@@ -199,8 +199,8 @@
     <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Images\Add_Point32_d.png" />
-    <Content Include="Images\GenericErrorStop32_d.png" />
+    <Resource Include="Images\Add_Point32_d.png" />
+    <Resource Include="Images\GenericErrorStop32_d.png" />
   </ItemGroup>
   <PropertyGroup>
     <ZipFileExtension>esriAddIn</ZipFileExtension>
