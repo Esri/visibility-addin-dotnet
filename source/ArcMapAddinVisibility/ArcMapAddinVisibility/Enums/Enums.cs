@@ -23,22 +23,34 @@ namespace ArcMapAddinVisibility
 {
     // Here we create all of our globalized enumerations
 
-    //public enum DistanceTypes : int 
-    //{
-    //    [LocalizableDescription(@"EnumFeet", typeof(Resources))]
-    //    Feet = 1,
-        
-    //    [LocalizableDescription(@"EnumKilometers", typeof(Resources))]
-    //    Kilometers = 2,
-        
-    //    [LocalizableDescription(@"EnumMeters", typeof(Resources))]
-    //    Meters = 3,
+    public enum LineTypes : int
+    {
+        [LocalizableDescription(@"EnumGeodesic", typeof(Resources))]
+        Geodesic = 1,
 
-    //    [LocalizableDescription(@"EnumNauticalMile", typeof(Resources))]
-    //    NauticalMile = 4,
+        [LocalizableDescription(@"EnumGreatElliptic", typeof(Resources))]
+        GreatElliptic = 2,
 
-    //    [LocalizableDescription(@"EnumSurveyFoot", typeof(Resources))]
-    //    SurveyFoot = 5
-    //}
+        [LocalizableDescription(@"EnumLoxodrome", typeof(Resources))]
+        Loxodrome = 3
+    }
+
+    public enum DistanceTypes : int
+    {
+        [LocalizableDescription(@"EnumFeet", typeof(Resources))]
+        Feet = 1,
+
+        [LocalizableDescription(@"EnumKilometers", typeof(Resources))]
+        Kilometers = 2,
+
+        [LocalizableDescription(@"EnumMeters", typeof(Resources))]
+        Meters = 3,
+
+        [LocalizableDescription(@"EnumNauticalMile", typeof(Resources))]
+        NauticalMile = 4,
+
+        [LocalizableDescription(@"EnumSurveyFoot", typeof(Resources))]
+        SurveyFoot = 5
+    }
 
 }

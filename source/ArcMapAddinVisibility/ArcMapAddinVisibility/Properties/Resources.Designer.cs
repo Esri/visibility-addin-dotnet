@@ -61,6 +61,105 @@ namespace ArcMapAddinVisibility.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid coordinate.
+        /// </summary>
+        public static string AEInvalidCoordinate {
+            get {
+                return ResourceManager.GetString("AEInvalidCoordinate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid input.
+        /// </summary>
+        public static string AEInvalidInput {
+            get {
+                return ResourceManager.GetString("AEInvalidInput", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The number must be positive.
+        /// </summary>
+        public static string AEMustBePositive {
+            get {
+                return ResourceManager.GetString("AEMustBePositive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Feet.
+        /// </summary>
+        public static string EnumFeet {
+            get {
+                return ResourceManager.GetString("EnumFeet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Geodesic.
+        /// </summary>
+        public static string EnumGeodesic {
+            get {
+                return ResourceManager.GetString("EnumGeodesic", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Great Elliptic.
+        /// </summary>
+        public static string EnumGreatElliptic {
+            get {
+                return ResourceManager.GetString("EnumGreatElliptic", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Kilometers.
+        /// </summary>
+        public static string EnumKilometers {
+            get {
+                return ResourceManager.GetString("EnumKilometers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Loxodrome.
+        /// </summary>
+        public static string EnumLoxodrome {
+            get {
+                return ResourceManager.GetString("EnumLoxodrome", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Meters.
+        /// </summary>
+        public static string EnumMeters {
+            get {
+                return ResourceManager.GetString("EnumMeters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Nautical Mile.
+        /// </summary>
+        public static string EnumNauticalMile {
+            get {
+                return ResourceManager.GetString("EnumNauticalMile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to US Survey Foot.
+        /// </summary>
+        public static string EnumSurveyFoot {
+            get {
+                return ResourceManager.GetString("EnumSurveyFoot", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to LLOS.
         /// </summary>
         public static string LabelTabLLOS {

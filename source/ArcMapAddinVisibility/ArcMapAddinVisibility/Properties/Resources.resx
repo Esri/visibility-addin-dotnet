@@ -117,6 +117,39 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AEInvalidCoordinate" xml:space="preserve">
+    <value>Invalid coordinate</value>
+  </data>
+  <data name="AEInvalidInput" xml:space="preserve">
+    <value>Invalid input</value>
+  </data>
+  <data name="AEMustBePositive" xml:space="preserve">
+    <value>The number must be positive</value>
+  </data>
+  <data name="EnumFeet" xml:space="preserve">
+    <value>Feet</value>
+  </data>
+  <data name="EnumGeodesic" xml:space="preserve">
+    <value>Geodesic</value>
+  </data>
+  <data name="EnumGreatElliptic" xml:space="preserve">
+    <value>Great Elliptic</value>
+  </data>
+  <data name="EnumKilometers" xml:space="preserve">
+    <value>Kilometers</value>
+  </data>
+  <data name="EnumLoxodrome" xml:space="preserve">
+    <value>Loxodrome</value>
+  </data>
+  <data name="EnumMeters" xml:space="preserve">
+    <value>Meters</value>
+  </data>
+  <data name="EnumNauticalMile" xml:space="preserve">
+    <value>Nautical Mile</value>
+  </data>
+  <data name="EnumSurveyFoot" xml:space="preserve">
+    <value>US Survey Foot</value>
+  </data>
   <data name="LabelTabLLOS" xml:space="preserve">
     <value>LLOS</value>
   </data>
