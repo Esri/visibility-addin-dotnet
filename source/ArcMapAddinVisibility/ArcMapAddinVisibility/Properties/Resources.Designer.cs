@@ -176,5 +176,14 @@ namespace ArcMapAddinVisibility.Properties {
                 return ResourceManager.GetString("LabelTabRLOS", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Map Point Tool.
+        /// </summary>
+        public static string TooltipMapPointTool {
+            get {
+                return ResourceManager.GetString("TooltipMapPointTool", resourceCulture);
+            }
+        }
     }
 }

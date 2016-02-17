@@ -156,4 +156,7 @@
   <data name="LabelTabRLOS" xml:space="preserve">
     <value>RLOS</value>
   </data>
+  <data name="TooltipMapPointTool" xml:space="preserve">
+    <value>Map Point Tool</value>
+  </data>
 </root>

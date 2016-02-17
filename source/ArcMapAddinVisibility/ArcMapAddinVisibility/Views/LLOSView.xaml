@@ -21,6 +21,11 @@
         <StaticResourceExtension ResourceKey="llosViewModel" />
     </UserControl.DataContext>
     <Grid>
-        <TextBlock Text="{x:Static prop:Resources.LabelTabLLOS}" />
+        <StackPanel>
+            <TextBlock Text="{x:Static prop:Resources.LabelTabLLOS}" />
+            <Button Grid.Row="2" Grid.Column="1" Command="{Binding ActivateToolCommand}" HorizontalAlignment="Center" ToolTip="{x:Static prop:Resources.TooltipMapPointTool}" Margin="3,3,0,0">
+                <Image Source="/ArcMapAddinVisibility;component/Images/Add_Point32_d.png" Width="18" Height="18" />
+            </Button>
+        </StackPanel>
     </Grid>
 </UserControl>
