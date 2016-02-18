@@ -620,6 +620,8 @@ namespace ArcMapAddinVisibility.ViewModels
                 var lineSymbol = new SimpleLineSymbolClass();
                 lineSymbol.Color = color;
                 lineSymbol.Width = width;
+
+                le.Symbol = lineSymbol;
             }
 
             if (element == null)
