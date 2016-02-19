@@ -119,6 +119,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="ValueConverters\EnumToFriendlyNameConverter.cs" />
+    <Compile Include="ValueConverters\IPointToStringConverter.cs" />
     <Compile Include="ViewModels\BaseViewModel.cs" />
     <Compile Include="ViewModels\LLOSViewModel.cs" />
     <Compile Include="ViewModels\LOSBaseViewModel.cs" />

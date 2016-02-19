@@ -29,14 +29,33 @@ namespace ArcMapAddinVisibility.ViewModels
         public LLOSViewModel()
         {
             SurfaceLayerNames = new ObservableCollection<string>();
+            TargetPoints = new ObservableCollection<IPoint>();
         }
 
         #region Properties
 
         public ObservableCollection<string> SurfaceLayerNames { get; set; }
         public string SelectedSurfaceName { get; set; }
+        public ObservableCollection<IPoint> TargetPoints { get; set; }
 
         #endregion
+
+        internal override void OnNewMapPointEvent(object obj)
+        {
+            base.OnNewMapPointEvent(obj);
+
+            if (!IsActiveTab)
+                return;
+
+            var point = obj as IPoint;
+
+            if (point == null)
+                return;
+
+            if (ToolMode == MapPointToolMode.Target)
+                TargetPoints.Insert(0, point);
+
+        }
 
         internal override void Reset(bool toolReset)
         {
@@ -56,6 +75,10 @@ namespace ArcMapAddinVisibility.ViewModels
                 SelectedSurfaceName = SurfaceLayerNames[0];
 
             RaisePropertyChanged(() => SelectedSurfaceName);
+
+            // reset points
+            ObserverPoints.Clear();
+            TargetPoints.Clear();
         }
 
         internal override void CreateMapElement()
@@ -82,6 +105,7 @@ namespace ArcMapAddinVisibility.ViewModels
             IPolyline polyInvisible = null;
             bool targetIsVisible = false;
 
+            //TODO add your offsets here, will need to convert to map z units
             var z1 = surface.GetElevation(Point1) + 2;
             var z2 = surface.GetElevation(Point2) + 2;
 

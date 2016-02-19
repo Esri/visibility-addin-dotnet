@@ -178,6 +178,24 @@ namespace ArcMapAddinVisibility.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to observer.
+        /// </summary>
+        public static string ToolModeObserver {
+            get {
+                return ResourceManager.GetString("ToolModeObserver", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to target.
+        /// </summary>
+        public static string ToolModeTarget {
+            get {
+                return ResourceManager.GetString("ToolModeTarget", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Map Point Tool.
         /// </summary>
         public static string TooltipMapPointTool {

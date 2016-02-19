@@ -433,7 +433,7 @@ namespace ArcMapAddinVisibility.ViewModels
         /// Activates the map tool to get map points from mouse clicks/movement
         /// </summary>
         /// <param name="obj"></param>
-        private void OnActivateTool(object obj)
+        internal virtual void OnActivateTool(object obj)
         {
             SetToolActiveInToolBar(ArcMap.Application, "Esri_ArcMapAddinVisibility_MapPointTool");
         }

@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections.ObjectModel;
 using ESRI.ArcGIS.Carto;
 using ESRI.ArcGIS.Geodatabase;
 using ESRI.ArcGIS.Analyst3D;
+using ESRI.ArcGIS.Geometry;
 
 namespace ArcMapAddinVisibility.ViewModels
 {
@@ -13,8 +15,19 @@ namespace ArcMapAddinVisibility.ViewModels
     {
         public LOSBaseViewModel()
         {
-
+            ObserverPoints = new ObservableCollection<IPoint>();
+            ToolMode = MapPointToolMode.Unknown;
         }
+
+        internal enum MapPointToolMode : int
+        {
+            Unknown = 0,
+            Observer = 1,
+            Target = 2
+        }
+
+        internal MapPointToolMode ToolMode { get; set; }
+        public ObservableCollection<IPoint> ObserverPoints { get; set; }
 
         public ISurface GetSurfaceFromMapByName(IMap map, string name)
         {
@@ -83,6 +96,38 @@ namespace ArcMapAddinVisibility.ViewModels
             }
 
             return list;
+        }
+
+        internal override void OnActivateTool(object obj)
+        {
+            var mode = obj.ToString();
+            ToolMode = MapPointToolMode.Unknown;
+
+            if (string.IsNullOrWhiteSpace(mode))
+                return;
+
+            if (mode == Properties.Resources.ToolModeObserver)
+                ToolMode = MapPointToolMode.Observer;
+            else if (mode == Properties.Resources.ToolModeTarget)
+                ToolMode = MapPointToolMode.Target;
+
+            base.OnActivateTool(obj);
+        }
+
+        internal override void OnNewMapPointEvent(object obj)
+        {
+            // lets test this out
+            if (!IsActiveTab)
+                return;
+
+            var point = obj as IPoint;
+
+            if (point == null)
+                return;
+
+            // ok, we have a point
+            if (ToolMode == MapPointToolMode.Observer)
+                ObserverPoints.Insert(0, point);
         }
 
         //public ISurface GetSurfaceFromMap(IMap map)
