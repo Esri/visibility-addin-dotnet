@@ -150,10 +150,28 @@
   <data name="EnumSurveyFoot" xml:space="preserve">
     <value>US Survey Foot</value>
   </data>
+  <data name="LabelCancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="LabelClearGraphics" xml:space="preserve">
+    <value>Clear Graphics</value>
+  </data>
+  <data name="LabelSubmit" xml:space="preserve">
+    <value>Submit</value>
+  </data>
   <data name="LabelTabLLOS" xml:space="preserve">
     <value>LLOS</value>
   </data>
   <data name="LabelTabRLOS" xml:space="preserve">
     <value>RLOS</value>
+  </data>
+  <data name="ToolModeObserver" xml:space="preserve">
+    <value>observer</value>
+  </data>
+  <data name="ToolModeTarget" xml:space="preserve">
+    <value>target</value>
+  </data>
+  <data name="TooltipMapPointTool" xml:space="preserve">
+    <value>Map Point Tool</value>
   </data>
 </root>

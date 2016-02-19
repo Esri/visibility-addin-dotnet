@@ -20,6 +20,7 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using ArcMapAddinVisibility.Helpers;
 using ArcMapAddinVisibility.Views;
+using ESRI.ArcGIS.Carto;
 
 namespace ArcMapAddinVisibility.ViewModels
 {
@@ -30,7 +31,51 @@ namespace ArcMapAddinVisibility.ViewModels
             // set some views
             _llosView = new VisibilityLLOSView();
             _rlosView = new VisibilityRLOSView();
+
+            // listen to some map events
+            ArcMap.Events.ActiveViewChanged += Events_ActiveViewChanged;
         }
+        private IMap map = null;
+        void Events_ActiveViewChanged()
+        {
+            map = ArcMap.Document.FocusMap as IMap;
+
+            if (map == null)
+                return;
+
+            // hook events
+
+            var viewEvents = map as IActiveViewEvents_Event;
+            if (viewEvents == null)
+                return;
+
+            viewEvents.FocusMapChanged += viewEvents_FocusMapChanged;
+            viewEvents.ItemAdded += viewEvents_ItemAdded;
+            viewEvents.ItemDeleted += viewEvents_ItemDeleted;
+
+            NotifyMapTOCUpdated();
+        }
+
+        void viewEvents_ItemDeleted(object Item)
+        {
+            NotifyMapTOCUpdated();
+        }
+
+        void viewEvents_ItemAdded(object Item)
+        {
+            NotifyMapTOCUpdated();
+        }
+
+        void viewEvents_FocusMapChanged()
+        {
+            NotifyMapTOCUpdated();
+        }
+
+        private void NotifyMapTOCUpdated()
+        {
+            Mediator.NotifyColleagues(Constants.MAP_TOC_UPDATED, null);
+        }
+
         #region Properties
 
         object selectedTab = null;
