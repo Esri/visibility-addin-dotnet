@@ -160,6 +160,33 @@ namespace ArcMapAddinVisibility.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cancel.
+        /// </summary>
+        public static string LabelCancel {
+            get {
+                return ResourceManager.GetString("LabelCancel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Clear Graphics.
+        /// </summary>
+        public static string LabelClearGraphics {
+            get {
+                return ResourceManager.GetString("LabelClearGraphics", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Submit.
+        /// </summary>
+        public static string LabelSubmit {
+            get {
+                return ResourceManager.GetString("LabelSubmit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to LLOS.
         /// </summary>
         public static string LabelTabLLOS {

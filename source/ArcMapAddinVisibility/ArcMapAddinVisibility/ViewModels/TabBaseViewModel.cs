@@ -43,6 +43,7 @@ namespace ArcMapAddinVisibility.ViewModels
             ClearGraphicsCommand = new RelayCommand(OnClearGraphics);
             ActivateToolCommand = new RelayCommand(OnActivateTool);
             EnterKeyCommand = new RelayCommand(OnEnterKeyCommand);
+            CancelCommand = new RelayCommand(OnCancelCommand);
 
             // Mediator
             Mediator.Register(Constants.NEW_MAP_POINT, OnNewMapPointEvent);
@@ -338,6 +339,12 @@ namespace ArcMapAddinVisibility.ViewModels
         public RelayCommand ClearGraphicsCommand { get; set; }
         public RelayCommand ActivateToolCommand { get; set; }
         public RelayCommand EnterKeyCommand { get; set; }
+        public RelayCommand CancelCommand { get; set; }
+
+        private void OnCancelCommand(object obj)
+        {
+            Reset(true);
+        }
 
         #endregion
 
@@ -644,6 +651,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
             gc.AddElement(element, 0);
 
+            //TODO make refresh more efficient in the future, avoid flicker refreshing entire view, only do what's needed
             //refresh map
             av.Refresh();
         }

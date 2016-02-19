@@ -17,10 +17,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections.ObjectModel;
 using ESRI.ArcGIS.Geodatabase;
 using ESRI.ArcGIS.Geometry;
 using ESRI.ArcGIS.Display;
-using System.Collections.ObjectModel;
+using ArcMapAddinVisibility.Helpers;
 
 namespace ArcMapAddinVisibility.ViewModels
 {
@@ -28,15 +29,26 @@ namespace ArcMapAddinVisibility.ViewModels
     {
         public LLOSViewModel()
         {
-            SurfaceLayerNames = new ObservableCollection<string>();
             TargetPoints = new ObservableCollection<IPoint>();
+
+            // commands
+            SubmitCommand = new RelayCommand(OnSubmitCommand);
         }
 
         #region Properties
 
-        public ObservableCollection<string> SurfaceLayerNames { get; set; }
-        public string SelectedSurfaceName { get; set; }
         public ObservableCollection<IPoint> TargetPoints { get; set; }
+
+        #endregion
+
+        #region Commands
+
+        public RelayCommand SubmitCommand { get; set; }
+
+        private void OnSubmitCommand(object obj)
+        {
+            CreateMapElement();
+        }
 
         #endregion
 
@@ -53,8 +65,11 @@ namespace ArcMapAddinVisibility.ViewModels
                 return;
 
             if (ToolMode == MapPointToolMode.Target)
+            {
                 TargetPoints.Insert(0, point);
-
+                //TODO change color
+                AddGraphicToMap(point, true);
+            }
         }
 
         internal override void Reset(bool toolReset)
@@ -64,21 +79,20 @@ namespace ArcMapAddinVisibility.ViewModels
             if (ArcMap.Document == null || ArcMap.Document.FocusMap == null)
                 return;
 
-            var names = GetSurfaceNamesFromMap(ArcMap.Document.FocusMap);
-
-            SurfaceLayerNames.Clear();
-
-            foreach (var name in names)
-                SurfaceLayerNames.Add(name);
-
-            if (SurfaceLayerNames.Any())
-                SelectedSurfaceName = SurfaceLayerNames[0];
-
-            RaisePropertyChanged(() => SelectedSurfaceName);
-
-            // reset points
-            ObserverPoints.Clear();
+            // reset target points
             TargetPoints.Clear();
+        }
+
+        public override bool CanCreateElement
+        {
+            get
+            {
+                return (!string.IsNullOrWhiteSpace(SelectedSurfaceName) 
+                    && ObserverPoints.Any() 
+                    && TargetPoints.Any()
+                    && ObserverOffset.HasValue
+                    && TargetOffset.HasValue);
+            }
         }
 
         internal override void CreateMapElement()
@@ -105,28 +119,34 @@ namespace ArcMapAddinVisibility.ViewModels
             IPolyline polyInvisible = null;
             bool targetIsVisible = false;
 
-            //TODO add your offsets here, will need to convert to map z units
-            var z1 = surface.GetElevation(Point1) + 2;
-            var z2 = surface.GetElevation(Point2) + 2;
+            foreach (var observerPoint in ObserverPoints)
+            {
+                foreach (var targetPoint in TargetPoints)
+                {
+                    //TODO add your offsets here, will need to convert to map z units
+                    var z1 = surface.GetElevation(observerPoint) + ObserverOffset.Value;
+                    var z2 = surface.GetElevation(targetPoint) + TargetOffset.Value;
 
-            geoBridge.GetLineOfSight(surface, 
-                new PointClass() { Z = z1, X = Point1.X, Y = Point1.Y, ZAware=true },
-                new PointClass() { Z = z2, X = Point2.X, Y = Point2.Y, ZAware=true }, 
-                out pointObstruction, out polyVisible, out polyInvisible, out targetIsVisible, false, false);
+                    geoBridge.GetLineOfSight(surface,
+                        new PointClass() { Z = z1, X = observerPoint.X, Y = observerPoint.Y, ZAware = true },
+                        new PointClass() { Z = z2, X = targetPoint.X, Y = targetPoint.Y, ZAware = true },
+                        out pointObstruction, out polyVisible, out polyInvisible, out targetIsVisible, false, false);
 
-            if (polyVisible == null)
-                return;
+                    if (polyVisible == null)
+                        return;
 
-            var rgbColor = new ESRI.ArcGIS.Display.RgbColorClass() as IRgbColor;
-            rgbColor.Green = 255;
-            AddGraphicToMap(polyVisible, rgbColor as IColor);
+                    var rgbColor = new ESRI.ArcGIS.Display.RgbColorClass() as IRgbColor;
+                    rgbColor.Green = 255;
+                    AddGraphicToMap(polyVisible, rgbColor as IColor);
 
-            if (polyInvisible == null)
-                return;
+                    if (polyInvisible == null)
+                        return;
 
-            var rgbColor2 = new ESRI.ArcGIS.Display.RgbColorClass() as IRgbColor;
-            rgbColor2.Red = 255;
-            AddGraphicToMap(polyInvisible, rgbColor2);
+                    var rgbColor2 = new ESRI.ArcGIS.Display.RgbColorClass() as IRgbColor;
+                    rgbColor2.Red = 255;
+                    AddGraphicToMap(polyInvisible, rgbColor2);
+                }
+            }
         }
     }
 }

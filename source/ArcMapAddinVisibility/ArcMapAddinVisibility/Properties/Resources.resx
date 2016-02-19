@@ -150,6 +150,15 @@
   <data name="EnumSurveyFoot" xml:space="preserve">
     <value>US Survey Foot</value>
   </data>
+  <data name="LabelCancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="LabelClearGraphics" xml:space="preserve">
+    <value>Clear Graphics</value>
+  </data>
+  <data name="LabelSubmit" xml:space="preserve">
+    <value>Submit</value>
+  </data>
   <data name="LabelTabLLOS" xml:space="preserve">
     <value>LLOS</value>
   </data>

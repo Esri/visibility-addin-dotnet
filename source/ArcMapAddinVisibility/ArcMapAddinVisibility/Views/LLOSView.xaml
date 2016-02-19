@@ -23,12 +23,12 @@
     </UserControl.DataContext>
     <Grid>
         <StackPanel>
-            <TextBlock Text="{x:Static prop:Resources.LabelTabLLOS}" />
+            <TextBlock Text="{x:Static prop:Resources.LabelTabLLOS}" Margin="3,3,0,0" />
             <Button Grid.Row="2" Grid.Column="1" Command="{Binding ActivateToolCommand}" CommandParameter="{x:Static prop:Resources.ToolModeObserver}"
                     HorizontalAlignment="Center" ToolTip="{x:Static prop:Resources.TooltipMapPointTool}" Margin="3,3,0,0">
                 <Image Source="/ArcMapAddinVisibility;component/Images/Add_Point32_d.png" Width="18" Height="18" />
             </Button>
-            <ComboBox ItemsSource="{Binding SurfaceLayerNames}" SelectedItem="{Binding SelectedSurfaceName}">
+            <ComboBox ItemsSource="{Binding SurfaceLayerNames}" SelectedItem="{Binding SelectedSurfaceName}" Margin="3,3,0,0">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel>
@@ -37,7 +37,7 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
-            <ListBox ItemsSource="{Binding ObserverPoints}" ScrollViewer.VerticalScrollBarVisibility="Visible" Height="60">
+            <ListBox ItemsSource="{Binding ObserverPoints}" ScrollViewer.VerticalScrollBarVisibility="Visible" Height="60" Margin="3,3,0,0">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
@@ -50,7 +50,7 @@
                     HorizontalAlignment="Center" ToolTip="{x:Static prop:Resources.TooltipMapPointTool}" Margin="3,3,0,0">
                 <Image Source="/ArcMapAddinVisibility;component/Images/Add_Point32_d.png" Width="18" Height="18" />
             </Button>
-            <ListBox ItemsSource="{Binding TargetPoints}" ScrollViewer.VerticalScrollBarVisibility="Visible" Height="60">
+            <ListBox ItemsSource="{Binding TargetPoints}" ScrollViewer.VerticalScrollBarVisibility="Visible" Height="60" Margin="3,3,0,0">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
@@ -59,6 +59,18 @@
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
+            <TextBox Text="{Binding ObserverOffset, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
+                     Validation.ErrorTemplate="{StaticResource errorTemplate}" Margin="3,3,0,0" />
+            <TextBox Text="{Binding TargetOffset, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
+                     Validation.ErrorTemplate="{StaticResource errorTemplate}" Margin="3,3,0,0" />
+            <ComboBox x:Name="cmbOffsetUnitType"
+                ItemsSource="{Binding Source={StaticResource lineDistanceData}}" 
+                SelectedItem="{Binding Path=OffsetUnitType, Mode=TwoWay}"                      
+                Height="Auto" Margin="3,3,0,0">
+            </ComboBox>
+            <Button Content="{x:Static prop:Resources.LabelCancel}" ToolTip="{x:Static prop:Resources.LabelCancel}" Command="{Binding CancelCommand}" Margin="3,20,0,0" />
+            <Button Content="{x:Static prop:Resources.LabelSubmit}" ToolTip="{x:Static prop:Resources.LabelSubmit}" Command="{Binding SubmitCommand}" Margin="3,3,0,0" />
+            <Button Content="{x:Static prop:Resources.LabelClearGraphics}" ToolTip="{x:Static prop:Resources.LabelClearGraphics}" Command="{Binding ClearGraphicsCommand}" Margin="3,3,0,0" />
         </StackPanel>
     </Grid>
 </UserControl>
