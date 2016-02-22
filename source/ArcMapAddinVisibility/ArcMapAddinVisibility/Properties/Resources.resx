@@ -126,6 +126,9 @@
   <data name="AEMustBePositive" xml:space="preserve">
     <value>The number must be positive</value>
   </data>
+  <data name="Distance" xml:space="preserve">
+    <value>Distance</value>
+  </data>
   <data name="EnumFeet" xml:space="preserve">
     <value>Feet</value>
   </data>
