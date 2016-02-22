@@ -169,11 +169,65 @@ namespace ArcMapAddinVisibility.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Clear Graphics.
+        ///   Looks up a localized string similar to Clear.
         /// </summary>
         public static string LabelClearGraphics {
             get {
                 return ResourceManager.GetString("LabelClearGraphics", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Distance.
+        /// </summary>
+        public static string LabelDistance {
+            get {
+                return ResourceManager.GetString("LabelDistance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Horizontal Field of View.
+        /// </summary>
+        public static string LabelHorizontalFOV {
+            get {
+                return ResourceManager.GetString("LabelHorizontalFOV", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Input Surface.
+        /// </summary>
+        public static string LabelInputSurface {
+            get {
+                return ResourceManager.GetString("LabelInputSurface", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Observer Offset.
+        /// </summary>
+        public static string LabelObserverOffset {
+            get {
+                return ResourceManager.GetString("LabelObserverOffset", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Observer Options.
+        /// </summary>
+        public static string LabelObserverOptions {
+            get {
+                return ResourceManager.GetString("LabelObserverOptions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Observer Points.
+        /// </summary>
+        public static string LabelObserverPoints {
+            get {
+                return ResourceManager.GetString("LabelObserverPoints", resourceCulture);
             }
         }
         
@@ -183,6 +237,15 @@ namespace ArcMapAddinVisibility.Properties {
         public static string LabelSubmit {
             get {
                 return ResourceManager.GetString("LabelSubmit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Surface Offset.
+        /// </summary>
+        public static string LabelSurfaceOffset {
+            get {
+                return ResourceManager.GetString("LabelSurfaceOffset", resourceCulture);
             }
         }
         
@@ -201,6 +264,15 @@ namespace ArcMapAddinVisibility.Properties {
         public static string LabelTabRLOS {
             get {
                 return ResourceManager.GetString("LabelTabRLOS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Vertical Field of View.
+        /// </summary>
+        public static string LabelVerticalFOV {
+            get {
+                return ResourceManager.GetString("LabelVerticalFOV", resourceCulture);
             }
         }
         
