@@ -651,9 +651,9 @@ namespace ArcMapAddinVisibility.ViewModels
 
             gc.AddElement(element, 0);
 
-            //TODO make refresh more efficient in the future, avoid flicker refreshing entire view, only do what's needed
-            //refresh map
-            av.Refresh();
+            //av.Refresh();
+            // partial refresh of graphics ok?
+            av.PartialRefresh(esriViewDrawPhase.esriViewGraphics, null, null);
         }
 
         internal void AddGraphicToMap(IGeometry geom, IColor color)

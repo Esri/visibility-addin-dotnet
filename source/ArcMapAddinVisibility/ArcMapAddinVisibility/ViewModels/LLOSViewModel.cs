@@ -136,7 +136,6 @@ namespace ArcMapAddinVisibility.ViewModels
 
                 foreach (var targetPoint in TargetPoints)
                 {
-                    //TODO add your offsets here, will need to convert to surface z units
                     var z2 = surface.GetElevation(targetPoint) + finalTargetOffset;
 
                     if (surface.IsVoidZ(z2))
