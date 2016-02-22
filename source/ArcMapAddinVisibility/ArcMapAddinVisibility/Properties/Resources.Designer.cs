@@ -232,6 +232,15 @@ namespace ArcMapAddinVisibility.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to OK.
+        /// </summary>
+        public static string LabelOK {
+            get {
+                return ResourceManager.GetString("LabelOK", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Submit.
         /// </summary>
         public static string LabelSubmit {

@@ -61,6 +61,11 @@
                     </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>
+            <ListBox.ContextMenu>
+                <ContextMenu DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Self}}">
+                    <MenuItem Header="Delete Point" Command="{Binding DataContext.DeletePointCommand}" CommandParameter="{Binding Path=SelectedItems}" />
+                </ContextMenu>
+            </ListBox.ContextMenu>
         </ListBox>
         <Button Grid.Row="3" Grid.Column="2" Command="{Binding ActivateToolCommand}" CommandParameter="{x:Static prop:Resources.ToolModeObserver}" VerticalAlignment="Center"
             HorizontalAlignment="Center" ToolTip="{x:Static prop:Resources.TooltipObserverMapPointTool}" Margin="3,3,0,0">
@@ -75,6 +80,11 @@
                     </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>
+            <ListBox.ContextMenu>
+                <ContextMenu DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Self}}">
+                    <MenuItem Header="Delete Point" Command="{Binding DataContext.DeletePointCommand}" CommandParameter="{Binding Path=SelectedItems}" />
+                </ContextMenu>
+            </ListBox.ContextMenu>
         </ListBox>
         <Button Grid.Row="5" Grid.Column="2" Command="{Binding ActivateToolCommand}" CommandParameter="{x:Static prop:Resources.ToolModeTarget}" VerticalAlignment="Center"
                 HorizontalAlignment="Center" ToolTip="{x:Static prop:Resources.TooltipTargetMapPointTool}" Margin="3,3,0,0">
@@ -93,7 +103,7 @@
         </ComboBox>
         <StackPanel Grid.Row="12" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Grid.Row="12" Grid.Column="0" Content="{x:Static prop:Resources.LabelCancel}" ToolTip="{x:Static prop:Resources.LabelCancel}" Command="{Binding CancelCommand}" Margin="3,20,0,0" />
-            <Button Grid.Row="12" Grid.Column="1" Content="{x:Static prop:Resources.LabelSubmit}" ToolTip="{x:Static prop:Resources.LabelSubmit}" Command="{Binding SubmitCommand}" Margin="3,20,0,0" />
+            <Button Grid.Row="12" Grid.Column="1" Content="{x:Static prop:Resources.LabelOK}" ToolTip="{x:Static prop:Resources.LabelOK}" Command="{Binding SubmitCommand}" Margin="3,20,0,0" />
             <Button Grid.Row="12" Grid.Column="2" Content="{x:Static prop:Resources.LabelClearGraphics}" ToolTip="{x:Static prop:Resources.LabelClearGraphics}" Command="{Binding ClearGraphicsCommand}" Margin="3,20,0,0" />
         </StackPanel>
     </Grid>

@@ -22,6 +22,7 @@ using ESRI.ArcGIS.Geodatabase;
 using ESRI.ArcGIS.Geometry;
 using ESRI.ArcGIS.Display;
 using ArcMapAddinVisibility.Helpers;
+using System.Collections;
 
 namespace ArcMapAddinVisibility.ViewModels
 {
@@ -50,6 +51,22 @@ namespace ArcMapAddinVisibility.ViewModels
             CreateMapElement();
 
             Reset(true);
+        }
+
+        internal override void OnDeletePointCommand(object obj)
+        {
+            // take care of ObserverPoints
+            base.OnDeletePointCommand(obj);
+
+            // now lets take care of Target Points
+            var items = obj as IList;
+            var points = items.Cast<IPoint>().ToList();
+
+            if (points == null)
+                return;
+
+            foreach (var point in points)
+                TargetPoints.Remove(point);
         }
 
         #endregion

@@ -9,6 +9,7 @@ using ESRI.ArcGIS.Geodatabase;
 using ESRI.ArcGIS.Analyst3D;
 using ESRI.ArcGIS.Geometry;
 using ArcMapAddinVisibility.Helpers;
+using System.Collections;
 
 namespace ArcMapAddinVisibility.ViewModels
 {
@@ -26,6 +27,8 @@ namespace ArcMapAddinVisibility.ViewModels
             SelectedSurfaceName = string.Empty;
 
             Mediator.Register(Constants.MAP_TOC_UPDATED, OnMapTocUpdated);
+
+            DeletePointCommand = new RelayCommand(OnDeletePointCommand);
         }
 
         #region Properties
@@ -67,6 +70,20 @@ namespace ArcMapAddinVisibility.ViewModels
 
         #region Commands
 
+        public RelayCommand DeletePointCommand { get; set; }
+
+        internal virtual void OnDeletePointCommand(object obj)
+        {
+            // remove observer points
+            var items = obj as IList;
+            var points = items.Cast<IPoint>().ToList();
+
+            if (points == null)
+                return;
+
+            foreach (var point in points)
+                ObserverPoints.Remove(point);
+        }
 
         #endregion
 
