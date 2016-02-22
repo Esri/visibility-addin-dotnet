@@ -169,24 +169,6 @@ namespace ArcMapAddinVisibility.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Horizontal Field of View.
-        /// </summary>
-        public static string HorizontalFOV {
-            get {
-                return ResourceManager.GetString("HorizontalFOV", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Input Surface.
-        /// </summary>
-        public static string InputSurface {
-            get {
-                return ResourceManager.GetString("InputSurface", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to LLOS.
         /// </summary>
         public static string LabelTabLLOS {
@@ -201,60 +183,6 @@ namespace ArcMapAddinVisibility.Properties {
         public static string LabelTabRLOS {
             get {
                 return ResourceManager.GetString("LabelTabRLOS", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Observer Offset.
-        /// </summary>
-        public static string ObserverOffset {
-            get {
-                return ResourceManager.GetString("ObserverOffset", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Observer Options.
-        /// </summary>
-        public static string ObserverOptions {
-            get {
-                return ResourceManager.GetString("ObserverOptions", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Observer Points.
-        /// </summary>
-        public static string ObserverPoints {
-            get {
-                return ResourceManager.GetString("ObserverPoints", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Surface Offset.
-        /// </summary>
-        public static string SurfaceOffset {
-            get {
-                return ResourceManager.GetString("SurfaceOffset", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Map Point Tool.
-        /// </summary>
-        public static string TooltipMapPointTool {
-            get {
-                return ResourceManager.GetString("TooltipMapPointTool", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Vertical Field of View.
-        /// </summary>
-        public static string VerticalFOV {
-            get {
-                return ResourceManager.GetString("VerticalFOV", resourceCulture);
             }
         }
     }

@@ -43,6 +43,7 @@ namespace ArcMapAddinVisibility.ViewModels
             ClearGraphicsCommand = new RelayCommand(OnClearGraphics);
             ActivateToolCommand = new RelayCommand(OnActivateTool);
             EnterKeyCommand = new RelayCommand(OnEnterKeyCommand);
+            CancelCommand = new RelayCommand(OnCancelCommand);
 
             // Mediator
             Mediator.Register(Constants.NEW_MAP_POINT, OnNewMapPointEvent);
@@ -338,6 +339,12 @@ namespace ArcMapAddinVisibility.ViewModels
         public RelayCommand ClearGraphicsCommand { get; set; }
         public RelayCommand ActivateToolCommand { get; set; }
         public RelayCommand EnterKeyCommand { get; set; }
+        public RelayCommand CancelCommand { get; set; }
+
+        private void OnCancelCommand(object obj)
+        {
+            Reset(true);
+        }
 
         #endregion
 
@@ -433,7 +440,7 @@ namespace ArcMapAddinVisibility.ViewModels
         /// Activates the map tool to get map points from mouse clicks/movement
         /// </summary>
         /// <param name="obj"></param>
-        private void OnActivateTool(object obj)
+        internal virtual void OnActivateTool(object obj)
         {
             SetToolActiveInToolBar(ArcMap.Application, "Esri_ArcMapAddinVisibility_MapPointTool");
         }
@@ -585,14 +592,14 @@ namespace ArcMapAddinVisibility.ViewModels
         /// Adds a graphic element to the map graphics container
         /// </summary>
         /// <param name="geom">IGeometry</param>
-        internal void AddGraphicToMap(IGeometry geom, bool IsTempGraphic)
+        internal void AddGraphicToMap(IGeometry geom, IColor color, bool IsTempGraphic)
         {
             if (geom == null || ArcMap.Document == null || ArcMap.Document.FocusMap == null)
                 return;
             IElement element = null;
-            ESRI.ArcGIS.Display.IRgbColor rgbColor = new ESRI.ArcGIS.Display.RgbColorClass();
-            rgbColor.Red = 255;
-            ESRI.ArcGIS.Display.IColor color = rgbColor; // Implicit cast.
+            //ESRI.ArcGIS.Display.IRgbColor rgbColor = new ESRI.ArcGIS.Display.RgbColorClass();
+            //rgbColor.Red = 255;
+            //ESRI.ArcGIS.Display.IColor color = rgbColor; // Implicit cast.
             double width = 2.0;
 
             geom.Project(ArcMap.Document.FocusMap.SpatialReference);
@@ -601,9 +608,9 @@ namespace ArcMapAddinVisibility.ViewModels
             {
                 // Marker symbols
                 var simpleMarkerSymbol = new SimpleMarkerSymbol() as ISimpleMarkerSymbol;
-                simpleMarkerSymbol.Color = rgbColor;
+                simpleMarkerSymbol.Color = color;
                 simpleMarkerSymbol.Outline = true;
-                simpleMarkerSymbol.OutlineColor = rgbColor;
+                simpleMarkerSymbol.OutlineColor = color;
                 simpleMarkerSymbol.Size = 5;
                 simpleMarkerSymbol.Style = esriSimpleMarkerStyle.esriSMSCircle;
 
@@ -620,6 +627,8 @@ namespace ArcMapAddinVisibility.ViewModels
                 var lineSymbol = new SimpleLineSymbolClass();
                 lineSymbol.Color = color;
                 lineSymbol.Width = width;
+
+                le.Symbol = lineSymbol;
             }
 
             if (element == null)
@@ -642,13 +651,31 @@ namespace ArcMapAddinVisibility.ViewModels
 
             gc.AddElement(element, 0);
 
+            //TODO make refresh more efficient in the future, avoid flicker refreshing entire view, only do what's needed
             //refresh map
             av.Refresh();
         }
+
+        internal void AddGraphicToMap(IGeometry geom, IColor color)
+        {
+            AddGraphicToMap(geom, color, false);
+        }
+
         internal void AddGraphicToMap(IGeometry geom)
         {
-            AddGraphicToMap(geom, false);
+            ESRI.ArcGIS.Display.IRgbColor rgbColor = new ESRI.ArcGIS.Display.RgbColorClass();
+            rgbColor.Red = 255;
+            //ESRI.ArcGIS.Display.IColor color = rgbColor; // Implicit cast.
+            AddGraphicToMap(geom, rgbColor);
         }
+        internal void AddGraphicToMap(IGeometry geom, bool isTemp)
+        {
+            ESRI.ArcGIS.Display.IRgbColor rgbColor = new ESRI.ArcGIS.Display.RgbColorClass();
+            rgbColor.Red = 255;
+            //ESRI.ArcGIS.Display.IColor color = rgbColor; // Implicit cast.
+            AddGraphicToMap(geom, rgbColor, isTemp);
+        }
+
         internal ISpatialReferenceFactory3 srf3 = null;
         /// <summary>
         /// Gets the linear unit from the esri constants for linear units

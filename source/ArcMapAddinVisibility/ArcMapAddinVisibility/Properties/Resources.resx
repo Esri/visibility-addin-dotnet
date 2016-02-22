@@ -153,34 +153,10 @@
   <data name="EnumSurveyFoot" xml:space="preserve">
     <value>US Survey Foot</value>
   </data>
-  <data name="HorizontalFOV" xml:space="preserve">
-    <value>Horizontal Field of View</value>
-  </data>
-  <data name="InputSurface" xml:space="preserve">
-    <value>Input Surface</value>
-  </data>
   <data name="LabelTabLLOS" xml:space="preserve">
     <value>LLOS</value>
   </data>
   <data name="LabelTabRLOS" xml:space="preserve">
     <value>RLOS</value>
-  </data>
-  <data name="ObserverOffset" xml:space="preserve">
-    <value>Observer Offset</value>
-  </data>
-  <data name="ObserverOptions" xml:space="preserve">
-    <value>Observer Options</value>
-  </data>
-  <data name="ObserverPoints" xml:space="preserve">
-    <value>Observer Points</value>
-  </data>
-  <data name="SurfaceOffset" xml:space="preserve">
-    <value>Surface Offset</value>
-  </data>
-  <data name="TooltipMapPointTool" xml:space="preserve">
-    <value>Map Point Tool</value>
-  </data>
-  <data name="VerticalFOV" xml:space="preserve">
-    <value>Vertical Field of View</value>
   </data>
 </root>
