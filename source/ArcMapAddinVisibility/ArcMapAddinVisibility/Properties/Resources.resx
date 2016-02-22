@@ -154,16 +154,40 @@
     <value>Cancel</value>
   </data>
   <data name="LabelClearGraphics" xml:space="preserve">
-    <value>Clear Graphics</value>
+    <value>Clear</value>
+  </data>
+  <data name="LabelDistance" xml:space="preserve">
+    <value>Distance</value>
+  </data>
+  <data name="LabelHorizontalFOV" xml:space="preserve">
+    <value>Horizontal Field of View</value>
+  </data>
+  <data name="LabelInputSurface" xml:space="preserve">
+    <value>Input Surface</value>
+  </data>
+  <data name="LabelObserverOffset" xml:space="preserve">
+    <value>Observer Offset</value>
+  </data>
+  <data name="LabelObserverOptions" xml:space="preserve">
+    <value>Observer Options</value>
+  </data>
+  <data name="LabelObserverPoints" xml:space="preserve">
+    <value>Observer Points</value>
   </data>
   <data name="LabelSubmit" xml:space="preserve">
     <value>Submit</value>
+  </data>
+  <data name="LabelSurfaceOffset" xml:space="preserve">
+    <value>Surface Offset</value>
   </data>
   <data name="LabelTabLLOS" xml:space="preserve">
     <value>LLOS</value>
   </data>
   <data name="LabelTabRLOS" xml:space="preserve">
     <value>RLOS</value>
+  </data>
+  <data name="LabelVerticalFOV" xml:space="preserve">
+    <value>Vertical Field of View</value>
   </data>
   <data name="ToolModeObserver" xml:space="preserve">
     <value>observer</value>
