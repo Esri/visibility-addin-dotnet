@@ -651,9 +651,9 @@ namespace ArcMapAddinVisibility.ViewModels
 
             gc.AddElement(element, 0);
 
-            //TODO make refresh more efficient in the future, avoid flicker refreshing entire view, only do what's needed
-            //refresh map
-            av.Refresh();
+            //av.Refresh();
+            // partial refresh of graphics ok?
+            av.PartialRefresh(esriViewDrawPhase.esriViewGraphics, null, null);
         }
 
         internal void AddGraphicToMap(IGeometry geom, IColor color)
@@ -676,12 +676,44 @@ namespace ArcMapAddinVisibility.ViewModels
             AddGraphicToMap(geom, rgbColor, isTemp);
         }
 
+        internal DistanceTypes GetDistanceType(int linearUnitFactoryCode)
+        { 
+            DistanceTypes distanceType = DistanceTypes.Meters;
+            switch (linearUnitFactoryCode)
+            {
+                case (int)esriSRUnitType.esriSRUnit_Foot:
+                    distanceType = DistanceTypes.Feet;
+                    break;
+                case (int)esriSRUnitType.esriSRUnit_Kilometer:
+                    distanceType = DistanceTypes.Kilometers;
+                    break;
+                case (int)esriSRUnitType.esriSRUnit_Meter:
+                    distanceType = DistanceTypes.Meters;
+                    break;
+                case (int)esriSRUnitType.esriSRUnit_NauticalMile:
+                    distanceType = DistanceTypes.NauticalMile;
+                    break;
+                case (int)esriSRUnitType.esriSRUnit_SurveyFoot:
+                    distanceType = DistanceTypes.SurveyFoot;
+                    break;
+                default:
+                    distanceType = DistanceTypes.Meters;
+                    break;
+            }
+
+            return distanceType;
+        }
+
         internal ISpatialReferenceFactory3 srf3 = null;
+        internal ILinearUnit GetLinearUnit()
+        {
+            return GetLinearUnit(LineDistanceType);
+        }
         /// <summary>
         /// Gets the linear unit from the esri constants for linear units
         /// </summary>
         /// <returns>ILinearUnit</returns>
-        internal ILinearUnit GetLinearUnit()
+        internal ILinearUnit GetLinearUnit(DistanceTypes distanceType)
         {
             int unitType = (int)esriSRUnitType.esriSRUnit_Meter;
             if (srf3 == null)
@@ -690,7 +722,7 @@ namespace ArcMapAddinVisibility.ViewModels
                 srf3 = Activator.CreateInstance(srType) as ISpatialReferenceFactory3;
             }
 
-            switch (LineDistanceType)
+            switch (distanceType)
             {
                 case DistanceTypes.Feet:
                     unitType = (int)esriSRUnitType.esriSRUnit_Foot;
@@ -715,17 +747,21 @@ namespace ArcMapAddinVisibility.ViewModels
             return srf3.CreateUnit(unitType) as ILinearUnit;
         }
 
+        private void UpdateDistanceFromTo(DistanceTypes fromType, DistanceTypes toType)
+        {
+            Distance = GetDistanceFromTo(fromType, toType, Distance);
+        }
         /// <summary>
         /// Ugly method to convert to/from different types of distance units
         /// </summary>
         /// <param name="fromType">DistanceTypes</param>
         /// <param name="toType">DistanceTypes</param>
-        private void UpdateDistanceFromTo(DistanceTypes fromType, DistanceTypes toType)
+        internal double GetDistanceFromTo(DistanceTypes fromType, DistanceTypes toType, double input)
         {
+            double length = input;
+
             try
             {
-                double length = Distance;
-
                 if (fromType == DistanceTypes.Meters && toType == DistanceTypes.Kilometers)
                     length /= 1000.0;
                 else if (fromType == DistanceTypes.Meters && toType == DistanceTypes.Feet)
@@ -766,13 +802,13 @@ namespace ArcMapAddinVisibility.ViewModels
                     length *= 6076.1154855643;
                 else if (fromType == DistanceTypes.NauticalMile && toType == DistanceTypes.SurveyFoot)
                     length *= 6076.1033333576;
-
-                Distance = length;
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
             }
+
+            return length;
         }
 
         /// <summary>

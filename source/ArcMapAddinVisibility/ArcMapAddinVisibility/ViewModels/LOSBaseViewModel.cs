@@ -139,6 +139,30 @@ namespace ArcMapAddinVisibility.ViewModels
             Target = 2
         }
 
+        internal double GetOffsetInZUnits(IMap map, double offset, double zFactor, DistanceTypes distanceType)
+        {
+            if (map.SpatialReference == null)
+                return offset;
+
+            double offsetInMapUnits = 0.0;
+            DistanceTypes distanceTo = DistanceTypes.Meters; // default to meters
+
+            var pcs = map.SpatialReference as IProjectedCoordinateSystem;
+
+            if (pcs != null)
+            {
+                // need to convert the offset from the input distance type to the spatial reference linear type
+                // then apply the zFactor
+                distanceTo = GetDistanceType(pcs.CoordinateUnit.FactoryCode);
+            }
+
+            offsetInMapUnits = GetDistanceFromTo(distanceType, distanceTo, offset);
+
+            var result = offsetInMapUnits / zFactor;
+
+            return result;
+        }
+
         public ISurface GetSurfaceFromMapByName(IMap map, string name)
         {
             for (int x = 0; x < map.LayerCount; x++)
