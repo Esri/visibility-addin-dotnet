@@ -48,6 +48,8 @@ namespace ArcMapAddinVisibility.ViewModels
         private void OnSubmitCommand(object obj)
         {
             CreateMapElement();
+
+            Reset(true);
         }
 
         #endregion
@@ -102,7 +104,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
  	        base.CreateMapElement();
             
-            // take your two points and get line of sight
+            // take your observer and target points and get lines of sight
 
             var surface = GetSurfaceFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
 
@@ -119,14 +121,30 @@ namespace ArcMapAddinVisibility.ViewModels
             IPolyline polyInvisible = null;
             bool targetIsVisible = false;
 
+            double finalObserverOffset = GetOffsetInZUnits(ArcMap.Document.FocusMap, ObserverOffset.Value, surface.ZFactor, OffsetUnitType);
+            double finalTargetOffset = GetOffsetInZUnits(ArcMap.Document.FocusMap, TargetOffset.Value, surface.ZFactor, OffsetUnitType);
+
             foreach (var observerPoint in ObserverPoints)
             {
+                var z1 = surface.GetElevation(observerPoint) + finalObserverOffset;
+
+                if (surface.IsVoidZ(z1))
+                {
+                    //TODO handle void z
+                    continue;
+                }
+
                 foreach (var targetPoint in TargetPoints)
                 {
-                    //TODO add your offsets here, will need to convert to map z units
-                    var z1 = surface.GetElevation(observerPoint) + ObserverOffset.Value;
-                    var z2 = surface.GetElevation(targetPoint) + TargetOffset.Value;
+                    //TODO add your offsets here, will need to convert to surface z units
+                    var z2 = surface.GetElevation(targetPoint) + finalTargetOffset;
 
+                    if (surface.IsVoidZ(z2))
+                    {
+                        //TODO handle void z
+                        continue;
+                    }
+                    
                     geoBridge.GetLineOfSight(surface,
                         new PointClass() { Z = z1, X = observerPoint.X, Y = observerPoint.Y, ZAware = true },
                         new PointClass() { Z = z2, X = targetPoint.X, Y = targetPoint.Y, ZAware = true },
