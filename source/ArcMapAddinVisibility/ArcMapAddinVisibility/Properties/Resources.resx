@@ -154,7 +154,7 @@
     <value>Cancel</value>
   </data>
   <data name="LabelClearGraphics" xml:space="preserve">
-    <value>Clear</value>
+    <value>Clear Graphics</value>
   </data>
   <data name="LabelDistance" xml:space="preserve">
     <value>Distance</value>
@@ -186,6 +186,12 @@
   <data name="LabelTabRLOS" xml:space="preserve">
     <value>RLOS</value>
   </data>
+  <data name="LabelTargetOffset" xml:space="preserve">
+    <value>Target Offset</value>
+  </data>
+  <data name="LabelTargetPoints" xml:space="preserve">
+    <value>Target Points</value>
+  </data>
   <data name="LabelVerticalFOV" xml:space="preserve">
     <value>Vertical Field of View</value>
   </data>
@@ -197,5 +203,11 @@
   </data>
   <data name="TooltipMapPointTool" xml:space="preserve">
     <value>Map Point Tool</value>
+  </data>
+  <data name="TooltipObserverMapPointTool" xml:space="preserve">
+    <value>Observer Map Point Tool</value>
+  </data>
+  <data name="TooltipTargetMapPointTool" xml:space="preserve">
+    <value>Target Map Point Tool</value>
   </data>
 </root>
