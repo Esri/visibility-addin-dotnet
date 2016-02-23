@@ -46,8 +46,15 @@ namespace ArcMapAddinVisibility.ViewModels
 
         public RelayCommand SubmitCommand { get; set; }
 
+        /// <summary>
+        /// Method to handle the Submit/OK button command
+        /// </summary>
+        /// <param name="obj">null</param>
         private void OnSubmitCommand(object obj)
         {
+            // make temp graphics... not temp
+            MoveTempGraphicsToMapGraphics();
+
             CreateMapElement();
 
             Reset(true);
@@ -65,8 +72,26 @@ namespace ArcMapAddinVisibility.ViewModels
             if (points == null)
                 return;
 
+            // temp list of point's graphic element's guids
+            var guidList = new List<string>();
+
             foreach (var point in points)
+            {
                 TargetPoints.Remove(point);
+
+                // add to graphic element guid list for removal
+                var kvp = GuidPointDictionary.FirstOrDefault(i => i.Value == point);
+
+                guidList.Add(kvp.Key);
+            }
+
+            RemoveGraphics(guidList);
+
+            foreach (var guid in guidList)
+            {
+                if(GuidPointDictionary.ContainsKey(guid))
+                    GuidPointDictionary.Remove(guid);
+            }
         }
 
         #endregion
@@ -86,8 +111,9 @@ namespace ArcMapAddinVisibility.ViewModels
             if (ToolMode == MapPointToolMode.Target)
             {
                 TargetPoints.Insert(0, point);
-                //TODO change color
-                AddGraphicToMap(point, true);
+                var color = new RgbColorClass() { Green = 255 } as IColor;
+                var guid = AddGraphicToMap(point, color, true, esriSimpleMarkerStyle.esriSMSSquare);
+                UpdatePointDictionary(point, guid);
             }
         }
 

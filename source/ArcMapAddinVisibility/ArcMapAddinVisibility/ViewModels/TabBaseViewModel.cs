@@ -380,8 +380,7 @@ namespace ArcMapAddinVisibility.ViewModels
             RemoveGraphics(gc, TempGraphicsList);
             RemoveGraphics(gc, MapGraphicsList);
 
-            //gc.DeleteAllElements();
-            av.Refresh();
+            av.PartialRefresh(esriViewDrawPhase.esriViewGraphics, null, null);
         }
 
         /// <summary>
@@ -401,7 +400,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
             RemoveGraphics(gc, TempGraphicsList);
 
-            av.Refresh();
+            av.PartialRefresh(esriViewDrawPhase.esriViewGraphics, null, null);
         }
         /// <summary>
         /// Method used to remove graphics from the graphics container
@@ -409,7 +408,7 @@ namespace ArcMapAddinVisibility.ViewModels
         /// </summary>
         /// <param name="gc">map graphics container</param>
         /// <param name="list">list of GUIDs to remove</param>
-        private void RemoveGraphics(IGraphicsContainer gc, List<string> list)
+        internal void RemoveGraphics(IGraphicsContainer gc, List<string> list)
         {
             if (gc == null || !list.Any())
                 return;
@@ -434,6 +433,37 @@ namespace ArcMapAddinVisibility.ViewModels
 
             list.Clear();
             elementList.Clear();
+        }
+
+        internal void RemoveGraphics(List<string> guidList)
+        {
+            if (!guidList.Any())
+                return;
+
+            var mxdoc = ArcMap.Application.Document as IMxDocument;
+            if (mxdoc == null)
+                return;
+            var av = mxdoc.FocusMap as IActiveView;
+            if (av == null)
+                return;
+            var gc = av as IGraphicsContainer;
+            if (gc == null)
+                return;
+
+            RemoveGraphics(gc, guidList);
+
+            av.PartialRefresh(esriViewDrawPhase.esriViewGraphics, null, null);
+        }
+
+        /// <summary>
+        /// Method used to move temp graphics to map graphics
+        /// Tools use this to make temp graphics permanent on completion
+        /// otherwise temp graphics get cleared on reset/cancel
+        /// </summary>
+        internal void MoveTempGraphicsToMapGraphics()
+        {
+            MapGraphicsList.AddRange(TempGraphicsList);
+            TempGraphicsList.Clear();
         }
 
         /// <summary>
@@ -592,14 +622,12 @@ namespace ArcMapAddinVisibility.ViewModels
         /// Adds a graphic element to the map graphics container
         /// </summary>
         /// <param name="geom">IGeometry</param>
-        internal void AddGraphicToMap(IGeometry geom, IColor color, bool IsTempGraphic)
+        internal string AddGraphicToMap(IGeometry geom, IColor color, bool IsTempGraphic = false, esriSimpleMarkerStyle markerStyle = esriSimpleMarkerStyle.esriSMSCircle)
         {
             if (geom == null || ArcMap.Document == null || ArcMap.Document.FocusMap == null)
-                return;
+                return string.Empty;
+
             IElement element = null;
-            //ESRI.ArcGIS.Display.IRgbColor rgbColor = new ESRI.ArcGIS.Display.RgbColorClass();
-            //rgbColor.Red = 255;
-            //ESRI.ArcGIS.Display.IColor color = rgbColor; // Implicit cast.
             double width = 2.0;
 
             geom.Project(ArcMap.Document.FocusMap.SpatialReference);
@@ -612,7 +640,7 @@ namespace ArcMapAddinVisibility.ViewModels
                 simpleMarkerSymbol.Outline = true;
                 simpleMarkerSymbol.OutlineColor = color;
                 simpleMarkerSymbol.Size = 5;
-                simpleMarkerSymbol.Style = esriSimpleMarkerStyle.esriSMSCircle;
+                simpleMarkerSymbol.Style = markerStyle;
 
                 var markerElement = new MarkerElement() as IMarkerElement;
                 markerElement.Symbol = simpleMarkerSymbol;
@@ -632,7 +660,7 @@ namespace ArcMapAddinVisibility.ViewModels
             }
 
             if (element == null)
-                return;
+                return string.Empty;
 
             element.Geometry = geom;
 
@@ -651,9 +679,9 @@ namespace ArcMapAddinVisibility.ViewModels
 
             gc.AddElement(element, 0);
 
-            //av.Refresh();
-            // partial refresh of graphics ok?
             av.PartialRefresh(esriViewDrawPhase.esriViewGraphics, null, null);
+
+            return eprop.Name;
         }
 
         internal void AddGraphicToMap(IGeometry geom, IColor color)
@@ -663,9 +691,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
         internal void AddGraphicToMap(IGeometry geom)
         {
-            ESRI.ArcGIS.Display.IRgbColor rgbColor = new ESRI.ArcGIS.Display.RgbColorClass();
-            rgbColor.Red = 255;
-            //ESRI.ArcGIS.Display.IColor color = rgbColor; // Implicit cast.
+            var rgbColor = new ESRI.ArcGIS.Display.RgbColorClass() { Red = 255 };
             AddGraphicToMap(geom, rgbColor);
         }
         internal void AddGraphicToMap(IGeometry geom, bool isTemp)

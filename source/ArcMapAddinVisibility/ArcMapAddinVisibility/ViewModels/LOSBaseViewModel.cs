@@ -10,6 +10,7 @@ using ESRI.ArcGIS.Analyst3D;
 using ESRI.ArcGIS.Geometry;
 using ArcMapAddinVisibility.Helpers;
 using System.Collections;
+using ESRI.ArcGIS.Display;
 
 namespace ArcMapAddinVisibility.ViewModels
 {
@@ -29,6 +30,8 @@ namespace ArcMapAddinVisibility.ViewModels
             Mediator.Register(Constants.MAP_TOC_UPDATED, OnMapTocUpdated);
 
             DeletePointCommand = new RelayCommand(OnDeletePointCommand);
+
+            GuidPointDictionary = new Dictionary<string, IPoint>();
         }
 
         #region Properties
@@ -65,6 +68,7 @@ namespace ArcMapAddinVisibility.ViewModels
         public ObservableCollection<string> SurfaceLayerNames { get; set; }
         public string SelectedSurfaceName { get; set; }
         public DistanceTypes OffsetUnitType { get; set; }
+        public Dictionary<string, IPoint> GuidPointDictionary { get; set; } 
 
         #endregion
 
@@ -81,8 +85,26 @@ namespace ArcMapAddinVisibility.ViewModels
             if (points == null)
                 return;
 
+            // temp list of point's graphic element's guids
+            var guidList = new List<string>();
+
             foreach (var point in points)
+            {
                 ObserverPoints.Remove(point);
+
+                // remove graphic
+                var kvp = GuidPointDictionary.FirstOrDefault(i => i.Value == point);
+
+                guidList.Add(kvp.Key);
+            }
+
+            RemoveGraphics(guidList);
+
+            foreach (var guid in guidList)
+            {
+                if (GuidPointDictionary.ContainsKey(guid))
+                    GuidPointDictionary.Remove(guid);
+            }
         }
 
         #endregion
@@ -111,6 +133,11 @@ namespace ArcMapAddinVisibility.ViewModels
             RaisePropertyChanged(() => SelectedSurfaceName);
         }
 
+        /// <summary>
+        /// Override this method to implement a "Mode" to separate the input of
+        /// observer points and target points
+        /// </summary>
+        /// <param name="obj">ToolMode string from resource file</param>
         internal override void OnActivateTool(object obj)
         {
             var mode = obj.ToString();
@@ -127,6 +154,10 @@ namespace ArcMapAddinVisibility.ViewModels
             base.OnActivateTool(obj);
         }
 
+        /// <summary>
+        /// Override this event to collect observer points based on tool mode
+        /// </summary>
+        /// <param name="obj"></param>
         internal override void OnNewMapPointEvent(object obj)
         {
             // lets test this out
@@ -141,14 +172,20 @@ namespace ArcMapAddinVisibility.ViewModels
             // ok, we have a point
             if (ToolMode == MapPointToolMode.Observer)
             {
+                // in tool mode "Observer" we add observer points
+                // otherwise ignore
                 ObserverPoints.Insert(0, point);
-                //TODO change color
-                AddGraphicToMap(point, true);
+                var color = new RgbColorClass() { Green = 255 } as IColor;
+                var guid = AddGraphicToMap(point, color, true);
+                UpdatePointDictionary(point, guid);
             }
         }
 
         #endregion
 
+        /// <summary>
+        /// Enumeration used to the different tool modes
+        /// </summary>
         internal enum MapPointToolMode : int
         {
             Unknown = 0,
@@ -156,6 +193,20 @@ namespace ArcMapAddinVisibility.ViewModels
             Target = 2
         }
 
+        internal void UpdatePointDictionary(IPoint point, string guid)
+        {
+            if (!GuidPointDictionary.ContainsKey(guid))
+                GuidPointDictionary.Add(guid, point);
+        }
+
+        /// <summary>
+        /// Method to get a z offset distance in the correct units for the map
+        /// </summary>
+        /// <param name="map">IMap</param>
+        /// <param name="offset">the input offset</param>
+        /// <param name="zFactor">ISurface z factor</param>
+        /// <param name="distanceType">the "from" distance unit type</param>
+        /// <returns></returns>
         internal double GetOffsetInZUnits(IMap map, double offset, double zFactor, DistanceTypes distanceType)
         {
             if (map.SpatialReference == null)
@@ -180,6 +231,12 @@ namespace ArcMapAddinVisibility.ViewModels
             return result;
         }
 
+        /// <summary>
+        /// Method to get a ISurface from a map with layer name
+        /// </summary>
+        /// <param name="map">IMap that contains surface layer</param>
+        /// <param name="name">Name of the layer that you are looking for</param>
+        /// <returns>ISurface</returns>
         public ISurface GetSurfaceFromMapByName(IMap map, string name)
         {
             for (int x = 0; x < map.LayerCount; x++)
@@ -211,6 +268,12 @@ namespace ArcMapAddinVisibility.ViewModels
             return null;
         }
 
+        /// <summary>
+        /// Method to get all the names of the raster/tin layers that support ISurface
+        /// we use this method to populate a combobox for input selection of surface layer
+        /// </summary>
+        /// <param name="map">IMap</param>
+        /// <returns></returns>
         public List<string> GetSurfaceNamesFromMap(IMap map)
         {
             var list = new List<string>();
@@ -249,6 +312,10 @@ namespace ArcMapAddinVisibility.ViewModels
             return list;
         }
 
+        /// <summary>
+        /// Override to add aditional items in the class to reset tool
+        /// </summary>
+        /// <param name="toolReset"></param>
         internal override void Reset(bool toolReset)
         {
             base.Reset(toolReset);
@@ -273,6 +340,8 @@ namespace ArcMapAddinVisibility.ViewModels
             ObserverPoints.Clear();
 
             ClearTempGraphics();
+
+            GuidPointDictionary.Clear();
         }
     }
 }
