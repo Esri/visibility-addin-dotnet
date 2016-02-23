@@ -380,8 +380,7 @@ namespace ArcMapAddinVisibility.ViewModels
             RemoveGraphics(gc, TempGraphicsList);
             RemoveGraphics(gc, MapGraphicsList);
 
-            //gc.DeleteAllElements();
-            av.Refresh();
+            av.PartialRefresh(esriViewDrawPhase.esriViewGraphics, null, null);
         }
 
         /// <summary>
@@ -401,7 +400,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
             RemoveGraphics(gc, TempGraphicsList);
 
-            av.Refresh();
+            av.PartialRefresh(esriViewDrawPhase.esriViewGraphics, null, null);
         }
         /// <summary>
         /// Method used to remove graphics from the graphics container
@@ -409,7 +408,7 @@ namespace ArcMapAddinVisibility.ViewModels
         /// </summary>
         /// <param name="gc">map graphics container</param>
         /// <param name="list">list of GUIDs to remove</param>
-        private void RemoveGraphics(IGraphicsContainer gc, List<string> list)
+        internal void RemoveGraphics(IGraphicsContainer gc, List<string> list)
         {
             if (gc == null || !list.Any())
                 return;
@@ -434,6 +433,37 @@ namespace ArcMapAddinVisibility.ViewModels
 
             list.Clear();
             elementList.Clear();
+        }
+
+        internal void RemoveGraphics(List<string> guidList)
+        {
+            if (!guidList.Any())
+                return;
+
+            var mxdoc = ArcMap.Application.Document as IMxDocument;
+            if (mxdoc == null)
+                return;
+            var av = mxdoc.FocusMap as IActiveView;
+            if (av == null)
+                return;
+            var gc = av as IGraphicsContainer;
+            if (gc == null)
+                return;
+
+            RemoveGraphics(gc, guidList);
+
+            av.PartialRefresh(esriViewDrawPhase.esriViewGraphics, null, null);
+        }
+
+        /// <summary>
+        /// Method used to move temp graphics to map graphics
+        /// Tools use this to make temp graphics permanent on completion
+        /// otherwise temp graphics get cleared on reset/cancel
+        /// </summary>
+        internal void MoveTempGraphicsToMapGraphics()
+        {
+            MapGraphicsList.AddRange(TempGraphicsList);
+            TempGraphicsList.Clear();
         }
 
         /// <summary>
@@ -592,14 +622,12 @@ namespace ArcMapAddinVisibility.ViewModels
         /// Adds a graphic element to the map graphics container
         /// </summary>
         /// <param name="geom">IGeometry</param>
-        internal void AddGraphicToMap(IGeometry geom, IColor color, bool IsTempGraphic)
+        internal string AddGraphicToMap(IGeometry geom, IColor color, bool IsTempGraphic = false, esriSimpleMarkerStyle markerStyle = esriSimpleMarkerStyle.esriSMSCircle)
         {
             if (geom == null || ArcMap.Document == null || ArcMap.Document.FocusMap == null)
-                return;
+                return string.Empty;
+
             IElement element = null;
-            //ESRI.ArcGIS.Display.IRgbColor rgbColor = new ESRI.ArcGIS.Display.RgbColorClass();
-            //rgbColor.Red = 255;
-            //ESRI.ArcGIS.Display.IColor color = rgbColor; // Implicit cast.
             double width = 2.0;
 
             geom.Project(ArcMap.Document.FocusMap.SpatialReference);
@@ -612,7 +640,7 @@ namespace ArcMapAddinVisibility.ViewModels
                 simpleMarkerSymbol.Outline = true;
                 simpleMarkerSymbol.OutlineColor = color;
                 simpleMarkerSymbol.Size = 5;
-                simpleMarkerSymbol.Style = esriSimpleMarkerStyle.esriSMSCircle;
+                simpleMarkerSymbol.Style = markerStyle;
 
                 var markerElement = new MarkerElement() as IMarkerElement;
                 markerElement.Symbol = simpleMarkerSymbol;
@@ -632,7 +660,7 @@ namespace ArcMapAddinVisibility.ViewModels
             }
 
             if (element == null)
-                return;
+                return string.Empty;
 
             element.Geometry = geom;
 
@@ -651,9 +679,9 @@ namespace ArcMapAddinVisibility.ViewModels
 
             gc.AddElement(element, 0);
 
-            //TODO make refresh more efficient in the future, avoid flicker refreshing entire view, only do what's needed
-            //refresh map
-            av.Refresh();
+            av.PartialRefresh(esriViewDrawPhase.esriViewGraphics, null, null);
+
+            return eprop.Name;
         }
 
         internal void AddGraphicToMap(IGeometry geom, IColor color)
@@ -663,9 +691,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
         internal void AddGraphicToMap(IGeometry geom)
         {
-            ESRI.ArcGIS.Display.IRgbColor rgbColor = new ESRI.ArcGIS.Display.RgbColorClass();
-            rgbColor.Red = 255;
-            //ESRI.ArcGIS.Display.IColor color = rgbColor; // Implicit cast.
+            var rgbColor = new ESRI.ArcGIS.Display.RgbColorClass() { Red = 255 };
             AddGraphicToMap(geom, rgbColor);
         }
         internal void AddGraphicToMap(IGeometry geom, bool isTemp)
@@ -676,12 +702,44 @@ namespace ArcMapAddinVisibility.ViewModels
             AddGraphicToMap(geom, rgbColor, isTemp);
         }
 
+        internal DistanceTypes GetDistanceType(int linearUnitFactoryCode)
+        { 
+            DistanceTypes distanceType = DistanceTypes.Meters;
+            switch (linearUnitFactoryCode)
+            {
+                case (int)esriSRUnitType.esriSRUnit_Foot:
+                    distanceType = DistanceTypes.Feet;
+                    break;
+                case (int)esriSRUnitType.esriSRUnit_Kilometer:
+                    distanceType = DistanceTypes.Kilometers;
+                    break;
+                case (int)esriSRUnitType.esriSRUnit_Meter:
+                    distanceType = DistanceTypes.Meters;
+                    break;
+                case (int)esriSRUnitType.esriSRUnit_NauticalMile:
+                    distanceType = DistanceTypes.NauticalMile;
+                    break;
+                case (int)esriSRUnitType.esriSRUnit_SurveyFoot:
+                    distanceType = DistanceTypes.SurveyFoot;
+                    break;
+                default:
+                    distanceType = DistanceTypes.Meters;
+                    break;
+            }
+
+            return distanceType;
+        }
+
         internal ISpatialReferenceFactory3 srf3 = null;
+        internal ILinearUnit GetLinearUnit()
+        {
+            return GetLinearUnit(LineDistanceType);
+        }
         /// <summary>
         /// Gets the linear unit from the esri constants for linear units
         /// </summary>
         /// <returns>ILinearUnit</returns>
-        internal ILinearUnit GetLinearUnit()
+        internal ILinearUnit GetLinearUnit(DistanceTypes distanceType)
         {
             int unitType = (int)esriSRUnitType.esriSRUnit_Meter;
             if (srf3 == null)
@@ -690,7 +748,7 @@ namespace ArcMapAddinVisibility.ViewModels
                 srf3 = Activator.CreateInstance(srType) as ISpatialReferenceFactory3;
             }
 
-            switch (LineDistanceType)
+            switch (distanceType)
             {
                 case DistanceTypes.Feet:
                     unitType = (int)esriSRUnitType.esriSRUnit_Foot;
@@ -715,17 +773,21 @@ namespace ArcMapAddinVisibility.ViewModels
             return srf3.CreateUnit(unitType) as ILinearUnit;
         }
 
+        private void UpdateDistanceFromTo(DistanceTypes fromType, DistanceTypes toType)
+        {
+            Distance = GetDistanceFromTo(fromType, toType, Distance);
+        }
         /// <summary>
         /// Ugly method to convert to/from different types of distance units
         /// </summary>
         /// <param name="fromType">DistanceTypes</param>
         /// <param name="toType">DistanceTypes</param>
-        private void UpdateDistanceFromTo(DistanceTypes fromType, DistanceTypes toType)
+        internal double GetDistanceFromTo(DistanceTypes fromType, DistanceTypes toType, double input)
         {
+            double length = input;
+
             try
             {
-                double length = Distance;
-
                 if (fromType == DistanceTypes.Meters && toType == DistanceTypes.Kilometers)
                     length /= 1000.0;
                 else if (fromType == DistanceTypes.Meters && toType == DistanceTypes.Feet)
@@ -766,13 +828,13 @@ namespace ArcMapAddinVisibility.ViewModels
                     length *= 6076.1154855643;
                 else if (fromType == DistanceTypes.NauticalMile && toType == DistanceTypes.SurveyFoot)
                     length *= 6076.1033333576;
-
-                Distance = length;
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
             }
+
+            return length;
         }
 
         /// <summary>

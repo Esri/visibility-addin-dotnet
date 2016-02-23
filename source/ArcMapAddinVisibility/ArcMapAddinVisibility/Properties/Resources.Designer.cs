@@ -169,7 +169,7 @@ namespace ArcMapAddinVisibility.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Clear.
+        ///   Looks up a localized string similar to Clear Graphics.
         /// </summary>
         public static string LabelClearGraphics {
             get {
@@ -232,6 +232,15 @@ namespace ArcMapAddinVisibility.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to OK.
+        /// </summary>
+        public static string LabelOK {
+            get {
+                return ResourceManager.GetString("LabelOK", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Submit.
         /// </summary>
         public static string LabelSubmit {
@@ -268,6 +277,24 @@ namespace ArcMapAddinVisibility.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Target Offset.
+        /// </summary>
+        public static string LabelTargetOffset {
+            get {
+                return ResourceManager.GetString("LabelTargetOffset", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Target Points.
+        /// </summary>
+        public static string LabelTargetPoints {
+            get {
+                return ResourceManager.GetString("LabelTargetPoints", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Vertical Field of View.
         /// </summary>
         public static string LabelVerticalFOV {
@@ -300,6 +327,24 @@ namespace ArcMapAddinVisibility.Properties {
         public static string TooltipMapPointTool {
             get {
                 return ResourceManager.GetString("TooltipMapPointTool", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Observer Map Point Tool.
+        /// </summary>
+        public static string TooltipObserverMapPointTool {
+            get {
+                return ResourceManager.GetString("TooltipObserverMapPointTool", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Target Map Point Tool.
+        /// </summary>
+        public static string TooltipTargetMapPointTool {
+            get {
+                return ResourceManager.GetString("TooltipTargetMapPointTool", resourceCulture);
             }
         }
     }
