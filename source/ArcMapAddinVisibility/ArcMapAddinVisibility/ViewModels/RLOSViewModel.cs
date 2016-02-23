@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using ArcMapAddinVisibility.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,11 +21,49 @@ using System.Threading.Tasks;
 
 namespace ArcMapAddinVisibility.ViewModels
 {
-    public class RLOSViewModel : TabBaseViewModel
+    public class RLOSViewModel : LOSBaseViewModel
     {
+        #region Properties
+
+        public double SurfaceOffset { get; set; }
+        public double MinDistance { get; set; }
+        public double MaxDistance { get; set; }
+        public double LeftHorizontalFOV { get; set; }
+        public double RightHorizontalFOV { get; set; }
+        public double BottomVerticalFOV { get; set; }
+        public double TopVerticalFOV { get; set; }
+
+        #endregion
+
+        #region Commands
+
+        public RelayCommand SubmitCommand { get; set; }
+
+        private void OnSubmitCommand(object obj)
+        {
+            CreateMapElement();
+        }
+
+        #endregion
+
         public RLOSViewModel()
         {
+            SurfaceOffset = 0.0;
+            MinDistance = 0.0;
+            MaxDistance = 100;
+            LeftHorizontalFOV = 0.0;
+            RightHorizontalFOV = 360.0;
+            BottomVerticalFOV = -90.0;
+            TopVerticalFOV = 90.0;
+        }
 
+        public override bool CanCreateElement
+        {
+            get
+            {
+                return (!string.IsNullOrWhiteSpace(SelectedSurfaceName)
+                    && ObserverPoints.Any());
+            }
         }
     }
 }

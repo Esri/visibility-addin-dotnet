@@ -19,6 +19,7 @@ namespace ArcMapAddinVisibility.ViewModels
             ObserverOffset = 2.0;
             TargetOffset = 0.0;
             OffsetUnitType = DistanceTypes.Meters;
+            AngularUnitType = AngularTypes.Degrees;
 
             ObserverPoints = new ObservableCollection<IPoint>();
             ToolMode = MapPointToolMode.Unknown;
@@ -62,6 +63,7 @@ namespace ArcMapAddinVisibility.ViewModels
         public ObservableCollection<string> SurfaceLayerNames { get; set; }
         public string SelectedSurfaceName { get; set; }
         public DistanceTypes OffsetUnitType { get; set; }
+        public AngularTypes AngularUnitType { get; set; }
 
         #endregion
 

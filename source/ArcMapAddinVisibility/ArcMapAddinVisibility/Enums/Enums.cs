@@ -53,4 +53,13 @@ namespace ArcMapAddinVisibility
         SurveyFoot = 5
     }
 
+    public enum AngularTypes : int
+    {
+        [LocalizableDescription(@"EnumDegrees", typeof(Resources))]
+        Degrees = 1,
+
+        [LocalizableDescription(@"EnumMils", typeof(Resources))]
+        Mils = 2
+    }
+
 }
