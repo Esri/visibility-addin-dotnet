@@ -8,7 +8,7 @@
              xmlns:viewModels="clr-namespace:ArcMapAddinVisibility.ViewModels"
              xmlns:prop="clr-namespace:ArcMapAddinVisibility.Properties"
              mc:Ignorable="d" 
-             d:DesignHeight="550" d:DesignWidth="300">
+             d:DesignHeight="575" d:DesignWidth="300">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -78,8 +78,8 @@
             </ListBox.ItemTemplate>
         </ListBox>
 
-        <Button Content="Ok" HorizontalAlignment="Right" Margin="5,5,56,5" Grid.Row="4" VerticalAlignment="Top" Width="75" RenderTransformOrigin="1.693,0.636"/>
-        <Button Content="Clear" HorizontalAlignment="Right" Margin="5,5,5,5" Grid.Row="4" VerticalAlignment="Top" Width="75" RenderTransformOrigin="1.587,0.5" Grid.ColumnSpan="3"/>
+        <Button Content="{x:Static prop:Resources.LabelOK}" ToolTip="{x:Static prop:Resources.LabelOK}" Command="{Binding SubmitCommand}" HorizontalAlignment="Right" Margin="0,5,66,0" Grid.Row="4" VerticalAlignment="Top" Width="75" RenderTransformOrigin="1.693,0.636"/>
+        <Button Content="{x:Static prop:Resources.LabelClearGraphics}" ToolTip="{x:Static prop:Resources.LabelClearGraphics}" Command="{Binding ClearGraphicsCommand}" HorizontalAlignment="Right" Margin="5,5,5,5" Grid.Row="4" VerticalAlignment="Top" Width="85" RenderTransformOrigin="1.587,0.5" Grid.ColumnSpan="3"/>
 
         <Expander Header="{x:Static prop:Resources.LabelObserverOptions}" HorizontalAlignment="Stretch" Margin="0,5,5,0" Grid.Row="5" VerticalAlignment="Top" IsExpanded="False" Height="373" Grid.RowSpan="4" Grid.ColumnSpan="3" RenderTransformOrigin="0.488,0.625">
             <Grid>
