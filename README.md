@@ -14,6 +14,7 @@ ArcGIS Add-in provides the capability to quickly do line of sight analyses.
 * [Requirements](#requirements)
 * [Instructions](#instructions)
 * [Workflows](#workflows)
+	* [One-to-one Linear Line Of Sight (LLOS)](one-to-one-linear-line-of-sight-(llos))
 * [Resources](#resources)
 * [Issues](#issues)
 * [Contributing](#contributing)
@@ -66,6 +67,18 @@ ArcGIS Add-in provides the capability to quickly do line of sight analyses.
 				* If you add this to a toolbar that you contstantly use the add-in will stay. To remove the add-in delete your [Normal.MXT](https://geonet.esri.com/thread/78692) file
 				
 ## Workflows
+
+### One-to-one Linear Line Of Sight (LLOS)
+1. Add an elevation surface to the map. 
+	* This may be a raster dataset, image service, or mosaic dataset.
+2. Open the *Visibility Tools*
+3. Select the **LLOS** tab
+4. Select the **Input Surface** layer from the list
+5. Use the **Observer Map Point Tool** to select an observer location on the map.
+6. Use the **Target Map Point Tool** to select the target location on the map.
+7. Optionally, type an **Observer Offset**, **Target Offset**, and select the offset units.
+8. Select **OK**
+
 
 ## Resources
 
