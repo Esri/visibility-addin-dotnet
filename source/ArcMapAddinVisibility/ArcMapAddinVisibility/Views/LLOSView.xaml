@@ -66,8 +66,8 @@
             </ListBox.ItemTemplate>
             <ListBox.ContextMenu>
                 <ContextMenu DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Self}}">
-                    <MenuItem Header="Delete" Command="{Binding DataContext.DeletePointCommand}" CommandParameter="{Binding Path=SelectedItems}" />
-                    <MenuItem Header="Delete All" Command="{Binding DataContext.DeleteAllPointsCommand}" CommandParameter="{x:Static prop:Resources.ToolModeObserver}" />
+                    <MenuItem Header="{x:Static prop:Resources.MenuLabelDelete}" Command="{Binding DataContext.DeletePointCommand}" CommandParameter="{Binding Path=SelectedItems}" />
+                    <MenuItem Header="{x:Static prop:Resources.MenuLabelDeleteAll}" Command="{Binding DataContext.DeleteAllPointsCommand}" CommandParameter="{x:Static prop:Resources.ToolModeObserver}" />
                 </ContextMenu>
             </ListBox.ContextMenu>
             <ListBox.InputBindings>
@@ -92,8 +92,8 @@
             </ListBox.ItemTemplate>
             <ListBox.ContextMenu>
                 <ContextMenu DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Self}}">
-                    <MenuItem Header="Delete" Command="{Binding DataContext.DeletePointCommand}" CommandParameter="{Binding Path=SelectedItems}" />
-                    <MenuItem Header="Delete All" Command="{Binding DataContext.DeleteAllPointsCommand}" CommandParameter="{x:Static prop:Resources.ToolModeTarget}" />
+                    <MenuItem Header="{x:Static prop:Resources.MenuLabelDelete}" Command="{Binding DataContext.DeletePointCommand}" CommandParameter="{Binding Path=SelectedItems}" />
+                    <MenuItem Header="{x:Static prop:Resources.MenuLabelDeleteAll}" Command="{Binding DataContext.DeleteAllPointsCommand}" CommandParameter="{x:Static prop:Resources.ToolModeTarget}" />
                 </ContextMenu>
             </ListBox.ContextMenu>
             <ListBox.InputBindings>

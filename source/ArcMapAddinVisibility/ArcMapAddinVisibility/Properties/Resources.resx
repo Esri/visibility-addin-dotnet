@@ -213,4 +213,10 @@
   <data name="TooltipTargetMapPointTool" xml:space="preserve">
     <value>Target Map Point Tool</value>
   </data>
+  <data name="MenuLabelDelete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="MenuLabelDeleteAll" xml:space="preserve">
+    <value>Delete All</value>
+  </data>
 </root>
