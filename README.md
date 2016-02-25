@@ -74,7 +74,7 @@ ArcGIS Add-in provides the capability to quickly do line of sight analyses.
 				
 ## Workflows
 
-### One-to-one Linear Line Of Sight (LLOS) <a name="one-to-one-linear-line-of-sight-llos"></a>
+### <a name="one-to-one-linear-line-of-sight-llos"></a> One-to-one Linear Line Of Sight (LLOS) 
 1. Add an elevation surface to the map. 
 	* This may be a raster dataset, image service, or mosaic dataset.
 2. Open the *Visibility Tools*
@@ -85,7 +85,7 @@ ArcGIS Add-in provides the capability to quickly do line of sight analyses.
 7. Optionally, type an **Observer Offset**, **Target Offset**, and select the offset units.
 8. Select **OK**
 
-### One-to-many Linear Line Of Sight (LLOS) <a name="one-to-many-linear-line-of-sight-llos"></a>
+### <a name="one-to-many-linear-line-of-sight-llos"></a> One-to-many Linear Line Of Sight (LLOS)
 1. Add an elevation surface to the map. 
 	* This may be a raster dataset, image service, or mosaic dataset.
 2. Open the *Visibility Tools*
@@ -96,7 +96,7 @@ ArcGIS Add-in provides the capability to quickly do line of sight analyses.
 7. Optionally, type an **Observer Offset**, **Target Offset**, and select the offset units.
 8. Select **OK**
 
-### Many-to-many Linear Line Of Sight (LLOS) <a name="many-to-many-linear-line-of-sight-llos"></a>
+### <a name="many-to-many-linear-line-of-sight-llos"></a> Many-to-many Linear Line Of Sight (LLOS) 
 1. Add an elevation surface to the map. 
 	* This may be a raster dataset, image service, or mosaic dataset.
 2. Open the *Visibility Tools*
@@ -107,7 +107,7 @@ ArcGIS Add-in provides the capability to quickly do line of sight analyses.
 7. Optionally, type an **Observer Offset**, **Target Offset**, and select the offset units.
 8. Select **OK**
 
-### Many-to-one Linear Line Of Sight (LLOS) <a name="many-to-one-linear-line-of-sight-llos"></a>
+### <a name="many-to-one-linear-line-of-sight-llos"></a> Many-to-one Linear Line Of Sight (LLOS) 
 1. Add an elevation surface to the map. 
 	* This may be a raster dataset, image service, or mosaic dataset.
 2. Open the *Visibility Tools*
@@ -118,7 +118,7 @@ ArcGIS Add-in provides the capability to quickly do line of sight analyses.
 7. Optionally, type an **Observer Offset**, **Target Offset**, and select the offset units.
 8. Select **OK**
 
-### Radial Line Of Sight (RLOS) <a name="radial-line-of-sight-rlos"></a>
+### <a name="radial-line-of-sight-rlos"></a> Radial Line Of Sight (RLOS) 
 1. Add an elevation surface to the map. 
 	* This may be a raster dataset, image service, or mosaic dataset.
 2. Open the *Visibility Tools*
