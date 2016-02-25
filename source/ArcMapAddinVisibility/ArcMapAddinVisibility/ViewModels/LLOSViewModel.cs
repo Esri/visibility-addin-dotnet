@@ -135,7 +135,6 @@ namespace ArcMapAddinVisibility.ViewModels
                 return (!string.IsNullOrWhiteSpace(SelectedSurfaceName) 
                     && ObserverPoints.Any() 
                     && TargetPoints.Any()
-                    && ObserverOffset.HasValue
                     && TargetOffset.HasValue);
             }
         }
