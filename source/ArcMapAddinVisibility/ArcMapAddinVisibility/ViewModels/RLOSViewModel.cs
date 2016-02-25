@@ -49,7 +49,15 @@ namespace ArcMapAddinVisibility.ViewModels
 
         private void OnSubmitCommand(object obj)
         {
+            // add wait cursor
+            var savedCursor = System.Windows.Forms.Cursor.Current;
+            System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
+            System.Windows.Forms.Application.DoEvents();
+
             CreateMapElement();
+
+            // set back to initial cursor
+            System.Windows.Forms.Cursor.Current = savedCursor;
         }
 
         #endregion

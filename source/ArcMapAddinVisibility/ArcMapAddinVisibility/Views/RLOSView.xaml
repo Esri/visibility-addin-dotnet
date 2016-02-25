@@ -145,7 +145,7 @@
                         <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
                     </TextBox.InputBindings>
                 </TextBox>
-                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="to" Margin="5,5,5,5" Grid.Row="6" Grid.Column="1"/>
+                <TextBlock Text="{x:Static prop:Resources.LabelTo}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,5,5,5" Grid.Row="6" Grid.Column="1"/>
                 <TextBox Margin="5,5,5,5" 
                  Text="{Binding MaxDistance, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
                  Validation.ErrorTemplate="{StaticResource errorTemplate}"
@@ -164,7 +164,7 @@
                         <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
                     </TextBox.InputBindings>
                 </TextBox>
-                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="to" Margin="5,5,5,5" Grid.Row="9" Grid.Column="1"/>
+                <TextBlock Text="{x:Static prop:Resources.LabelTo}" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="5,0,5,9" Grid.Row="9" Grid.Column="1"/>
                 <TextBox Margin="5,5,5,5" 
                  Text="{Binding RightHorizontalFOV, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
                  Validation.ErrorTemplate="{StaticResource errorTemplate}"
@@ -191,7 +191,7 @@
                     </TextBox.InputBindings>
                 </TextBox>
 
-                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="to" Margin="5,5,5,5" Grid.Row="14" Grid.Column="1"/>
+                <TextBlock Text="{x:Static prop:Resources.LabelTo}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,5,5,5" Grid.Row="14" Grid.Column="1"/>
                 <TextBox Margin="5,5,5,5" 
                  Text="{Binding TopVerticalFOV, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
                  Validation.ErrorTemplate="{StaticResource errorTemplate}"

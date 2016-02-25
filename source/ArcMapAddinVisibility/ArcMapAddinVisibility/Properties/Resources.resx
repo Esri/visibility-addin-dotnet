@@ -219,4 +219,7 @@
   <data name="MenuLabelDeleteAll" xml:space="preserve">
     <value>Delete All</value>
   </data>
+  <data name="LabelTo" xml:space="preserve">
+    <value>to</value>
+  </data>
 </root>

@@ -295,6 +295,15 @@ namespace ArcMapAddinVisibility.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to to.
+        /// </summary>
+        public static string LabelTo {
+            get {
+                return ResourceManager.GetString("LabelTo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Vertical Field of View.
         /// </summary>
         public static string LabelVerticalFOV {
