@@ -52,12 +52,17 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <param name="obj">null</param>
         private void OnSubmitCommand(object obj)
         {
-            // make temp graphics... not temp
+            var savedCursor = System.Windows.Forms.Cursor.Current;
+            System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
+            System.Windows.Forms.Application.DoEvents();
+            // promote temp graphics
             MoveTempGraphicsToMapGraphics();
 
             CreateMapElement();
 
             Reset(true);
+
+            System.Windows.Forms.Cursor.Current = savedCursor;
         }
 
         internal override void OnDeletePointCommand(object obj)
@@ -72,6 +77,11 @@ namespace ArcMapAddinVisibility.ViewModels
             if (points == null)
                 return;
 
+            DeleteTargetPoints(points);
+        }
+
+        private void DeleteTargetPoints(List<IPoint> points)
+        {
             // temp list of point's graphic element's guids
             var guidList = new List<string>();
 
@@ -89,9 +99,22 @@ namespace ArcMapAddinVisibility.ViewModels
 
             foreach (var guid in guidList)
             {
-                if(GuidPointDictionary.ContainsKey(guid))
+                if (GuidPointDictionary.ContainsKey(guid))
                     GuidPointDictionary.Remove(guid);
             }
+        }
+
+        internal override void OnDeleteAllPointsCommand(object obj)
+        {
+            var mode = obj.ToString();
+
+            if (string.IsNullOrWhiteSpace(mode))
+                return;
+
+            if (mode == Properties.Resources.ToolModeObserver)
+                base.OnDeleteAllPointsCommand(obj);
+            else if (mode == Properties.Resources.ToolModeTarget)
+                DeleteTargetPoints(TargetPoints.ToList<IPoint>());
         }
 
         #endregion
@@ -111,7 +134,7 @@ namespace ArcMapAddinVisibility.ViewModels
             if (ToolMode == MapPointToolMode.Target)
             {
                 TargetPoints.Insert(0, point);
-                var color = new RgbColorClass() { Green = 255 } as IColor;
+                var color = new RgbColorClass() { Red = 255 } as IColor;
                 var guid = AddGraphicToMap(point, color, true, esriSimpleMarkerStyle.esriSMSSquare);
                 UpdatePointDictionary(point, guid);
             }
@@ -191,19 +214,19 @@ namespace ArcMapAddinVisibility.ViewModels
                         new PointClass() { Z = z2, X = targetPoint.X, Y = targetPoint.Y, ZAware = true },
                         out pointObstruction, out polyVisible, out polyInvisible, out targetIsVisible, false, false);
 
-                    if (polyVisible == null)
-                        return;
+                    if (polyVisible != null)
+                    {
+                        var rgbColor = new ESRI.ArcGIS.Display.RgbColorClass() as IRgbColor;
+                        rgbColor.Green = 255;
+                        AddGraphicToMap(polyVisible, rgbColor as IColor);
+                    }
 
-                    var rgbColor = new ESRI.ArcGIS.Display.RgbColorClass() as IRgbColor;
-                    rgbColor.Green = 255;
-                    AddGraphicToMap(polyVisible, rgbColor as IColor);
-
-                    if (polyInvisible == null)
-                        return;
-
-                    var rgbColor2 = new ESRI.ArcGIS.Display.RgbColorClass() as IRgbColor;
-                    rgbColor2.Red = 255;
-                    AddGraphicToMap(polyInvisible, rgbColor2);
+                    if (polyInvisible != null)
+                    {
+                        var rgbColor2 = new ESRI.ArcGIS.Display.RgbColorClass() as IRgbColor;
+                        rgbColor2.Red = 255;
+                        AddGraphicToMap(polyInvisible, rgbColor2);
+                    }
                 }
             }
         }
