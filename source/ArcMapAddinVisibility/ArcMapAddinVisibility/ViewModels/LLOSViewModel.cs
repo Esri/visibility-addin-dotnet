@@ -111,7 +111,7 @@ namespace ArcMapAddinVisibility.ViewModels
             if (ToolMode == MapPointToolMode.Target)
             {
                 TargetPoints.Insert(0, point);
-                var color = new RgbColorClass() { Green = 255 } as IColor;
+                var color = new RgbColorClass() { Red = 255 } as IColor;
                 var guid = AddGraphicToMap(point, color, true, esriSimpleMarkerStyle.esriSMSSquare);
                 UpdatePointDictionary(point, guid);
             }
