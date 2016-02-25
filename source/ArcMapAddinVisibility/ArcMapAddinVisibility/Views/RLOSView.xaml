@@ -155,6 +155,10 @@
                     </TextBox.InputBindings>
                 </TextBox>
 
+                <Separator 
+                    Grid.Row="7" 
+                    Grid.ColumnSpan="4"/>
+
                 <TextBlock Text="{x:Static prop:Resources.LabelHorizontalFOV}" Margin="5,5,5,5" Grid.ColumnSpan="3" Grid.Row="8"/>
                 <TextBox Margin="5,5,5,5" 
                  Text="{Binding LeftHorizontalFOV, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
