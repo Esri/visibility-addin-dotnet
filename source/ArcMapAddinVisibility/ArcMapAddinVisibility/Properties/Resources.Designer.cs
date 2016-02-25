@@ -304,6 +304,24 @@ namespace ArcMapAddinVisibility.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Delete.
+        /// </summary>
+        public static string MenuLabelDelete {
+            get {
+                return ResourceManager.GetString("MenuLabelDelete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete All.
+        /// </summary>
+        public static string MenuLabelDeleteAll {
+            get {
+                return ResourceManager.GetString("MenuLabelDeleteAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to observer.
         /// </summary>
         public static string ToolModeObserver {

@@ -24,5 +24,10 @@ namespace ArcMapAddinVisibility.Views
         {
             InitializeComponent();
         }
+
+        private void ListBox_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            e.Handled = true;
+        }
     }
 }
