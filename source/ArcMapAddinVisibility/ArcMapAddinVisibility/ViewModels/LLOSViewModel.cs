@@ -52,12 +52,17 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <param name="obj">null</param>
         private void OnSubmitCommand(object obj)
         {
-            // make temp graphics... not temp
+            var savedCursor = System.Windows.Forms.Cursor.Current;
+            System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
+            System.Windows.Forms.Application.DoEvents();
+            // promote temp graphics
             MoveTempGraphicsToMapGraphics();
 
             CreateMapElement();
 
             Reset(true);
+
+            System.Windows.Forms.Cursor.Current = savedCursor;
         }
 
         internal override void OnDeletePointCommand(object obj)
