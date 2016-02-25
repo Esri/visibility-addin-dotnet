@@ -1,7 +1,7 @@
 # visibility-addin-dotnet
 ArcGIS Add-in provides the capability to quickly do line of sight analyses.
 
-![Image of Visibility Add-In](ScreenShot.PNG) 
+![Image of Visibility Add-In](visibility.png) 
 
 ## Features
 
@@ -14,7 +14,11 @@ ArcGIS Add-in provides the capability to quickly do line of sight analyses.
 * [Requirements](#requirements)
 * [Instructions](#instructions)
 * [Workflows](#workflows)
-	* [One-to-one Linear Line Of Sight (LLOS)](one-to-one-linear-line-of-sight-(llos))
+	* [One-to-one Linear Line Of Sight (LLOS)](#One-to-one Linear Line Of Sight (LLOS))
+	* [One-to-many Linear Line of Sight (LLOS)](#One-to-many Linear Line Of Sight (LLOS))
+	* [Many-to-many Linear Line Of Sight (LLOS)](#Many-to-many Linear Line Of Sight (LLOS))
+	* [Many-to-one Linear Line Of Sight (LLOS)](#Many-to-many Linear Line Of Sight (LLOS))
+	* [Radial Line Of Sight (RLOS)](#Radial Line Of Sight (RLOS))
 * [Resources](#resources)
 * [Issues](#issues)
 * [Contributing](#contributing)
@@ -79,6 +83,50 @@ ArcGIS Add-in provides the capability to quickly do line of sight analyses.
 7. Optionally, type an **Observer Offset**, **Target Offset**, and select the offset units.
 8. Select **OK**
 
+### One-to-many Linear Line Of Sight (LLOS)
+1. Add an elevation surface to the map. 
+	* This may be a raster dataset, image service, or mosaic dataset.
+2. Open the *Visibility Tools*
+3. Select the **LLOS** tab
+4. Select the **Input Surface** layer from the list
+5. Use the **Observer Map Point Tool** to select an observer location on the map.
+6. Use the **Target Map Point Tool** to select one or many target location on the map.
+7. Optionally, type an **Observer Offset**, **Target Offset**, and select the offset units.
+8. Select **OK**
+
+### Many-to-many Linear Line Of Sight (LLOS)
+1. Add an elevation surface to the map. 
+	* This may be a raster dataset, image service, or mosaic dataset.
+2. Open the *Visibility Tools*
+3. Select the **LLOS** tab
+4. Select the **Input Surface** layer from the list
+5. Use the **Observer Map Point Tool** to select an observer location on the map.
+6. Use the **Target Map Point Tool** to select one or many target location on the map.
+7. Optionally, type an **Observer Offset**, **Target Offset**, and select the offset units.
+8. Select **OK**
+
+### Many-to-one Linear Line Of Sight (LLOS)
+1. Add an elevation surface to the map. 
+	* This may be a raster dataset, image service, or mosaic dataset.
+2. Open the *Visibility Tools*
+3. Select the **LLOS** tab
+4. Select the **Input Surface** layer from the list
+5. Use the **Observer Map Point Tool** to select an observer location on the map.
+6. Use the **Target Map Point Tool** to select one or many target location on the map.
+7. Optionally, type an **Observer Offset**, **Target Offset**, and select the offset units.
+8. Select **OK**
+
+### Radial Line Of Sight (RLOS)
+1. Add an elevation surface to the map. 
+	* This may be a raster dataset, image service, or mosaic dataset.
+2. Open the *Visibility Tools*
+3. Select the **RLOS** tab
+4. Select the **Input Surface** layer from the list
+5. Use the **Observer Map Point Tool** to select an observer location on the map.
+6. Use the **Target Map Point Tool** to select one or many target location on the map.
+7. Optionally, type an **Observer Offset**, **Surface Offset**, and **Distance**, and select the appropriate units.
+8. Additional options are **Horizontal Field of View** and **Vertical Field of View**, and select the appropriate units.
+8. Select **OK**
 
 ## Resources
 
