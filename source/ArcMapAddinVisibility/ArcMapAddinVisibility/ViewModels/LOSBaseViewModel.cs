@@ -22,6 +22,7 @@ namespace ArcMapAddinVisibility.ViewModels
             ObserverOffset = 2.0;
             TargetOffset = 0.0;
             OffsetUnitType = DistanceTypes.Meters;
+            AngularUnitType = AngularTypes.DEGREES;
 
             ObserverPoints = new ObservableCollection<IPoint>();
             ToolMode = MapPointToolMode.Unknown;
@@ -71,6 +72,7 @@ namespace ArcMapAddinVisibility.ViewModels
         public string SelectedSurfaceName { get; set; }
         public DistanceTypes OffsetUnitType { get; set; }
         public Dictionary<string, IPoint> GuidPointDictionary { get; set; } 
+        public AngularTypes AngularUnitType { get; set; }
 
         #endregion
 
@@ -264,10 +266,10 @@ namespace ArcMapAddinVisibility.ViewModels
                 if (layer == null || layer.Name != name)
                     continue;
 
-                var tin = layer as ITinLayer;
-                if (tin != null)
+                    var tin = layer as ITinLayer;
+                    if (tin != null)
                 {
-                    return tin.Dataset as ISurface;
+                        return tin.Dataset as ISurface;
                 }
 
                 var rasterSurface = new RasterSurfaceClass() as IRasterSurface;
@@ -295,7 +297,37 @@ namespace ArcMapAddinVisibility.ViewModels
         }
 
         /// <summary>
-        /// Method to get all the names of the raster/tin/mosaic layers that support ISurface
+        /// Method to get a IRasterLayer from a map by layer name
+        /// </summary>
+        /// <param name="map">IMap that contains surface layer</param>
+        /// <param name="name">Name of the layer that you are looking for</param>
+        /// <returns>IRasterLayer</returns>
+        public IRasterLayer GetLayerFromMapByName(IMap map, string name)
+        {
+            for (int x = 0; x < map.LayerCount; x++)
+            {
+                var layer = map.get_Layer(x);
+
+                if (layer == null || layer.Name != name)
+                    continue;
+
+                var rasterLayer = layer as IRasterLayer;
+                if (rasterLayer == null)
+                {
+                    var tin = layer as ITinLayer;
+                    if (tin != null)
+                        return tin as IRasterLayer;
+
+                    continue;
+                }
+                return rasterLayer;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Method to get all the names of the raster/tin layers that support ISurface
         /// we use this method to populate a combobox for input selection of surface layer
         /// </summary>
         /// <param name="map">IMap</param>
@@ -313,12 +345,12 @@ namespace ArcMapAddinVisibility.ViewModels
                     if (layer == null)
                         continue;
 
-                    var tin = layer as ITinLayer;
+                        var tin = layer as ITinLayer;
 
                     if (tin != null)
                     {
                         list.Add(layer.Name);
-                        continue;
+                            continue;
                     }
 
                     var rasterSurface = new RasterSurfaceClass() as IRasterSurface; 
@@ -334,7 +366,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
                             surface = rasterSurface as ISurface;
                             if (surface != null)
-                                list.Add(layer.Name);
+                        list.Add(layer.Name);
                         }
                         continue;
                     }
@@ -345,8 +377,8 @@ namespace ArcMapAddinVisibility.ViewModels
                         rasterSurface.PutRaster(rasterLayer.Raster, 0);
 
                         surface = rasterSurface as ISurface;
-                        if (surface != null)
-                            list.Add(layer.Name);
+                    if (surface != null)
+                        list.Add(layer.Name);
                         continue;
                     }
                 }
