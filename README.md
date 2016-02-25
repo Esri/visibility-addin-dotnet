@@ -102,7 +102,7 @@ ArcGIS Add-in provides the capability to quickly do line of sight analyses.
 2. Open the *Visibility Tools*
 3. Select the **LLOS** tab
 4. Select the **Input Surface** layer from the list
-5. Use the **Observer Map Point Tool** to select an observer location on the map.
+5. Use the **Observer Map Point Tool** to select one or many observer location on the map.
 6. Use the **Target Map Point Tool** to select one or many target location on the map.
 7. Optionally, type an **Observer Offset**, **Target Offset**, and select the offset units.
 8. Select **OK**
@@ -113,8 +113,8 @@ ArcGIS Add-in provides the capability to quickly do line of sight analyses.
 2. Open the *Visibility Tools*
 3. Select the **LLOS** tab
 4. Select the **Input Surface** layer from the list
-5. Use the **Observer Map Point Tool** to select an observer location on the map.
-6. Use the **Target Map Point Tool** to select one or many target location on the map.
+5. Use the **Observer Map Point Tool** to select many observer locations on the map.
+6. Use the **Target Map Point Tool** to select one target location on the map.
 7. Optionally, type an **Observer Offset**, **Target Offset**, and select the offset units.
 8. Select **OK**
 
