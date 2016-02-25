@@ -72,6 +72,11 @@ namespace ArcMapAddinVisibility.ViewModels
             if (points == null)
                 return;
 
+            DeleteTargetPoints(points);
+        }
+
+        private void DeleteTargetPoints(List<IPoint> points)
+        {
             // temp list of point's graphic element's guids
             var guidList = new List<string>();
 
@@ -89,9 +94,22 @@ namespace ArcMapAddinVisibility.ViewModels
 
             foreach (var guid in guidList)
             {
-                if(GuidPointDictionary.ContainsKey(guid))
+                if (GuidPointDictionary.ContainsKey(guid))
                     GuidPointDictionary.Remove(guid);
             }
+        }
+
+        internal override void OnDeleteAllPointsCommand(object obj)
+        {
+            var mode = obj.ToString();
+
+            if (string.IsNullOrWhiteSpace(mode))
+                return;
+
+            if (mode == Properties.Resources.ToolModeObserver)
+                base.OnDeleteAllPointsCommand(obj);
+            else if (mode == Properties.Resources.ToolModeTarget)
+                DeleteTargetPoints(TargetPoints.ToList<IPoint>());
         }
 
         #endregion

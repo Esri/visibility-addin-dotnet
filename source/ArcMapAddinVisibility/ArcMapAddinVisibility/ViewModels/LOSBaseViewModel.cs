@@ -31,6 +31,7 @@ namespace ArcMapAddinVisibility.ViewModels
             Mediator.Register(Constants.MAP_TOC_UPDATED, OnMapTocUpdated);
 
             DeletePointCommand = new RelayCommand(OnDeletePointCommand);
+            DeleteAllPointsCommand = new RelayCommand(OnDeleteAllPointsCommand); 
 
             GuidPointDictionary = new Dictionary<string, IPoint>();
         }
@@ -76,6 +77,7 @@ namespace ArcMapAddinVisibility.ViewModels
         #region Commands
 
         public RelayCommand DeletePointCommand { get; set; }
+        public RelayCommand DeleteAllPointsCommand { get; set; }
 
         internal virtual void OnDeletePointCommand(object obj)
         {
@@ -86,10 +88,25 @@ namespace ArcMapAddinVisibility.ViewModels
             if (points == null)
                 return;
 
+            DeletePoints(points);
+        }
+
+        internal virtual void OnDeleteAllPointsCommand(object obj)
+        {
+            DeletePoints(ObserverPoints.ToList<IPoint>());
+        }
+
+
+
+        private void DeletePoints(List<IPoint> pointList)
+        {
+            if (pointList == null || !pointList.Any())
+                return;
+
             // temp list of point's graphic element's guids
             var guidList = new List<string>();
 
-            foreach (var point in points)
+            foreach (var point in pointList)
             {
                 ObserverPoints.Remove(point);
 
