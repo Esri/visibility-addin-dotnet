@@ -4,13 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Collections.ObjectModel;
+using System.Collections;
 using ESRI.ArcGIS.Carto;
 using ESRI.ArcGIS.Geodatabase;
 using ESRI.ArcGIS.Analyst3D;
 using ESRI.ArcGIS.Geometry;
-using ArcMapAddinVisibility.Helpers;
-using System.Collections;
 using ESRI.ArcGIS.Display;
+using ESRI.ArcGIS.DataSourcesRaster;
+using ArcMapAddinVisibility.Helpers;
 
 namespace ArcMapAddinVisibility.ViewModels
 {
@@ -248,21 +249,29 @@ namespace ArcMapAddinVisibility.ViewModels
                 if (layer == null || layer.Name != name)
                     continue;
 
-                var rasterLayer = layer as IRasterLayer;
-                if (rasterLayer == null)
-                {
                     var tin = layer as ITinLayer;
                     if (tin != null)
+                {
                         return tin.Dataset as ISurface;
-
-                    continue;
                 }
 
-                var rs = new RasterSurfaceClass() as IRasterSurface;
+                var rasterSurface = new RasterSurfaceClass() as IRasterSurface;
+                ISurface surface = null;
 
-                rs.PutRaster(rasterLayer.Raster, 0);
+                var mosaicLayer = layer as IMosaicLayer;
+                var rasterLayer = layer as IRasterLayer;
 
-                var surface = rs as ISurface;
+                if (mosaicLayer != null)
+                {
+                    rasterSurface.PutRaster(mosaicLayer.PreviewLayer.Raster, 0);
+                }
+                else if (rasterLayer != null)
+                {
+                    rasterSurface.PutRaster(rasterLayer.Raster, 0);
+                }
+
+                surface = rasterSurface as ISurface;
+
                 if (surface != null)
                     return surface;
             }
@@ -316,24 +325,45 @@ namespace ArcMapAddinVisibility.ViewModels
                 {
                     var layer = map.get_Layer(x);
 
-                    var rasterLayer = layer as IRasterLayer;
-                    if (rasterLayer == null)
-                    {
-                        var tin = layer as ITinLayer;
-                        if(tin == null)
-                            continue;
+                    if (layer == null)
+                        continue;
 
+                        var tin = layer as ITinLayer;
+
+                    if (tin != null)
+                    {
                         list.Add(layer.Name);
+                            continue;
+                    }
+
+                    var rasterSurface = new RasterSurfaceClass() as IRasterSurface; 
+                    ISurface surface = null;
+
+                    var ml = layer as IMosaicLayer;
+                    
+                    if(ml != null)
+                    {
+                        if(ml.PreviewLayer != null && ml.PreviewLayer.Raster != null)
+                        {
+                            rasterSurface.PutRaster(ml.PreviewLayer.Raster, 0);
+
+                            surface = rasterSurface as ISurface;
+                            if (surface != null)
+                        list.Add(layer.Name);
+                        }
                         continue;
                     }
 
-                    var rs = new RasterSurfaceClass() as IRasterSurface;
+                    var rasterLayer = layer as IRasterLayer;
+                    if (rasterLayer != null)
+                    {
+                        rasterSurface.PutRaster(rasterLayer.Raster, 0);
 
-                    rs.PutRaster(rasterLayer.Raster, 0);
-
-                    var surface = rs as ISurface;
+                        surface = rasterSurface as ISurface;
                     if (surface != null)
                         list.Add(layer.Name);
+                        continue;
+                    }
                 }
                 catch(Exception ex)
                 {
