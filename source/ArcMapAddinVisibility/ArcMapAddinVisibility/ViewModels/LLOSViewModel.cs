@@ -210,19 +210,19 @@ namespace ArcMapAddinVisibility.ViewModels
                         new PointClass() { Z = z2, X = targetPoint.X, Y = targetPoint.Y, ZAware = true },
                         out pointObstruction, out polyVisible, out polyInvisible, out targetIsVisible, false, false);
 
-                    if (polyVisible == null)
-                        return;
+                    if (polyVisible != null)
+                    {
+                        var rgbColor = new ESRI.ArcGIS.Display.RgbColorClass() as IRgbColor;
+                        rgbColor.Green = 255;
+                        AddGraphicToMap(polyVisible, rgbColor as IColor);
+                    }
 
-                    var rgbColor = new ESRI.ArcGIS.Display.RgbColorClass() as IRgbColor;
-                    rgbColor.Green = 255;
-                    AddGraphicToMap(polyVisible, rgbColor as IColor);
-
-                    if (polyInvisible == null)
-                        return;
-
-                    var rgbColor2 = new ESRI.ArcGIS.Display.RgbColorClass() as IRgbColor;
-                    rgbColor2.Red = 255;
-                    AddGraphicToMap(polyInvisible, rgbColor2);
+                    if (polyInvisible != null)
+                    {
+                        var rgbColor2 = new ESRI.ArcGIS.Display.RgbColorClass() as IRgbColor;
+                        rgbColor2.Red = 255;
+                        AddGraphicToMap(polyInvisible, rgbColor2);
+                    }
                 }
             }
         }
