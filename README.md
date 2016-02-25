@@ -13,12 +13,14 @@ ArcGIS Add-in provides the capability to quickly do line of sight analyses.
 
 * [Requirements](#requirements)
 * [Instructions](#instructions)
+* [Developers](#developers)
+* [ArcGIS for Desktop Users](#arcgis-for-desktop-users)
 * [Workflows](#workflows)
-	* [One-to-one Linear Line Of Sight (LLOS)](#One-to-one Linear Line Of Sight (LLOS))
-	* [One-to-many Linear Line of Sight (LLOS)](#One-to-many Linear Line Of Sight (LLOS))
-	* [Many-to-many Linear Line Of Sight (LLOS)](#Many-to-many Linear Line Of Sight (LLOS))
-	* [Many-to-one Linear Line Of Sight (LLOS)](#Many-to-many Linear Line Of Sight (LLOS))
-	* [Radial Line Of Sight (RLOS)](#Radial Line Of Sight (RLOS))
+	* [One-to-one Linear Line Of Sight (LLOS)](#one-to-one-linear-line-of-sight-llos)
+	* [One-to-many Linear Line of Sight (LLOS)](#one-to-many-linear-line-of-sight-llos)
+	* [Many-to-many Linear Line Of Sight (LLOS)](#many-to-many-linear-line-of-sight-llos)
+	* [Many-to-one Linear Line Of Sight (LLOS)](#many-to-one-linear-line-of-sight-llos)
+	* [Radial Line Of Sight (RLOS)](#radial-line-of-sight-rlos)
 * [Resources](#resources)
 * [Issues](#issues)
 * [Contributing](#contributing)
@@ -26,13 +28,13 @@ ArcGIS Add-in provides the capability to quickly do line of sight analyses.
 
 ## Requirements
 
-### Developers 
+## Developers 
 
 * Visual Studio 2013
 * ArcGIS Desktop SDK for .NET 10.3.1
 	* [ArcGIS Desktop for .NET Requirements](https://desktop.arcgis.com/en/desktop/latest/get-started/system-requirements/arcobjects-sdk-system-requirements.htm)
 
-### ArcGIS for Desktop Users
+## ArcGIS for Desktop Users <a name="arcgis-for-desktop-users"></a>
 
 * [ArcGIS Desktop 10.3.1](http://desktop.arcgis.com/en/arcmap/10.3/get-started/system-requirements/arcgis-desktop-system-requirements.htm)
 
@@ -72,7 +74,7 @@ ArcGIS Add-in provides the capability to quickly do line of sight analyses.
 				
 ## Workflows
 
-### One-to-one Linear Line Of Sight (LLOS)
+### One-to-one Linear Line Of Sight (LLOS) <a name="one-to-one-linear-line-of-sight-llos"></a>
 1. Add an elevation surface to the map. 
 	* This may be a raster dataset, image service, or mosaic dataset.
 2. Open the *Visibility Tools*
@@ -83,7 +85,7 @@ ArcGIS Add-in provides the capability to quickly do line of sight analyses.
 7. Optionally, type an **Observer Offset**, **Target Offset**, and select the offset units.
 8. Select **OK**
 
-### One-to-many Linear Line Of Sight (LLOS)
+### One-to-many Linear Line Of Sight (LLOS) <a name="one-to-many-linear-line-of-sight-llos"></a>
 1. Add an elevation surface to the map. 
 	* This may be a raster dataset, image service, or mosaic dataset.
 2. Open the *Visibility Tools*
@@ -94,7 +96,7 @@ ArcGIS Add-in provides the capability to quickly do line of sight analyses.
 7. Optionally, type an **Observer Offset**, **Target Offset**, and select the offset units.
 8. Select **OK**
 
-### Many-to-many Linear Line Of Sight (LLOS)
+### Many-to-many Linear Line Of Sight (LLOS) <a name="many-to-many-linear-line-of-sight-llos"></a>
 1. Add an elevation surface to the map. 
 	* This may be a raster dataset, image service, or mosaic dataset.
 2. Open the *Visibility Tools*
@@ -105,7 +107,7 @@ ArcGIS Add-in provides the capability to quickly do line of sight analyses.
 7. Optionally, type an **Observer Offset**, **Target Offset**, and select the offset units.
 8. Select **OK**
 
-### Many-to-one Linear Line Of Sight (LLOS)
+### Many-to-one Linear Line Of Sight (LLOS) <a name="many-to-one-linear-line-of-sight-llos"></a>
 1. Add an elevation surface to the map. 
 	* This may be a raster dataset, image service, or mosaic dataset.
 2. Open the *Visibility Tools*
@@ -116,7 +118,7 @@ ArcGIS Add-in provides the capability to quickly do line of sight analyses.
 7. Optionally, type an **Observer Offset**, **Target Offset**, and select the offset units.
 8. Select **OK**
 
-### Radial Line Of Sight (RLOS)
+### Radial Line Of Sight (RLOS) <a name="radial-line-of-sight-rlos"></a>
 1. Add an elevation surface to the map. 
 	* This may be a raster dataset, image service, or mosaic dataset.
 2. Open the *Visibility Tools*
