@@ -56,10 +56,13 @@ namespace ArcMapAddinVisibility
     public enum AngularTypes : int
     {
         [LocalizableDescription(@"EnumDegrees", typeof(Resources))]
-        Degrees = 1,
+        DEGREES = 1,
+
+        [LocalizableDescription(@"EnumGrads", typeof(Resources))]
+        GRADS = 2,
 
         [LocalizableDescription(@"EnumMils", typeof(Resources))]
-        Mils = 2
+        MILS = 3
     }
 
 }

@@ -17,6 +17,7 @@ using ESRI.ArcGIS.Carto;
 using ESRI.ArcGIS.DataSourcesGDB;
 using ESRI.ArcGIS.Display;
 using ESRI.ArcGIS.esriSystem;
+using ESRI.ArcGIS.Framework;
 using ESRI.ArcGIS.GeoAnalyst;
 using ESRI.ArcGIS.Geodatabase;
 using ESRI.ArcGIS.Geometry;
@@ -57,7 +58,7 @@ namespace ArcMapAddinVisibility.ViewModels
         {
             SurfaceOffset = 0.0;
             MinDistance = 0.0;
-            MaxDistance = 100;
+            MaxDistance = 1000;
             LeftHorizontalFOV = 0.0;
             RightHorizontalFOV = 360.0;
             BottomVerticalFOV = -90.0;
@@ -81,7 +82,7 @@ namespace ArcMapAddinVisibility.ViewModels
             if (!CanCreateElement || ArcMap.Document == null || ArcMap.Document.FocusMap == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
                 return;
 
-            base.CreateMapElement();
+            //base.CreateMapElement();
 
             var surface = GetSurfaceFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
 
@@ -97,28 +98,30 @@ namespace ArcMapAddinVisibility.ViewModels
             IFeatureClass pointFc = CreateFeatureClass(workspace, "tempfc");
 
             double finalObserverOffset = GetOffsetInZUnits(ArcMap.Document.FocusMap, ObserverOffset.Value, surface.ZFactor, OffsetUnitType);
+            double finalSurfaceOffset = GetOffsetInZUnits(ArcMap.Document.FocusMap, SurfaceOffset, surface.ZFactor, OffsetUnitType);
+            double finalMinDistance = GetOffsetInZUnits(ArcMap.Document.FocusMap, MinDistance, 1, OffsetUnitType);
+            double finalMaxDistance = GetOffsetInZUnits(ArcMap.Document.FocusMap, MaxDistance, 1, OffsetUnitType);
 
             foreach (var observerPoint in ObserverPoints)
             {
-                double elev = surface.GetElevation(observerPoint);
                 double z1 = surface.GetElevation(observerPoint) + finalObserverOffset;
 
                 //create a new point feature
                 IFeature ipFeature = pointFc.CreateFeature();
 
                 // Observer Offset
-                //SetDatabaseFieldValue(ipFeature, "OFFSETA", ObserverOffset);
+                SetDatabaseFieldValue(ipFeature, "OFFSETA", finalObserverOffset);
                 // Surface Offset
-                //SetDatabaseFieldValue(ipFeature, "OFFSETB", SurfaceOffset);
+                SetDatabaseFieldValue(ipFeature, "OFFSETB", finalSurfaceOffset);
                 // Horizontal FOV
-                //SetDatabaseFieldValue(ipFeature, "AZIMUTH1", LeftHorizontalFOV);
-                //SetDatabaseFieldValue(ipFeature, "AZIMUTH2", RightHorizontalFOV);
+                SetDatabaseFieldValue(ipFeature, "AZIMUTH1", LeftHorizontalFOV);
+                SetDatabaseFieldValue(ipFeature, "AZIMUTH2", RightHorizontalFOV);
                 // Distance
-                SetDatabaseFieldValue(ipFeature, "RADIUS1", MinDistance);
-                SetDatabaseFieldValue(ipFeature, "RADIUS2", MaxDistance);
+                SetDatabaseFieldValue(ipFeature, "RADIUS1", finalMinDistance);
+                SetDatabaseFieldValue(ipFeature, "RADIUS2", finalMaxDistance);
                 // Vertical FOV
-                //SetDatabaseFieldValue(ipFeature, "VERT1", BottomVerticalFOV);
-                //SetDatabaseFieldValue(ipFeature, "VERT1", TopVerticalFOV);
+                SetDatabaseFieldValue(ipFeature, "VERT1", BottomVerticalFOV);
+                SetDatabaseFieldValue(ipFeature, "VERT1", TopVerticalFOV);
 
                 //Create shape 
                 IPoint point = new PointClass() { Z = z1, X = observerPoint.X, Y = observerPoint.Y, ZAware = true };
@@ -156,7 +159,7 @@ namespace ArcMapAddinVisibility.ViewModels
                 map.AddLayer((ILayer)rLayer);
             }
 
-            Reset(true);
+            //Reset(true);
         }
 
         internal override void Reset(bool toolReset)
@@ -317,29 +320,29 @@ namespace ArcMapAddinVisibility.ViewModels
              pFldEdt.GeometryDef_2 = pGeoDef; 
              pFldsEdt.AddField(pFldEdt);
 
-             //pFldEdt = new FieldClass();
-             //pFldEdt.Name_2 = "OFFSETA";
-             //pFldEdt.AliasName_2 = "OFFSETA";
-             //pFldEdt.Type_2 = esriFieldType.esriFieldTypeDouble;
-             //pFldsEdt.AddField(pFldEdt);
+             pFldEdt = new FieldClass();
+             pFldEdt.Name_2 = "OFFSETA";
+             pFldEdt.AliasName_2 = "OFFSETA";
+             pFldEdt.Type_2 = esriFieldType.esriFieldTypeDouble;
+             pFldsEdt.AddField(pFldEdt);
 
-             //pFldEdt = new FieldClass();
-             //pFldEdt.Name_2 = "OFFSETB";
-             //pFldEdt.AliasName_2 = "OFFSETB";
-             //pFldEdt.Type_2 = esriFieldType.esriFieldTypeDouble;
-             //pFldsEdt.AddField(pFldEdt);
+             pFldEdt = new FieldClass();
+             pFldEdt.Name_2 = "OFFSETB";
+             pFldEdt.AliasName_2 = "OFFSETB";
+             pFldEdt.Type_2 = esriFieldType.esriFieldTypeDouble;
+             pFldsEdt.AddField(pFldEdt);
 
-             //pFldEdt = new FieldClass();
-             //pFldEdt.Name_2 = "AZIMUTH1";
-             //pFldEdt.AliasName_2 = "AZIMUTH1";
-             //pFldEdt.Type_2 = esriFieldType.esriFieldTypeDouble;
-             //pFldsEdt.AddField(pFldEdt);
+             pFldEdt = new FieldClass();
+             pFldEdt.Name_2 = "AZIMUTH1";
+             pFldEdt.AliasName_2 = "AZIMUTH1";
+             pFldEdt.Type_2 = esriFieldType.esriFieldTypeDouble;
+             pFldsEdt.AddField(pFldEdt);
 
-             //pFldEdt = new FieldClass();
-             //pFldEdt.Name_2 = "AZIMUTH2";
-             //pFldEdt.AliasName_2 = "AZIMUTH2";
-             //pFldEdt.Type_2 = esriFieldType.esriFieldTypeDouble;
-             //pFldsEdt.AddField(pFldEdt); 
+             pFldEdt = new FieldClass();
+             pFldEdt.Name_2 = "AZIMUTH2";
+             pFldEdt.AliasName_2 = "AZIMUTH2";
+             pFldEdt.Type_2 = esriFieldType.esriFieldTypeDouble;
+             pFldsEdt.AddField(pFldEdt); 
 
              pFldEdt = new FieldClass();
              pFldEdt.Name_2 = "RADIUS1";
@@ -353,17 +356,17 @@ namespace ArcMapAddinVisibility.ViewModels
              pFldEdt.Type_2 = esriFieldType.esriFieldTypeDouble;
              pFldsEdt.AddField(pFldEdt);
 
-             //pFldEdt = new FieldClass();
-             //pFldEdt.Name_2 = "VERT1";
-             //pFldEdt.AliasName_2 = "VERT1";
-             //pFldEdt.Type_2 = esriFieldType.esriFieldTypeDouble;
-             //pFldsEdt.AddField(pFldEdt);
+             pFldEdt = new FieldClass();
+             pFldEdt.Name_2 = "VERT1";
+             pFldEdt.AliasName_2 = "VERT1";
+             pFldEdt.Type_2 = esriFieldType.esriFieldTypeDouble;
+             pFldsEdt.AddField(pFldEdt);
 
-             //pFldEdt = new FieldClass();
-             //pFldEdt.Name_2 = "VERT2";
-             //pFldEdt.AliasName_2 = "VERT2";
-             //pFldEdt.Type_2 = esriFieldType.esriFieldTypeDouble;
-             //pFldsEdt.AddField(pFldEdt); 
+             pFldEdt = new FieldClass();
+             pFldEdt.Name_2 = "VERT2";
+             pFldEdt.AliasName_2 = "VERT2";
+             pFldEdt.Type_2 = esriFieldType.esriFieldTypeDouble;
+             pFldsEdt.AddField(pFldEdt); 
  
              //Now add each field: 
              //foreach (CSVField field in fields) 

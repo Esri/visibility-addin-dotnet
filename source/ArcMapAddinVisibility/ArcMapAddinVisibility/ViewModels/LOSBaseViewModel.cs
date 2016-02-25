@@ -21,7 +21,7 @@ namespace ArcMapAddinVisibility.ViewModels
             ObserverOffset = 2.0;
             TargetOffset = 0.0;
             OffsetUnitType = DistanceTypes.Meters;
-            AngularUnitType = AngularTypes.Degrees;
+            AngularUnitType = AngularTypes.DEGREES;
 
             ObserverPoints = new ObservableCollection<IPoint>();
             ToolMode = MapPointToolMode.Unknown;
