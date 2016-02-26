@@ -138,19 +138,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
             var map = ArcMap.Document.FocusMap;
 
-            var tempName = SelectedSurfaceName;
-
-            SurfaceLayerNames.Clear();
-            foreach (var name in GetSurfaceNamesFromMap(map))
-                SurfaceLayerNames.Add(name);
-            if (SurfaceLayerNames.Contains(tempName))
-                SelectedSurfaceName = tempName;
-            else if (SurfaceLayerNames.Any())
-                SelectedSurfaceName = SurfaceLayerNames[0];
-            else
-                SelectedSurfaceName = string.Empty;
-
-            RaisePropertyChanged(() => SelectedSurfaceName);
+            ResetSurfaceNames(map);
         }
 
         /// <summary>
@@ -403,17 +391,7 @@ namespace ArcMapAddinVisibility.ViewModels
                 return;
 
             // reset surface names OC
-            var names = GetSurfaceNamesFromMap(ArcMap.Document.FocusMap);
-
-            SurfaceLayerNames.Clear();
-
-            foreach (var name in names)
-                SurfaceLayerNames.Add(name);
-
-            if (SurfaceLayerNames.Any())
-                SelectedSurfaceName = SurfaceLayerNames[0];
-
-            RaisePropertyChanged(() => SelectedSurfaceName);
+            ResetSurfaceNames(ArcMap.Document.FocusMap);
 
             // reset observer points
             ObserverPoints.Clear();
@@ -421,6 +399,26 @@ namespace ArcMapAddinVisibility.ViewModels
             ClearTempGraphics();
 
             GuidPointDictionary.Clear();
+        }
+
+        internal void ResetSurfaceNames(IMap map)
+        {
+            // keep the current selection if it's still valid
+            var tempName = SelectedSurfaceName;
+
+            SurfaceLayerNames.Clear();
+
+            foreach (var name in GetSurfaceNamesFromMap(map))
+                SurfaceLayerNames.Add(name);
+
+            if (SurfaceLayerNames.Contains(tempName))
+                SelectedSurfaceName = tempName;
+            else if (SurfaceLayerNames.Any())
+                SelectedSurfaceName = SurfaceLayerNames[0];
+            else
+                SelectedSurfaceName = string.Empty;
+
+            RaisePropertyChanged(() => SelectedSurfaceName);
         }
     }
 }
