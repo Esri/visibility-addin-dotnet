@@ -22,103 +22,107 @@
         <StaticResourceExtension ResourceKey="llosViewModel" />
     </UserControl.DataContext>
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-        <TextBlock Grid.ColumnSpan="3" Text="{x:Static prop:Resources.LabelInputSurface}" Margin="3,3,0,0" />
-        <ComboBox Grid.Row="1" Grid.ColumnSpan="3" ItemsSource="{Binding SurfaceLayerNames}" SelectedItem="{Binding SelectedSurfaceName}" Margin="3,3,0,0">
-            <ComboBox.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel>
-                        <TextBlock Text="{Binding}"/>
-                    </StackPanel>
-                </DataTemplate>
-            </ComboBox.ItemTemplate>
-        </ComboBox>
-        <TextBlock Grid.Row="2" Grid.ColumnSpan="3" Text="{x:Static prop:Resources.LabelObserverPoints}" Margin="3,3,0,0" />
-        <ListBox Grid.Row="3" Grid.ColumnSpan="2" ItemsSource="{Binding ObserverPoints}" ScrollViewer.VerticalScrollBarVisibility="Visible" 
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock Grid.ColumnSpan="3" Text="{x:Static prop:Resources.LabelInputSurface}" Margin="3,3,0,0" />
+                <ComboBox Grid.Row="1" Grid.ColumnSpan="3" ItemsSource="{Binding SurfaceLayerNames}" SelectedItem="{Binding SelectedSurfaceName}" Margin="3,3,0,0">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <TextBlock Text="{Binding}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <TextBlock Grid.Row="2" Grid.ColumnSpan="3" Text="{x:Static prop:Resources.LabelObserverPoints}" Margin="3,3,0,0" />
+                <ListBox Grid.Row="3" Grid.ColumnSpan="2" ItemsSource="{Binding ObserverPoints}" ScrollViewer.VerticalScrollBarVisibility="Visible" 
                  PreviewMouseRightButtonDown="ListBox_PreviewMouseRightButtonDown"
                  SelectionMode="Multiple"
                  Height="60" Margin="3,3,0,0">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding Path=., Converter={StaticResource iPointToString}}"  />
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-            <ListBox.ContextMenu>
-                <ContextMenu DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Self}}">
-                    <MenuItem Header="{x:Static prop:Resources.MenuLabelDelete}" Command="{Binding DataContext.DeletePointCommand}" CommandParameter="{Binding Path=SelectedItems}" />
-                    <MenuItem Header="{x:Static prop:Resources.MenuLabelDeleteAll}" Command="{Binding DataContext.DeleteAllPointsCommand}" CommandParameter="{x:Static prop:Resources.ToolModeObserver}" />
-                </ContextMenu>
-            </ListBox.ContextMenu>
-            <ListBox.InputBindings>
-                <KeyBinding Key="Delete" Command="{Binding DeletePointCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}}, Path=SelectedItems}" />
-            </ListBox.InputBindings>
-        </ListBox>
-        <Button Grid.Row="3" Grid.Column="2" Command="{Binding ActivateToolCommand}" CommandParameter="{x:Static prop:Resources.ToolModeObserver}" VerticalAlignment="Center"
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Path=., Converter={StaticResource iPointToString}}"  />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                    <ListBox.ContextMenu>
+                        <ContextMenu DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Self}}">
+                            <MenuItem Header="{x:Static prop:Resources.MenuLabelDelete}" Command="{Binding DataContext.DeletePointCommand}" CommandParameter="{Binding Path=SelectedItems}" />
+                            <MenuItem Header="{x:Static prop:Resources.MenuLabelDeleteAll}" Command="{Binding DataContext.DeleteAllPointsCommand}" CommandParameter="{x:Static prop:Resources.ToolModeObserver}" />
+                        </ContextMenu>
+                    </ListBox.ContextMenu>
+                    <ListBox.InputBindings>
+                        <KeyBinding Key="Delete" Command="{Binding DeletePointCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}}, Path=SelectedItems}" />
+                    </ListBox.InputBindings>
+                </ListBox>
+                <Button Grid.Row="3" Grid.Column="2" Command="{Binding ActivateToolCommand}" CommandParameter="{x:Static prop:Resources.ToolModeObserver}" VerticalAlignment="Center"
             HorizontalAlignment="Center" ToolTip="{x:Static prop:Resources.TooltipObserverMapPointTool}" Margin="3,3,0,0">
-            <Image Source="/ArcMapAddinVisibility;component/Images/Add_Point32_d.png" Width="18" Height="18" />
-        </Button>
-        <TextBlock Grid.Row="4" Grid.ColumnSpan="3" Text="{x:Static prop:Resources.LabelTargetPoints}" Margin="3,3,0,0" />
-        <ListBox Grid.Row="5" Grid.ColumnSpan="2" ItemsSource="{Binding TargetPoints}" ScrollViewer.VerticalScrollBarVisibility="Visible" 
+                    <Image Source="/ArcMapAddinVisibility;component/Images/Add_Point32_d.png" Width="18" Height="18" />
+                </Button>
+                <TextBlock Grid.Row="4" Grid.ColumnSpan="3" Text="{x:Static prop:Resources.LabelTargetPoints}" Margin="3,3,0,0" />
+                <ListBox Grid.Row="5" Grid.ColumnSpan="2" ItemsSource="{Binding TargetPoints}" ScrollViewer.VerticalScrollBarVisibility="Visible" 
                  PreviewMouseRightButtonDown="ListBox_PreviewMouseRightButtonDown"
                  SelectionMode="Multiple"
                  Height="60" Margin="3,3,0,0">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding Path=., Converter={StaticResource iPointToString}}"  />
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-            <ListBox.ContextMenu>
-                <ContextMenu DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Self}}">
-                    <MenuItem Header="{x:Static prop:Resources.MenuLabelDelete}" Command="{Binding DataContext.DeletePointCommand}" CommandParameter="{Binding Path=SelectedItems}" />
-                    <MenuItem Header="{x:Static prop:Resources.MenuLabelDeleteAll}" Command="{Binding DataContext.DeleteAllPointsCommand}" CommandParameter="{x:Static prop:Resources.ToolModeTarget}" />
-                </ContextMenu>
-            </ListBox.ContextMenu>
-            <ListBox.InputBindings>
-                <KeyBinding Key="Delete" Command="{Binding DeletePointCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}}, Path=SelectedItems}" />
-            </ListBox.InputBindings>
-        </ListBox>
-        <Button Grid.Row="5" Grid.Column="2" Command="{Binding ActivateToolCommand}" CommandParameter="{x:Static prop:Resources.ToolModeTarget}" VerticalAlignment="Center"
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Path=., Converter={StaticResource iPointToString}}"  />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                    <ListBox.ContextMenu>
+                        <ContextMenu DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Self}}">
+                            <MenuItem Header="{x:Static prop:Resources.MenuLabelDelete}" Command="{Binding DataContext.DeletePointCommand}" CommandParameter="{Binding Path=SelectedItems}" />
+                            <MenuItem Header="{x:Static prop:Resources.MenuLabelDeleteAll}" Command="{Binding DataContext.DeleteAllPointsCommand}" CommandParameter="{x:Static prop:Resources.ToolModeTarget}" />
+                        </ContextMenu>
+                    </ListBox.ContextMenu>
+                    <ListBox.InputBindings>
+                        <KeyBinding Key="Delete" Command="{Binding DeletePointCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}}, Path=SelectedItems}" />
+                    </ListBox.InputBindings>
+                </ListBox>
+                <Button Grid.Row="5" Grid.Column="2" Command="{Binding ActivateToolCommand}" CommandParameter="{x:Static prop:Resources.ToolModeTarget}" VerticalAlignment="Center"
                 HorizontalAlignment="Center" ToolTip="{x:Static prop:Resources.TooltipTargetMapPointTool}" Margin="3,3,0,0">
-            <Image Source="/ArcMapAddinVisibility;component/Images/Add_Point32_d.png" Width="18" Height="18" />
-        </Button>
-        <TextBlock Grid.Row="6" Grid.ColumnSpan="3" Text="{x:Static prop:Resources.LabelObserverOffset}" Margin="3,3,0,0" />
-        <TextBox Grid.Row="7" Grid.ColumnSpan="2" Text="{Binding ObserverOffset, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
+                    <Image Source="/ArcMapAddinVisibility;component/Images/Add_Point32_d.png" Width="18" Height="18" />
+                </Button>
+                <TextBlock Grid.Row="6" Grid.ColumnSpan="3" Text="{x:Static prop:Resources.LabelObserverOffset}" Margin="3,3,0,0" />
+                <TextBox Grid.Row="7" Grid.ColumnSpan="2" Text="{Binding ObserverOffset, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
                     Validation.ErrorTemplate="{StaticResource errorTemplate}" Margin="3,3,0,0" />
-        <TextBlock Grid.Row="8" Grid.ColumnSpan="3" Text="{x:Static prop:Resources.LabelTargetOffset}" Margin="3,3,0,0" />
-        <TextBox Grid.Row="9" Grid.ColumnSpan="2" Text="{Binding TargetOffset, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
+                <TextBlock Grid.Row="8" Grid.ColumnSpan="3" Text="{x:Static prop:Resources.LabelTargetOffset}" Margin="3,3,0,0" />
+                <TextBox Grid.Row="9" Grid.ColumnSpan="2" Text="{Binding TargetOffset, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
                     Validation.ErrorTemplate="{StaticResource errorTemplate}" Margin="3,3,0,0" />
-        <ComboBox Grid.Row="8" Grid.Column="2" x:Name="cmbOffsetUnitType"
+                <ComboBox Grid.Row="8" Grid.Column="2" x:Name="cmbOffsetUnitType"
             ItemsSource="{Binding Source={StaticResource lineDistanceData}}" 
             SelectedItem="{Binding Path=OffsetUnitType, Mode=TwoWay}"                      
             Height="Auto" Margin="3,3,0,0">
-        </ComboBox>
-        <StackPanel Grid.Row="12" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Grid.Row="12" Grid.Column="0" Content="{x:Static prop:Resources.LabelCancel}" ToolTip="{x:Static prop:Resources.LabelCancel}" Command="{Binding CancelCommand}" Margin="3,20,0,0" />
-            <Button Grid.Row="12" Grid.Column="1" Content="{x:Static prop:Resources.LabelOK}" ToolTip="{x:Static prop:Resources.LabelOK}" Command="{Binding SubmitCommand}" Margin="3,20,0,0" />
-            <Button Grid.Row="12" Grid.Column="2" Content="{x:Static prop:Resources.LabelClearGraphics}" ToolTip="{x:Static prop:Resources.LabelClearGraphics}" Command="{Binding ClearGraphicsCommand}" Margin="3,20,0,0" />
-        </StackPanel>
+                </ComboBox>
+                <StackPanel Grid.Row="12" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Grid.Row="12" Grid.Column="0" Content="{x:Static prop:Resources.LabelCancel}" ToolTip="{x:Static prop:Resources.LabelCancel}" Command="{Binding CancelCommand}" Margin="3,20,0,0" />
+                    <Button Grid.Row="12" Grid.Column="1" Content="{x:Static prop:Resources.LabelOK}" ToolTip="{x:Static prop:Resources.LabelOK}" Command="{Binding SubmitCommand}" Margin="3,20,0,0" />
+                    <Button Grid.Row="12" Grid.Column="2" Content="{x:Static prop:Resources.LabelClearGraphics}" ToolTip="{x:Static prop:Resources.LabelClearGraphics}" Command="{Binding ClearGraphicsCommand}" Margin="3,20,0,0" />
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
     </Grid>
 </UserControl>
