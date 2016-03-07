@@ -69,7 +69,10 @@
                 ToolTip="{x:Static prop:Resources.TooltipMapPointTool}" Margin="0,5,5,5">
                     <Image Source="/ArcMapAddinVisibility;component/Images/Add_Point32_d.png" Width="18" Height="18" HorizontalAlignment="Right" />
                 </Button>
-                <ListBox ItemsSource="{Binding ObserverPoints}" ScrollViewer.VerticalScrollBarVisibility="Visible" Grid.Row="3" Height="60" Margin="5,5,5,5">
+                <ListBox ItemsSource="{Binding ObserverPoints}" ScrollViewer.VerticalScrollBarVisibility="Visible" 
+                         PreviewMouseRightButtonDown="ListBox_PreviewMouseRightButtonDown"
+                         SelectionMode="Multiple"
+                         Grid.Row="3" Height="60" Margin="5,5,5,5">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
@@ -77,6 +80,12 @@
                             </StackPanel>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
+                    <ListBox.ContextMenu>
+                        <ContextMenu DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Self}}">
+                            <MenuItem Header="{x:Static prop:Resources.MenuLabelDelete}" Command="{Binding DataContext.DeletePointCommand}" CommandParameter="{Binding Path=SelectedItems}" />
+                            <MenuItem Header="{x:Static prop:Resources.MenuLabelDeleteAll}" Command="{Binding DataContext.DeleteAllPointsCommand}" CommandParameter="{x:Static prop:Resources.ToolModeObserver}" />
+                        </ContextMenu>
+                    </ListBox.ContextMenu>
                 </ListBox>
 
                 <CheckBox IsChecked="{Binding ShowNonVisibleData}" Content="{x:Static prop:Resources.LabelNonVisible}" ToolTip="{x:Static prop:Resources.LabelNonVisible}"   HorizontalAlignment="Left" Margin="5,9,5,5" Grid.Row="4" VerticalAlignment="Top" />

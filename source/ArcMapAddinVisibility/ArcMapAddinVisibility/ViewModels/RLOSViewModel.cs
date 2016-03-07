@@ -343,9 +343,6 @@ namespace ArcMapAddinVisibility.ViewModels
             if (ArcMap.Document == null || ArcMap.Document.FocusMap == null)
                 return;
 
-            // reset target points
-            ObserverPoints.Clear();
-
             // Disable buttons
             EnableOkCancelClearBtns(false);
         }
