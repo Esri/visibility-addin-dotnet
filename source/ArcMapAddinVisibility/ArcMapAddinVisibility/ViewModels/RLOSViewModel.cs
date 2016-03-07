@@ -449,18 +449,18 @@ namespace ArcMapAddinVisibility.ViewModels
                 else
                 {
                     fillSymbol2.Color = new RgbColorClass() { Green = 255 } as IColor;
-                    uvRenderer.AddValue("0", "", fillSymbol2 as ISymbol);
-                    uvRenderer.set_Label("0", "Visible by 1 Observer");
+                    uvRenderer.AddValue("1", "", fillSymbol2 as ISymbol);
+                    uvRenderer.set_Label("1", "Visible by 1 Observer");
 
                     int field = ipTable.FindField("gridcode");
                     uvRenderer.set_Field(0, "gridcode");
 
-                    for (int i = 1; i < uniqueValues; i++)
+                    for (int i = 2; i <= uniqueValues; i++)
                     {
                         ISimpleFillSymbol newFillSymbol = new SimpleFillSymbolClass();
-                        newFillSymbol.Color = colorRamp.get_Color(i);
+                        newFillSymbol.Color = colorRamp.get_Color(i-1);
                         uvRenderer.AddValue(i.ToString(), "", newFillSymbol as ISymbol);
-                        string label = "Visible by " + (i+1).ToString() + " Observers";
+                        string label = "Visible by " + (i).ToString() + " Observers";
                         uvRenderer.set_Label(i.ToString(), label);
                     }
                 }
