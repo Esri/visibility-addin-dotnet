@@ -658,6 +658,24 @@ namespace ArcMapAddinVisibility.ViewModels
 
                 le.Symbol = lineSymbol;
             }
+            else if (geom.GeometryType == esriGeometryType.esriGeometryPolygon)
+            {
+                // create graphic then add to map
+                IPolygonElement pe = new PolygonElementClass() as IPolygonElement;
+                element = pe as IElement;
+                IFillShapeElement fe = pe as IFillShapeElement;
+                
+                var fillSymbol = new SimpleFillSymbolClass();
+                RgbColor selectedColor = new RgbColorClass();
+                selectedColor.Red = 0;
+                selectedColor.Green = 0;
+                selectedColor.Blue = 0;
+
+                selectedColor.Transparency = (byte)0;
+                fillSymbol.Color = selectedColor;  
+                
+                fe.Symbol = fillSymbol;
+            }
 
             if (element == null)
                 return string.Empty;
@@ -777,6 +795,7 @@ namespace ArcMapAddinVisibility.ViewModels
         {
             Distance = GetDistanceFromTo(fromType, toType, Distance);
         }
+
         /// <summary>
         /// Ugly method to convert to/from different types of distance units
         /// </summary>
