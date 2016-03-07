@@ -205,6 +205,15 @@ namespace ArcMapAddinVisibility.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Show Non-Visible Data.
+        /// </summary>
+        public static string LabelNonVisible {
+            get {
+                return ResourceManager.GetString("LabelNonVisible", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Observer Offset.
         /// </summary>
         public static string LabelObserverOffset {
@@ -291,6 +300,15 @@ namespace ArcMapAddinVisibility.Properties {
         public static string LabelTargetPoints {
             get {
                 return ResourceManager.GetString("LabelTargetPoints", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to to.
+        /// </summary>
+        public static string LabelTo {
+            get {
+                return ResourceManager.GetString("LabelTo", resourceCulture);
             }
         }
         

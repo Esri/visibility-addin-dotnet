@@ -98,8 +98,6 @@ namespace ArcMapAddinVisibility.ViewModels
             DeletePoints(ObserverPoints.ToList<IPoint>());
         }
 
-
-
         private void DeletePoints(List<IPoint> pointList)
         {
             if (pointList == null || !pointList.Any())
@@ -320,7 +318,7 @@ namespace ArcMapAddinVisibility.ViewModels
         /// </summary>
         /// <param name="map">IMap</param>
         /// <returns></returns>
-        public List<string> GetSurfaceNamesFromMap(IMap map)
+        public List<string> GetSurfaceNamesFromMap(IMap map, bool IncludeTinLayers = false)
         {
             var list = new List<string>();
 
@@ -333,12 +331,14 @@ namespace ArcMapAddinVisibility.ViewModels
                     if (layer == null)
                         continue;
 
-                        var tin = layer as ITinLayer;
+                    var tin = layer as ITinLayer;
 
                     if (tin != null)
                     {
-                        list.Add(layer.Name);
-                            continue;
+                        if (IncludeTinLayers)
+                            list.Add(layer.Name);
+                        
+                        continue;
                     }
 
                     var rasterSurface = new RasterSurfaceClass() as IRasterSurface; 
@@ -408,7 +408,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
             SurfaceLayerNames.Clear();
 
-            foreach (var name in GetSurfaceNamesFromMap(map))
+            foreach (var name in GetSurfaceNamesFromMap(map, (this.GetType() == typeof(LLOSViewModel))? true:false))
                 SurfaceLayerNames.Add(name);
 
             if (SurfaceLayerNames.Contains(tempName))
