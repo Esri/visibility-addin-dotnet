@@ -154,6 +154,21 @@ namespace ArcMapAddinVisibility.ViewModels
         }
 
         #region override
+
+        internal override void OnDeletePointCommand(object obj)
+        {
+            base.OnDeletePointCommand(obj);
+
+            EnableOkCancelClearBtns(ObserverPoints.Any());
+        }
+
+        internal override void OnDeleteAllPointsCommand(object obj)
+        {
+            base.OnDeleteAllPointsCommand(obj);
+
+            EnableOkCancelClearBtns(ObserverPoints.Any());
+        }
+
         public override bool CanCreateElement
         {
             get

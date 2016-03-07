@@ -98,8 +98,6 @@ namespace ArcMapAddinVisibility.ViewModels
             DeletePoints(ObserverPoints.ToList<IPoint>());
         }
 
-
-
         private void DeletePoints(List<IPoint> pointList)
         {
             if (pointList == null || !pointList.Any())
