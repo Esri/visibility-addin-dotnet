@@ -377,7 +377,7 @@ namespace ArcMapAddinVisibility.ViewModels
             if (gc == null)
                 return;
 
-            RemoveGraphics(gc, TempGraphicsList);
+            //RemoveGraphics(gc, TempGraphicsList);
             RemoveGraphics(gc, MapGraphicsList);
 
             av.PartialRefresh(esriViewDrawPhase.esriViewGraphics, null, null);

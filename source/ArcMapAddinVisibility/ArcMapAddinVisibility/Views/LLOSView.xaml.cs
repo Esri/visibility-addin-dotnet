@@ -24,5 +24,12 @@ namespace ArcMapAddinVisibility.Views
         {
             InitializeComponent();
         }
+
+        private void ListBox_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            // right mouse click selects item in list box
+            // avoid this by setting e.Handled to true
+            e.Handled = true;
+        }
     }
 }

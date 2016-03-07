@@ -53,7 +53,10 @@
             </ComboBox.ItemTemplate>
         </ComboBox>
         <TextBlock Grid.Row="2" Grid.ColumnSpan="3" Text="{x:Static prop:Resources.LabelObserverPoints}" Margin="3,3,0,0" />
-        <ListBox Grid.Row="3" Grid.ColumnSpan="2" ItemsSource="{Binding ObserverPoints}" ScrollViewer.VerticalScrollBarVisibility="Visible" Height="60" Margin="3,3,0,0">
+        <ListBox Grid.Row="3" Grid.ColumnSpan="2" ItemsSource="{Binding ObserverPoints}" ScrollViewer.VerticalScrollBarVisibility="Visible" 
+                 PreviewMouseRightButtonDown="ListBox_PreviewMouseRightButtonDown"
+                 SelectionMode="Multiple"
+                 Height="60" Margin="3,3,0,0">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal">
@@ -63,16 +66,23 @@
             </ListBox.ItemTemplate>
             <ListBox.ContextMenu>
                 <ContextMenu DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Self}}">
-                    <MenuItem Header="Delete Point" Command="{Binding DataContext.DeletePointCommand}" CommandParameter="{Binding Path=SelectedItems}" />
+                    <MenuItem Header="{x:Static prop:Resources.MenuLabelDelete}" Command="{Binding DataContext.DeletePointCommand}" CommandParameter="{Binding Path=SelectedItems}" />
+                    <MenuItem Header="{x:Static prop:Resources.MenuLabelDeleteAll}" Command="{Binding DataContext.DeleteAllPointsCommand}" CommandParameter="{x:Static prop:Resources.ToolModeObserver}" />
                 </ContextMenu>
             </ListBox.ContextMenu>
+            <ListBox.InputBindings>
+                <KeyBinding Key="Delete" Command="{Binding DeletePointCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}}, Path=SelectedItems}" />
+            </ListBox.InputBindings>
         </ListBox>
         <Button Grid.Row="3" Grid.Column="2" Command="{Binding ActivateToolCommand}" CommandParameter="{x:Static prop:Resources.ToolModeObserver}" VerticalAlignment="Center"
             HorizontalAlignment="Center" ToolTip="{x:Static prop:Resources.TooltipObserverMapPointTool}" Margin="3,3,0,0">
             <Image Source="/ArcMapAddinVisibility;component/Images/Add_Point32_d.png" Width="18" Height="18" />
         </Button>
         <TextBlock Grid.Row="4" Grid.ColumnSpan="3" Text="{x:Static prop:Resources.LabelTargetPoints}" Margin="3,3,0,0" />
-        <ListBox Grid.Row="5" Grid.ColumnSpan="2" ItemsSource="{Binding TargetPoints}" ScrollViewer.VerticalScrollBarVisibility="Visible" Height="60" Margin="3,3,0,0">
+        <ListBox Grid.Row="5" Grid.ColumnSpan="2" ItemsSource="{Binding TargetPoints}" ScrollViewer.VerticalScrollBarVisibility="Visible" 
+                 PreviewMouseRightButtonDown="ListBox_PreviewMouseRightButtonDown"
+                 SelectionMode="Multiple"
+                 Height="60" Margin="3,3,0,0">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal">
@@ -82,9 +92,13 @@
             </ListBox.ItemTemplate>
             <ListBox.ContextMenu>
                 <ContextMenu DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Self}}">
-                    <MenuItem Header="Delete Point" Command="{Binding DataContext.DeletePointCommand}" CommandParameter="{Binding Path=SelectedItems}" />
+                    <MenuItem Header="{x:Static prop:Resources.MenuLabelDelete}" Command="{Binding DataContext.DeletePointCommand}" CommandParameter="{Binding Path=SelectedItems}" />
+                    <MenuItem Header="{x:Static prop:Resources.MenuLabelDeleteAll}" Command="{Binding DataContext.DeleteAllPointsCommand}" CommandParameter="{x:Static prop:Resources.ToolModeTarget}" />
                 </ContextMenu>
             </ListBox.ContextMenu>
+            <ListBox.InputBindings>
+                <KeyBinding Key="Delete" Command="{Binding DeletePointCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}}, Path=SelectedItems}" />
+            </ListBox.InputBindings>
         </ListBox>
         <Button Grid.Row="5" Grid.Column="2" Command="{Binding ActivateToolCommand}" CommandParameter="{x:Static prop:Resources.ToolModeTarget}" VerticalAlignment="Center"
                 HorizontalAlignment="Center" ToolTip="{x:Static prop:Resources.TooltipTargetMapPointTool}" Margin="3,3,0,0">
