@@ -79,14 +79,17 @@
                     </ListBox.ItemTemplate>
                 </ListBox>
 
-                <CheckBox IsChecked="{Binding ShowNonVisibleData}" Content="{x:Static prop:Resources.LabelNonVisible}" ToolTip="{x:Static prop:Resources.LabelNonVisible}"   HorizontalAlignment="Left" Margin="5,9,5,5" Grid.Row="4" VerticalAlignment="Top" RenderTransformOrigin="-0.289,-1.049"/>
+                <CheckBox IsChecked="{Binding ShowNonVisibleData}" Content="{x:Static prop:Resources.LabelNonVisible}" ToolTip="{x:Static prop:Resources.LabelNonVisible}"   HorizontalAlignment="Left" Margin="5,9,5,5" Grid.Row="4" VerticalAlignment="Top" />
 
                 <ProgressBar Name="pbStatus" IsIndeterminate="True" Width="Auto" HorizontalAlignment="Stretch" Visibility="{Binding DisplayProgressBar}" Grid.ColumnSpan="3" Margin="5,0"/>
                 <Button Content="{x:Static prop:Resources.LabelCancel}" ToolTip="{x:Static prop:Resources.LabelCancel}" Command="{Binding CancelCommand}" Margin="0,0,104,5" HorizontalAlignment="Right" VerticalAlignment="Bottom" Grid.Row="5" IsEnabled="{Binding IsCancelEnabled}"/>
-                <Button Content="{x:Static prop:Resources.LabelOK}" ToolTip="{x:Static prop:Resources.LabelOK}" Command="{Binding SubmitCommand}" HorizontalAlignment="Right" Margin="0,5,66,0" Grid.Row="5" VerticalAlignment="Top" Width="33" RenderTransformOrigin="1.693,0.636" IsEnabled="{Binding IsOkEnabled}" />
-                <Button Content="{x:Static prop:Resources.LabelClearGraphics}" ToolTip="{x:Static prop:Resources.LabelClearGraphics}" Command="{Binding ClearGraphicsCommand}" HorizontalAlignment="Right" Margin="5,5,5,5" Grid.Row="5" VerticalAlignment="Top" Width="85" RenderTransformOrigin="1.587,0.5" Grid.ColumnSpan="3" IsEnabled="{Binding IsClearEnabled}"/>
+                <Button Content="{x:Static prop:Resources.LabelOK}" ToolTip="{x:Static prop:Resources.LabelOK}" Command="{Binding SubmitCommand}" HorizontalAlignment="Right" Margin="0,5,66,0" Grid.Row="5" VerticalAlignment="Top" Width="33" IsEnabled="{Binding IsOkEnabled}" />
+                <Button Content="{x:Static prop:Resources.LabelClearGraphics}" ToolTip="{x:Static prop:Resources.LabelClearGraphics}" Command="{Binding ClearGraphicsCommand}" HorizontalAlignment="Right" Margin="5,5,5,5" Grid.Row="5" VerticalAlignment="Top" Width="85" Grid.ColumnSpan="3" IsEnabled="{Binding IsClearEnabled}"/>
 
-                <Expander Header="{x:Static prop:Resources.LabelObserverOptions}" HorizontalAlignment="Stretch" Margin="0,5,5,0" Grid.Row="6" VerticalAlignment="Top" IsExpanded="False" Height="373" Grid.RowSpan="4" Grid.ColumnSpan="3" RenderTransformOrigin="0.488,0.625">
+                <Expander Header="{x:Static prop:Resources.LabelObserverOptions}" 
+                          HorizontalAlignment="Stretch" Margin="0,5,5,0" Grid.Row="6" 
+                          IsExpanded="False" 
+                          Grid.ColumnSpan="3">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
@@ -208,15 +211,7 @@
                                 <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
                             </TextBox.InputBindings>
                         </TextBox>
-
-
-
-
-
-
                     </Grid>
-
-
                 </Expander>
             </Grid>
         </ScrollViewer>
