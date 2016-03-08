@@ -171,7 +171,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
             var point = obj as IPoint;
 
-            if (point == null)
+            if (point == null || !IsValidPoint(point, true))
                 return;
 
             // ok, we have a point
@@ -184,6 +184,21 @@ namespace ArcMapAddinVisibility.ViewModels
                 var guid = AddGraphicToMap(point, color, true);
                 UpdatePointDictionary(point, guid);
             }
+        }
+
+        internal bool IsValidPoint(IPoint point, bool showPopup = false)
+        {
+            var validPoint = true;
+
+            if (!string.IsNullOrWhiteSpace(SelectedSurfaceName) && ArcMap.Document != null && ArcMap.Document.FocusMap != null)
+            {
+                validPoint = IsPointWithinExtent(point, GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName).AreaOfInterest);
+
+                if (validPoint == false && showPopup)
+                    System.Windows.Forms.MessageBox.Show(Properties.Resources.MsgOutOfAOI);
+            }
+
+            return validPoint;
         }
 
         #endregion
@@ -202,6 +217,16 @@ namespace ArcMapAddinVisibility.ViewModels
         {
             if (!GuidPointDictionary.ContainsKey(guid))
                 GuidPointDictionary.Add(guid, point);
+        }
+
+        internal bool IsPointWithinExtent(IPoint point, IEnvelope env)
+        {
+            var relationOp = env as IRelationalOperator;
+
+            if (relationOp == null)
+                return false;
+
+            return relationOp.Contains(point);
         }
 
         /// <summary>
@@ -281,13 +306,28 @@ namespace ArcMapAddinVisibility.ViewModels
             return null;
         }
 
+        public ILayer GetLayerFromMapByName(IMap map, string name)
+        {
+            for (int x = 0; x < map.LayerCount; x++)
+            {
+                var layer = map.get_Layer(x);
+
+                if (layer == null || layer.Name != name)
+                    continue;
+
+                return layer;
+            }
+
+            return null;
+        }
+
         /// <summary>
         /// Method to get a IRasterLayer from a map by layer name
         /// </summary>
         /// <param name="map">IMap that contains surface layer</param>
         /// <param name="name">Name of the layer that you are looking for</param>
         /// <returns>IRasterLayer</returns>
-        public IRasterLayer GetLayerFromMapByName(IMap map, string name)
+        public IRasterLayer GetRasterLayerFromMapByName(IMap map, string name)
         {
             for (int x = 0; x < map.LayerCount; x++)
             {
