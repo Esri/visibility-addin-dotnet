@@ -263,30 +263,31 @@ namespace ArcMapAddinVisibility.ViewModels
 
                 StopEditOperation((IWorkspace)workspace);
 
-                IRasterLayer rasterLayer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
-
-                IFeatureLayer ipFeatureLayer = new FeatureLayerClass();
-                ipFeatureLayer.FeatureClass = pointFc;
-
-                IDataset ipDataset = (IDataset)pointFc;
-                string outputFcName = ipDataset.BrowseName + "_output";
-                string strPath = ipDataset.Workspace.PathName + "\\" + ipDataset.BrowseName;
-                string outPath = ipDataset.Workspace.PathName + "\\" + outputFcName;
-
-                IVariantArray parameters = new VarArrayClass();
-                parameters.Add(rasterLayer.FilePath);
-                parameters.Add(strPath);
-                parameters.Add(outPath);
-
-                if (ShowNonVisibleData == false)
-                {
-                    parameters.Add(null);
-                    parameters.Add(null);
-                    parameters.Add("true");
-                }                
-
                 try
                 {
+                    ILayer layer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
+                    string layerPath = GetLayerPath(layer);
+
+                    IFeatureLayer ipFeatureLayer = new FeatureLayerClass();
+                    ipFeatureLayer.FeatureClass = pointFc;
+
+                    IDataset ipDataset = (IDataset)pointFc;
+                    string outputFcName = ipDataset.BrowseName + "_output";
+                    string strPath = ipDataset.Workspace.PathName + "\\" + ipDataset.BrowseName;
+                    string outPath = ipDataset.Workspace.PathName + "\\" + outputFcName;
+
+                    IVariantArray parameters = new VarArrayClass();
+                    parameters.Add(layerPath);
+                    parameters.Add(strPath);
+                    parameters.Add(outPath);
+
+                    if (ShowNonVisibleData == false)
+                    {
+                        parameters.Add(null);
+                        parameters.Add(null);
+                        parameters.Add("true");
+                    }                
+          
                     esriLicenseStatus status = GetSpatialAnalystLicense();
 
                     IGeoProcessor2 gp = new GeoProcessorClass();
@@ -1036,7 +1037,28 @@ namespace ArcMapAddinVisibility.ViewModels
             }
 
             return angularDistance;
-        }  
+        }
+
+        /// <summary>
+        /// Return the layer file path of the provided layer
+        /// </summary>
+        /// <param name="layer">ILayer</param>
+        /// <returns>file path of layer</returns>
+        private static string GetLayerPath(ILayer layer)
+        {
+            if (layer is IRasterLayer)
+            {
+                IRasterLayer rlayer = layer as IRasterLayer;
+                return rlayer.FilePath;
+            }
+            else if (layer is IMosaicLayer)
+            {
+                IMosaicLayer mlayer = layer as IMosaicLayer;
+                return mlayer.FilePath;
+            }
+
+            return null;
+        }
 
         #endregion
     }

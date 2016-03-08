@@ -287,8 +287,8 @@ namespace ArcMapAddinVisibility.ViewModels
         /// </summary>
         /// <param name="map">IMap that contains surface layer</param>
         /// <param name="name">Name of the layer that you are looking for</param>
-        /// <returns>IRasterLayer</returns>
-        public IRasterLayer GetLayerFromMapByName(IMap map, string name)
+        /// <returns>ILayer</returns>
+        public ILayer GetLayerFromMapByName(IMap map, string name)
         {
             for (int x = 0; x < map.LayerCount; x++)
             {
@@ -299,10 +299,12 @@ namespace ArcMapAddinVisibility.ViewModels
 
                 var rasterLayer = layer as IRasterLayer;
                 if (rasterLayer == null)
-                {
-                    var tin = layer as ITinLayer;
-                    if (tin != null)
-                        return tin as IRasterLayer;
+                {                  
+                    var mosaicLayer = layer as IMosaicLayer;
+                    if (mosaicLayer != null)
+                    {
+                        return mosaicLayer as ILayer;
+                    }
 
                     continue;
                 }
