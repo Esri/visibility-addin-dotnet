@@ -32,6 +32,8 @@ namespace ArcMapAddinVisibility.ViewModels
             _llosView = new VisibilityLLOSView();
             _rlosView = new VisibilityRLOSView();
 
+            Events_ActiveViewChanged();
+
             // listen to some map events
             ArcMap.Events.ActiveViewChanged += Events_ActiveViewChanged;
         }
