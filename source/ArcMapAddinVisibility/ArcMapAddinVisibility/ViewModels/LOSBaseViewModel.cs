@@ -166,7 +166,6 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <param name="obj"></param>
         internal override void OnNewMapPointEvent(object obj)
         {
-            // lets test this out
             if (!IsActiveTab)
                 return;
 
@@ -181,7 +180,7 @@ namespace ArcMapAddinVisibility.ViewModels
                 // in tool mode "Observer" we add observer points
                 // otherwise ignore
                 ObserverPoints.Insert(0, point);
-                var color = new RgbColorClass() { Green = 255 } as IColor;
+                var color = new RgbColorClass() { Blue = 255 } as IColor;
                 var guid = AddGraphicToMap(point, color, true);
                 UpdatePointDictionary(point, guid);
             }
