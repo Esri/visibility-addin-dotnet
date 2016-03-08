@@ -263,7 +263,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
                 StopEditOperation((IWorkspace)workspace);
 
-                IRasterLayer rasterLayer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
+                IRasterLayer rasterLayer = GetRasterLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
 
                 IFeatureLayer ipFeatureLayer = new FeatureLayerClass();
                 ipFeatureLayer.FeatureClass = pointFc;

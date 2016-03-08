@@ -128,7 +128,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
             var point = obj as IPoint;
 
-            if (point == null)
+            if (point == null || !IsValidPoint(point))
                 return;
 
             if (ToolMode == MapPointToolMode.Target)
