@@ -81,6 +81,10 @@ namespace ArcMapAddinVisibility.ViewModels
         public RelayCommand DeletePointCommand { get; set; }
         public RelayCommand DeleteAllPointsCommand { get; set; }
 
+        /// <summary>
+        /// Command method to delete points
+        /// </summary>
+        /// <param name="obj"></param>
         internal virtual void OnDeletePointCommand(object obj)
         {
             // remove observer points
@@ -129,6 +133,11 @@ namespace ArcMapAddinVisibility.ViewModels
 
         #region Event handlers
 
+        /// <summary>
+        /// Method called when the map TOC is updated
+        /// Reset surface names
+        /// </summary>
+        /// <param name="obj">not used</param>
         private void OnMapTocUpdated(object obj)
         {
             if (ArcMap.Document == null || ArcMap.Document.FocusMap == null)
@@ -163,7 +172,7 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <summary>
         /// Override this event to collect observer points based on tool mode
         /// </summary>
-        /// <param name="obj"></param>
+        /// <param name="obj">MapPointToolMode</param>
         internal override void OnNewMapPointEvent(object obj)
         {
             if (!IsActiveTab)
@@ -185,7 +194,14 @@ namespace ArcMapAddinVisibility.ViewModels
                 UpdatePointDictionary(point, guid);
             }
         }
-
+        /// <summary>
+        /// Method to check to see point is withing the currently selected surface
+        /// returns true if there is no surface selected or point is contained by layer AOI
+        /// returns false if the point is not contained in the layer AOI
+        /// </summary>
+        /// <param name="point">IPoint to validate</param>
+        /// <param name="showPopup">boolean to show popup message or not</param>
+        /// <returns></returns>
         internal bool IsValidPoint(IPoint point, bool showPopup = false)
         {
             var validPoint = true;
@@ -204,7 +220,7 @@ namespace ArcMapAddinVisibility.ViewModels
         #endregion
 
         /// <summary>
-        /// Enumeration used to the different tool modes
+        /// Enumeration used for the different tool modes
         /// </summary>
         internal enum MapPointToolMode : int
         {
@@ -212,13 +228,22 @@ namespace ArcMapAddinVisibility.ViewModels
             Observer = 1,
             Target = 2
         }
-
+        /// <summary>
+        /// Dictionary to keep track of the related graphic element with IPoints (Observers and Targets)
+        /// </summary>
+        /// <param name="point">IPoint</param>
+        /// <param name="guid">guid string of the related graphic element</param>
         internal void UpdatePointDictionary(IPoint point, string guid)
         {
             if (!GuidPointDictionary.ContainsKey(guid))
                 GuidPointDictionary.Add(guid, point);
         }
-
+        /// <summary>
+        /// Method used to check to see if a point is contained by an envelope
+        /// </summary>
+        /// <param name="point">IPoint</param>
+        /// <param name="env">IEnvelope</param>
+        /// <returns></returns>
         internal bool IsPointWithinExtent(IPoint point, IEnvelope env)
         {
             var relationOp = env as IRelationalOperator;
@@ -305,7 +330,12 @@ namespace ArcMapAddinVisibility.ViewModels
 
             return null;
         }
-
+        /// <summary>
+        /// returns ILayer if found in the map layer collection
+        /// </summary>
+        /// <param name="map">IMap</param>
+        /// <param name="name">string name of layer</param>
+        /// <returns></returns>
         public ILayer GetLayerFromMapByName(IMap map, string name)
         {
             for (int x = 0; x < map.LayerCount; x++)
@@ -440,6 +470,11 @@ namespace ArcMapAddinVisibility.ViewModels
             GuidPointDictionary.Clear();
         }
 
+        /// <summary>
+        /// Method used to reset the currently selected surfacename 
+        /// Use when toc items or map changes, on tab selection changed, etc
+        /// </summary>
+        /// <param name="map">IMap</param>
         internal void ResetSurfaceNames(IMap map)
         {
             // keep the current selection if it's still valid
