@@ -352,38 +352,6 @@ namespace ArcMapAddinVisibility.ViewModels
         }
 
         /// <summary>
-        /// Method to get a IRasterLayer from a map by layer name
-        /// </summary>
-        /// <param name="map">IMap that contains surface layer</param>
-        /// <param name="name">Name of the layer that you are looking for</param>
-        /// <returns>ILayer</returns>
-        public ILayer GetLayerFromMapByName(IMap map, string name)
-        {
-            for (int x = 0; x < map.LayerCount; x++)
-            {
-                var layer = map.get_Layer(x);
-
-                if (layer == null || layer.Name != name)
-                    continue;
-
-                var rasterLayer = layer as IRasterLayer;
-                if (rasterLayer == null)
-                {
-                    var mosaicLayer = layer as IMosaicLayer;
-                    if (mosaicLayer != null)
-                    {
-                        return mosaicLayer as ILayer;
-                    }
-
-                    continue;
-                }
-                return rasterLayer;
-            }
-
-            return null;
-        }
-
-        /// <summary>
         /// Method to get all the names of the raster/tin layers that support ISurface
         /// we use this method to populate a combobox for input selection of surface layer
         /// </summary>
