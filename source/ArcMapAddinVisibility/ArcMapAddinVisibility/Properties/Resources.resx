@@ -225,4 +225,7 @@
   <data name="LabelTo" xml:space="preserve">
     <value>to</value>
   </data>
+  <data name="MsgOutOfAOI" xml:space="preserve">
+    <value>Point does not fall within the input extent.</value>
+  </data>
 </root>

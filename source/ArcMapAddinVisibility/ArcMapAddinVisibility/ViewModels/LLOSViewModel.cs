@@ -56,7 +56,7 @@ namespace ArcMapAddinVisibility.ViewModels
             System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
             System.Windows.Forms.Application.DoEvents();
             // promote temp graphics
-            MoveTempGraphicsToMapGraphics();
+            //MoveTempGraphicsToMapGraphics();
 
             CreateMapElement();
 
@@ -128,7 +128,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
             var point = obj as IPoint;
 
-            if (point == null)
+            if (point == null || !IsValidPoint(point))
                 return;
 
             if (ToolMode == MapPointToolMode.Target)
@@ -162,6 +162,14 @@ namespace ArcMapAddinVisibility.ViewModels
             }
         }
 
+        /// <summary>
+        /// Here we need to create the lines of sight and determine is a target can be seen or not
+        /// Visualize the visible targets with GREEN circles
+        /// Visualize the non visible targets with RED circles
+        /// Visualize the number of observers that can see a target with a label #
+        /// Visualize an observer that can see no targets with a RED circle on top of a BLUE circle
+        /// Visualize an observer that can see at least one target with a GREEN circle on top of a BLUE circle
+        /// </summary>
         internal override void CreateMapElement()
         {
             if (!CanCreateElement || ArcMap.Document == null || ArcMap.Document.FocusMap == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
@@ -189,8 +197,13 @@ namespace ArcMapAddinVisibility.ViewModels
             double finalObserverOffset = GetOffsetInZUnits(ArcMap.Document.FocusMap, ObserverOffset.Value, surface.ZFactor, OffsetUnitType);
             double finalTargetOffset = GetOffsetInZUnits(ArcMap.Document.FocusMap, TargetOffset.Value, surface.ZFactor, OffsetUnitType);
 
+            var DictionaryTargetObserverCount = new Dictionary<IPoint, int>();
+
             foreach (var observerPoint in ObserverPoints)
             {
+                // keep track of visible targets for this observer
+                var CanSeeAtLeastOneTarget = false;
+
                 var z1 = surface.GetElevation(observerPoint) + finalObserverOffset;
 
                 if (surface.IsVoidZ(z1))
@@ -214,20 +227,75 @@ namespace ArcMapAddinVisibility.ViewModels
                         new PointClass() { Z = z2, X = targetPoint.X, Y = targetPoint.Y, ZAware = true },
                         out pointObstruction, out polyVisible, out polyInvisible, out targetIsVisible, false, false);
 
+                    // set the flag if we can see at least one target
+                    if (targetIsVisible)
+                    {
+                        CanSeeAtLeastOneTarget = true;
+
+                        // update target observer count
+                        UpdateTargetObserverCount(DictionaryTargetObserverCount, targetPoint);
+                    }
+
                     if (polyVisible != null)
                     {
-                        var rgbColor = new ESRI.ArcGIS.Display.RgbColorClass() as IRgbColor;
-                        rgbColor.Green = 255;
-                        AddGraphicToMap(polyVisible, rgbColor as IColor);
+                        AddGraphicToMap(polyVisible, new RgbColorClass() { Green = 255 });
                     }
 
                     if (polyInvisible != null)
                     {
-                        var rgbColor2 = new ESRI.ArcGIS.Display.RgbColorClass() as IRgbColor;
-                        rgbColor2.Red = 255;
-                        AddGraphicToMap(polyInvisible, rgbColor2);
+                        AddGraphicToMap(polyInvisible, new RgbColorClass() { Red = 255 });
                     }
                 }
+
+                // visualize observer
+
+                // add blue dot
+                AddGraphicToMap(observerPoint, new RgbColorClass() { Blue = 255 }, size: 10);
+                                
+                if(CanSeeAtLeastOneTarget)
+                {
+                    // add green dot
+                    AddGraphicToMap(observerPoint, new RgbColorClass() { Green = 255 });
+                }
+                else
+                {
+                    // add red dot
+                    AddGraphicToMap(observerPoint, new RgbColorClass() { Red = 255 });
+                }
+            }
+
+            VisualizeTargets(DictionaryTargetObserverCount);
+        }
+
+        private void VisualizeTargets(Dictionary<IPoint, int> dict)
+        {
+            // visualize targets
+            foreach (var targetPoint in TargetPoints)
+            {
+                if (dict.ContainsKey(targetPoint))
+                {
+                    // add green circle
+                    AddGraphicToMap(targetPoint, new RgbColorClass() { Green = 255 }, size: 10);
+                    // add label
+                    AddTextToMap(dict[targetPoint].ToString(), targetPoint, new RgbColorClass(), size: 10);
+                }
+                else
+                {
+                    // add red circle
+                    AddGraphicToMap(targetPoint, new RgbColorClass() { Red = 255 }, size: 10);
+                }
+            }
+        }
+
+        private void UpdateTargetObserverCount(Dictionary<IPoint, int> dict, IPoint targetPoint)
+        {
+            if (dict.ContainsKey(targetPoint))
+            {
+                dict[targetPoint] += 1;
+            }
+            else
+            {
+                dict.Add(targetPoint, 1);
             }
         }
     }

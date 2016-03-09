@@ -618,11 +618,60 @@ namespace ArcMapAddinVisibility.ViewModels
             IsActiveTab = (obj == this);
         }
 
+        internal string AddTextToMap(string text, IGeometry geom, IColor color, bool IsTempGraphic = false, int size = 12)
+        {
+            if (geom == null || ArcMap.Document == null || ArcMap.Document.FocusMap == null)
+                return string.Empty;
+
+            IElement element = null;
+
+            geom.Project(ArcMap.Document.FocusMap.SpatialReference);
+
+            if (geom.GeometryType == esriGeometryType.esriGeometryPoint)
+            {
+                var te = new TextElementClass() as ITextElement;
+                te.Text = text;
+
+                var ts = new TextSymbolClass();
+                ts.Size = size;
+                ts.VerticalAlignment = esriTextVerticalAlignment.esriTVACenter;
+                ts.HorizontalAlignment = esriTextHorizontalAlignment.esriTHACenter;
+
+                te.Symbol = ts;
+
+                element = te as IElement;
+            }
+
+            if (element == null)
+                return string.Empty;
+
+            element.Geometry = geom;
+
+            var mxdoc = ArcMap.Application.Document as IMxDocument;
+            var av = mxdoc.FocusMap as IActiveView;
+            var gc = av as IGraphicsContainer;
+
+            // store guid
+            var eprop = element as IElementProperties;
+            eprop.Name = Guid.NewGuid().ToString();
+
+            if (IsTempGraphic)
+                TempGraphicsList.Add(eprop.Name);
+            else
+                MapGraphicsList.Add(eprop.Name);
+
+            gc.AddElement(element, 0);
+
+            av.PartialRefresh(esriViewDrawPhase.esriViewGraphics, null, null);
+
+            return eprop.Name;
+        }
+
         /// <summary>
         /// Adds a graphic element to the map graphics container
         /// </summary>
         /// <param name="geom">IGeometry</param>
-        internal string AddGraphicToMap(IGeometry geom, IColor color, bool IsTempGraphic = false, esriSimpleMarkerStyle markerStyle = esriSimpleMarkerStyle.esriSMSCircle)
+        internal string AddGraphicToMap(IGeometry geom, IColor color, bool IsTempGraphic = false, esriSimpleMarkerStyle markerStyle = esriSimpleMarkerStyle.esriSMSCircle, int size = 5)
         {
             if (geom == null || ArcMap.Document == null || ArcMap.Document.FocusMap == null)
                 return string.Empty;
@@ -639,7 +688,7 @@ namespace ArcMapAddinVisibility.ViewModels
                 simpleMarkerSymbol.Color = color;
                 simpleMarkerSymbol.Outline = true;
                 simpleMarkerSymbol.OutlineColor = color;
-                simpleMarkerSymbol.Size = 5;
+                simpleMarkerSymbol.Size = size;
                 simpleMarkerSymbol.Style = markerStyle;
 
                 var markerElement = new MarkerElement() as IMarkerElement;

@@ -81,6 +81,10 @@ namespace ArcMapAddinVisibility.ViewModels
         public RelayCommand DeletePointCommand { get; set; }
         public RelayCommand DeleteAllPointsCommand { get; set; }
 
+        /// <summary>
+        /// Command method to delete points
+        /// </summary>
+        /// <param name="obj"></param>
         internal virtual void OnDeletePointCommand(object obj)
         {
             // remove observer points
@@ -129,6 +133,11 @@ namespace ArcMapAddinVisibility.ViewModels
 
         #region Event handlers
 
+        /// <summary>
+        /// Method called when the map TOC is updated
+        /// Reset surface names
+        /// </summary>
+        /// <param name="obj">not used</param>
         private void OnMapTocUpdated(object obj)
         {
             if (ArcMap.Document == null || ArcMap.Document.FocusMap == null)
@@ -163,16 +172,15 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <summary>
         /// Override this event to collect observer points based on tool mode
         /// </summary>
-        /// <param name="obj"></param>
+        /// <param name="obj">MapPointToolMode</param>
         internal override void OnNewMapPointEvent(object obj)
         {
-            // lets test this out
             if (!IsActiveTab)
                 return;
 
             var point = obj as IPoint;
 
-            if (point == null)
+            if (point == null || !IsValidPoint(point, true))
                 return;
 
             // ok, we have a point
@@ -181,16 +189,38 @@ namespace ArcMapAddinVisibility.ViewModels
                 // in tool mode "Observer" we add observer points
                 // otherwise ignore
                 ObserverPoints.Insert(0, point);
-                var color = new RgbColorClass() { Green = 255 } as IColor;
+                var color = new RgbColorClass() { Blue = 255 } as IColor;
                 var guid = AddGraphicToMap(point, color, true);
                 UpdatePointDictionary(point, guid);
             }
+        }
+        /// <summary>
+        /// Method to check to see point is withing the currently selected surface
+        /// returns true if there is no surface selected or point is contained by layer AOI
+        /// returns false if the point is not contained in the layer AOI
+        /// </summary>
+        /// <param name="point">IPoint to validate</param>
+        /// <param name="showPopup">boolean to show popup message or not</param>
+        /// <returns></returns>
+        internal bool IsValidPoint(IPoint point, bool showPopup = false)
+        {
+            var validPoint = true;
+
+            if (!string.IsNullOrWhiteSpace(SelectedSurfaceName) && ArcMap.Document != null && ArcMap.Document.FocusMap != null)
+            {
+                validPoint = IsPointWithinExtent(point, GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName).AreaOfInterest);
+
+                if (validPoint == false && showPopup)
+                    System.Windows.Forms.MessageBox.Show(Properties.Resources.MsgOutOfAOI);
+            }
+
+            return validPoint;
         }
 
         #endregion
 
         /// <summary>
-        /// Enumeration used to the different tool modes
+        /// Enumeration used for the different tool modes
         /// </summary>
         internal enum MapPointToolMode : int
         {
@@ -198,11 +228,30 @@ namespace ArcMapAddinVisibility.ViewModels
             Observer = 1,
             Target = 2
         }
-
+        /// <summary>
+        /// Dictionary to keep track of the related graphic element with IPoints (Observers and Targets)
+        /// </summary>
+        /// <param name="point">IPoint</param>
+        /// <param name="guid">guid string of the related graphic element</param>
         internal void UpdatePointDictionary(IPoint point, string guid)
         {
             if (!GuidPointDictionary.ContainsKey(guid))
                 GuidPointDictionary.Add(guid, point);
+        }
+        /// <summary>
+        /// Method used to check to see if a point is contained by an envelope
+        /// </summary>
+        /// <param name="point">IPoint</param>
+        /// <param name="env">IEnvelope</param>
+        /// <returns></returns>
+        internal bool IsPointWithinExtent(IPoint point, IEnvelope env)
+        {
+            var relationOp = env as IRelationalOperator;
+
+            if (relationOp == null)
+                return false;
+
+            return relationOp.Contains(point);
         }
 
         /// <summary>
@@ -281,6 +330,26 @@ namespace ArcMapAddinVisibility.ViewModels
 
             return null;
         }
+        /// <summary>
+        /// returns ILayer if found in the map layer collection
+        /// </summary>
+        /// <param name="map">IMap</param>
+        /// <param name="name">string name of layer</param>
+        /// <returns></returns>
+        public ILayer GetLayerFromMapByName(IMap map, string name)
+        {
+            for (int x = 0; x < map.LayerCount; x++)
+            {
+                var layer = map.get_Layer(x);
+
+                if (layer == null || layer.Name != name)
+                    continue;
+
+                return layer;
+            }
+
+            return null;
+        }
 
         /// <summary>
         /// Method to get a IRasterLayer from a map by layer name
@@ -299,7 +368,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
                 var rasterLayer = layer as IRasterLayer;
                 if (rasterLayer == null)
-                {                  
+                {
                     var mosaicLayer = layer as IMosaicLayer;
                     if (mosaicLayer != null)
                     {
@@ -403,6 +472,11 @@ namespace ArcMapAddinVisibility.ViewModels
             GuidPointDictionary.Clear();
         }
 
+        /// <summary>
+        /// Method used to reset the currently selected surfacename 
+        /// Use when toc items or map changes, on tab selection changed, etc
+        /// </summary>
+        /// <param name="map">IMap</param>
         internal void ResetSurfaceNames(IMap map)
         {
             // keep the current selection if it's still valid

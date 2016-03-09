@@ -268,18 +268,18 @@ namespace ArcMapAddinVisibility.ViewModels
                     ILayer layer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
                     string layerPath = GetLayerPath(layer);
 
-                    IFeatureLayer ipFeatureLayer = new FeatureLayerClass();
-                    ipFeatureLayer.FeatureClass = pointFc;
+                IFeatureLayer ipFeatureLayer = new FeatureLayerClass();
+                ipFeatureLayer.FeatureClass = pointFc;
 
-                    IDataset ipDataset = (IDataset)pointFc;
-                    string outputFcName = ipDataset.BrowseName + "_output";
-                    string strPath = ipDataset.Workspace.PathName + "\\" + ipDataset.BrowseName;
-                    string outPath = ipDataset.Workspace.PathName + "\\" + outputFcName;
+                IDataset ipDataset = (IDataset)pointFc;
+                string outputFcName = ipDataset.BrowseName + "_output";
+                string strPath = ipDataset.Workspace.PathName + "\\" + ipDataset.BrowseName;
+                string outPath = ipDataset.Workspace.PathName + "\\" + outputFcName;
 
-                    IVariantArray parameters = new VarArrayClass();
+                IVariantArray parameters = new VarArrayClass();
                     parameters.Add(layerPath);
-                    parameters.Add(strPath);
-                    parameters.Add(outPath);
+                parameters.Add(strPath);
+                parameters.Add(outPath);
 
                     esriLicenseStatus status = GetSpatialAnalystLicense();
 
@@ -363,7 +363,8 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <param name="obj"></param>
         internal override void OnNewMapPointEvent(object obj)
         {
-            // lets test this out
+            base.OnNewMapPointEvent(obj);
+
             if (!IsActiveTab)
                 return;
 
@@ -371,17 +372,6 @@ namespace ArcMapAddinVisibility.ViewModels
 
             if (point == null)
                 return;
-
-            // ok, we have a point
-            if (ToolMode == MapPointToolMode.Observer)
-            {
-                // in tool mode "Observer" we add observer points
-                // otherwise ignore
-                ObserverPoints.Insert(0, point);
-                var color = new RgbColorClass() { Blue = 255 } as IColor;
-                var guid = AddGraphicToMap(point, color, true);
-                UpdatePointDictionary(point, guid);
-            }
 
             EnableOkCancelClearBtns(ObserverPoints.Any());
         }
@@ -434,23 +424,23 @@ namespace ArcMapAddinVisibility.ViewModels
                 {                  
                     fillSymbol.Color = new RgbColorClass() { Red = 255 } as IColor;
                     uvRenderer.AddValue("0", "", fillSymbol as ISymbol);
-                    uvRenderer.set_Label("0", "Non-Visible");   
+                    uvRenderer.set_Label("0", "Non-Visible");                
                 }
-                fillSymbol2.Color = new RgbColorClass() { Green = 255 } as IColor;
-                uvRenderer.AddValue("1", "", fillSymbol2 as ISymbol);
-                uvRenderer.set_Label("1", "Visible by 1 Observer");
+                    fillSymbol2.Color = new RgbColorClass() { Green = 255 } as IColor;
+                    uvRenderer.AddValue("1", "", fillSymbol2 as ISymbol);
+                    uvRenderer.set_Label("1", "Visible by 1 Observer");
 
-                int field = ipTable.FindField("gridcode");
-                uvRenderer.set_Field(0, "gridcode");
+                    int field = ipTable.FindField("gridcode");
+                    uvRenderer.set_Field(0, "gridcode");
 
-                for (int i = 2; i < uniqueValues; i++)
-                {
-                    ISimpleFillSymbol newFillSymbol = new SimpleFillSymbolClass();
-                    newFillSymbol.Color = colorRamp.get_Color(i);
-                    uvRenderer.AddValue(i.ToString(), "", newFillSymbol as ISymbol);
-                    string label = "Visible by " + i.ToString() + " Observers";
-                    uvRenderer.set_Label(i.ToString(), label);
-                }
+                    for (int i = 2; i < uniqueValues; i++)
+                    {
+                        ISimpleFillSymbol newFillSymbol = new SimpleFillSymbolClass();
+                        newFillSymbol.Color = colorRamp.get_Color(i);
+                        uvRenderer.AddValue(i.ToString(), "", newFillSymbol as ISymbol);
+                        string label = "Visible by " + i.ToString() + " Observers";
+                        uvRenderer.set_Label(i.ToString(), label);
+                    }
 
                 return featRenderer;
             }
@@ -1012,7 +1002,7 @@ namespace ArcMapAddinVisibility.ViewModels
             }
 
             return angularDistance;
-        }
+        }  
 
         /// <summary>
         /// Return the layer file path of the provided layer
