@@ -205,6 +205,8 @@ namespace ArcMapAddinVisibility.ViewModels
                 var CanSeeAtLeastOneTarget = false;
 
                 var z1 = surface.GetElevation(observerPoint) + finalObserverOffset;
+                if (double.IsNaN(z1))
+                    z1 = 0.000001;
 
                 if (surface.IsVoidZ(z1))
                 {
@@ -215,6 +217,8 @@ namespace ArcMapAddinVisibility.ViewModels
                 foreach (var targetPoint in TargetPoints)
                 {
                     var z2 = surface.GetElevation(targetPoint) + finalTargetOffset;
+                    if (double.IsNaN(z2))
+                        z2 = 0.000001;
 
                     if (surface.IsVoidZ(z2))
                     {
