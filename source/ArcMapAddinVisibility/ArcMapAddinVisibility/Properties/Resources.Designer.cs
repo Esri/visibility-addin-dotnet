@@ -205,7 +205,7 @@ namespace ArcMapAddinVisibility.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Show Non-Visible Data.
+        ///   Looks up a localized string similar to Symbolize Non-Visible Data in Output.
         /// </summary>
         public static string LabelNonVisible {
             get {
