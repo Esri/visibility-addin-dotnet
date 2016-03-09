@@ -263,7 +263,10 @@ namespace ArcMapAddinVisibility.ViewModels
 
                 StopEditOperation((IWorkspace)workspace);
 
-                IRasterLayer rasterLayer = GetRasterLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
+                try
+                {
+                    ILayer layer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
+                    string layerPath = GetLayerPath(layer);
 
                 IFeatureLayer ipFeatureLayer = new FeatureLayerClass();
                 ipFeatureLayer.FeatureClass = pointFc;
@@ -274,19 +277,10 @@ namespace ArcMapAddinVisibility.ViewModels
                 string outPath = ipDataset.Workspace.PathName + "\\" + outputFcName;
 
                 IVariantArray parameters = new VarArrayClass();
-                parameters.Add(rasterLayer.FilePath);
+                    parameters.Add(layerPath);
                 parameters.Add(strPath);
                 parameters.Add(outPath);
 
-                if (ShowNonVisibleData == false)
-                {
-                    parameters.Add(null);
-                    parameters.Add(null);
-                    parameters.Add("true");
-                }                
-
-                try
-                {
                     esriLicenseStatus status = GetSpatialAnalystLicense();
 
                     IGeoProcessor2 gp = new GeoProcessorClass();
@@ -431,6 +425,7 @@ namespace ArcMapAddinVisibility.ViewModels
                     fillSymbol.Color = new RgbColorClass() { Red = 255 } as IColor;
                     uvRenderer.AddValue("0", "", fillSymbol as ISymbol);
                     uvRenderer.set_Label("0", "Non-Visible");                
+                }
                     fillSymbol2.Color = new RgbColorClass() { Green = 255 } as IColor;
                     uvRenderer.AddValue("1", "", fillSymbol2 as ISymbol);
                     uvRenderer.set_Label("1", "Visible by 1 Observer");
@@ -445,27 +440,8 @@ namespace ArcMapAddinVisibility.ViewModels
                         uvRenderer.AddValue(i.ToString(), "", newFillSymbol as ISymbol);
                         string label = "Visible by " + i.ToString() + " Observers";
                         uvRenderer.set_Label(i.ToString(), label);
-
                     }
-                }
-                else
-                {
-                    fillSymbol2.Color = new RgbColorClass() { Green = 255 } as IColor;
-                    uvRenderer.AddValue("1", "", fillSymbol2 as ISymbol);
-                    uvRenderer.set_Label("1", "Visible by 1 Observer");
 
-                    int field = ipTable.FindField("gridcode");
-                    uvRenderer.set_Field(0, "gridcode");
-
-                    for (int i = 2; i <= uniqueValues; i++)
-                    {
-                        ISimpleFillSymbol newFillSymbol = new SimpleFillSymbolClass();
-                        newFillSymbol.Color = colorRamp.get_Color(i-1);
-                        uvRenderer.AddValue(i.ToString(), "", newFillSymbol as ISymbol);
-                        string label = "Visible by " + (i).ToString() + " Observers";
-                        uvRenderer.set_Label(i.ToString(), label);
-                    }
-                }
                 return featRenderer;
             }
             catch (Exception ex)
@@ -1027,6 +1003,27 @@ namespace ArcMapAddinVisibility.ViewModels
 
             return angularDistance;
         }  
+
+        /// <summary>
+        /// Return the layer file path of the provided layer
+        /// </summary>
+        /// <param name="layer">ILayer</param>
+        /// <returns>file path of layer</returns>
+        private static string GetLayerPath(ILayer layer)
+        {
+            if (layer is IRasterLayer)
+            {
+                IRasterLayer rlayer = layer as IRasterLayer;
+                return rlayer.FilePath;
+            }
+            else if (layer is IMosaicLayer)
+            {
+                IMosaicLayer mlayer = layer as IMosaicLayer;
+                return mlayer.FilePath;
+            }
+
+            return null;
+        }
 
         #endregion
     }
