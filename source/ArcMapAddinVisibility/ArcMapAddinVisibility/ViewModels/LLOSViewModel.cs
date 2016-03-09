@@ -222,9 +222,10 @@ namespace ArcMapAddinVisibility.ViewModels
                         continue;
                     }
                     
-                    geoBridge.GetLineOfSight(surface,
-                        new PointClass() { Z = z1, X = observerPoint.X, Y = observerPoint.Y, ZAware = true },
-                        new PointClass() { Z = z2, X = targetPoint.X, Y = targetPoint.Y, ZAware = true },
+                    var fromPoint = new PointClass() { Z = z1, X = observerPoint.X, Y = observerPoint.Y, ZAware = true } as IPoint;
+                    var toPoint = new PointClass() { Z = z2, X = targetPoint.X, Y = targetPoint.Y, ZAware = true } as IPoint;
+
+                    geoBridge.GetLineOfSight(surface, fromPoint, toPoint,
                         out pointObstruction, out polyVisible, out polyInvisible, out targetIsVisible, false, false);
 
                     // set the flag if we can see at least one target
@@ -244,6 +245,18 @@ namespace ArcMapAddinVisibility.ViewModels
                     if (polyInvisible != null)
                     {
                         AddGraphicToMap(polyInvisible, new RgbColorClass() { Red = 255 });
+                    }
+
+                    if(polyVisible == null && polyInvisible == null)
+                    {
+                        var pcol = new PolylineClass() as IPointCollection;
+                        pcol.AddPoint(fromPoint);
+                        pcol.AddPoint(toPoint);
+
+                        if(targetIsVisible)
+                            AddGraphicToMap(pcol as IPolyline, new RgbColorClass() { Green = 255 });
+                        else
+                            AddGraphicToMap(pcol as IPolyline, new RgbColorClass() { Red = 255 });
                     }
                 }
 
