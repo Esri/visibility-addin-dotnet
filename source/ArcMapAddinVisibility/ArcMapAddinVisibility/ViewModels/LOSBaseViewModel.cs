@@ -32,7 +32,7 @@ namespace ArcMapAddinVisibility.ViewModels
             Mediator.Register(Constants.MAP_TOC_UPDATED, OnMapTocUpdated);
 
             DeletePointCommand = new RelayCommand(OnDeletePointCommand);
-            DeleteAllPointsCommand = new RelayCommand(OnDeleteAllPointsCommand); 
+            DeleteAllPointsCommand = new RelayCommand(OnDeleteAllPointsCommand);
 
             GuidPointDictionary = new Dictionary<string, IPoint>();
         }
@@ -40,7 +40,7 @@ namespace ArcMapAddinVisibility.ViewModels
         #region Properties
 
         private double? observerOffset;
-        public double? ObserverOffset 
+        public double? ObserverOffset
         {
             get { return observerOffset; }
             set
@@ -53,9 +53,9 @@ namespace ArcMapAddinVisibility.ViewModels
             }
         }
         private double? targetOffset;
-        public double? TargetOffset 
+        public double? TargetOffset
         {
-            get { return targetOffset; } 
+            get { return targetOffset; }
             set
             {
                 targetOffset = value;
@@ -71,7 +71,7 @@ namespace ArcMapAddinVisibility.ViewModels
         public ObservableCollection<string> SurfaceLayerNames { get; set; }
         public string SelectedSurfaceName { get; set; }
         public DistanceTypes OffsetUnitType { get; set; }
-        public Dictionary<string, IPoint> GuidPointDictionary { get; set; } 
+        public Dictionary<string, IPoint> GuidPointDictionary { get; set; }
         public AngularTypes AngularUnitType { get; set; }
 
         #endregion
@@ -301,10 +301,10 @@ namespace ArcMapAddinVisibility.ViewModels
                 if (layer == null || layer.Name != name)
                     continue;
 
-                    var tin = layer as ITinLayer;
-                    if (tin != null)
+                var tin = layer as ITinLayer;
+                if (tin != null)
                 {
-                        return tin.Dataset as ISurface;
+                    return tin.Dataset as ISurface;
                 }
 
                 var rasterSurface = new RasterSurfaceClass() as IRasterSurface;
@@ -313,11 +313,11 @@ namespace ArcMapAddinVisibility.ViewModels
                 var mosaicLayer = layer as IMosaicLayer;
                 var rasterLayer = layer as IRasterLayer;
 
-                if (mosaicLayer != null)
+                if (mosaicLayer != null && mosaicLayer.PreviewLayer != null && mosaicLayer.PreviewLayer.Raster != null)
                 {
                     rasterSurface.PutRaster(mosaicLayer.PreviewLayer.Raster, 0);
                 }
-                else if (rasterLayer != null)
+                else if (rasterLayer != null && rasterLayer.Raster != null)
                 {
                     rasterSurface.PutRaster(rasterLayer.Raster, 0);
                 }
@@ -376,40 +376,40 @@ namespace ArcMapAddinVisibility.ViewModels
                     {
                         if (IncludeTinLayers)
                             list.Add(layer.Name);
-                        
+
                         continue;
                     }
 
-                    var rasterSurface = new RasterSurfaceClass() as IRasterSurface; 
+                    var rasterSurface = new RasterSurfaceClass() as IRasterSurface;
                     ISurface surface = null;
 
                     var ml = layer as IMosaicLayer;
-                    
-                    if(ml != null)
+
+                    if (ml != null)
                     {
-                        if(ml.PreviewLayer != null && ml.PreviewLayer.Raster != null)
+                        if (ml.PreviewLayer != null && ml.PreviewLayer.Raster != null)
                         {
                             rasterSurface.PutRaster(ml.PreviewLayer.Raster, 0);
 
                             surface = rasterSurface as ISurface;
                             if (surface != null)
-                        list.Add(layer.Name);
+                                list.Add(layer.Name);
                         }
                         continue;
                     }
 
                     var rasterLayer = layer as IRasterLayer;
-                    if (rasterLayer != null)
+                    if (rasterLayer != null && rasterLayer.Raster != null)
                     {
                         rasterSurface.PutRaster(rasterLayer.Raster, 0);
 
                         surface = rasterSurface as ISurface;
-                    if (surface != null)
-                        list.Add(layer.Name);
+                        if (surface != null)
+                            list.Add(layer.Name);
                         continue;
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Console.WriteLine(ex);
                 }
@@ -452,7 +452,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
             SurfaceLayerNames.Clear();
 
-            foreach (var name in GetSurfaceNamesFromMap(map, (this.GetType() == typeof(LLOSViewModel))? true:false))
+            foreach (var name in GetSurfaceNamesFromMap(map, (this.GetType() == typeof(LLOSViewModel)) ? true : false))
                 SurfaceLayerNames.Add(name);
 
             if (SurfaceLayerNames.Contains(tempName))
