@@ -313,11 +313,11 @@ namespace ArcMapAddinVisibility.ViewModels
                 var mosaicLayer = layer as IMosaicLayer;
                 var rasterLayer = layer as IRasterLayer;
 
-                if (mosaicLayer != null)
+                if (mosaicLayer != null && mosaicLayer.PreviewLayer != null && mosaicLayer.PreviewLayer.Raster != null)
                 {
                     rasterSurface.PutRaster(mosaicLayer.PreviewLayer.Raster, 0);
                 }
-                else if (rasterLayer != null)
+                else if (rasterLayer != null && rasterLayer.Raster != null)
                 {
                     rasterSurface.PutRaster(rasterLayer.Raster, 0);
                 }
@@ -385,7 +385,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
                     var ml = layer as IMosaicLayer;
 
-                    if (ml != null && !string.IsNullOrWhiteSpace(ml.FilePath))
+                    if (ml != null)
                     {
                         if (ml.PreviewLayer != null && ml.PreviewLayer.Raster != null)
                         {
@@ -399,7 +399,7 @@ namespace ArcMapAddinVisibility.ViewModels
                     }
 
                     var rasterLayer = layer as IRasterLayer;
-                    if (rasterLayer != null)
+                    if (rasterLayer != null && rasterLayer.Raster != null)
                     {
                         rasterSurface.PutRaster(rasterLayer.Raster, 0);
 
