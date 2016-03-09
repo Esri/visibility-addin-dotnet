@@ -220,7 +220,7 @@
     <value>Delete All</value>
   </data>
   <data name="LabelNonVisible" xml:space="preserve">
-    <value>Show Non-Visible Data</value>
+    <value>Symbolize Non-Visible Data in Output</value>
   </data>
   <data name="LabelTo" xml:space="preserve">
     <value>to</value>

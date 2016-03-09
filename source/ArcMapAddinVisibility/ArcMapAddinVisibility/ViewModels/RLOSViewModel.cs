@@ -281,13 +281,6 @@ namespace ArcMapAddinVisibility.ViewModels
                     parameters.Add(strPath);
                     parameters.Add(outPath);
 
-                    if (ShowNonVisibleData == false)
-                    {
-                        parameters.Add(null);
-                        parameters.Add(null);
-                        parameters.Add("true");
-                    }                
-          
                     esriLicenseStatus status = GetSpatialAnalystLicense();
 
                     IGeoProcessor2 gp = new GeoProcessorClass();
@@ -441,42 +434,24 @@ namespace ArcMapAddinVisibility.ViewModels
                 {                  
                     fillSymbol.Color = new RgbColorClass() { Red = 255 } as IColor;
                     uvRenderer.AddValue("0", "", fillSymbol as ISymbol);
-                    uvRenderer.set_Label("0", "Non-Visible");                
-                    fillSymbol2.Color = new RgbColorClass() { Green = 255 } as IColor;
-                    uvRenderer.AddValue("1", "", fillSymbol2 as ISymbol);
-                    uvRenderer.set_Label("1", "Visible by 1 Observer");
-
-                    int field = ipTable.FindField("gridcode");
-                    uvRenderer.set_Field(0, "gridcode");
-
-                    for (int i = 2; i < uniqueValues; i++)
-                    {
-                        ISimpleFillSymbol newFillSymbol = new SimpleFillSymbolClass();
-                        newFillSymbol.Color = colorRamp.get_Color(i);
-                        uvRenderer.AddValue(i.ToString(), "", newFillSymbol as ISymbol);
-                        string label = "Visible by " + i.ToString() + " Observers";
-                        uvRenderer.set_Label(i.ToString(), label);
-
-                    }
+                    uvRenderer.set_Label("0", "Non-Visible");   
                 }
-                else
+                fillSymbol2.Color = new RgbColorClass() { Green = 255 } as IColor;
+                uvRenderer.AddValue("1", "", fillSymbol2 as ISymbol);
+                uvRenderer.set_Label("1", "Visible by 1 Observer");
+
+                int field = ipTable.FindField("gridcode");
+                uvRenderer.set_Field(0, "gridcode");
+
+                for (int i = 2; i < uniqueValues; i++)
                 {
-                    fillSymbol2.Color = new RgbColorClass() { Green = 255 } as IColor;
-                    uvRenderer.AddValue("1", "", fillSymbol2 as ISymbol);
-                    uvRenderer.set_Label("1", "Visible by 1 Observer");
-
-                    int field = ipTable.FindField("gridcode");
-                    uvRenderer.set_Field(0, "gridcode");
-
-                    for (int i = 2; i <= uniqueValues; i++)
-                    {
-                        ISimpleFillSymbol newFillSymbol = new SimpleFillSymbolClass();
-                        newFillSymbol.Color = colorRamp.get_Color(i-1);
-                        uvRenderer.AddValue(i.ToString(), "", newFillSymbol as ISymbol);
-                        string label = "Visible by " + (i).ToString() + " Observers";
-                        uvRenderer.set_Label(i.ToString(), label);
-                    }
+                    ISimpleFillSymbol newFillSymbol = new SimpleFillSymbolClass();
+                    newFillSymbol.Color = colorRamp.get_Color(i);
+                    uvRenderer.AddValue(i.ToString(), "", newFillSymbol as ISymbol);
+                    string label = "Visible by " + i.ToString() + " Observers";
+                    uvRenderer.set_Label(i.ToString(), label);
                 }
+
                 return featRenderer;
             }
             catch (Exception ex)
