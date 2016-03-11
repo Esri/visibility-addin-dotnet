@@ -228,4 +228,7 @@
   <data name="MsgOutOfAOI" xml:space="preserve">
     <value>Point does not fall within the input extent.</value>
   </data>
+  <data name="ExceptionSomethingWentWrong" xml:space="preserve">
+    <value>Something went wrong.</value>
+  </data>
 </root>
