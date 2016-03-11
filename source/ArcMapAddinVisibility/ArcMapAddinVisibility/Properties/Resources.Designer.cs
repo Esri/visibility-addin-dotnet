@@ -376,6 +376,15 @@ namespace ArcMapAddinVisibility.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Linear Line of Sight.
+        /// </summary>
+        public static string TooltipLLOSTab {
+            get {
+                return ResourceManager.GetString("TooltipLLOSTab", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Map Point Tool.
         /// </summary>
         public static string TooltipMapPointTool {
@@ -390,6 +399,15 @@ namespace ArcMapAddinVisibility.Properties {
         public static string TooltipObserverMapPointTool {
             get {
                 return ResourceManager.GetString("TooltipObserverMapPointTool", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Radial Line of Sight.
+        /// </summary>
+        public static string TooltipRLOSTab {
+            get {
+                return ResourceManager.GetString("TooltipRLOSTab", resourceCulture);
             }
         }
         

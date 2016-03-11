@@ -231,4 +231,10 @@
   <data name="ExceptionSomethingWentWrong" xml:space="preserve">
     <value>Something went wrong.</value>
   </data>
+  <data name="TooltipLLOSTab" xml:space="preserve">
+    <value>Linear Line of Sight</value>
+  </data>
+  <data name="TooltipRLOSTab" xml:space="preserve">
+    <value>Radial Line of Sight</value>
+  </data>
 </root>
