@@ -223,7 +223,7 @@ namespace ArcMapAddinVisibility.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Observer Offset.
+        ///   Looks up a localized string similar to Observer.
         /// </summary>
         public static string LabelObserverOffset {
             get {
@@ -246,6 +246,15 @@ namespace ArcMapAddinVisibility.Properties {
         public static string LabelObserverPoints {
             get {
                 return ResourceManager.GetString("LabelObserverPoints", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Offsets.
+        /// </summary>
+        public static string LabelOffsets {
+            get {
+                return ResourceManager.GetString("LabelOffsets", resourceCulture);
             }
         }
         
@@ -295,7 +304,7 @@ namespace ArcMapAddinVisibility.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Target Offset.
+        ///   Looks up a localized string similar to Target.
         /// </summary>
         public static string LabelTargetOffset {
             get {
@@ -376,6 +385,15 @@ namespace ArcMapAddinVisibility.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Linear Line of Sight.
+        /// </summary>
+        public static string TooltipLLOSTab {
+            get {
+                return ResourceManager.GetString("TooltipLLOSTab", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Map Point Tool.
         /// </summary>
         public static string TooltipMapPointTool {
@@ -390,6 +408,15 @@ namespace ArcMapAddinVisibility.Properties {
         public static string TooltipObserverMapPointTool {
             get {
                 return ResourceManager.GetString("TooltipObserverMapPointTool", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Radial Line of Sight.
+        /// </summary>
+        public static string TooltipRLOSTab {
+            get {
+                return ResourceManager.GetString("TooltipRLOSTab", resourceCulture);
             }
         }
         
