@@ -61,6 +61,14 @@ namespace ArcMapAddinVisibility.ViewModels
         internal bool HasPoint2 = false;
         internal INewLineFeedback feedback = null;
 
+        public bool HasMapGraphics
+        {
+            get
+            {
+                return MapGraphicsList.Any();
+            }
+        }
+
         private IPoint point1 = null;
         /// <summary>
         /// Property for the first IPoint
@@ -377,10 +385,10 @@ namespace ArcMapAddinVisibility.ViewModels
             if (gc == null)
                 return;
 
-            //RemoveGraphics(gc, TempGraphicsList);
             RemoveGraphics(gc, MapGraphicsList);
 
-            av.PartialRefresh(esriViewDrawPhase.esriViewGraphics, null, null);
+            //av.PartialRefresh(esriViewDrawPhase.esriViewGraphics, null, null);
+            av.Refresh(); // sometimes a partial refresh is not working
         }
 
         /// <summary>
@@ -433,6 +441,8 @@ namespace ArcMapAddinVisibility.ViewModels
 
             list.Clear();
             elementList.Clear();
+            
+            RaisePropertyChanged(() => HasMapGraphics);
         }
 
         internal void RemoveGraphics(List<string> guidList)
@@ -464,6 +474,7 @@ namespace ArcMapAddinVisibility.ViewModels
         {
             MapGraphicsList.AddRange(TempGraphicsList);
             TempGraphicsList.Clear();
+            RaisePropertyChanged(() => HasMapGraphics);
         }
 
         /// <summary>
@@ -664,6 +675,8 @@ namespace ArcMapAddinVisibility.ViewModels
 
             av.PartialRefresh(esriViewDrawPhase.esriViewGraphics, null, null);
 
+            RaisePropertyChanged(() => HasMapGraphics);
+
             return eprop.Name;
         }
 
@@ -747,6 +760,8 @@ namespace ArcMapAddinVisibility.ViewModels
             gc.AddElement(element, 0);
 
             av.PartialRefresh(esriViewDrawPhase.esriViewGraphics, null, null);
+
+            RaisePropertyChanged(() => HasMapGraphics);
 
             return eprop.Name;
         }
