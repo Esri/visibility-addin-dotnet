@@ -39,6 +39,17 @@ namespace ArcMapAddinVisibility.ViewModels
 
         #region Properties
 
+        private bool isRunning = false;
+        public bool IsRunning
+        {
+            get { return isRunning; }
+            set
+            {
+                isRunning = value;
+                RaisePropertyChanged(() => IsRunning);
+            }
+        }
+
         private double? observerOffset;
         public double? ObserverOffset
         {

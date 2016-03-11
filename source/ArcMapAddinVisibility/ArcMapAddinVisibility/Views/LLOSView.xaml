@@ -124,7 +124,33 @@
                     </StackPanel>
                 </GroupBox>
                 <StackPanel Grid.Row="12" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Grid.Row="12" Grid.Column="0" Content="{x:Static prop:Resources.LabelCancel}" ToolTip="{x:Static prop:Resources.LabelCancel}" Command="{Binding CancelCommand}" Margin="3,20,0,0" />
+                    <Button Grid.Row="12" Grid.Column="0" Content="{x:Static prop:Resources.LabelCancel}" ToolTip="{x:Static prop:Resources.LabelCancel}" Command="{Binding CancelCommand}" Margin="3,20,0,0">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="IsEnabled" Value="False" />
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding ElementName=listBoxObservers, Path=HasItems}" Value="True" />
+                                            <Condition Binding="{Binding IsRunning}" Value="False" />
+                                        </MultiDataTrigger.Conditions>
+                                        <MultiDataTrigger.Setters>
+                                            <Setter Property="IsEnabled" Value="True" />
+                                        </MultiDataTrigger.Setters>
+                                    </MultiDataTrigger>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding ElementName=listBoxTargets, Path=HasItems}" Value="True" />
+                                            <Condition Binding="{Binding IsRunning}" Value="False" />
+                                        </MultiDataTrigger.Conditions>
+                                        <MultiDataTrigger.Setters>
+                                            <Setter Property="IsEnabled" Value="True" />
+                                        </MultiDataTrigger.Setters>
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
                     <Button Grid.Row="12" Grid.Column="1" Content="{x:Static prop:Resources.LabelOK}" ToolTip="{x:Static prop:Resources.LabelOK}" Command="{Binding SubmitCommand}" Margin="3,20,0,0">
                         <Button.Style>
                             <Style TargetType="Button">

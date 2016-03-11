@@ -174,6 +174,7 @@ namespace ArcMapAddinVisibility.ViewModels
         {
             try
             {
+                IsRunning = true;
 
                 if (!CanCreateElement || ArcMap.Document == null || ArcMap.Document.FocusMap == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
                     return;
@@ -285,6 +286,10 @@ namespace ArcMapAddinVisibility.ViewModels
             catch(Exception ex)
             {
                 System.Windows.Forms.MessageBox.Show(Properties.Resources.ExceptionSomethingWentWrong);
+            }
+            finally
+            {
+                IsRunning = false;
             }
         }
 
