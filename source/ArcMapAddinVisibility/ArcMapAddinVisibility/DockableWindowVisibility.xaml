@@ -12,10 +12,10 @@
     </UserControl.DataContext>
     <Grid Margin="3,3,3,3">
         <TabControl SelectedItem="{Binding SelectedTab, Mode=OneWayToSource}">
-            <TabItem Header="{x:Static prop:Resources.LabelTabLLOS}">
+            <TabItem Header="{x:Static prop:Resources.LabelTabLLOS}" ToolTip="{x:Static prop:Resources.TooltipLLOSTab}">
                 <UserControl Content="{Binding LLOSView}" />
             </TabItem>
-            <TabItem Header="{x:Static prop:Resources.LabelTabRLOS}">
+            <TabItem Header="{x:Static prop:Resources.LabelTabRLOS}" ToolTip="{x:Static prop:Resources.TooltipRLOSTab}">
                 <UserControl Content="{Binding RLOSView}" />
             </TabItem>
         </TabControl>

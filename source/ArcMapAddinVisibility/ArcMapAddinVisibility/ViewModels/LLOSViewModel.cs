@@ -172,116 +172,125 @@ namespace ArcMapAddinVisibility.ViewModels
         /// </summary>
         internal override void CreateMapElement()
         {
-            if (!CanCreateElement || ArcMap.Document == null || ArcMap.Document.FocusMap == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
-                return;
-
- 	        base.CreateMapElement();
-            
-            // take your observer and target points and get lines of sight
-
-            var surface = GetSurfaceFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
-
-            if(surface == null)
-                return;
-
-            var geoBridge = new GeoDatabaseHelperClass() as IGeoDatabaseBridge2;
-
-            if (geoBridge == null)
-                return;
-
-            IPoint pointObstruction = null;
-            IPolyline polyVisible = null;
-            IPolyline polyInvisible = null;
-            bool targetIsVisible = false;
-
-            double finalObserverOffset = GetOffsetInZUnits(ArcMap.Document.FocusMap, ObserverOffset.Value, surface.ZFactor, OffsetUnitType);
-            double finalTargetOffset = GetOffsetInZUnits(ArcMap.Document.FocusMap, TargetOffset.Value, surface.ZFactor, OffsetUnitType);
-
-            var DictionaryTargetObserverCount = new Dictionary<IPoint, int>();
-
-            foreach (var observerPoint in ObserverPoints)
+            try
             {
-                // keep track of visible targets for this observer
-                var CanSeeAtLeastOneTarget = false;
+                IsRunning = true;
 
-                var z1 = surface.GetElevation(observerPoint) + finalObserverOffset;
-                if (double.IsNaN(z1))
-                    z1 = 0.000001;
+                if (!CanCreateElement || ArcMap.Document == null || ArcMap.Document.FocusMap == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
+                    return;
 
-                if (surface.IsVoidZ(z1))
+                base.CreateMapElement();
+
+                // take your observer and target points and get lines of sight
+
+                var surface = GetSurfaceFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
+
+                if (surface == null)
+                    return;
+
+                var geoBridge = new GeoDatabaseHelperClass() as IGeoDatabaseBridge2;
+
+                if (geoBridge == null)
+                    return;
+
+                IPoint pointObstruction = null;
+                IPolyline polyVisible = null;
+                IPolyline polyInvisible = null;
+                bool targetIsVisible = false;
+
+                double finalObserverOffset = GetOffsetInZUnits(ArcMap.Document.FocusMap, ObserverOffset.Value, surface.ZFactor, OffsetUnitType);
+                double finalTargetOffset = GetOffsetInZUnits(ArcMap.Document.FocusMap, TargetOffset.Value, surface.ZFactor, OffsetUnitType);
+
+                var DictionaryTargetObserverCount = new Dictionary<IPoint, int>();
+
+                foreach (var observerPoint in ObserverPoints)
                 {
-                    //TODO handle void z
-                    continue;
+                    // keep track of visible targets for this observer
+                    var CanSeeAtLeastOneTarget = false;
+
+                    var z1 = surface.GetElevation(observerPoint) + finalObserverOffset;
+
+                    if (surface.IsVoidZ(z1))
+                    {
+                        if (double.IsNaN(z1))
+                            z1 = 0.000001;
+                    }
+
+                    foreach (var targetPoint in TargetPoints)
+                    {
+                        var z2 = surface.GetElevation(targetPoint) + finalTargetOffset;
+
+                        if (surface.IsVoidZ(z2))
+                        {
+                            if (double.IsNaN(z2))
+                                z2 = 0.000001;
+                        }
+
+                        var fromPoint = new PointClass() { Z = z1, X = observerPoint.X, Y = observerPoint.Y, ZAware = true } as IPoint;
+                        var toPoint = new PointClass() { Z = z2, X = targetPoint.X, Y = targetPoint.Y, ZAware = true } as IPoint;
+
+                        geoBridge.GetLineOfSight(surface, fromPoint, toPoint,
+                            out pointObstruction, out polyVisible, out polyInvisible, out targetIsVisible, false, false);
+
+                        // set the flag if we can see at least one target
+                        if (targetIsVisible)
+                        {
+                            CanSeeAtLeastOneTarget = true;
+
+                            // update target observer count
+                            UpdateTargetObserverCount(DictionaryTargetObserverCount, targetPoint);
+                        }
+
+                        if (polyVisible != null)
+                        {
+                            AddGraphicToMap(polyVisible, new RgbColorClass() { Green = 255 });
+                        }
+
+                        if (polyInvisible != null)
+                        {
+                            AddGraphicToMap(polyInvisible, new RgbColorClass() { Red = 255 });
+                        }
+
+                        if (polyVisible == null && polyInvisible == null)
+                        {
+                            var pcol = new PolylineClass() as IPointCollection;
+                            pcol.AddPoint(fromPoint);
+                            pcol.AddPoint(toPoint);
+
+                            if (targetIsVisible)
+                                AddGraphicToMap(pcol as IPolyline, new RgbColorClass() { Green = 255 });
+                            else
+                                AddGraphicToMap(pcol as IPolyline, new RgbColorClass() { Red = 255 });
+                        }
+                    }
+
+                    // visualize observer
+
+                    // add blue dot
+                    AddGraphicToMap(observerPoint, new RgbColorClass() { Blue = 255 }, size: 10);
+
+                    if (CanSeeAtLeastOneTarget)
+                    {
+                        // add green dot
+                        AddGraphicToMap(observerPoint, new RgbColorClass() { Green = 255 });
+                    }
+                    else
+                    {
+                        // add red dot
+                        AddGraphicToMap(observerPoint, new RgbColorClass() { Red = 255 });
+                    }
                 }
 
-                foreach (var targetPoint in TargetPoints)
-                {
-                    var z2 = surface.GetElevation(targetPoint) + finalTargetOffset;
-                    if (double.IsNaN(z2))
-                        z2 = 0.000001;
-
-                    if (surface.IsVoidZ(z2))
-                    {
-                        //TODO handle void z
-                        continue;
-                    }
-                    
-                    var fromPoint = new PointClass() { Z = z1, X = observerPoint.X, Y = observerPoint.Y, ZAware = true } as IPoint;
-                    var toPoint = new PointClass() { Z = z2, X = targetPoint.X, Y = targetPoint.Y, ZAware = true } as IPoint;
-
-                    geoBridge.GetLineOfSight(surface, fromPoint, toPoint,
-                        out pointObstruction, out polyVisible, out polyInvisible, out targetIsVisible, false, false);
-
-                    // set the flag if we can see at least one target
-                    if (targetIsVisible)
-                    {
-                        CanSeeAtLeastOneTarget = true;
-
-                        // update target observer count
-                        UpdateTargetObserverCount(DictionaryTargetObserverCount, targetPoint);
-                    }
-
-                    if (polyVisible != null)
-                    {
-                        AddGraphicToMap(polyVisible, new RgbColorClass() { Green = 255 });
-                    }
-
-                    if (polyInvisible != null)
-                    {
-                        AddGraphicToMap(polyInvisible, new RgbColorClass() { Red = 255 });
-                    }
-
-                    if(polyVisible == null && polyInvisible == null)
-                    {
-                        var pcol = new PolylineClass() as IPointCollection;
-                        pcol.AddPoint(fromPoint);
-                        pcol.AddPoint(toPoint);
-
-                        if(targetIsVisible)
-                            AddGraphicToMap(pcol as IPolyline, new RgbColorClass() { Green = 255 });
-                        else
-                            AddGraphicToMap(pcol as IPolyline, new RgbColorClass() { Red = 255 });
-                    }
-                }
-
-                // visualize observer
-
-                // add blue dot
-                AddGraphicToMap(observerPoint, new RgbColorClass() { Blue = 255 }, size: 10);
-                                
-                if(CanSeeAtLeastOneTarget)
-                {
-                    // add green dot
-                    AddGraphicToMap(observerPoint, new RgbColorClass() { Green = 255 });
-                }
-                else
-                {
-                    // add red dot
-                    AddGraphicToMap(observerPoint, new RgbColorClass() { Red = 255 });
-                }
+                VisualizeTargets(DictionaryTargetObserverCount);
             }
-
-            VisualizeTargets(DictionaryTargetObserverCount);
+            catch(Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show(Properties.Resources.ExceptionSomethingWentWrong);
+            }
+            finally
+            {
+                IsRunning = false;
+            }
         }
 
         private void VisualizeTargets(Dictionary<IPoint, int> dict)

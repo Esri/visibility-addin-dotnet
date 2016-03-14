@@ -55,7 +55,7 @@
                     </ComboBox.ItemTemplate>
                 </ComboBox>
                 <TextBlock Grid.Row="2" Grid.ColumnSpan="3" Text="{x:Static prop:Resources.LabelObserverPoints}" Margin="3,3,0,0" />
-                <ListBox Grid.Row="3" Grid.ColumnSpan="2" ItemsSource="{Binding ObserverPoints}" ScrollViewer.VerticalScrollBarVisibility="Visible" 
+                <ListBox x:Name="listBoxObservers" Grid.Row="3" Grid.ColumnSpan="2" ItemsSource="{Binding ObserverPoints}" ScrollViewer.VerticalScrollBarVisibility="Visible" 
                  PreviewMouseRightButtonDown="ListBox_PreviewMouseRightButtonDown"
                  SelectionMode="Multiple"
                  Height="60" Margin="3,3,0,0">
@@ -81,7 +81,7 @@
                     <Image Source="/ArcMapAddinVisibility;component/Images/Add_Point32_d.png" Width="18" Height="18" />
                 </Button>
                 <TextBlock Grid.Row="4" Grid.ColumnSpan="3" Text="{x:Static prop:Resources.LabelTargetPoints}" Margin="3,3,0,0" />
-                <ListBox Grid.Row="5" Grid.ColumnSpan="2" ItemsSource="{Binding TargetPoints}" ScrollViewer.VerticalScrollBarVisibility="Visible" 
+                <ListBox x:Name="listBoxTargets" Grid.Row="5" Grid.ColumnSpan="2" ItemsSource="{Binding TargetPoints}" ScrollViewer.VerticalScrollBarVisibility="Visible" 
                  PreviewMouseRightButtonDown="ListBox_PreviewMouseRightButtonDown"
                  SelectionMode="Multiple"
                  Height="60" Margin="3,3,0,0">
@@ -106,21 +106,81 @@
                 HorizontalAlignment="Center" ToolTip="{x:Static prop:Resources.TooltipTargetMapPointTool}" Margin="3,3,0,0">
                     <Image Source="/ArcMapAddinVisibility;component/Images/Add_Point32_d.png" Width="18" Height="18" />
                 </Button>
-                <TextBlock Grid.Row="6" Grid.ColumnSpan="3" Text="{x:Static prop:Resources.LabelObserverOffset}" Margin="3,3,0,0" />
-                <TextBox Grid.Row="7" Grid.ColumnSpan="2" Text="{Binding ObserverOffset, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
-                    Validation.ErrorTemplate="{StaticResource errorTemplate}" Margin="3,3,0,0" />
-                <TextBlock Grid.Row="8" Grid.ColumnSpan="3" Text="{x:Static prop:Resources.LabelTargetOffset}" Margin="3,3,0,0" />
-                <TextBox Grid.Row="9" Grid.ColumnSpan="2" Text="{Binding TargetOffset, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
-                    Validation.ErrorTemplate="{StaticResource errorTemplate}" Margin="3,3,0,0" />
-                <ComboBox Grid.Row="8" Grid.Column="2" x:Name="cmbOffsetUnitType"
-            ItemsSource="{Binding Source={StaticResource lineDistanceData}}" 
-            SelectedItem="{Binding Path=OffsetUnitType, Mode=TwoWay}"                      
-            Height="Auto" Margin="3,3,0,0">
-                </ComboBox>
+                <GroupBox Header="{x:Static prop:Resources.LabelOffsets}" 
+                          Grid.Row="6" Grid.ColumnSpan="4"
+                          Margin="0,3,0,0">
+                    <StackPanel>
+                        <TextBlock Text="{x:Static prop:Resources.LabelObserverOffset}" Margin="3,3,0,0" />
+                        <TextBox Text="{Binding ObserverOffset, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
+                            Validation.ErrorTemplate="{StaticResource errorTemplate}" Margin="3,3,0,0" />
+                        <TextBlock Text="{x:Static prop:Resources.LabelTargetOffset}" Margin="3,3,0,0" />
+                        <TextBox Text="{Binding TargetOffset, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
+                            Validation.ErrorTemplate="{StaticResource errorTemplate}" Margin="3,3,0,0" />
+                        <ComboBox x:Name="cmbOffsetUnitType"
+                            ItemsSource="{Binding Source={StaticResource lineDistanceData}}" 
+                            SelectedItem="{Binding Path=OffsetUnitType, Mode=TwoWay}"                      
+                            Height="Auto" Margin="3,3,0,0">
+                        </ComboBox>
+                    </StackPanel>
+                </GroupBox>
                 <StackPanel Grid.Row="12" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Grid.Row="12" Grid.Column="0" Content="{x:Static prop:Resources.LabelCancel}" ToolTip="{x:Static prop:Resources.LabelCancel}" Command="{Binding CancelCommand}" Margin="3,20,0,0" />
-                    <Button Grid.Row="12" Grid.Column="1" Content="{x:Static prop:Resources.LabelOK}" ToolTip="{x:Static prop:Resources.LabelOK}" Command="{Binding SubmitCommand}" Margin="3,20,0,0" />
-                    <Button Grid.Row="12" Grid.Column="2" Content="{x:Static prop:Resources.LabelClearGraphics}" ToolTip="{x:Static prop:Resources.LabelClearGraphics}" Command="{Binding ClearGraphicsCommand}" Margin="3,20,0,0" />
+                    <Button Grid.Row="12" Grid.Column="0" Content="{x:Static prop:Resources.LabelCancel}" ToolTip="{x:Static prop:Resources.LabelCancel}" Command="{Binding CancelCommand}" Margin="3,20,0,0">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="IsEnabled" Value="False" />
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding ElementName=listBoxObservers, Path=HasItems}" Value="True" />
+                                            <Condition Binding="{Binding IsRunning}" Value="False" />
+                                        </MultiDataTrigger.Conditions>
+                                        <MultiDataTrigger.Setters>
+                                            <Setter Property="IsEnabled" Value="True" />
+                                        </MultiDataTrigger.Setters>
+                                    </MultiDataTrigger>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding ElementName=listBoxTargets, Path=HasItems}" Value="True" />
+                                            <Condition Binding="{Binding IsRunning}" Value="False" />
+                                        </MultiDataTrigger.Conditions>
+                                        <MultiDataTrigger.Setters>
+                                            <Setter Property="IsEnabled" Value="True" />
+                                        </MultiDataTrigger.Setters>
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    <Button Grid.Row="12" Grid.Column="1" Content="{x:Static prop:Resources.LabelOK}" ToolTip="{x:Static prop:Resources.LabelOK}" Command="{Binding SubmitCommand}" Margin="3,20,0,0">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="IsEnabled" Value="False" />
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding ElementName=listBoxObservers, Path=HasItems}" Value="True" />
+                                            <Condition Binding="{Binding ElementName=listBoxTargets, Path=HasItems}" Value="True" />
+                                        </MultiDataTrigger.Conditions>
+                                        <MultiDataTrigger.Setters>
+                                            <Setter Property="IsEnabled" Value="True" />
+                                        </MultiDataTrigger.Setters>
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    <Button Grid.Row="12" Grid.Column="2" Content="{x:Static prop:Resources.LabelClearGraphics}" ToolTip="{x:Static prop:Resources.LabelClearGraphics}" Command="{Binding ClearGraphicsCommand}" Margin="3,20,0,0">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="IsEnabled" Value="False" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasMapGraphics}" Value="True">
+                                        <Setter Property="IsEnabled" Value="True" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
                 </StackPanel>
             </Grid>
         </ScrollViewer>

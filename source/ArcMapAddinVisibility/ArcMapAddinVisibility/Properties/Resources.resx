@@ -166,7 +166,7 @@
     <value>Input Surface</value>
   </data>
   <data name="LabelObserverOffset" xml:space="preserve">
-    <value>Observer Offset</value>
+    <value>Observer</value>
   </data>
   <data name="LabelObserverOptions" xml:space="preserve">
     <value>Observer Options</value>
@@ -190,7 +190,7 @@
     <value>RLOS</value>
   </data>
   <data name="LabelTargetOffset" xml:space="preserve">
-    <value>Target Offset</value>
+    <value>Target</value>
   </data>
   <data name="LabelTargetPoints" xml:space="preserve">
     <value>Target Points</value>
@@ -227,5 +227,17 @@
   </data>
   <data name="MsgOutOfAOI" xml:space="preserve">
     <value>Point does not fall within the input extent.</value>
+  </data>
+  <data name="ExceptionSomethingWentWrong" xml:space="preserve">
+    <value>Something went wrong.</value>
+  </data>
+  <data name="LabelOffsets" xml:space="preserve">
+    <value>Offsets</value>
+  </data>
+  <data name="TooltipLLOSTab" xml:space="preserve">
+    <value>Linear Line of Sight</value>
+  </data>
+  <data name="TooltipRLOSTab" xml:space="preserve">
+    <value>Radial Line of Sight</value>
   </data>
 </root>
