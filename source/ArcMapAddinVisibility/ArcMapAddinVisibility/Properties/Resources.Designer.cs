@@ -160,6 +160,15 @@ namespace ArcMapAddinVisibility.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Field index not found.
+        /// </summary>
+        public static string ExceptionFieldIndexNotFound {
+            get {
+                return ResourceManager.GetString("ExceptionFieldIndexNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Something went wrong..
         /// </summary>
         public static string ExceptionSomethingWentWrong {
@@ -358,11 +367,29 @@ namespace ArcMapAddinVisibility.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Calculation cancelled.
+        /// </summary>
+        public static string MsgCalcCancelled {
+            get {
+                return ResourceManager.GetString("MsgCalcCancelled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Point does not fall within the input extent..
         /// </summary>
         public static string MsgOutOfAOI {
             get {
                 return ResourceManager.GetString("MsgOutOfAOI", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Results not calculated.  Check input parameters and try again..
+        /// </summary>
+        public static string MsgTryAgain {
+            get {
+                return ResourceManager.GetString("MsgTryAgain", resourceCulture);
             }
         }
         

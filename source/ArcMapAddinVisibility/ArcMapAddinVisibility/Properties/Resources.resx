@@ -240,4 +240,13 @@
   <data name="TooltipRLOSTab" xml:space="preserve">
     <value>Radial Line of Sight</value>
   </data>
+  <data name="ExceptionFieldIndexNotFound" xml:space="preserve">
+    <value>Field index not found</value>
+  </data>
+  <data name="MsgCalcCancelled" xml:space="preserve">
+    <value>Calculation cancelled</value>
+  </data>
+  <data name="MsgTryAgain" xml:space="preserve">
+    <value>Results not calculated.  Check input parameters and try again.</value>
+  </data>
 </root>

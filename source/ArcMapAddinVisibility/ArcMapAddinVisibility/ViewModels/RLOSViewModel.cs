@@ -338,7 +338,7 @@ namespace ArcMapAddinVisibility.ViewModels
                 catch (Exception ex)
                 {
                     string exception = ex.ToString();
-                    System.Windows.MessageBox.Show("Results not calculated.  Check input parameters and try again.", "Calculation cancelled");
+                    System.Windows.MessageBox.Show(Properties.Resources.MsgTryAgain, Properties.Resources.MsgCalcCancelled);
                 }
 
                 //Reset(true);
@@ -544,7 +544,7 @@ namespace ArcMapAddinVisibility.ViewModels
             }
             else
             {
-                throw new Exception("Field index not found");
+                throw new Exception(Properties.Resources.ExceptionFieldIndexNotFound);
             }
         }
 
