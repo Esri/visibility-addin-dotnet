@@ -72,7 +72,7 @@ ArcGIS Add-in provides the capability to quickly do line of sight analyses.
 				* Dockable visibility tool appears
 				* If you add this to a toolbar that you contstantly use the add-in will stay. To remove the add-in delete your [Normal.MXT](https://geonet.esri.com/thread/78692) file
 				
-## Workflows
+## Workflows - LLOS
 
 ### <a name="one-to-one-linear-line-of-sight-llos"></a> One-to-one Linear Line Of Sight (LLOS) 
 1. Add an elevation surface to the map. 
@@ -117,6 +117,9 @@ ArcGIS Add-in provides the capability to quickly do line of sight analyses.
 6. Use the **Target Map Point Tool** to select one target location on the map.
 7. Optionally, type an **Observer Offset**, **Target Offset**, and select the offset units.
 8. Select **OK**
+
+## Workflows - RLOS
+Note that the input surface used for RLOS must be in a projected coordinate system (PCS), or the ArcMap Data Frame must be set to  a PCS.
 
 ### <a name="radial-line-of-sight-rlos"></a> Radial Line Of Sight (RLOS) 
 1. Add an elevation surface to the map. 
