@@ -181,7 +181,7 @@
     <value>Submit</value>
   </data>
   <data name="LabelSurfaceOffset" xml:space="preserve">
-    <value>Surface Offset</value>
+    <value>Surface</value>
   </data>
   <data name="LabelTabLLOS" xml:space="preserve">
     <value>LLOS</value>

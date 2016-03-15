@@ -286,7 +286,7 @@ namespace ArcMapAddinVisibility.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Surface Offset.
+        ///   Looks up a localized string similar to Surface.
         /// </summary>
         public static string LabelSurfaceOffset {
             get {
