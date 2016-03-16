@@ -160,7 +160,7 @@
     <value>Distance</value>
   </data>
   <data name="LabelHorizontalFOV" xml:space="preserve">
-    <value>Horizontal Field of View</value>
+    <value>Horizontal</value>
   </data>
   <data name="LabelInputSurface" xml:space="preserve">
     <value>Input Surface</value>
@@ -196,7 +196,7 @@
     <value>Target Points</value>
   </data>
   <data name="LabelVerticalFOV" xml:space="preserve">
-    <value>Vertical Field of View</value>
+    <value>Vertical</value>
   </data>
   <data name="ToolModeObserver" xml:space="preserve">
     <value>observer</value>
@@ -248,5 +248,17 @@
   </data>
   <data name="MsgTryAgain" xml:space="preserve">
     <value>Results not calculated.  Check input parameters and try again.</value>
+  </data>
+  <data name="EnumDegrees" xml:space="preserve">
+    <value>Degrees</value>
+  </data>
+  <data name="EnumGrads" xml:space="preserve">
+    <value>Grads</value>
+  </data>
+  <data name="EnumMils" xml:space="preserve">
+    <value>Mils</value>
+  </data>
+  <data name="LabelFieldOfView" xml:space="preserve">
+    <value>Field of View</value>
   </data>
 </root>

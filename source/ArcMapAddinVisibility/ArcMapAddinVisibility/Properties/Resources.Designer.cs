@@ -88,6 +88,15 @@ namespace ArcMapAddinVisibility.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Degrees.
+        /// </summary>
+        public static string EnumDegrees {
+            get {
+                return ResourceManager.GetString("EnumDegrees", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Feet.
         /// </summary>
         public static string EnumFeet {
@@ -102,6 +111,15 @@ namespace ArcMapAddinVisibility.Properties {
         public static string EnumGeodesic {
             get {
                 return ResourceManager.GetString("EnumGeodesic", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Grads.
+        /// </summary>
+        public static string EnumGrads {
+            get {
+                return ResourceManager.GetString("EnumGrads", resourceCulture);
             }
         }
         
@@ -138,6 +156,15 @@ namespace ArcMapAddinVisibility.Properties {
         public static string EnumMeters {
             get {
                 return ResourceManager.GetString("EnumMeters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mils.
+        /// </summary>
+        public static string EnumMils {
+            get {
+                return ResourceManager.GetString("EnumMils", resourceCulture);
             }
         }
         
@@ -205,7 +232,16 @@ namespace ArcMapAddinVisibility.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Horizontal Field of View.
+        ///   Looks up a localized string similar to Field of View.
+        /// </summary>
+        public static string LabelFieldOfView {
+            get {
+                return ResourceManager.GetString("LabelFieldOfView", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Horizontal.
         /// </summary>
         public static string LabelHorizontalFOV {
             get {
@@ -340,7 +376,7 @@ namespace ArcMapAddinVisibility.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Vertical Field of View.
+        ///   Looks up a localized string similar to Vertical.
         /// </summary>
         public static string LabelVerticalFOV {
             get {
