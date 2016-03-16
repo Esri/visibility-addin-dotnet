@@ -88,6 +88,15 @@ namespace ArcMapAddinVisibility.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Degrees.
+        /// </summary>
+        public static string EnumDegrees {
+            get {
+                return ResourceManager.GetString("EnumDegrees", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Feet.
         /// </summary>
         public static string EnumFeet {
@@ -102,6 +111,15 @@ namespace ArcMapAddinVisibility.Properties {
         public static string EnumGeodesic {
             get {
                 return ResourceManager.GetString("EnumGeodesic", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Grads.
+        /// </summary>
+        public static string EnumGrads {
+            get {
+                return ResourceManager.GetString("EnumGrads", resourceCulture);
             }
         }
         
@@ -142,6 +160,15 @@ namespace ArcMapAddinVisibility.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Mils.
+        /// </summary>
+        public static string EnumMils {
+            get {
+                return ResourceManager.GetString("EnumMils", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Nautical Mile.
         /// </summary>
         public static string EnumNauticalMile {
@@ -156,6 +183,15 @@ namespace ArcMapAddinVisibility.Properties {
         public static string EnumSurveyFoot {
             get {
                 return ResourceManager.GetString("EnumSurveyFoot", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Field index not found.
+        /// </summary>
+        public static string ExceptionFieldIndexNotFound {
+            get {
+                return ResourceManager.GetString("ExceptionFieldIndexNotFound", resourceCulture);
             }
         }
         
@@ -196,7 +232,16 @@ namespace ArcMapAddinVisibility.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Horizontal Field of View.
+        ///   Looks up a localized string similar to Field of View.
+        /// </summary>
+        public static string LabelFieldOfView {
+            get {
+                return ResourceManager.GetString("LabelFieldOfView", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Horizontal.
         /// </summary>
         public static string LabelHorizontalFOV {
             get {
@@ -277,7 +322,7 @@ namespace ArcMapAddinVisibility.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Surface Offset.
+        ///   Looks up a localized string similar to Surface.
         /// </summary>
         public static string LabelSurfaceOffset {
             get {
@@ -331,7 +376,7 @@ namespace ArcMapAddinVisibility.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Vertical Field of View.
+        ///   Looks up a localized string similar to Vertical.
         /// </summary>
         public static string LabelVerticalFOV {
             get {
@@ -358,11 +403,29 @@ namespace ArcMapAddinVisibility.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Calculation cancelled.
+        /// </summary>
+        public static string MsgCalcCancelled {
+            get {
+                return ResourceManager.GetString("MsgCalcCancelled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Point does not fall within the input extent..
         /// </summary>
         public static string MsgOutOfAOI {
             get {
                 return ResourceManager.GetString("MsgOutOfAOI", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Results not calculated.  Check input parameters and try again..
+        /// </summary>
+        public static string MsgTryAgain {
+            get {
+                return ResourceManager.GetString("MsgTryAgain", resourceCulture);
             }
         }
         
