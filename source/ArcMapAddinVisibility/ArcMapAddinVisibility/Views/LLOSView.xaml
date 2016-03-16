@@ -111,10 +111,10 @@
                           Margin="0,3,0,0">
                     <StackPanel>
                         <TextBlock Text="{x:Static prop:Resources.LabelObserverOffset}" Margin="3,3,0,0" />
-                        <TextBox Text="{Binding ObserverOffset, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
+                        <TextBox x:Name="tbObserverOffset" Text="{Binding ObserverOffset, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
                             Validation.ErrorTemplate="{StaticResource errorTemplate}" Margin="3,3,0,0" />
                         <TextBlock Text="{x:Static prop:Resources.LabelTargetOffset}" Margin="3,3,0,0" />
-                        <TextBox Text="{Binding TargetOffset, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
+                        <TextBox x:Name="tbTargetOffset" Text="{Binding TargetOffset, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
                             Validation.ErrorTemplate="{StaticResource errorTemplate}" Margin="3,3,0,0" />
                         <ComboBox x:Name="cmbOffsetUnitType"
                             ItemsSource="{Binding Source={StaticResource lineDistanceData}}" 
@@ -160,6 +160,8 @@
                                         <MultiDataTrigger.Conditions>
                                             <Condition Binding="{Binding ElementName=listBoxObservers, Path=HasItems}" Value="True" />
                                             <Condition Binding="{Binding ElementName=listBoxTargets, Path=HasItems}" Value="True" />
+                                            <Condition Binding="{Binding ElementName=tbObserverOffset, Path=(Validation.HasError)}" Value="False" />
+                                            <Condition Binding="{Binding ElementName=tbTargetOffset, Path=(Validation.HasError)}" Value="False" />
                                         </MultiDataTrigger.Conditions>
                                         <MultiDataTrigger.Setters>
                                             <Setter Property="IsEnabled" Value="True" />
