@@ -462,7 +462,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
             RemoveGraphics(gc, guidList);
 
-            av.PartialRefresh(esriViewDrawPhase.esriViewGraphics, null, null);
+            av.Refresh();
         }
 
         /// <summary>

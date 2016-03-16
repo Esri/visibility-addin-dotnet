@@ -124,102 +124,129 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
+                        <GroupBox Header="{x:Static prop:Resources.LabelOffsets}" Grid.ColumnSpan="4" Padding="0,0,3,0">
+                            <StackPanel>
+                                <TextBlock Text="{x:Static prop:Resources.LabelObserverOffset}" Margin="3,3,0,0" Grid.ColumnSpan="2" Grid.Row="0"/>
+                                <TextBox Margin="3,3,0,0" 
+                                    Text="{Binding ObserverOffset, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
+                                    Validation.ErrorTemplate="{StaticResource errorTemplate}">
+                                    <TextBox.InputBindings>
+                                        <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
+                                    </TextBox.InputBindings>
+                                </TextBox>
 
-                        <TextBlock Text="{x:Static prop:Resources.LabelObserverOffset}" Margin="5,5,5,5" Grid.ColumnSpan="2" Grid.Row="0"/>
-                        <TextBox Margin="5,5,5,5" 
-                 Text="{Binding ObserverOffset, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
-                 Validation.ErrorTemplate="{StaticResource errorTemplate}"
-                 Grid.Row="1" Grid.ColumnSpan="1" Width="100">
-                            <TextBox.InputBindings>
-                                <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
-                            </TextBox.InputBindings>
-                        </TextBox>
+                                <TextBlock Text="{x:Static prop:Resources.LabelSurfaceOffset}" Margin="3,3,0,0" Grid.ColumnSpan="4" />
+                                <TextBox Margin="3,3,0,0" 
+                                    Text="{Binding SurfaceOffset, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
+                                    Validation.ErrorTemplate="{StaticResource errorTemplate}">
+                                    <TextBox.InputBindings>
+                                        <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
+                                    </TextBox.InputBindings>
+                                </TextBox>
+                                <ComboBox x:Name="cmbOffsetUnitType"
+                                    ItemsSource="{Binding Source={StaticResource lineDistanceData}}" 
+                                    SelectedItem="{Binding Path=OffsetUnitType, Mode=TwoWay}"                      
+                                    Height="Auto" Width="Auto" Margin="3,3,0,0">
+                                </ComboBox>
+                            </StackPanel>
+                        </GroupBox>
+                        <GroupBox Header="{x:Static prop:Resources.LabelDistance}" Grid.Row="5" Grid.ColumnSpan="4">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBox Grid.Column="0"
+                                    Margin="3,3,0,0" 
+                                    Text="{Binding MinDistance, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
+                                    Validation.ErrorTemplate="{StaticResource errorTemplate}"
+                                    HorizontalAlignment="Stretch">
+                                    <TextBox.InputBindings>
+                                        <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
+                                    </TextBox.InputBindings>
+                                </TextBox>
+                                <TextBlock Text="{x:Static prop:Resources.LabelTo}" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                           Grid.Column="1"
+                                           Margin="3,3,0,0" />
+                                <TextBox Margin="3,3,0,0" Grid.Column="2"
+                                    Text="{Binding MaxDistance, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
+                                    Validation.ErrorTemplate="{StaticResource errorTemplate}"
+                                    HorizontalAlignment="Stretch">
+                                    <TextBox.InputBindings>
+                                        <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
+                                    </TextBox.InputBindings>
+                                </TextBox>
+                            </Grid>
+                        </GroupBox>
 
-                        <ComboBox x:Name="cmbOffsetUnitType"
-                    ItemsSource="{Binding Source={StaticResource lineDistanceData}}" 
-                    SelectedItem="{Binding Path=OffsetUnitType, Mode=TwoWay}"                      
-                    Height="Auto" Margin="5,5,5,5"
-                    Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" >
-                        </ComboBox>
+                        <GroupBox Header="{x:Static prop:Resources.LabelFieldOfView}" Grid.Row="6" Grid.ColumnSpan="4">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <TextBlock Text="{x:Static prop:Resources.LabelHorizontalFOV}" Margin="3,3,0,0" Grid.ColumnSpan="3"/>
+                                <TextBox Margin="3,3,0,0" 
+                                    Text="{Binding LeftHorizontalFOV, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
+                                    Validation.ErrorTemplate="{StaticResource errorTemplate}"
+                                    Grid.Row="1" >
+                                    <TextBox.InputBindings>
+                                        <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
+                                    </TextBox.InputBindings>
+                                </TextBox>
+                                <TextBlock Text="{x:Static prop:Resources.LabelTo}" 
+                                           HorizontalAlignment="Center" VerticalAlignment="Bottom" 
+                                           Margin="3,3,0,0" 
+                                           Grid.Row="1" Grid.Column="1"/>
+                                <TextBox Margin="3,3,0,0" 
+                                    Text="{Binding RightHorizontalFOV, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
+                                    Validation.ErrorTemplate="{StaticResource errorTemplate}"
+                                    Grid.Row="1" Grid.Column="2" >
+                                    <TextBox.InputBindings>
+                                        <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
+                                    </TextBox.InputBindings>
+                                </TextBox>
 
-                        <TextBlock Text="{x:Static prop:Resources.LabelSurfaceOffset}" Margin="5,5,5,5" Grid.ColumnSpan="2" Grid.Row="3"/>
-                        <TextBox Margin="5,5,5,5" 
-                 Text="{Binding SurfaceOffset, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
-                 Validation.ErrorTemplate="{StaticResource errorTemplate}"
-                 Grid.Row="4" Grid.ColumnSpan="1">
-                            <TextBox.InputBindings>
-                                <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
-                            </TextBox.InputBindings>
-                        </TextBox>
+                                <TextBlock Text="{x:Static prop:Resources.LabelVerticalFOV}" Margin="3,3,0,0" Grid.ColumnSpan="3" Grid.Row="2"/>
+                                <TextBox Margin="3,3,0,0" 
+                                    Text="{Binding BottomVerticalFOV, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
+                                    Validation.ErrorTemplate="{StaticResource errorTemplate}"
+                                    Grid.Row="3" >
+                                    <TextBox.InputBindings>
+                                        <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
+                                    </TextBox.InputBindings>
+                                </TextBox>
 
-                        <TextBlock Text="{x:Static prop:Resources.LabelDistance}" Margin="5,5,5,5" Grid.Row="5"/>
-                        <TextBox Margin="5,5,5,5" 
-                 Text="{Binding MinDistance, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
-                 Validation.ErrorTemplate="{StaticResource errorTemplate}"
-                 Grid.Row="6" Grid.ColumnSpan="1" >
-                            <TextBox.InputBindings>
-                                <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
-                            </TextBox.InputBindings>
-                        </TextBox>
-                        <TextBlock Text="{x:Static prop:Resources.LabelTo}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,5,5,5" Grid.Row="6" Grid.Column="1"/>
-                        <TextBox Margin="5,5,5,5" 
-                 Text="{Binding MaxDistance, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
-                 Validation.ErrorTemplate="{StaticResource errorTemplate}"
-                 Grid.Row="6" Grid.Column="2" Grid.ColumnSpan="1" Width="100">
-                            <TextBox.InputBindings>
-                                <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
-                            </TextBox.InputBindings>
-                        </TextBox>
-
-                        <Separator 
-                    Grid.Row="7" 
-                    Grid.ColumnSpan="4"/>
-
-                        <TextBlock Text="{x:Static prop:Resources.LabelHorizontalFOV}" Margin="5,5,5,5" Grid.ColumnSpan="3" Grid.Row="8"/>
-                        <TextBox Margin="5,5,5,5" 
-                 Text="{Binding LeftHorizontalFOV, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
-                 Validation.ErrorTemplate="{StaticResource errorTemplate}"
-                 Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="1">
-                            <TextBox.InputBindings>
-                                <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
-                            </TextBox.InputBindings>
-                        </TextBox>
-                        <TextBlock Text="{x:Static prop:Resources.LabelTo}" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="5,0,5,9" Grid.Row="9" Grid.Column="1"/>
-                        <TextBox Margin="5,5,5,5" 
-                 Text="{Binding RightHorizontalFOV, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
-                 Validation.ErrorTemplate="{StaticResource errorTemplate}"
-                 Grid.Row="9" Grid.Column="2" Grid.ColumnSpan="1">
-                            <TextBox.InputBindings>
-                                <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
-                            </TextBox.InputBindings>
-                        </TextBox>
-
-                        <ComboBox x:Name="cmbDegreeDistanceType"
-                  ItemsSource="{Binding Source={StaticResource angularDistanceData}}" 
-                  SelectedItem="{Binding Path=AngularUnitType, Mode=TwoWay}"                        
-                  Height="Auto" Margin="5,5,5,5" Width="Auto"
-                  Grid.Row="12" Grid.Column="2" Grid.ColumnSpan="2">
-                        </ComboBox>
-
-                        <TextBlock Text="{x:Static prop:Resources.LabelVerticalFOV}" Margin="5,5,5,5" Grid.ColumnSpan="3" Grid.Row="13"/>
-                        <TextBox Margin="5,5,5,5" 
-                 Text="{Binding BottomVerticalFOV, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
-                 Validation.ErrorTemplate="{StaticResource errorTemplate}"
-                 Grid.Row="14" Grid.Column="0" Grid.ColumnSpan="1">
-                            <TextBox.InputBindings>
-                                <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
-                            </TextBox.InputBindings>
-                        </TextBox>
-
-                        <TextBlock Text="{x:Static prop:Resources.LabelTo}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,5,5,5" Grid.Row="14" Grid.Column="1"/>
-                        <TextBox Margin="5,5,5,5" 
-                 Text="{Binding TopVerticalFOV, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
-                 Validation.ErrorTemplate="{StaticResource errorTemplate}"
-                 Grid.Row="14" Grid.Column="2" Grid.ColumnSpan="1">
-                            <TextBox.InputBindings>
-                                <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
-                            </TextBox.InputBindings>
-                        </TextBox>
+                                <TextBlock Text="{x:Static prop:Resources.LabelTo}" 
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                           Margin="3,3,0,0" 
+                                           Grid.Row="3" Grid.Column="1"/>
+                                <TextBox Margin="3,3,0,0" 
+                                     Text="{Binding TopVerticalFOV, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
+                                     Validation.ErrorTemplate="{StaticResource errorTemplate}"
+                                     Grid.Row="3" Grid.Column="2" >
+                                    <TextBox.InputBindings>
+                                        <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
+                                    </TextBox.InputBindings>
+                                </TextBox>
+                                <ComboBox x:Name="cmbDegreeDistanceType"
+                                    ItemsSource="{Binding Source={StaticResource angularDistanceData}}" 
+                                    SelectedItem="{Binding Path=AngularUnitType, Mode=TwoWay}"                        
+                                    Height="Auto" Width="Auto" 
+                                          Margin="3,3,0,0"
+                                    Grid.Row="4" Grid.ColumnSpan="3">
+                                </ComboBox>
+                            </Grid>
+                        </GroupBox>
                     </Grid>
                 </Expander>
             </Grid>
