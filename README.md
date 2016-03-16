@@ -72,7 +72,7 @@ ArcGIS Add-in provides the capability to quickly do line of sight analyses.
 				* Dockable visibility tool appears
 				* If you add this to a toolbar that you contstantly use the add-in will stay. To remove the add-in delete your [Normal.MXT](https://geonet.esri.com/thread/78692) file
 				
-## Workflows - LLOS
+## <a name="workflows"></a> Workflows - LLOS
 
 ### <a name="one-to-one-linear-line-of-sight-llos"></a> One-to-one Linear Line Of Sight (LLOS) 
 1. Add an elevation surface to the map. 
