@@ -128,7 +128,8 @@ Note that the input surface used for RLOS must be in a projected coordinate syst
 3. Select the **RLOS** tab
 4. Select the **Input Surface** layer from the list
 5. Use the **Observer Map Point Tool** to select an observer location on the map.
-6. Use the **Target Map Point Tool** to select one or many target location on the map.
+6. Check **Symbolize Non-Visible Data in Output** to add non-visible areas to the output.
+	1. If unchecked the output will *only* show areas that are visible to the observers.
 7. Optionally, type an **Observer Offset**, **Surface Offset**, and **Distance**, and select the appropriate units.
 8. Additional options are **Horizontal Field of View** and **Vertical Field of View**, and select the appropriate units.
 8. Select **OK**
