@@ -18,13 +18,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
+using System.Text.RegularExpressions;
 using ESRI.ArcGIS.esriSystem;
 using ESRI.ArcGIS.ArcMapUI;
 using ESRI.ArcGIS.Carto;
 using ESRI.ArcGIS.Geometry;
 using ESRI.ArcGIS.Display;
 using ArcMapAddinVisibility.Helpers;
-using System.Text.RegularExpressions;
+using ArcMapAddinVisibility.Models;
 
 namespace ArcMapAddinVisibility.ViewModels
 {
@@ -60,6 +61,8 @@ namespace ArcMapAddinVisibility.ViewModels
         internal bool HasPoint1 = false;
         internal bool HasPoint2 = false;
         internal INewLineFeedback feedback = null;
+
+        public static VisibilityConfig AddInConfig = new VisibilityConfig();
 
         public bool HasMapGraphics
         {

@@ -88,6 +88,96 @@ namespace ArcMapAddinVisibility.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cancel.
+        /// </summary>
+        public static string ButtonCancel {
+            get {
+                return ResourceManager.GetString("ButtonCancel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to OK.
+        /// </summary>
+        public static string ButtonOK {
+            get {
+                return ResourceManager.GetString("ButtonOK", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DD.
+        /// </summary>
+        public static string EnumCTDD {
+            get {
+                return ResourceManager.GetString("EnumCTDD", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DDM.
+        /// </summary>
+        public static string EnumCTDDM {
+            get {
+                return ResourceManager.GetString("EnumCTDDM", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DMS.
+        /// </summary>
+        public static string EnumCTDMS {
+            get {
+                return ResourceManager.GetString("EnumCTDMS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to GARS.
+        /// </summary>
+        public static string EnumCTGARS {
+            get {
+                return ResourceManager.GetString("EnumCTGARS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MGRS.
+        /// </summary>
+        public static string EnumCTMGRS {
+            get {
+                return ResourceManager.GetString("EnumCTMGRS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Default Map Unit.
+        /// </summary>
+        public static string EnumCTNone {
+            get {
+                return ResourceManager.GetString("EnumCTNone", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to USNG.
+        /// </summary>
+        public static string EnumCTUSNG {
+            get {
+                return ResourceManager.GetString("EnumCTUSNG", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to UTM.
+        /// </summary>
+        public static string EnumCTUTM {
+            get {
+                return ResourceManager.GetString("EnumCTUTM", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Degrees.
         /// </summary>
         public static string EnumDegrees {
@@ -219,6 +309,15 @@ namespace ArcMapAddinVisibility.Properties {
         public static string LabelClearGraphics {
             get {
                 return ResourceManager.GetString("LabelClearGraphics", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Display Coordinate.
+        /// </summary>
+        public static string LabelDisplayCoordinate {
+            get {
+                return ResourceManager.GetString("LabelDisplayCoordinate", resourceCulture);
             }
         }
         
@@ -426,6 +525,15 @@ namespace ArcMapAddinVisibility.Properties {
         public static string MsgTryAgain {
             get {
                 return ResourceManager.GetString("MsgTryAgain", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Edit Properties.
+        /// </summary>
+        public static string TitleEditProperties {
+            get {
+                return ResourceManager.GetString("TitleEditProperties", resourceCulture);
             }
         }
         

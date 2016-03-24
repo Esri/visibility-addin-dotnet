@@ -12,6 +12,7 @@ using ESRI.ArcGIS.Geometry;
 using ESRI.ArcGIS.Display;
 using ESRI.ArcGIS.DataSourcesRaster;
 using ArcMapAddinVisibility.Helpers;
+using ArcMapAddinVisibility.Views;
 
 namespace ArcMapAddinVisibility.ViewModels
 {
@@ -121,9 +122,9 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <param name="obj"></param>
         private void OnEditPropertiesDialogCommand(object obj)
         {
-            //var dlg = new EditPropertiesView();
+            var dlg = new EditPropertiesView();
 
-            //dlg.ShowDialog();
+            dlg.ShowDialog();
         }
 
         private void DeletePoints(List<IPoint> pointList)
