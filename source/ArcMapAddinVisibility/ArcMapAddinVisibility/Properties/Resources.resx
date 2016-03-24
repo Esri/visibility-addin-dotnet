@@ -261,4 +261,7 @@
   <data name="LabelFieldOfView" xml:space="preserve">
     <value>Field of View</value>
   </data>
+  <data name="TooltipEditProperties" xml:space="preserve">
+    <value>Edit Properties</value>
+  </data>
 </root>

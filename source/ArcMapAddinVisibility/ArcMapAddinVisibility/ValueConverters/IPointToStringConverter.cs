@@ -30,6 +30,8 @@ namespace ArcMapAddinVisibility
             if (value == null)
                 return "NA";
 
+            //TODO update with IConversionNotation
+
             var point = value as IPoint;
             return string.Format("{0:0.0#####} {1:0.0#####}", point.Y, point.X);
         }

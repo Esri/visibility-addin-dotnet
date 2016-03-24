@@ -33,6 +33,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
             DeletePointCommand = new RelayCommand(OnDeletePointCommand);
             DeleteAllPointsCommand = new RelayCommand(OnDeleteAllPointsCommand);
+            EditPropertiesDialogCommand = new RelayCommand(OnEditPropertiesDialogCommand);
 
             GuidPointDictionary = new Dictionary<string, IPoint>();
         }
@@ -91,6 +92,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
         public RelayCommand DeletePointCommand { get; set; }
         public RelayCommand DeleteAllPointsCommand { get; set; }
+        public RelayCommand EditPropertiesDialogCommand { get; set; }
 
         /// <summary>
         /// Command method to delete points
@@ -111,6 +113,17 @@ namespace ArcMapAddinVisibility.ViewModels
         internal virtual void OnDeleteAllPointsCommand(object obj)
         {
             DeletePoints(ObserverPoints.ToList<IPoint>());
+        }
+
+        /// <summary>
+        /// Handler for opening the edit properties dialog
+        /// </summary>
+        /// <param name="obj"></param>
+        private void OnEditPropertiesDialogCommand(object obj)
+        {
+            //var dlg = new EditPropertiesView();
+
+            //dlg.ShowDialog();
         }
 
         private void DeletePoints(List<IPoint> pointList)

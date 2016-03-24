@@ -448,6 +448,15 @@ namespace ArcMapAddinVisibility.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Edit Properties.
+        /// </summary>
+        public static string TooltipEditProperties {
+            get {
+                return ResourceManager.GetString("TooltipEditProperties", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Linear Line of Sight.
         /// </summary>
         public static string TooltipLLOSTab {
