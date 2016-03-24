@@ -43,24 +43,33 @@
 
                 <TextBlock Text="{x:Static prop:Resources.LabelInputSurface}" 
                HorizontalAlignment="Stretch" 
-               Margin="5,5,5,5"
+               Margin="3,3,0,0"
                Grid.ColumnSpan="3" Grid.Row="0" />
-                <ComboBox x:Name="cmbInputSurface"
-                Height="Auto"
-                Margin="5,5,5,5"
-                Grid.Row="1" Grid.ColumnSpan="3"
-                ItemsSource="{Binding SurfaceLayerNames}" SelectedItem="{Binding SelectedSurfaceName}">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel>
-                                <TextBlock Text="{Binding}"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
+                <Grid Grid.Row="1" Grid.ColumnSpan="3">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ComboBox x:Name="cmbInputSurface"
+                        Height="Auto"
+                        Margin="3,3,0,0"
+                        ItemsSource="{Binding SurfaceLayerNames}" 
+                              SelectedItem="{Binding SelectedSurfaceName}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <Button Style="{StaticResource buttonProperties}" 
+                        Grid.Column="1" 
+                        Margin="3,3,0,0" />
+                </Grid>
                 <TextBlock Text="{x:Static prop:Resources.LabelObserverPoints}" 
                HorizontalAlignment="Stretch" 
-               Margin="5,5,5,5" Grid.Row="2" />
+               Margin="3,3,0,0" Grid.Row="2" />
 
                 <Button Command="{Binding ActivateToolCommand}"
                 CommandParameter="{x:Static prop:Resources.ToolModeObserver}"

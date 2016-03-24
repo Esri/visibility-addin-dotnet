@@ -123,6 +123,8 @@
     <Compile Include="Helpers\Mediator.cs" />
     <Compile Include="Helpers\NotificationObject.cs" />
     <Compile Include="Helpers\RelayCommand.cs" />
+    <Compile Include="Helpers\Wpf.cs" />
+    <Compile Include="Models\VisibilityConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -142,11 +144,15 @@
     <Compile Include="ValueConverters\EnumToFriendlyNameConverter.cs" />
     <Compile Include="ValueConverters\IPointToStringConverter.cs" />
     <Compile Include="ViewModels\BaseViewModel.cs" />
+    <Compile Include="ViewModels\EditPropertiesViewModel.cs" />
     <Compile Include="ViewModels\LLOSViewModel.cs" />
     <Compile Include="ViewModels\LOSBaseViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\RLOSViewModel.cs" />
     <Compile Include="ViewModels\TabBaseViewModel.cs" />
+    <Compile Include="Views\EditPropertiesView.xaml.cs">
+      <DependentUpon>EditPropertiesView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\LLOSView.xaml.cs">
       <DependentUpon>LLOSView.xaml</DependentUpon>
     </Compile>
@@ -187,6 +193,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Views\EditPropertiesView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\LLOSView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -224,12 +234,13 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Models\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Resource Include="Images\Add_Point32_d.png" />
     <Resource Include="Images\GenericErrorStop32_d.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\GeoprocessingEnvironmentSettings32_d.png" />
   </ItemGroup>
   <PropertyGroup>
     <ZipFileExtension>esriAddIn</ZipFileExtension>

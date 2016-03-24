@@ -45,15 +45,24 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <TextBlock Grid.ColumnSpan="3" Text="{x:Static prop:Resources.LabelInputSurface}" Margin="3,3,0,0" />
-                <ComboBox Grid.Row="1" Grid.ColumnSpan="3" ItemsSource="{Binding SurfaceLayerNames}" SelectedItem="{Binding SelectedSurfaceName}" Margin="3,3,0,0">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel>
-                                <TextBlock Text="{Binding}"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
+                <Grid Grid.Row="1" Grid.ColumnSpan="3">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ComboBox  ItemsSource="{Binding SurfaceLayerNames}" SelectedItem="{Binding SelectedSurfaceName}" Margin="3,3,0,0">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <Button Style="{StaticResource buttonProperties}" 
+                        Grid.Column="1" 
+                        Margin="3,3,0,0" />
+                </Grid>
                 <TextBlock Grid.Row="2" Grid.ColumnSpan="3" Text="{x:Static prop:Resources.LabelObserverPoints}" Margin="3,3,0,0" />
                 <ListBox x:Name="listBoxObservers" Grid.Row="3" Grid.ColumnSpan="2" ItemsSource="{Binding ObserverPoints}" ScrollViewer.VerticalScrollBarVisibility="Visible" 
                  PreviewMouseRightButtonDown="ListBox_PreviewMouseRightButtonDown"
