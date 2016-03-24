@@ -28,5 +28,6 @@ namespace ArcMapAddinVisibility
         public const string MOUSE_MOVE_POINT = "MOUSE_MOVE_POINT";
         public const string TAB_ITEM_SELECTED = "TAB_ITEM_SELECTED";
         public const string MAP_TOC_UPDATED = "MAP_TOC_UPDATED";
+        public const string DISPLAY_COORDINATE_TYPE_CHANGED = "DisplayCoordinateTypeChanged";
     }
 }

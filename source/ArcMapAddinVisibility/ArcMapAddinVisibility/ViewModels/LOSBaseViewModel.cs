@@ -31,6 +31,7 @@ namespace ArcMapAddinVisibility.ViewModels
             SelectedSurfaceName = string.Empty;
 
             Mediator.Register(Constants.MAP_TOC_UPDATED, OnMapTocUpdated);
+            Mediator.Register(Constants.DISPLAY_COORDINATE_TYPE_CHANGED, OnDisplayCoordinateTypeChanged);
 
             DeletePointCommand = new RelayCommand(OnDeletePointCommand);
             DeleteAllPointsCommand = new RelayCommand(OnDeleteAllPointsCommand);
@@ -38,7 +39,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
             GuidPointDictionary = new Dictionary<string, IPoint>();
         }
-
+        
         #region Properties
 
         private bool isRunning = false;
@@ -488,6 +489,20 @@ namespace ArcMapAddinVisibility.ViewModels
                 SelectedSurfaceName = string.Empty;
 
             RaisePropertyChanged(() => SelectedSurfaceName);
+        }
+
+        /// <summary>
+        /// Method to handle the display coordinate type change
+        /// Need to update the list boxes
+        /// </summary>
+        /// <param name="obj">null, not used</param>
+        internal virtual void OnDisplayCoordinateTypeChanged(object obj)
+        {
+            var list = ObserverPoints.ToList();
+            ObserverPoints.Clear();
+            foreach (var item in list)
+                ObserverPoints.Add(item);
+            RaisePropertyChanged(() => HasMapGraphics);
         }
     }
 }

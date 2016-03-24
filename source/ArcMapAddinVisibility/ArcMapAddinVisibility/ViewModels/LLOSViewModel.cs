@@ -324,5 +324,16 @@ namespace ArcMapAddinVisibility.ViewModels
                 dict.Add(targetPoint, 1);
             }
         }
+
+        internal override void OnDisplayCoordinateTypeChanged(object obj)
+        {
+            var list = TargetPoints.ToList();
+            TargetPoints.Clear();
+            foreach (var item in list)
+                TargetPoints.Add(item);
+
+            // and update observers
+            base.OnDisplayCoordinateTypeChanged(obj);
+        }
     }
 }
