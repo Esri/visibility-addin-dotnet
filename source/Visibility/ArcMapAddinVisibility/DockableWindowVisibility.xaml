@@ -2,7 +2,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:viewModels="clr-namespace:ArcMapAddinVisibility.ViewModels"
-    xmlns:prop="clr-namespace:VisibilityLibrary.Properties"
+    xmlns:prop="clr-namespace:VisibilityLibrary.Properties;assembly=VisibilityLibrary"
     Loaded="UserControl_Loaded"
     Height="300" Width="300">
     <UserControl.Resources>

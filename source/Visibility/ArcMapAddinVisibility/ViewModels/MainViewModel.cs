@@ -12,15 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Controls;
-using VisibilityLibrary.Helpers;
 using ESRI.ArcGIS.Carto;
 using VisibilityLibrary;
+using VisibilityLibrary.Helpers;
 using VisibilityLibrary.Views;
 
 namespace ArcMapAddinVisibility.ViewModels

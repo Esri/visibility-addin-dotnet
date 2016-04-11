@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Collections.ObjectModel;
 using System.Collections;
 using ESRI.ArcGIS.Carto;
@@ -10,7 +8,6 @@ using ESRI.ArcGIS.Geodatabase;
 using ESRI.ArcGIS.Analyst3D;
 using ESRI.ArcGIS.Geometry;
 using ESRI.ArcGIS.Display;
-using ESRI.ArcGIS.DataSourcesRaster;
 using VisibilityLibrary;
 using VisibilityLibrary.Helpers;
 using VisibilityLibrary.Views;
