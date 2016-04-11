@@ -19,8 +19,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using System.Xml;
-using ArcMapAddinVisibility.Helpers;
+using VisibilityLibrary.Helpers;
 using System.IO;
+using VisibilityLibrary;
 
 namespace ArcMapAddinVisibility.Models
 {

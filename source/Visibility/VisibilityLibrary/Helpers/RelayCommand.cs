@@ -14,7 +14,7 @@
 using System;
 using System.Windows.Input;
 
-namespace ArcMapAddinVisibility.Helpers
+namespace VisibilityLibrary.Helpers
 {
     public class RelayCommand : ICommand
     {

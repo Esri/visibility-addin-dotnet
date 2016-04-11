@@ -18,9 +18,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
-using ArcMapAddinVisibility.Helpers;
-using ArcMapAddinVisibility.Views;
+using VisibilityLibrary.Helpers;
 using ESRI.ArcGIS.Carto;
+using VisibilityLibrary;
+using VisibilityLibrary.Views;
 
 namespace ArcMapAddinVisibility.ViewModels
 {

@@ -4,7 +4,8 @@ using System.Text;
 using System.IO;
 using ESRI.ArcGIS.Carto;
 using ESRI.ArcGIS.Geometry;
-using ArcMapAddinVisibility.Helpers;
+using VisibilityLibrary.Helpers;
+using VisibilityLibrary;
 
 namespace ArcMapAddinVisibility
 {

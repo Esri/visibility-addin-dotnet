@@ -14,7 +14,7 @@
   *   limitations under the License. 
   ******************************************************************************/
 
-using ArcMapAddinVisibility.Helpers;
+using VisibilityLibrary.Helpers;
 
 namespace ArcMapAddinVisibility.ViewModels
 {

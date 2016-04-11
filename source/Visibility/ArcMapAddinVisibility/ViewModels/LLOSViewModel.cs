@@ -21,7 +21,7 @@ using System.Collections.ObjectModel;
 using ESRI.ArcGIS.Geodatabase;
 using ESRI.ArcGIS.Geometry;
 using ESRI.ArcGIS.Display;
-using ArcMapAddinVisibility.Helpers;
+using VisibilityLibrary.Helpers;
 using System.Collections;
 
 namespace ArcMapAddinVisibility.ViewModels
@@ -111,9 +111,9 @@ namespace ArcMapAddinVisibility.ViewModels
             if (string.IsNullOrWhiteSpace(mode))
                 return;
 
-            if (mode == Properties.Resources.ToolModeObserver)
+            if (mode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
                 base.OnDeleteAllPointsCommand(obj);
-            else if (mode == Properties.Resources.ToolModeTarget)
+            else if (mode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
                 DeleteTargetPoints(TargetPoints.ToList<IPoint>());
         }
 
@@ -285,7 +285,7 @@ namespace ArcMapAddinVisibility.ViewModels
             }
             catch(Exception ex)
             {
-                System.Windows.Forms.MessageBox.Show(Properties.Resources.ExceptionSomethingWentWrong);
+                System.Windows.Forms.MessageBox.Show(VisibilityLibrary.Properties.Resources.ExceptionSomethingWentWrong);
             }
             finally
             {

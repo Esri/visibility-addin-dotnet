@@ -12,29 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using ArcMapAddinVisibility.Helpers;
+using VisibilityLibrary.Helpers;
 using ESRI.ArcGIS.ADF;
 using ESRI.ArcGIS.Carto;
 using ESRI.ArcGIS.DataSourcesGDB;
-using ESRI.ArcGIS.DataSourcesRaster;
 using ESRI.ArcGIS.Display;
 using ESRI.ArcGIS.esriSystem;
-using ESRI.ArcGIS.Framework;
 using ESRI.ArcGIS.GeoAnalyst;
 using ESRI.ArcGIS.Geodatabase;
 using ESRI.ArcGIS.Geometry;
 using ESRI.ArcGIS.Geoprocessing;
-using ESRI.ArcGIS.Geoprocessor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
-using System.Windows.Forms;
-using System.Timers;
 using System.Windows;
+using VisibilityLibrary;
 
 namespace ArcMapAddinVisibility.ViewModels
 {
@@ -338,7 +330,7 @@ namespace ArcMapAddinVisibility.ViewModels
                 catch (Exception ex)
                 {
                     string exception = ex.ToString();
-                    System.Windows.MessageBox.Show(Properties.Resources.MsgTryAgain, Properties.Resources.MsgCalcCancelled);
+                    System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
                 }
 
                 //Reset(true);
@@ -544,7 +536,7 @@ namespace ArcMapAddinVisibility.ViewModels
             }
             else
             {
-                throw new Exception(Properties.Resources.ExceptionFieldIndexNotFound);
+                throw new Exception(VisibilityLibrary.Properties.Resources.ExceptionFieldIndexNotFound);
             }
         }
 

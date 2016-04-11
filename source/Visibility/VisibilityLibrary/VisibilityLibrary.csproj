@@ -45,6 +45,11 @@
   <ItemGroup>
     <Compile Include="Attributes\LocalizableDescriptionAttribute.cs" />
     <Compile Include="Enums\Enums.cs" />
+    <Compile Include="Helpers\Constants.cs" />
+    <Compile Include="Helpers\Mediator.cs" />
+    <Compile Include="Helpers\NotificationObject.cs" />
+    <Compile Include="Helpers\RelayCommand.cs" />
+    <Compile Include="Helpers\Wpf.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -52,6 +57,15 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="ValueConverters\EnumToFriendlyNameConverter.cs" />
+    <Compile Include="Views\EditPropertiesView.xaml.cs">
+      <DependentUpon>EditPropertiesView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LLOSView.xaml.cs">
+      <DependentUpon>LLOSView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\RLOSView.xaml.cs">
+      <DependentUpon>RLOSView.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -61,6 +75,18 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="MAResourceDictionary.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\EditPropertiesView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LLOSView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\RLOSView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

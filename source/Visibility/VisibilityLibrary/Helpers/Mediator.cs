@@ -15,7 +15,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace ArcMapAddinVisibility.Helpers
+namespace VisibilityLibrary.Helpers
 {
     static public class Mediator
     {

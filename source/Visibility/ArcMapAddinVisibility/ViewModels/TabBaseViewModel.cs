@@ -24,8 +24,9 @@ using ESRI.ArcGIS.ArcMapUI;
 using ESRI.ArcGIS.Carto;
 using ESRI.ArcGIS.Geometry;
 using ESRI.ArcGIS.Display;
-using ArcMapAddinVisibility.Helpers;
+using VisibilityLibrary.Helpers;
 using ArcMapAddinVisibility.Models;
+using VisibilityLibrary;
 
 namespace ArcMapAddinVisibility.ViewModels
 {
@@ -169,7 +170,7 @@ namespace ArcMapAddinVisibility.ViewModels
                     // invalid coordinate, reset and throw exception
                     Point1 = null;
                     HasPoint1 = false;
-                    throw new ArgumentException(Properties.Resources.AEInvalidCoordinate);
+                    throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEInvalidCoordinate);
                 }
             }
         }
@@ -239,7 +240,7 @@ namespace ArcMapAddinVisibility.ViewModels
                     // invalid coordinate, reset and throw exception
                     Point2 = null;
                     HasPoint2 = false;
-                    throw new ArgumentException(Properties.Resources.AEInvalidCoordinate);
+                    throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEInvalidCoordinate);
                 }
             }
         }
@@ -287,7 +288,7 @@ namespace ArcMapAddinVisibility.ViewModels
             set
             {
                 if (value < 0.0)
-                    throw new ArgumentException(Properties.Resources.AEMustBePositive);
+                    throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEMustBePositive);
 
                 distance = value;
                 DistanceString = distance.ToString("N"); // use current culture number format
@@ -322,7 +323,7 @@ namespace ArcMapAddinVisibility.ViewModels
                 }
                 else
                 {
-                    throw new ArgumentException(Properties.Resources.AEInvalidInput);
+                    throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEInvalidInput);
                 }
             }
         }

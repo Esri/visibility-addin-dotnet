@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace ArcMapAddinVisibility.Views
+namespace VisibilityLibrary.Views
 {
     /// <summary>
     /// Interaction logic for LLOSView.xaml

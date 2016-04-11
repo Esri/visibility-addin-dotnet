@@ -15,7 +15,7 @@ using System;
 using System.ComponentModel;
 using System.Linq.Expressions;
 
-namespace ArcMapAddinVisibility.Helpers
+namespace VisibilityLibrary.Helpers
 {
     public class NotificationObject : INotifyPropertyChanged
     {

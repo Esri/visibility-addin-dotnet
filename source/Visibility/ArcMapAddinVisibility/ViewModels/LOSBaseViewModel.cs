@@ -11,8 +11,9 @@ using ESRI.ArcGIS.Analyst3D;
 using ESRI.ArcGIS.Geometry;
 using ESRI.ArcGIS.Display;
 using ESRI.ArcGIS.DataSourcesRaster;
-using ArcMapAddinVisibility.Helpers;
-using ArcMapAddinVisibility.Views;
+using VisibilityLibrary;
+using VisibilityLibrary.Helpers;
+using VisibilityLibrary.Views;
 
 namespace ArcMapAddinVisibility.ViewModels
 {
@@ -63,7 +64,7 @@ namespace ArcMapAddinVisibility.ViewModels
                 RaisePropertyChanged(() => ObserverOffset);
 
                 if (!observerOffset.HasValue)
-                    throw new ArgumentException(Properties.Resources.AEInvalidInput);
+                    throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEInvalidInput);
             }
         }
         private double? targetOffset;
@@ -76,7 +77,7 @@ namespace ArcMapAddinVisibility.ViewModels
                 RaisePropertyChanged(() => TargetOffset);
 
                 if (!targetOffset.HasValue)
-                    throw new ArgumentException(Properties.Resources.AEInvalidInput);
+                    throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEInvalidInput);
             }
         }
 
@@ -124,6 +125,8 @@ namespace ArcMapAddinVisibility.ViewModels
         private void OnEditPropertiesDialogCommand(object obj)
         {
             var dlg = new EditPropertiesView();
+
+            //TODO set viewmodel
 
             dlg.ShowDialog();
         }
@@ -187,9 +190,9 @@ namespace ArcMapAddinVisibility.ViewModels
             if (string.IsNullOrWhiteSpace(mode))
                 return;
 
-            if (mode == Properties.Resources.ToolModeObserver)
+            if (mode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
                 ToolMode = MapPointToolMode.Observer;
-            else if (mode == Properties.Resources.ToolModeTarget)
+            else if (mode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
                 ToolMode = MapPointToolMode.Target;
 
             base.OnActivateTool(obj);
@@ -237,7 +240,7 @@ namespace ArcMapAddinVisibility.ViewModels
                 validPoint = IsPointWithinExtent(point, GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName).AreaOfInterest);
 
                 if (validPoint == false && showPopup)
-                    System.Windows.Forms.MessageBox.Show(Properties.Resources.MsgOutOfAOI);
+                    System.Windows.Forms.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgOutOfAOI);
             }
 
             return validPoint;

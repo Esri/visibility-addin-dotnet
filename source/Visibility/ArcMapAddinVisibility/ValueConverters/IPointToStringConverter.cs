@@ -19,6 +19,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using ESRI.ArcGIS.Geometry;
+using VisibilityLibrary;
 
 namespace ArcMapAddinVisibility
 {
