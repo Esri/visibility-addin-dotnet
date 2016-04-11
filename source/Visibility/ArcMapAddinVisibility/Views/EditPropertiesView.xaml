@@ -17,7 +17,7 @@
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/ArcMapAddinVisibility;component/MAResourceDictionary.xaml"/>
+                <ResourceDictionary Source="/VisibilityLibrary;component/MAResourceDictionary.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             <viewModels:EditPropertiesViewModel x:Key="editPropertiesVM" />
             <ObjectDataProvider x:Key="coordinateTypes"

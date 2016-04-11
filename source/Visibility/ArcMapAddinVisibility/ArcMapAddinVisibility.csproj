@@ -141,7 +141,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="ValueConverters\EnumToFriendlyNameConverter.cs" />
     <Compile Include="ValueConverters\IPointToStringConverter.cs" />
     <Compile Include="ViewModels\BaseViewModel.cs" />
     <Compile Include="ViewModels\EditPropertiesViewModel.cs" />
@@ -189,10 +188,6 @@
       <SubType>Code</SubType>
     </Compile>
     <AddInContent Include="Images\DockableWindowVisibility.png" />
-    <Page Include="MAResourceDictionary.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="Views\EditPropertiesView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

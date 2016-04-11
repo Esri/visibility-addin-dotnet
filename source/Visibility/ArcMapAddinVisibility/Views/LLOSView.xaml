@@ -12,7 +12,7 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/ArcMapAddinVisibility;component/MAResourceDictionary.xaml"/>
+                <ResourceDictionary Source="/VisibilityLibrary;component/MAResourceDictionary.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             <viewModels:LLOSViewModel x:Key="llosViewModel" />
             <local:IPointToStringConverter x:Key="iPointToString" />
