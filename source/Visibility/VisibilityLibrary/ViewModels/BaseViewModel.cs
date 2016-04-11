@@ -16,7 +16,7 @@
 
 using VisibilityLibrary.Helpers;
 
-namespace ArcMapAddinVisibility.ViewModels
+namespace VisibilityLibrary.ViewModels
 {
     public class BaseViewModel : NotificationObject
     {

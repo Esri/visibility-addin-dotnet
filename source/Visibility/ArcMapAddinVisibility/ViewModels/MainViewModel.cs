@@ -17,6 +17,7 @@ using ESRI.ArcGIS.Carto;
 using VisibilityLibrary;
 using VisibilityLibrary.Helpers;
 using VisibilityLibrary.Views;
+using VisibilityLibrary.ViewModels;
 
 namespace ArcMapAddinVisibility.ViewModels
 {

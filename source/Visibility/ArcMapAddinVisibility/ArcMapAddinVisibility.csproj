@@ -118,7 +118,6 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Config.esriaddinx</DependentUpon>
     </Compile>
-    <Compile Include="Models\VisibilityConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -131,8 +130,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ValueConverters\IPointToStringConverter.cs" />
-    <Compile Include="ViewModels\BaseViewModel.cs" />
-    <Compile Include="ViewModels\EditPropertiesViewModel.cs" />
     <Compile Include="ViewModels\LLOSViewModel.cs" />
     <Compile Include="ViewModels\LOSBaseViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
@@ -191,7 +188,9 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Models\" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\VisibilityLibrary\VisibilityLibrary.csproj">
       <Project>{d743cd02-174d-44cb-ae88-93c01d21f89e}</Project>

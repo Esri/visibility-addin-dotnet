@@ -21,8 +21,9 @@ using ESRI.ArcGIS.Carto;
 using ESRI.ArcGIS.Geometry;
 using ESRI.ArcGIS.Display;
 using VisibilityLibrary.Helpers;
-using ArcMapAddinVisibility.Models;
 using VisibilityLibrary;
+using VisibilityLibrary.ViewModels;
+using VisibilityLibrary.Models;
 
 namespace ArcMapAddinVisibility.ViewModels
 {

@@ -14,14 +14,15 @@
 
 using VisibilityLibrary.Helpers;
 using VisibilityLibrary;
+using VisibilityLibrary.Models;
 
-namespace ArcMapAddinVisibility.ViewModels
+namespace VisibilityLibrary.ViewModels
 {
     public class EditPropertiesViewModel : BaseViewModel
     {
         public EditPropertiesViewModel()
         {
-            SelectedCoordinateType = TabBaseViewModel.AddInConfig.DisplayCoordinateType;
+            SelectedCoordinateType = VisibilityConfig.AddInConfig.DisplayCoordinateType;
             OKButtonPressedCommand = new RelayCommand(OnOkButtonPressedCommand);
         }
 
@@ -46,9 +47,9 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <param name="obj"></param>
         private void OnOkButtonPressedCommand(object obj)
         {
-            TabBaseViewModel.AddInConfig.DisplayCoordinateType = SelectedCoordinateType;
+            VisibilityConfig.AddInConfig.DisplayCoordinateType = SelectedCoordinateType;
 
-            TabBaseViewModel.AddInConfig.SaveConfiguration();
+            VisibilityConfig.AddInConfig.SaveConfiguration();
 
             // close dialog
             DialogResult = true;

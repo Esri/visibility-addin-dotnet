@@ -13,23 +13,21 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 using System.Xml;
 using VisibilityLibrary.Helpers;
 using System.IO;
-using VisibilityLibrary;
 
-namespace ArcMapAddinVisibility.Models
+namespace VisibilityLibrary.Models
 {
     public class VisibilityConfig : NotificationObject
     {
         public VisibilityConfig()
         {
         }
+
+        public static VisibilityConfig AddInConfig = new VisibilityConfig();
 
         private CoordinateTypes displayCoordinateType = CoordinateTypes.None;
         public CoordinateTypes DisplayCoordinateType
