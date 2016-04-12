@@ -59,14 +59,14 @@
                         Margin="3,3,0,0" />
                 </Grid>
                 <TextBlock Grid.Row="2" Grid.ColumnSpan="3" Text="{x:Static prop:Resources.LabelObserverPoints}" Margin="3,3,0,0" />
-                <ListBox x:Name="listBoxObservers" Grid.Row="3" Grid.ColumnSpan="2" ItemsSource="{Binding ObserverPoints}" ScrollViewer.VerticalScrollBarVisibility="Visible" 
+                <ListBox x:Name="listBoxObservers" Grid.Row="3" Grid.ColumnSpan="2" ItemsSource="{Binding ObserverAddInPoints}" ScrollViewer.VerticalScrollBarVisibility="Visible" 
                  PreviewMouseRightButtonDown="ListBox_PreviewMouseRightButtonDown"
                  SelectionMode="Multiple"
                  Height="60" Margin="3,3,0,0">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding Path=.}" />
+                                <TextBlock Text="{Binding Text}" />
                             </StackPanel>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
@@ -85,14 +85,14 @@
                     <Image Source="/VisibilityLibrary;component/Images/Add_Point32_d.png" Width="18" Height="18" />
                 </Button>
                 <TextBlock Grid.Row="4" Grid.ColumnSpan="3" Text="{x:Static prop:Resources.LabelTargetPoints}" Margin="3,3,0,0" />
-                <ListBox x:Name="listBoxTargets" Grid.Row="5" Grid.ColumnSpan="2" ItemsSource="{Binding TargetPoints}" ScrollViewer.VerticalScrollBarVisibility="Visible" 
+                <ListBox x:Name="listBoxTargets" Grid.Row="5" Grid.ColumnSpan="2" ItemsSource="{Binding TargetAddInPoints}" ScrollViewer.VerticalScrollBarVisibility="Visible" 
                  PreviewMouseRightButtonDown="ListBox_PreviewMouseRightButtonDown"
                  SelectionMode="Multiple"
                  Height="60" Margin="3,3,0,0">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding Path=.}" /><!--, Converter={StaticResource iPointToString}}"  />-->
+                                <TextBlock Text="{Binding Text}" />
                             </StackPanel>
                         </DataTemplate>
                     </ListBox.ItemTemplate>

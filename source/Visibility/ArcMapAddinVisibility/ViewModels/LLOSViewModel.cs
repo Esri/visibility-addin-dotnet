@@ -21,6 +21,7 @@ using ESRI.ArcGIS.Geometry;
 using ESRI.ArcGIS.Display;
 using VisibilityLibrary.Helpers;
 using System.Collections;
+using ArcMapAddinVisibility.Models;
 
 namespace ArcMapAddinVisibility.ViewModels
 {
@@ -28,7 +29,7 @@ namespace ArcMapAddinVisibility.ViewModels
     {
         public LLOSViewModel()
         {
-            TargetPoints = new ObservableCollection<IPoint>();
+            TargetAddInPoints = new ObservableCollection<AddInPoint>();
 
             // commands
             SubmitCommand = new RelayCommand(OnSubmitCommand);
@@ -36,7 +37,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
         #region Properties
 
-        public ObservableCollection<IPoint> TargetPoints { get; set; }
+        public ObservableCollection<AddInPoint> TargetAddInPoints { get; set; }
 
         #endregion
 
@@ -70,35 +71,28 @@ namespace ArcMapAddinVisibility.ViewModels
 
             // now lets take care of Target Points
             var items = obj as IList;
-            var points = items.Cast<IPoint>().ToList();
+            var targets = items.Cast<AddInPoint>().ToList();
 
-            if (points == null)
+            if (targets == null)
                 return;
 
-            DeleteTargetPoints(points);
+            DeleteTargetPoints(targets);
         }
 
-        private void DeleteTargetPoints(List<IPoint> points)
+
+        private void DeleteTargetPoints(List<AddInPoint> targets)
         {
-            // temp list of point's graphic element's guids
-            var guidList = new List<string>();
+            if (targets == null || !targets.Any())
+                return;
 
-            foreach (var point in points)
-            {
-                TargetPoints.Remove(point);
-
-                // add to graphic element guid list for removal
-                var kvp = GuidPointDictionary.FirstOrDefault(i => i.Value == point);
-
-                guidList.Add(kvp.Key);
-            }
-
+            // remove map graphics
+            var guidList = targets.Select(x => x.GUID).ToList();
             RemoveGraphics(guidList);
 
-            foreach (var guid in guidList)
+            // remove from collection
+            foreach (var obj in targets)
             {
-                if (GuidPointDictionary.ContainsKey(guid))
-                    GuidPointDictionary.Remove(guid);
+                TargetAddInPoints.Remove(obj);
             }
         }
 
@@ -112,7 +106,7 @@ namespace ArcMapAddinVisibility.ViewModels
             if (mode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
                 base.OnDeleteAllPointsCommand(obj);
             else if (mode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
-                DeleteTargetPoints(TargetPoints.ToList<IPoint>());
+                DeleteTargetPoints(TargetAddInPoints.ToList());
         }
 
         #endregion
@@ -131,10 +125,10 @@ namespace ArcMapAddinVisibility.ViewModels
 
             if (ToolMode == MapPointToolMode.Target)
             {
-                TargetPoints.Insert(0, point);
                 var color = new RgbColorClass() { Red = 255 } as IColor;
                 var guid = AddGraphicToMap(point, color, true, esriSimpleMarkerStyle.esriSMSSquare);
-                UpdatePointDictionary(point, guid);
+                var addInPoint = new AddInPoint() { Point = point, GUID = guid };
+                TargetAddInPoints.Insert(0, addInPoint);
             }
         }
 
@@ -146,7 +140,7 @@ namespace ArcMapAddinVisibility.ViewModels
                 return;
 
             // reset target points
-            TargetPoints.Clear();
+            TargetAddInPoints.Clear();
         }
 
         public override bool CanCreateElement
@@ -154,8 +148,8 @@ namespace ArcMapAddinVisibility.ViewModels
             get
             {
                 return (!string.IsNullOrWhiteSpace(SelectedSurfaceName) 
-                    && ObserverPoints.Any() 
-                    && TargetPoints.Any()
+                    && ObserverAddInPoints.Any() 
+                    && TargetAddInPoints.Any()
                     && TargetOffset.HasValue);
             }
         }
@@ -201,12 +195,12 @@ namespace ArcMapAddinVisibility.ViewModels
 
                 var DictionaryTargetObserverCount = new Dictionary<IPoint, int>();
 
-                foreach (var observerPoint in ObserverPoints)
+                foreach (var observerPoint in ObserverAddInPoints)
                 {
                     // keep track of visible targets for this observer
                     var CanSeeAtLeastOneTarget = false;
 
-                    var z1 = surface.GetElevation(observerPoint) + finalObserverOffset;
+                    var z1 = surface.GetElevation(observerPoint.Point) + finalObserverOffset;
 
                     if (surface.IsVoidZ(z1))
                     {
@@ -214,9 +208,9 @@ namespace ArcMapAddinVisibility.ViewModels
                             z1 = 0.000001;
                     }
 
-                    foreach (var targetPoint in TargetPoints)
+                    foreach (var targetPoint in TargetAddInPoints)
                     {
-                        var z2 = surface.GetElevation(targetPoint) + finalTargetOffset;
+                        var z2 = surface.GetElevation(targetPoint.Point) + finalTargetOffset;
 
                         if (surface.IsVoidZ(z2))
                         {
@@ -224,8 +218,8 @@ namespace ArcMapAddinVisibility.ViewModels
                                 z2 = 0.000001;
                         }
 
-                        var fromPoint = new PointClass() { Z = z1, X = observerPoint.X, Y = observerPoint.Y, ZAware = true } as IPoint;
-                        var toPoint = new PointClass() { Z = z2, X = targetPoint.X, Y = targetPoint.Y, ZAware = true } as IPoint;
+                        var fromPoint = new PointClass() { Z = z1, X = observerPoint.Point.X, Y = observerPoint.Point.Y, ZAware = true } as IPoint;
+                        var toPoint = new PointClass() { Z = z2, X = targetPoint.Point.X, Y = targetPoint.Point.Y, ZAware = true } as IPoint;
 
                         geoBridge.GetLineOfSight(surface, fromPoint, toPoint,
                             out pointObstruction, out polyVisible, out polyInvisible, out targetIsVisible, false, false);
@@ -236,7 +230,7 @@ namespace ArcMapAddinVisibility.ViewModels
                             CanSeeAtLeastOneTarget = true;
 
                             // update target observer count
-                            UpdateTargetObserverCount(DictionaryTargetObserverCount, targetPoint);
+                            UpdateTargetObserverCount(DictionaryTargetObserverCount, targetPoint.Point);
                         }
 
                         if (polyVisible != null)
@@ -265,17 +259,17 @@ namespace ArcMapAddinVisibility.ViewModels
                     // visualize observer
 
                     // add blue dot
-                    AddGraphicToMap(observerPoint, new RgbColorClass() { Blue = 255 }, size: 10);
+                    AddGraphicToMap(observerPoint.Point, new RgbColorClass() { Blue = 255 }, size: 10);
 
                     if (CanSeeAtLeastOneTarget)
                     {
                         // add green dot
-                        AddGraphicToMap(observerPoint, new RgbColorClass() { Green = 255 });
+                        AddGraphicToMap(observerPoint.Point, new RgbColorClass() { Green = 255 });
                     }
                     else
                     {
                         // add red dot
-                        AddGraphicToMap(observerPoint, new RgbColorClass() { Red = 255 });
+                        AddGraphicToMap(observerPoint.Point, new RgbColorClass() { Red = 255 });
                     }
                 }
 
@@ -294,19 +288,19 @@ namespace ArcMapAddinVisibility.ViewModels
         private void VisualizeTargets(Dictionary<IPoint, int> dict)
         {
             // visualize targets
-            foreach (var targetPoint in TargetPoints)
+            foreach (var targetPoint in TargetAddInPoints)
             {
-                if (dict.ContainsKey(targetPoint))
+                if (dict.ContainsKey(targetPoint.Point))
                 {
                     // add green circle
-                    AddGraphicToMap(targetPoint, new RgbColorClass() { Green = 255 }, size: 10);
+                    AddGraphicToMap(targetPoint.Point, new RgbColorClass() { Green = 255 }, size: 10);
                     // add label
-                    AddTextToMap(dict[targetPoint].ToString(), targetPoint, new RgbColorClass(), size: 10);
+                    AddTextToMap(dict[targetPoint.Point].ToString(), targetPoint.Point, new RgbColorClass(), size: 10);
                 }
                 else
                 {
                     // add red circle
-                    AddGraphicToMap(targetPoint, new RgbColorClass() { Red = 255 }, size: 10);
+                    AddGraphicToMap(targetPoint.Point, new RgbColorClass() { Red = 255 }, size: 10);
                 }
             }
         }
@@ -325,10 +319,10 @@ namespace ArcMapAddinVisibility.ViewModels
 
         internal override void OnDisplayCoordinateTypeChanged(object obj)
         {
-            var list = TargetPoints.ToList();
-            TargetPoints.Clear();
+            var list = TargetAddInPoints.ToList();
+            TargetAddInPoints.Clear();
             foreach (var item in list)
-                TargetPoints.Add(item);
+                TargetAddInPoints.Add(item);
 
             // and update observers
             base.OnDisplayCoordinateTypeChanged(obj);

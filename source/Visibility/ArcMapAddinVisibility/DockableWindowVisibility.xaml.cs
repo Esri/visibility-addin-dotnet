@@ -67,11 +67,5 @@ namespace ArcMapAddinVisibility
             }
 
         }
-
-        private void UserControl_Loaded(object sender, RoutedEventArgs e)
-        {
-            // load the configuration file
-            ArcMapAddinVisibility.ViewModels.TabBaseViewModel.AddInConfig.LoadConfiguration();
-        }
     }
 }

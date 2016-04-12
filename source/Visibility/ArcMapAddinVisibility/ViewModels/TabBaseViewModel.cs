@@ -60,8 +60,6 @@ namespace ArcMapAddinVisibility.ViewModels
         internal bool HasPoint2 = false;
         internal INewLineFeedback feedback = null;
 
-        public static VisibilityConfig AddInConfig = new VisibilityConfig();
-
         public bool HasMapGraphics
         {
             get

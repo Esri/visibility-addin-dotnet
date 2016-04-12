@@ -74,6 +74,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -95,9 +96,9 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Images\Add_Point32_d.png" />
-    <Content Include="Images\GenericErrorStop32_d.png" />
-    <Content Include="Images\GeoprocessingEnvironmentSettings32_d.png" />
+    <Resource Include="Images\Add_Point32_d.png" />
+    <Resource Include="Images\GenericErrorStop32_d.png" />
+    <Resource Include="Images\GeoprocessingEnvironmentSettings32_d.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

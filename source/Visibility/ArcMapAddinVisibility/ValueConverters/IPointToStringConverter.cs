@@ -13,13 +13,10 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Data;
 using ESRI.ArcGIS.Geometry;
 using VisibilityLibrary;
+using VisibilityLibrary.Models;
 
 namespace ArcMapAddinVisibility
 {
@@ -43,7 +40,7 @@ namespace ArcMapAddinVisibility
             var cn = point as IConversionNotation;
             if (cn != null)
             {
-                switch (ArcMapAddinVisibility.ViewModels.TabBaseViewModel.AddInConfig.DisplayCoordinateType)
+                switch (VisibilityConfig.AddInConfig.DisplayCoordinateType)
                 {
                     case CoordinateTypes.DD:
                         result = cn.GetDDFromCoords(6);

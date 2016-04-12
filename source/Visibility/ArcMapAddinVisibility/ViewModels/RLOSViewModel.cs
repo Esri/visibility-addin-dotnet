@@ -151,14 +151,14 @@ namespace ArcMapAddinVisibility.ViewModels
         {
             base.OnDeletePointCommand(obj);
 
-            EnableOkCancelClearBtns(ObserverPoints.Any());
+            EnableOkCancelClearBtns(ObserverAddInPoints.Any());
         }
 
         internal override void OnDeleteAllPointsCommand(object obj)
         {
             base.OnDeleteAllPointsCommand(obj);
 
-            EnableOkCancelClearBtns(ObserverPoints.Any());
+            EnableOkCancelClearBtns(ObserverAddInPoints.Any());
         }
 
         public override bool CanCreateElement
@@ -166,7 +166,7 @@ namespace ArcMapAddinVisibility.ViewModels
             get
             {
                 return (!string.IsNullOrWhiteSpace(SelectedSurfaceName)
-                    && ObserverPoints.Any());
+                    && ObserverAddInPoints.Any());
             }
         }
 
@@ -215,10 +215,10 @@ namespace ArcMapAddinVisibility.ViewModels
                 List<IGeometry> radius1_2GeomList = new List<IGeometry>();
                 List<IGeometry> donutGeomList = new List<IGeometry>();
 
-                foreach (IPoint observerPoint in ObserverPoints)
+                foreach (var observerPoint in ObserverAddInPoints)
                 {
                     // Create buffer geometries for final Min/Max distance
-                    ITopologicalOperator topologicalOperator = observerPoint as ITopologicalOperator;
+                    ITopologicalOperator topologicalOperator = observerPoint.Point as ITopologicalOperator;
                     IGeometry geom = topologicalOperator.Buffer(finalMaxDistance);
                     radius2GeomList.Add(geom);
                     radius1_2GeomList.Add(geom);
@@ -235,7 +235,7 @@ namespace ArcMapAddinVisibility.ViewModels
                         radius1_2GeomList.Add(geom);
                     }
 
-                    double z1 = surface.GetElevation(observerPoint) + finalObserverOffset;
+                    double z1 = surface.GetElevation(observerPoint.Point) + finalObserverOffset;
 
                     //create a new point feature
                     IFeature ipFeature = pointFc.CreateFeature();
@@ -245,7 +245,7 @@ namespace ArcMapAddinVisibility.ViewModels
                         finalRightHorizontalFOV, finalBottomVerticalFOV, finalTopVerticalFOV, ipFeature);
 
                     //Create shape 
-                    IPoint point = new PointClass() { Z = z1, X = observerPoint.X, Y = observerPoint.Y, ZAware = true };
+                    IPoint point = new PointClass() { Z = z1, X = observerPoint.Point.X, Y = observerPoint.Point.Y, ZAware = true };
                     ipFeature.Shape = point;
                     ipFeature.Store();
                 }
@@ -365,7 +365,7 @@ namespace ArcMapAddinVisibility.ViewModels
             if (point == null)
                 return;
 
-            EnableOkCancelClearBtns(ObserverPoints.Any());
+            EnableOkCancelClearBtns(ObserverAddInPoints.Any());
         }
 
         #endregion

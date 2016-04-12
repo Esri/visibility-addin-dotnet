@@ -11,6 +11,8 @@ using ESRI.ArcGIS.Display;
 using VisibilityLibrary;
 using VisibilityLibrary.Helpers;
 using VisibilityLibrary.Views;
+using VisibilityLibrary.ViewModels;
+using ArcMapAddinVisibility.Models;
 
 namespace ArcMapAddinVisibility.ViewModels
 {
@@ -23,7 +25,8 @@ namespace ArcMapAddinVisibility.ViewModels
             OffsetUnitType = DistanceTypes.Meters;
             AngularUnitType = AngularTypes.DEGREES;
 
-            ObserverPoints = new ObservableCollection<IPoint>();
+            ObserverAddInPoints = new ObservableCollection<AddInPoint>();
+            
             ToolMode = MapPointToolMode.Unknown;
             SurfaceLayerNames = new ObservableCollection<string>();
             SelectedSurfaceName = string.Empty;
@@ -35,9 +38,8 @@ namespace ArcMapAddinVisibility.ViewModels
             DeleteAllPointsCommand = new RelayCommand(OnDeleteAllPointsCommand);
             EditPropertiesDialogCommand = new RelayCommand(OnEditPropertiesDialogCommand);
 
-            GuidPointDictionary = new Dictionary<string, IPoint>();
         }
-        
+
         #region Properties
 
         private bool isRunning = false;
@@ -77,13 +79,11 @@ namespace ArcMapAddinVisibility.ViewModels
                     throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEInvalidInput);
             }
         }
-
         internal MapPointToolMode ToolMode { get; set; }
-        public ObservableCollection<IPoint> ObserverPoints { get; set; }
+        public ObservableCollection<AddInPoint> ObserverAddInPoints { get; set; }
         public ObservableCollection<string> SurfaceLayerNames { get; set; }
         public string SelectedSurfaceName { get; set; }
         public DistanceTypes OffsetUnitType { get; set; }
-        public Dictionary<string, IPoint> GuidPointDictionary { get; set; }
         public AngularTypes AngularUnitType { get; set; }
 
         #endregion
@@ -102,17 +102,17 @@ namespace ArcMapAddinVisibility.ViewModels
         {
             // remove observer points
             var items = obj as IList;
-            var points = items.Cast<IPoint>().ToList();
+            var objects = items.Cast<AddInPoint>().ToList();
 
-            if (points == null)
+            if (objects == null)
                 return;
 
-            DeletePoints(points);
+            DeletePoints(objects);
         }
 
         internal virtual void OnDeleteAllPointsCommand(object obj)
         {
-            DeletePoints(ObserverPoints.ToList<IPoint>());
+            DeletePoints(ObserverAddInPoints.ToList());
         }
 
         /// <summary>
@@ -123,35 +123,22 @@ namespace ArcMapAddinVisibility.ViewModels
         {
             var dlg = new EditPropertiesView();
 
-            //TODO set viewmodel
+            dlg.DataContext = new EditPropertiesViewModel();
 
             dlg.ShowDialog();
         }
-
-        private void DeletePoints(List<IPoint> pointList)
+        private void DeletePoints(List<AddInPoint> observers)
         {
-            if (pointList == null || !pointList.Any())
+            if (observers == null || !observers.Any())
                 return;
 
-            // temp list of point's graphic element's guids
-            var guidList = new List<string>();
-
-            foreach (var point in pointList)
-            {
-                ObserverPoints.Remove(point);
-
-                // remove graphic
-                var kvp = GuidPointDictionary.FirstOrDefault(i => i.Value == point);
-
-                guidList.Add(kvp.Key);
-            }
-
+            // remove graphics from map
+            var guidList = observers.Select(x => x.GUID).ToList();
             RemoveGraphics(guidList);
 
-            foreach (var guid in guidList)
+            foreach (var point in observers)
             {
-                if (GuidPointDictionary.ContainsKey(guid))
-                    GuidPointDictionary.Remove(guid);
+                ObserverAddInPoints.Remove(point);
             }
         }
 
@@ -214,10 +201,11 @@ namespace ArcMapAddinVisibility.ViewModels
             {
                 // in tool mode "Observer" we add observer points
                 // otherwise ignore
-                ObserverPoints.Insert(0, point);
+                
                 var color = new RgbColorClass() { Blue = 255 } as IColor;
                 var guid = AddGraphicToMap(point, color, true);
-                UpdatePointDictionary(point, guid);
+                var addInPoint = new AddInPoint() { Point = point, GUID = guid };
+                ObserverAddInPoints.Insert(0, addInPoint);
             }
         }
         /// <summary>
@@ -254,16 +242,7 @@ namespace ArcMapAddinVisibility.ViewModels
             Observer = 1,
             Target = 2
         }
-        /// <summary>
-        /// Dictionary to keep track of the related graphic element with IPoints (Observers and Targets)
-        /// </summary>
-        /// <param name="point">IPoint</param>
-        /// <param name="guid">guid string of the related graphic element</param>
-        internal void UpdatePointDictionary(IPoint point, string guid)
-        {
-            if (!GuidPointDictionary.ContainsKey(guid))
-                GuidPointDictionary.Add(guid, point);
-        }
+
         /// <summary>
         /// Method used to check to see if a point is contained by an envelope
         /// </summary>
@@ -459,11 +438,9 @@ namespace ArcMapAddinVisibility.ViewModels
             ResetSurfaceNames(ArcMap.Document.FocusMap);
 
             // reset observer points
-            ObserverPoints.Clear();
+            ObserverAddInPoints.Clear();
 
             ClearTempGraphics();
-
-            GuidPointDictionary.Clear();
         }
 
         /// <summary>
@@ -498,10 +475,10 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <param name="obj">null, not used</param>
         internal virtual void OnDisplayCoordinateTypeChanged(object obj)
         {
-            var list = ObserverPoints.ToList();
-            ObserverPoints.Clear();
+            var list = ObserverAddInPoints.ToList();
+            ObserverAddInPoints.Clear();
             foreach (var item in list)
-                ObserverPoints.Add(item);
+                ObserverAddInPoints.Add(item);
             RaisePropertyChanged(() => HasMapGraphics);
         }
     }

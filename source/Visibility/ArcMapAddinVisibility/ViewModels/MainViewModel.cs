@@ -18,6 +18,7 @@ using VisibilityLibrary;
 using VisibilityLibrary.Helpers;
 using VisibilityLibrary.Views;
 using VisibilityLibrary.ViewModels;
+using VisibilityLibrary.Models;
 
 namespace ArcMapAddinVisibility.ViewModels
 {
@@ -27,12 +28,17 @@ namespace ArcMapAddinVisibility.ViewModels
         {
             // set some views
             _llosView = new VisibilityLLOSView();
+            var vm = new LLOSViewModel();
+            _llosView.DataContext = vm;
             _rlosView = new VisibilityRLOSView();
+            _rlosView.DataContext = new RLOSViewModel();
 
             Events_ActiveViewChanged();
 
             // listen to some map events
             ArcMap.Events.ActiveViewChanged += Events_ActiveViewChanged;
+
+            VisibilityConfig.AddInConfig.LoadConfiguration();
         }
         private IMap map = null;
         void Events_ActiveViewChanged()
