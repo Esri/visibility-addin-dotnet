@@ -13,7 +13,6 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/VisibilityLibrary;component/MAResourceDictionary.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-            <!--<local:IPointToStringConverter x:Key="iPointToString" />-->
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>

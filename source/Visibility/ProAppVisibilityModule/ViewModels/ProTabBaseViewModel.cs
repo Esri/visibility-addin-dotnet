@@ -24,6 +24,9 @@ using ArcGIS.Desktop.Mapping;
 using ProAppVisibilityModule.Models;
 using ArcGIS.Desktop.Framework;
 using ArcGIS.Core.Geometry;
+using System.Threading.Tasks;
+using ArcGIS.Core.CIM;
+using ArcGIS.Desktop.Framework.Threading.Tasks;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -600,109 +603,62 @@ namespace ProAppVisibilityModule.ViewModels
         //    return eprop.Name;
         //}
 
-        /// <summary>
-        /// Adds a graphic element to the map graphics container
-        /// </summary>
-        /// <param name="geom">IGeometry</param>
-        //internal string AddGraphicToMap(IGeometry geom, IColor color, bool IsTempGraphic = false, esriSimpleMarkerStyle markerStyle = esriSimpleMarkerStyle.esriSMSCircle, int size = 5)
-        //{
-        //    if (geom == null || ArcMap.Document == null || ArcMap.Document.FocusMap == null)
-        //        return string.Empty;
 
-        //    IElement element = null;
-        //    double width = 2.0;
+        internal async void AddGraphicToMap(Geometry geom, bool IsTempGraphic = false, double size = 1.0)
+        {
+            // default color Red
+            await AddGraphicToMap(geom, ColorFactory.Red, IsTempGraphic, size);
+        }
 
-        //    geom.Project(ArcMap.Document.FocusMap.SpatialReference);
+        internal async Task AddGraphicToMap(Geometry geom, CIMColor color, bool IsTempGraphic = false, double size = 1.0, string text = string.Empty)
+        {
+            if (geom == null || MapView.Active == null)
+                return;
 
-        //    if (geom.GeometryType == esriGeometryType.esriGeometryPoint)
-        //    {
-        //        // Marker symbols
-        //        var simpleMarkerSymbol = new SimpleMarkerSymbol() as ISimpleMarkerSymbol;
-        //        simpleMarkerSymbol.Color = color;
-        //        simpleMarkerSymbol.Outline = true;
-        //        simpleMarkerSymbol.OutlineColor = color;
-        //        simpleMarkerSymbol.Size = size;
-        //        simpleMarkerSymbol.Style = markerStyle;
+            CIMSymbolReference symbol = null;
 
-        //        var markerElement = new MarkerElement() as IMarkerElement;
-        //        markerElement.Symbol = simpleMarkerSymbol;
-        //        element = markerElement as IElement;
-        //    }
-        //    else if (geom.GeometryType == esriGeometryType.esriGeometryPolyline)
-        //    {
-        //        // create graphic then add to map
-        //        var le = new LineElementClass() as ILineElement;
-        //        element = le as IElement;
+            if(!string.IsNullOrWhiteSpace(text) && geom.GeometryType == GeometryType.Point)
+            {
+                await QueuedTask.Run(() =>
+                    {
+                        //var tg = new CIMTextGraphic() { Placement = Anchor.CenterPoint, Text = text};
+                    });
+            }
+            else if (geom.GeometryType == GeometryType.Point)
+            {
+                await QueuedTask.Run(() =>
+                {
+                    var s = SymbolFactory.ConstructPointSymbol(color, size, SimpleMarkerStyle.Circle);
+                    symbol = new CIMSymbolReference() { Symbol = s };
+                });
+            }
+            else if (geom.GeometryType == GeometryType.Polyline)
+            {
+                await QueuedTask.Run(() =>
+                {
+                    var s = SymbolFactory.ConstructLineSymbol(color, size);
+                    symbol = new CIMSymbolReference() { Symbol = s };
+                });
+            }
+            else if (geom.GeometryType == GeometryType.Polygon)
+            {
+                await QueuedTask.Run(() =>
+                {
+                    var outline = SymbolFactory.ConstructStroke(ColorFactory.Black, 1.0, SimpleLineStyle.Solid);
+                    var s = SymbolFactory.ConstructPolygonSymbol(color, SimpleFillStyle.Solid, outline);
+                    symbol = new CIMSymbolReference() { Symbol = s };
+                });
+            }
 
-        //        var lineSymbol = new SimpleLineSymbolClass();
-        //        lineSymbol.Color = color;
-        //        lineSymbol.Width = width;
+            await QueuedTask.Run(() =>
+            {
+                var disposable = MapView.Active.AddOverlay(geom, symbol);
+                overlayObjects.Add(disposable);
 
-        //        le.Symbol = lineSymbol;
-        //    }
-        //    else if (geom.GeometryType == esriGeometryType.esriGeometryPolygon)
-        //    {
-        //        // create graphic then add to map
-        //        IPolygonElement pe = new PolygonElementClass() as IPolygonElement;
-        //        element = pe as IElement;
-        //        IFillShapeElement fe = pe as IFillShapeElement;
-                
-        //        var fillSymbol = new SimpleFillSymbolClass();
-        //        RgbColor selectedColor = new RgbColorClass();
-        //        selectedColor.Red = 0;
-        //        selectedColor.Green = 0;
-        //        selectedColor.Blue = 0;
+                GraphicsList.Add(new ProGraphic(disposable, geom, IsTempGraphic));
+            });
+        }
 
-        //        selectedColor.Transparency = (byte)0;
-        //        fillSymbol.Color = selectedColor;  
-                
-        //        fe.Symbol = fillSymbol;
-        //    }
-
-        //    if (element == null)
-        //        return string.Empty;
-
-        //    element.Geometry = geom;
-
-        //    var mxdoc = ArcMap.Application.Document as IMxDocument;
-        //    var av = mxdoc.FocusMap as IActiveView;
-        //    var gc = av as IGraphicsContainer;
-
-        //    // store guid
-        //    var eprop = element as IElementProperties;
-        //    eprop.Name = Guid.NewGuid().ToString();
-
-        //    if (IsTempGraphic)
-        //        TempGraphicsList.Add(eprop.Name);
-        //    else
-        //        MapGraphicsList.Add(eprop.Name);
-
-        //    gc.AddElement(element, 0);
-
-        //    av.PartialRefresh(esriViewDrawPhase.esriViewGraphics, null, null);
-
-        //    RaisePropertyChanged(() => HasMapGraphics);
-
-        //    return eprop.Name;
-        //}
-
-        //internal void AddGraphicToMap(IGeometry geom, IColor color)
-        //{
-        //    AddGraphicToMap(geom, color, false);
-        //}
-
-        //internal void AddGraphicToMap(IGeometry geom)
-        //{
-        //    var rgbColor = new ESRI.ArcGIS.Display.RgbColorClass() { Red = 255 };
-        //    AddGraphicToMap(geom, rgbColor);
-        //}
-        //internal void AddGraphicToMap(IGeometry geom, bool isTemp)
-        //{
-        //    ESRI.ArcGIS.Display.IRgbColor rgbColor = new ESRI.ArcGIS.Display.RgbColorClass();
-        //    rgbColor.Red = 255;
-        //    //ESRI.ArcGIS.Display.IColor color = rgbColor; // Implicit cast.
-        //    AddGraphicToMap(geom, rgbColor, isTemp);
-        //}
 
         //internal DistanceTypes GetDistanceType(int linearUnitFactoryCode)
         //{ 
