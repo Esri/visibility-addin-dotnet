@@ -28,8 +28,7 @@ namespace ArcMapAddinVisibility.ViewModels
         {
             // set some views
             _llosView = new VisibilityLLOSView();
-            var vm = new LLOSViewModel();
-            _llosView.DataContext = vm;
+            _llosView.DataContext = new LLOSViewModel();
             _rlosView = new VisibilityRLOSView();
             _rlosView.DataContext = new RLOSViewModel();
 

@@ -88,11 +88,11 @@
     <Compile Include="Helpers\MapPointHelper.cs" />
     <Compile Include="Models\AddInPoint.cs" />
     <Compile Include="Models\ProGraphic.cs" />
-    <Compile Include="ViewModels\LLOSViewModel.cs" />
-    <Compile Include="ViewModels\LOSBaseViewModel.cs" />
-    <Compile Include="ViewModels\MainViewModel.cs" />
-    <Compile Include="ViewModels\RLOSViewModel.cs" />
-    <Compile Include="ViewModels\TabBaseViewModel.cs" />
+    <Compile Include="ViewModels\ProLLOSViewModel.cs" />
+    <Compile Include="ViewModels\ProLOSBaseViewModel.cs" />
+    <Compile Include="ViewModels\ProMainViewModel.cs" />
+    <Compile Include="ViewModels\ProRLOSViewModel.cs" />
+    <Compile Include="ViewModels\ProTabBaseViewModel.cs" />
     <Compile Include="VisibilityMapTool.cs" />
     <Compile Include="PropertiesButton.cs" />
     <Compile Include="VisibilityDockpane.xaml.cs">

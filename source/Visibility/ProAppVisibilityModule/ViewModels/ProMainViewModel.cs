@@ -21,15 +21,15 @@ using VisibilityLibrary.Models;
 
 namespace ProAppVisibilityModule.ViewModels
 {
-    public class MainViewModel : BaseViewModel
+    public class ProMainViewModel : BaseViewModel
     {
-        public MainViewModel()
+        public ProMainViewModel()
         {
             // set some views
             _llosView = new VisibilityLLOSView();
-            _llosView.DataContext = new LLOSViewModel();
+            _llosView.DataContext = new ProLLOSViewModel();
             _rlosView = new VisibilityRLOSView();
-            _rlosView.DataContext = new RLOSViewModel();
+            _rlosView.DataContext = new ProRLOSViewModel();
 
             //Events_ActiveViewChanged();
 

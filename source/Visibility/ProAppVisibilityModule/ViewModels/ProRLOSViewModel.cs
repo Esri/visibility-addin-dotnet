@@ -24,7 +24,7 @@ using VisibilityLibrary.Helpers;
 namespace ProAppVisibilityModule.ViewModels
 {
 
-    public class RLOSViewModel : LOSBaseViewModel
+    public class ProRLOSViewModel : ProLOSBaseViewModel
     {
 
         #region Properties
@@ -116,7 +116,7 @@ namespace ProAppVisibilityModule.ViewModels
         /// <summary>
         /// One and only constructor
         /// </summary>
-        public RLOSViewModel()
+        public ProRLOSViewModel()
         {
             SurfaceOffset = 0.0;
             MinDistance = 0.0;

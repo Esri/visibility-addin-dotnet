@@ -23,9 +23,9 @@ using ArcGIS.Core.Geometry;
 
 namespace ProAppVisibilityModule.ViewModels
 {
-    public class LLOSViewModel : LOSBaseViewModel
+    public class ProLLOSViewModel : ProLOSBaseViewModel
     {
-        public LLOSViewModel()
+        public ProLLOSViewModel()
         {
             TargetAddInPoints = new ObservableCollection<AddInPoint>();
 

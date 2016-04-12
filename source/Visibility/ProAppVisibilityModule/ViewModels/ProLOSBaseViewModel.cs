@@ -12,9 +12,9 @@ using ArcMapAddinVisibility.Models;
 
 namespace ProAppVisibilityModule.ViewModels
 {
-    public class LOSBaseViewModel : TabBaseViewModel
+    public class ProLOSBaseViewModel : ProTabBaseViewModel
     {
-        public LOSBaseViewModel()
+        public ProLOSBaseViewModel()
         {
             ObserverOffset = 2.0;
             TargetOffset = 0.0;

@@ -30,9 +30,9 @@ namespace ProAppVisibilityModule.ViewModels
     /// <summary>
     /// Base class for all the common properties, commands and events for tab items
     /// </summary>
-    public class TabBaseViewModel : BaseViewModel
+    public class ProTabBaseViewModel : BaseViewModel
     {
-        public TabBaseViewModel()
+        public ProTabBaseViewModel()
         {
             //properties
             //LineType = LineTypes.Geodesic;
