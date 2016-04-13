@@ -15,11 +15,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using VisibilityLibrary.Helpers;
 using VisibilityLibrary;
 using VisibilityLibrary.ViewModels;
-using VisibilityLibrary.Models;
 using ArcGIS.Desktop.Mapping;
 using ProAppVisibilityModule.Models;
 using ArcGIS.Desktop.Framework;
@@ -610,7 +608,7 @@ namespace ProAppVisibilityModule.ViewModels
             await AddGraphicToMap(geom, ColorFactory.Red, IsTempGraphic, size);
         }
 
-        internal async Task AddGraphicToMap(Geometry geom, CIMColor color, bool IsTempGraphic = false, double size = 1.0, string text = string.Empty)
+        internal async Task AddGraphicToMap(Geometry geom, CIMColor color, bool IsTempGraphic = false, double size = 1.0, string text = "")
         {
             if (geom == null || MapView.Active == null)
                 return;

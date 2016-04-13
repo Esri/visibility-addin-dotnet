@@ -23,7 +23,6 @@ using ESRI.ArcGIS.Display;
 using VisibilityLibrary.Helpers;
 using VisibilityLibrary;
 using VisibilityLibrary.ViewModels;
-using VisibilityLibrary.Models;
 
 namespace ArcMapAddinVisibility.ViewModels
 {
