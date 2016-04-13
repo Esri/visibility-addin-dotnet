@@ -94,33 +94,35 @@
                 <CheckBox IsChecked="{Binding ShowNonVisibleData}" Content="{x:Static prop:Resources.LabelNonVisible}" ToolTip="{x:Static prop:Resources.LabelNonVisible}"   HorizontalAlignment="Left" Margin="5,9,5,5" Grid.Row="4" VerticalAlignment="Top" />
 
                 <ProgressBar Name="pbStatus" IsIndeterminate="True" Width="Auto" HorizontalAlignment="Stretch" Visibility="{Binding DisplayProgressBar}" Grid.ColumnSpan="3" Margin="5,0"/>
-                <Button Content="{x:Static prop:Resources.LabelCancel}" ToolTip="{x:Static prop:Resources.LabelCancel}" Command="{Binding CancelCommand}" Margin="0,0,104,5" HorizontalAlignment="Right" VerticalAlignment="Bottom" Grid.Row="5" IsEnabled="{Binding IsCancelEnabled}"/>
-                <Button Content="{x:Static prop:Resources.LabelOK}" ToolTip="{x:Static prop:Resources.LabelOK}" Command="{Binding SubmitCommand}" HorizontalAlignment="Right" Margin="0,5,66,0" Grid.Row="5" VerticalAlignment="Top" Width="33">
-                    <Button.Style>
-                        <Style TargetType="Button">
-                            <Setter Property="IsEnabled" Value="False" />
-                            <Style.Triggers>
-                                <MultiDataTrigger>
-                                    <MultiDataTrigger.Conditions>
-                                        <Condition Binding="{Binding ElementName=listBoxObservers, Path=HasItems}" Value="True" />
-                                        <Condition Binding="{Binding ElementName=tbObserverOffset, Path=(Validation.HasError)}" Value="False" />
-                                        <Condition Binding="{Binding ElementName=tbSurfaceOffset, Path=(Validation.HasError)}" Value="False" />
-                                        <Condition Binding="{Binding ElementName=tbMinDistance, Path=(Validation.HasError)}" Value="False" />
-                                        <Condition Binding="{Binding ElementName=tbMaxDistance, Path=(Validation.HasError)}" Value="False" />
-                                        <Condition Binding="{Binding ElementName=tbHFOVFrom, Path=(Validation.HasError)}" Value="False" />
-                                        <Condition Binding="{Binding ElementName=tbHFOVTo, Path=(Validation.HasError)}" Value="False" />
-                                        <Condition Binding="{Binding ElementName=tbVFOVFrom, Path=(Validation.HasError)}" Value="False" />
-                                        <Condition Binding="{Binding ElementName=tbVFOVTo, Path=(Validation.HasError)}" Value="False" />
-                                    </MultiDataTrigger.Conditions>
-                                    <MultiDataTrigger.Setters>
-                                        <Setter Property="IsEnabled" Value="True" />
-                                    </MultiDataTrigger.Setters>
-                                </MultiDataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
-                <Button Content="{x:Static prop:Resources.LabelClearGraphics}" ToolTip="{x:Static prop:Resources.LabelClearGraphics}" Command="{Binding ClearGraphicsCommand}" HorizontalAlignment="Right" Margin="5,5,5,5" Grid.Row="5" VerticalAlignment="Top" Width="85" Grid.ColumnSpan="3" IsEnabled="{Binding IsClearEnabled}"/>
+                <StackPanel Grid.Row="5" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="{x:Static prop:Resources.LabelCancel}" ToolTip="{x:Static prop:Resources.LabelCancel}" Command="{Binding CancelCommand}" Margin="3,20,0,0"  IsEnabled="{Binding IsCancelEnabled}"/>
+                    <Button Content="{x:Static prop:Resources.LabelOK}" ToolTip="{x:Static prop:Resources.LabelOK}" Command="{Binding SubmitCommand}"  Margin="3,20,0,0">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="IsEnabled" Value="False" />
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding ElementName=listBoxObservers, Path=HasItems}" Value="True" />
+                                            <Condition Binding="{Binding ElementName=tbObserverOffset, Path=(Validation.HasError)}" Value="False" />
+                                            <Condition Binding="{Binding ElementName=tbSurfaceOffset, Path=(Validation.HasError)}" Value="False" />
+                                            <Condition Binding="{Binding ElementName=tbMinDistance, Path=(Validation.HasError)}" Value="False" />
+                                            <Condition Binding="{Binding ElementName=tbMaxDistance, Path=(Validation.HasError)}" Value="False" />
+                                            <Condition Binding="{Binding ElementName=tbHFOVFrom, Path=(Validation.HasError)}" Value="False" />
+                                            <Condition Binding="{Binding ElementName=tbHFOVTo, Path=(Validation.HasError)}" Value="False" />
+                                            <Condition Binding="{Binding ElementName=tbVFOVFrom, Path=(Validation.HasError)}" Value="False" />
+                                            <Condition Binding="{Binding ElementName=tbVFOVTo, Path=(Validation.HasError)}" Value="False" />
+                                        </MultiDataTrigger.Conditions>
+                                        <MultiDataTrigger.Setters>
+                                            <Setter Property="IsEnabled" Value="True" />
+                                        </MultiDataTrigger.Setters>
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    <Button Content="{x:Static prop:Resources.LabelClearGraphics}" ToolTip="{x:Static prop:Resources.LabelClearGraphics}" Command="{Binding ClearGraphicsCommand}" Margin="3,20,0,0" IsEnabled="{Binding IsClearEnabled}"/>
+                </StackPanel>
 
                 <Expander Header="{x:Static prop:Resources.LabelObserverOptions}" 
                           HorizontalAlignment="Stretch" Margin="0,5,5,0" Grid.Row="6" 

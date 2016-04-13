@@ -49,7 +49,7 @@ namespace ProAppVisibilityModule.ViewModels
             }
         }
 
-        private bool isOkEnabled;
+        private bool isOkEnabled = false;
         public bool IsOkEnabled
         {
             get { return isOkEnabled; }
@@ -60,7 +60,7 @@ namespace ProAppVisibilityModule.ViewModels
             }
         }
 
-        private bool isClearEnabled;
+        private bool isClearEnabled = false;
         public bool IsClearEnabled
         {
             get { return isClearEnabled; }
@@ -71,7 +71,7 @@ namespace ProAppVisibilityModule.ViewModels
             }
         }
 
-        private Visibility _displayProgressBar;
+        private Visibility _displayProgressBar = Visibility.Collapsed;
         public Visibility DisplayProgressBar
         {
             get

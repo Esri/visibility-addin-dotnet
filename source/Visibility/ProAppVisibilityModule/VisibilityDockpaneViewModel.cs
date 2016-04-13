@@ -14,6 +14,8 @@
 
 using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Contracts;
+using VisibilityLibrary.Views;
+using ProAppVisibilityModule.ViewModels;
 
 namespace ProAppVisibilityModule
 {
@@ -21,8 +23,21 @@ namespace ProAppVisibilityModule
     {
         private const string _dockPaneID = "ProAppVisibilityModule_VisibilityDockpane";
 
-        protected VisibilityDockpaneViewModel() { }
+        protected VisibilityDockpaneViewModel() 
+        {
+            LLOSView = new VisibilityLLOSView();
+            LLOSView.DataContext = new ProLLOSViewModel();
 
+            RLOSView = new VisibilityRLOSView();
+            RLOSView.DataContext = new ProRLOSViewModel();
+        }
+
+        #region Views
+
+        public VisibilityLLOSView LLOSView { get; set;}
+        public VisibilityRLOSView RLOSView { get; set; }
+
+        #endregion
         /// <summary>
         /// Show the DockPane.
         /// </summary>
