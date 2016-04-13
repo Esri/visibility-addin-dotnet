@@ -1,0 +1,50 @@
+﻿<ArcGIS defaultAssembly="ProAppVisibilityModule.dll" defaultNamespace="ProAppVisibilityModule" xmlns="http://schemas.esri.com/DADF/Registry" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.esri.com/DADF/Registry file:///C:/Program%20Files/ArcGIS/Pro/bin/ArcGIS.Desktop.Framework.xsd">
+  <AddInInfo id="{cdeb79cb-8161-4f77-8771-9cf422c47f17}" version="1.0" desktopVersion="1.2.5023">
+    <Name>Visibility</Name>
+    <Description>Conduct Linear Line of Sight and Radial Line of Sight analysis</Description>
+    <Image>Images\AddinDesktop32.png</Image>
+    <Author>Esri</Author>
+    <Company>Esri</Company>
+    <Date>4/12/2016 1:35:21 PM, 2016</Date>
+    <Subject>Framework</Subject>
+    <!-- Note subject can be one or more of these topics:
+                    Content, Framework, Editing, Geodatabase, Geometry, Geoprocessing, Layouts, Map Authoring, Map Exploration -->
+  </AddInInfo>
+  <modules>
+    <insertModule id="ProAppVisibilityModule_Module" className="VisibilityModule" autoLoad="false" caption="Module1">
+      <!-- uncomment to have the control hosted on a separate tab-->
+      <tabs>
+        <!--<tab id="ProAppVisibilityModule_Tab1" caption="New Tab">
+          <group refID="ProAppVisibilityModule_Group1"/>
+        </tab>-->
+      </tabs>
+      <groups>
+        <!-- comment this out if you have no controls on the Addin tab to avoid
+              an empty group-->
+        <group id="ProAppVisibilityModule_Group1" caption="Visibility" appearsOnAddInTab="true">
+          <!-- host controls within groups -->
+          <button refID="ProAppVisibilityModule_VisibilityDockpane_ShowButton" size="large" />
+          <button refID="ProAppVisibilityModule_PropertiesButton" size="large" />
+          <tool refID="ProAppVisibilityModule_MapTool" size="large" />
+        </group>
+      </groups>
+      <controls>
+        <!-- add your controls here -->
+        <button id="ProAppVisibilityModule_VisibilityDockpane_ShowButton" caption="Show" className="VisibilityDockpane_ShowButton" loadOnClick="true" smallImage="Images\GenericButtonPurple16.png" largeImage="Images\GenericButtonPurple32.png">
+          <tooltip heading="Show Visibility">Show Visibility Dockpane<disabledText /></tooltip>
+        </button>
+        <button id="ProAppVisibilityModule_PropertiesButton" caption="Properties" className="PropertiesButton" loadOnClick="true" smallImage="Images\GenericButtonBlue16.png" largeImage="Images\GenericButtonBlue32.png">
+          <tooltip heading="Edit Properties">Edit Properties<disabledText /></tooltip>
+        </button>
+        <tool id="ProAppVisibilityModule_MapTool" caption="Map Point Tool " className="VisibilityMapTool" loadOnClick="true" smallImage="Images\GenericButtonRed16.png" largeImage="Images\GenericButtonRed32.png" condition="esri_mapping_mapPane">
+          <tooltip heading="Visibility Map Tool">Visibility Map Tool<disabledText /></tooltip>
+        </tool>
+      </controls>
+      <dockPanes>
+        <dockPane id="ProAppVisibilityModule_VisibilityDockpane" caption="Visibility" className="VisibilityDockpaneViewModel" dock="group" dockWith="esri_core_contentsDockPane">
+          <content className="VisibilityDockpaneView" />
+        </dockPane>
+      </dockPanes>
+    </insertModule>
+  </modules>
+</ArcGIS>
