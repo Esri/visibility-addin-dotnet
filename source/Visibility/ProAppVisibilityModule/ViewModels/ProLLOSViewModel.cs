@@ -28,6 +28,7 @@ namespace ProAppVisibilityModule.ViewModels
         public ProLLOSViewModel()
         {
             TargetAddInPoints = new ObservableCollection<AddInPoint>();
+            IsActiveTab = true;
 
             // commands
             SubmitCommand = new RelayCommand(OnSubmitCommand);

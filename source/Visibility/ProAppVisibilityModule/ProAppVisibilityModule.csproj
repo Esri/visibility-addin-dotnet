@@ -90,7 +90,6 @@
     <Compile Include="Models\ProGraphic.cs" />
     <Compile Include="ViewModels\ProLLOSViewModel.cs" />
     <Compile Include="ViewModels\ProLOSBaseViewModel.cs" />
-    <Compile Include="ViewModels\ProMainViewModel.cs" />
     <Compile Include="ViewModels\ProRLOSViewModel.cs" />
     <Compile Include="ViewModels\ProTabBaseViewModel.cs" />
     <Compile Include="VisibilityMapTool.cs" />

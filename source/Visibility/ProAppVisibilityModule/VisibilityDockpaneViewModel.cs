@@ -15,7 +15,10 @@
 using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Contracts;
 using VisibilityLibrary.Views;
+using VisibilityLibrary.Models;
 using ProAppVisibilityModule.ViewModels;
+using System.Windows.Controls;
+using VisibilityLibrary.Helpers;
 
 namespace ProAppVisibilityModule
 {
@@ -30,6 +33,24 @@ namespace ProAppVisibilityModule
 
             RLOSView = new VisibilityRLOSView();
             RLOSView.DataContext = new ProRLOSViewModel();
+
+            VisibilityConfig.AddInConfig.LoadConfiguration();
+        }
+
+        object selectedTab = null;
+        public object SelectedTab
+        {
+            get { return selectedTab; }
+            set
+            {
+                if (selectedTab == value)
+                    return;
+
+                selectedTab = value;
+                var tabItem = selectedTab as TabItem;
+                if (tabItem.Content != null && (tabItem.Content as UserControl).Content != null)
+                    Mediator.NotifyColleagues(VisibilityLibrary.Constants.TAB_ITEM_SELECTED, ((tabItem.Content as UserControl).Content as UserControl).DataContext);
+            }
         }
 
         #region Views
@@ -67,7 +88,7 @@ namespace ProAppVisibilityModule
     /// <summary>
     /// Button implementation to show the DockPane.
     /// </summary>
-    internal class VisibilityDockpane_ShowButton : Button
+    internal class VisibilityDockpane_ShowButton : ArcGIS.Desktop.Framework.Contracts.Button
     {
         protected override void OnClick()
         {
