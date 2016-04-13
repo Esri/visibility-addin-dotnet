@@ -20,6 +20,8 @@ using VisibilityLibrary.Helpers;
 using System.Collections;
 using ArcMapAddinVisibility.Models;
 using ArcGIS.Core.Geometry;
+using ArcGIS.Desktop.Mapping;
+using System.Windows;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -126,11 +128,13 @@ namespace ProAppVisibilityModule.ViewModels
 
             if (ToolMode == MapPointToolMode.Target)
             {
-                // TODO update add graphic to map
-                //var color = new RgbColorClass() { Red = 255 } as IColor;
-                //var guid = AddGraphicToMap(point, color, true, esriSimpleMarkerStyle.esriSMSSquare);
-                //var addInPoint = new AddInPoint() { Point = point, GUID = guid };
-                //TargetAddInPoints.Insert(0, addInPoint);
+                //TODO square symbol, add symbol to parameter list, etc
+                AddGraphicToMap(point, ColorFactory.Red, true, 5.0);
+                var addInPoint = new AddInPoint() { Point = point };
+                Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        TargetAddInPoints.Insert(0, addInPoint);
+                    });
             }
         }
 

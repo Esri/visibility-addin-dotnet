@@ -23,6 +23,8 @@ using VisibilityLibrary.Views;
 using VisibilityLibrary.ViewModels;
 using ArcGIS.Core.Geometry;
 using ArcMapAddinVisibility.Models;
+using ArcGIS.Desktop.Mapping;
+using System.Windows;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -43,7 +45,7 @@ namespace ProAppVisibilityModule.ViewModels
 
             //TODO update for Pro
             //Mediator.Register(Constants.MAP_TOC_UPDATED, OnMapTocUpdated);
-            Mediator.Register(Constants.DISPLAY_COORDINATE_TYPE_CHANGED, OnDisplayCoordinateTypeChanged);
+            Mediator.Register(VisibilityLibrary.Constants.DISPLAY_COORDINATE_TYPE_CHANGED, OnDisplayCoordinateTypeChanged);
 
             DeletePointCommand = new RelayCommand(OnDeletePointCommand);
             DeleteAllPointsCommand = new RelayCommand(OnDeleteAllPointsCommand);
@@ -214,11 +216,12 @@ namespace ProAppVisibilityModule.ViewModels
                 // in tool mode "Observer" we add observer points
                 // otherwise ignore
                 
-                //TODO update to Pro
-                //var color = new RgbColorClass() { Blue = 255 } as IColor;
-                //var guid = AddGraphicToMap(point, color, true);
-                //var addInPoint = new AddInPoint() { Point = point, GUID = guid };
-                //ObserverAddInPoints.Insert(0, addInPoint);
+                AddGraphicToMap(point, ColorFactory.Blue, true, 5.0);
+                var addInPoint = new AddInPoint() { Point = point };
+                Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        ObserverAddInPoints.Insert(0, addInPoint);
+                    });
             }
         }
         /// <summary>

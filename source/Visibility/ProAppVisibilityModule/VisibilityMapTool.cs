@@ -12,8 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
+using ArcGIS.Desktop.Framework.Threading.Tasks;
+using VisibilityLibrary.Helpers;
 
 namespace ProAppVisibilityModule
 {
@@ -26,6 +29,22 @@ namespace ProAppVisibilityModule
 
         protected override void OnToolMouseDown(MapViewMouseButtonEventArgs e)
         {
+            if (e.ChangedButton != System.Windows.Input.MouseButton.Left)
+                return;
+
+            try
+            {
+                QueuedTask.Run(() =>
+                {
+                    var mp = MapView.Active.ClientToMap(e.ClientPoint);
+                    Mediator.NotifyColleagues(VisibilityLibrary.Constants.NEW_MAP_POINT, mp);
+                });
+            }
+            catch (Exception ex)
+            {
+
+            }
+
             base.OnToolMouseDown(e);
         }
     }
