@@ -64,18 +64,30 @@
                 <TextBlock Text="{x:Static prop:Resources.LabelObserverPoints}" 
                HorizontalAlignment="Stretch" 
                Margin="3,3,0,0" Grid.Row="2" />
+                <TextBox Margin="3,3,0,0"
+                         Grid.Row="3" Grid.ColumnSpan="2"
+                             Text="{Binding Path=Point1Formatted,
+                                            UpdateSourceTrigger=PropertyChanged,
+                                            ValidatesOnExceptions=True}"
+                             Validation.ErrorTemplate="{StaticResource errorTemplate}">
+                    <TextBox.InputBindings>
+                        <KeyBinding Key="Enter"
+                                        Command="{Binding EnterKeyCommand}"
+                                        CommandParameter="{x:Static prop:Resources.ToolModeObserver}" />
+                    </TextBox.InputBindings>
+                </TextBox>
 
-                <Button Command="{Binding ActivateToolCommand}"
+                <Button Margin="3,3,0,0" Command="{Binding ActivateToolCommand}"
                 CommandParameter="{x:Static prop:Resources.ToolModeObserver}"
                 Width="24" Height="24" HorizontalAlignment="Right" 
                 Grid.Row="3" Grid.Column="2" 
-                ToolTip="{x:Static prop:Resources.TooltipMapPointTool}" Margin="0,5,5,5">
+                ToolTip="{x:Static prop:Resources.TooltipMapPointTool}">
                     <Image Source="/VisibilityLibrary;component/Images/Add_Point32_d.png" Width="18" Height="18" HorizontalAlignment="Right" />
                 </Button>
                 <ListBox x:Name="listBoxObservers" ItemsSource="{Binding ObserverAddInPoints}" ScrollViewer.VerticalScrollBarVisibility="Visible" 
                          PreviewMouseRightButtonDown="ListBox_PreviewMouseRightButtonDown"
                          SelectionMode="Multiple"
-                         Grid.Row="3" Height="60" Margin="5,5,5,5">
+                         Grid.Row="4" Grid.ColumnSpan="3" Height="60" Margin="5,5,5,5">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
@@ -91,10 +103,10 @@
                     </ListBox.ContextMenu>
                 </ListBox>
 
-                <CheckBox IsChecked="{Binding ShowNonVisibleData}" Content="{x:Static prop:Resources.LabelNonVisible}" ToolTip="{x:Static prop:Resources.LabelNonVisible}"   HorizontalAlignment="Left" Margin="5,9,5,5" Grid.Row="4" VerticalAlignment="Top" />
+                <CheckBox IsChecked="{Binding ShowNonVisibleData}" Content="{x:Static prop:Resources.LabelNonVisible}" ToolTip="{x:Static prop:Resources.LabelNonVisible}"   HorizontalAlignment="Left" Margin="5,9,5,5" Grid.Row="5" VerticalAlignment="Top" />
 
                 <ProgressBar Name="pbStatus" IsIndeterminate="True" Width="Auto" HorizontalAlignment="Stretch" Visibility="{Binding DisplayProgressBar}" Grid.ColumnSpan="3" Margin="5,0"/>
-                <StackPanel Grid.Row="5" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Right">
+                <StackPanel Grid.Row="6" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Content="{x:Static prop:Resources.LabelCancel}" ToolTip="{x:Static prop:Resources.LabelCancel}" Command="{Binding CancelCommand}" Margin="3,20,0,0"  IsEnabled="{Binding IsCancelEnabled}"/>
                     <Button Content="{x:Static prop:Resources.LabelOK}" ToolTip="{x:Static prop:Resources.LabelOK}" Command="{Binding SubmitCommand}"  Margin="3,20,0,0">
                         <Button.Style>
@@ -125,7 +137,7 @@
                 </StackPanel>
 
                 <Expander Header="{x:Static prop:Resources.LabelObserverOptions}" 
-                          HorizontalAlignment="Stretch" Margin="0,5,5,0" Grid.Row="6" 
+                          HorizontalAlignment="Stretch" Margin="0,5,5,0" Grid.Row="7" 
                           IsExpanded="False" 
                           Grid.ColumnSpan="3">
                     <Grid>
