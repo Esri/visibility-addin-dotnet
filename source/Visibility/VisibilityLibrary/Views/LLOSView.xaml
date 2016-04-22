@@ -69,7 +69,7 @@
                     <TextBox.InputBindings>
                         <KeyBinding Key="Enter"
                                         Command="{Binding EnterKeyCommand}"
-                                        CommandParameter="observer" />
+                                        CommandParameter="{x:Static prop:Resources.ToolModeObserver}" />
                     </TextBox.InputBindings>
                 </TextBox>
                 <ListBox x:Name="listBoxObservers" Grid.Row="4" Grid.ColumnSpan="3" ItemsSource="{Binding ObserverAddInPoints}" ScrollViewer.VerticalScrollBarVisibility="Visible" 
@@ -108,7 +108,7 @@
                     <TextBox.InputBindings>
                         <KeyBinding Key="Enter"
                                         Command="{Binding EnterKeyCommand}"
-                                        CommandParameter="target" />
+                                        CommandParameter="{x:Static prop:Resources.ToolModeTarget}" />
                     </TextBox.InputBindings>
                 </TextBox>
                 <ListBox x:Name="listBoxTargets" Grid.Row="7" Grid.ColumnSpan="3" ItemsSource="{Binding TargetAddInPoints}" ScrollViewer.VerticalScrollBarVisibility="Visible" 
