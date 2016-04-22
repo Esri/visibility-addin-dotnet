@@ -52,10 +52,6 @@ namespace ArcMapAddinVisibility.ViewModels
         private static List<string> TempGraphicsList = new List<string>();
         private static List<string> MapGraphicsList = new List<string>();
 
-        internal bool HasPoint1 = false;
-        internal bool HasPoint2 = false;
-        internal INewLineFeedback feedback = null;
-
         public bool HasMapGraphics
         {
             get
@@ -138,22 +134,16 @@ namespace ArcMapAddinVisibility.ViewModels
                 var point = GetPointFromString(value);
                 if (point != null)
                 {
-                    // clear temp graphics
-                    ClearTempGraphics();
                     point1Formatted = value;
-                    HasPoint1 = true;
                     Point1 = point;
-                    AddGraphicToMap(Point1, true);
-                    // lets try feedback
+                    //AddGraphicToMap(Point1, true);
                     var mxdoc = ArcMap.Application.Document as IMxDocument;
-                    var av = mxdoc.FocusMap as IActiveView;
                     point.Project(mxdoc.FocusMap.SpatialReference);
                 }
                 else
                 {
                     // invalid coordinate, reset and throw exception
                     Point1 = null;
-                    HasPoint1 = false;
                     throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEInvalidCoordinate);
                 }
             }
@@ -197,17 +187,15 @@ namespace ArcMapAddinVisibility.ViewModels
                 if (point != null)
                 {
                     point2Formatted = value;
-                    //HasPoint2 = true;
                     Point2 = point;
+                    //AddGraphicToMap(Point2, true);
                     var mxdoc = ArcMap.Application.Document as IMxDocument;
-                    var av = mxdoc.FocusMap as IActiveView;
                     Point2.Project(mxdoc.FocusMap.SpatialReference);
                 }
                 else
                 {
                     // invalid coordinate, reset and throw exception
                     Point2 = null;
-                    HasPoint2 = false;
                     throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEInvalidCoordinate);
                 }
             }
@@ -396,36 +384,12 @@ namespace ArcMapAddinVisibility.ViewModels
             if (!IsActiveTab)
                 return;
 
-            var mxdoc = ArcMap.Application.Document as IMxDocument;
-            var av = mxdoc.FocusMap as IActiveView;
             var point = obj as IPoint;
 
             if (point == null)
                 return;
 
-            if (!HasPoint1)
-            {
-                // clear temp graphics
-                ClearTempGraphics();
-                Point1 = point;
-                HasPoint1 = true;
-                Point1Formatted = string.Empty;
-
-                AddGraphicToMap(Point1, true);
-            }
-            else if (!HasPoint2)
-            {
-                Point2 = point;
-                HasPoint2 = true;
-                point2Formatted = string.Empty;
-                RaisePropertyChanged(() => Point2Formatted);
-            }
-
-            if (HasPoint1 && HasPoint2)
-            {
-                CreateMapElement();
-                ResetPoints();
-            }
+            // do nothing
         }
 
         #endregion
@@ -512,18 +476,10 @@ namespace ArcMapAddinVisibility.ViewModels
                 DeactivateTool("Esri_ArcMapAddinVisibility_MapPointTool");
             }
 
-            ResetPoints();
             Point1 = null;
             Point2 = null;
             Point1Formatted = string.Empty;
             Point2Formatted = string.Empty;
-        }
-        /// <summary>
-        /// Resets Points 1 and 2
-        /// </summary>
-        internal virtual void ResetPoints()
-        {
-            HasPoint1 = HasPoint2 = false;
         }
 
         /// <summary>
@@ -797,16 +753,7 @@ namespace ArcMapAddinVisibility.ViewModels
             if (point == null)
                 return;
 
-            // dynamically update start point if not set yet
-            if (!HasPoint1)
-            {
-                Point1 = point;
-            }
-            else if (HasPoint1 && !HasPoint2)
-            {
-                Point2Formatted = string.Empty;
-                Point2 = point;
-            }
+            // do nothing
         }
 
         /// <summary>
