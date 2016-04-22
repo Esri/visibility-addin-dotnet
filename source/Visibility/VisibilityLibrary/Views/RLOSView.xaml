@@ -17,7 +17,7 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
-        <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <ScrollViewer Padding="0,0,3,0" VerticalScrollBarVisibility="Auto">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
@@ -78,6 +78,7 @@
                 <TextBox Grid.Row="3"
                          Grid.ColumnSpan="2"
                          Margin="3,3,0,0"
+                         VerticalContentAlignment="Center"
                          Text="{Binding Path=Point1Formatted,
                                         UpdateSourceTrigger=PropertyChanged,
                                         ValidatesOnExceptions=True}"
@@ -91,15 +92,14 @@
 
                 <Button Grid.Row="3"
                         Grid.Column="2"
-                        Width="24"
-                        Height="24"
                         Margin="3,3,0,0"
-                        HorizontalAlignment="Right"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
                         Command="{Binding ActivateToolCommand}"
                         CommandParameter="{x:Static prop:Resources.ToolModeObserver}"
                         ToolTip="{x:Static prop:Resources.TooltipMapPointTool}">
-                    <Image Width="18"
-                           Height="18"
+                    <Image Width="16"
+                           Height="16"
                            HorizontalAlignment="Right"
                            Source="/VisibilityLibrary;component/Images/Add_Point32_d.png" />
                 </Button>

@@ -17,7 +17,7 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
-        <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <ScrollViewer Padding="0,0,3,0" VerticalScrollBarVisibility="Auto">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -71,6 +71,7 @@
                 <TextBox Grid.Row="3"
                          Grid.ColumnSpan="2"
                          Margin="3,3,0,0"
+                         VerticalContentAlignment="Center"
                          Text="{Binding Path=Point1Formatted,
                                         UpdateSourceTrigger=PropertyChanged,
                                         ValidatesOnExceptions=True}"
@@ -89,8 +90,8 @@
                         Command="{Binding ActivateToolCommand}"
                         CommandParameter="{x:Static prop:Resources.ToolModeObserver}"
                         ToolTip="{x:Static prop:Resources.TooltipObserverMapPointTool}">
-                    <Image Width="18"
-                           Height="18"
+                    <Image Width="16"
+                           Height="16"
                            Source="/VisibilityLibrary;component/Images/Add_Point32_d.png" />
                 </Button>
                 <ListBox x:Name="listBoxObservers"
@@ -133,6 +134,7 @@
                 <TextBox Grid.Row="6"
                          Grid.ColumnSpan="2"
                          Margin="3,3,0,0"
+                         VerticalContentAlignment="Center"
                          Text="{Binding Path=Point2Formatted,
                                         UpdateSourceTrigger=PropertyChanged,
                                         ValidatesOnExceptions=True}"
@@ -151,8 +153,8 @@
                         Command="{Binding ActivateToolCommand}"
                         CommandParameter="{x:Static prop:Resources.ToolModeTarget}"
                         ToolTip="{x:Static prop:Resources.TooltipTargetMapPointTool}">
-                    <Image Width="18"
-                           Height="18"
+                    <Image Width="16"
+                           Height="16"
                            Source="/VisibilityLibrary;component/Images/Add_Point32_d.png" />
                 </Button>
                 <ListBox x:Name="listBoxTargets"
