@@ -208,6 +208,27 @@ namespace ArcMapAddinVisibility.ViewModels
                 ObserverAddInPoints.Insert(0, addInPoint);
             }
         }
+        internal override void OnMouseMoveEvent(object obj)
+        {
+            if (!IsActiveTab)
+                return;
+
+            var point = obj as IPoint;
+
+            if (point == null)
+                return;
+
+            if(ToolMode == MapPointToolMode.Observer)
+            {
+                Point1Formatted = string.Empty;
+                Point1 = point;
+            }
+            else if(ToolMode == MapPointToolMode.Target)
+            {
+                Point2Formatted = string.Empty;
+                Point2 = point;
+            }
+        }
         /// <summary>
         /// Method to check to see point is withing the currently selected surface
         /// returns true if there is no surface selected or point is contained by layer AOI
