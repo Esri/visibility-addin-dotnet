@@ -39,7 +39,7 @@
                 <ProgressBar Name="pbStatus"
                              Grid.ColumnSpan="3"
                              Width="Auto"
-                             Margin="5,0"
+                             Margin="3,3,0,0"
                              HorizontalAlignment="Stretch"
                              IsIndeterminate="True"
                              Visibility="{Binding DisplayProgressBar}" />
@@ -107,7 +107,7 @@
                          Grid.Row="4"
                          Grid.ColumnSpan="3"
                          Height="60"
-                         Margin="5,5,5,5"
+                         Margin="3,3,0,0"
                          ItemsSource="{Binding ObserverAddInPoints}"
                          PreviewMouseRightButtonDown="ListBox_PreviewMouseRightButtonDown"
                          ScrollViewer.VerticalScrollBarVisibility="Visible"
@@ -132,7 +132,8 @@
                 </ListBox>
 
                 <CheckBox Grid.Row="5"
-                          Margin="5,9,5,5"
+                          Grid.ColumnSpan="3"
+                          Margin="3,9,0,0"
                           HorizontalAlignment="Left"
                           VerticalAlignment="Top"
                           Content="{x:Static prop:Resources.LabelNonVisible}"
@@ -184,7 +185,7 @@
 
                 <Expander Grid.Row="7"
                           Grid.ColumnSpan="3"
-                          Margin="0,5,5,0"
+                          Margin="3,3,0,0"
                           HorizontalAlignment="Stretch"
                           Header="{x:Static prop:Resources.LabelObserverOptions}"
                           IsExpanded="False">
@@ -213,9 +214,7 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
-                        <GroupBox Grid.ColumnSpan="4"
-                                  Header="{x:Static prop:Resources.LabelOffsets}"
-                                  Padding="0,0,3,0">
+                        <GroupBox Grid.ColumnSpan="4" Header="{x:Static prop:Resources.LabelOffsets}">
                             <StackPanel>
                                 <TextBlock Grid.Row="0"
                                            Grid.ColumnSpan="2"
