@@ -230,6 +230,33 @@ namespace ArcMapAddinVisibility.ViewModels
             }
         }
         /// <summary>
+        /// Handler for "Enter" key press
+        /// If pressed when input textbox for observer or target is focused
+        ///     will set the correct tool mode and then call OnNewMapPointEvent
+        /// If pressed anywhere else, resets tool mode and calls base method
+        /// </summary>
+        /// <param name="obj">ToolMode from resources</param>
+        internal override void OnEnterKeyCommand(object obj)
+        {
+            var keyCommandMode = obj as string;
+
+            if(keyCommandMode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
+            {
+                ToolMode = MapPointToolMode.Observer;
+                OnNewMapPointEvent(Point1);
+            }
+            else if (keyCommandMode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
+            {
+                ToolMode = MapPointToolMode.Target;
+                OnNewMapPointEvent(Point2);
+            }
+            else
+            {
+                ToolMode = MapPointToolMode.Unknown;
+                base.OnEnterKeyCommand(obj);
+            }
+        }
+        /// <summary>
         /// Method to check to see point is withing the currently selected surface
         /// returns true if there is no surface selected or point is contained by layer AOI
         /// returns false if the point is not contained in the layer AOI
