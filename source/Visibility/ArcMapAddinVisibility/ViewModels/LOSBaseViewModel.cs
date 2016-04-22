@@ -208,6 +208,54 @@ namespace ArcMapAddinVisibility.ViewModels
                 ObserverAddInPoints.Insert(0, addInPoint);
             }
         }
+        internal override void OnMouseMoveEvent(object obj)
+        {
+            if (!IsActiveTab)
+                return;
+
+            var point = obj as IPoint;
+
+            if (point == null)
+                return;
+
+            if(ToolMode == MapPointToolMode.Observer)
+            {
+                Point1Formatted = string.Empty;
+                Point1 = point;
+            }
+            else if(ToolMode == MapPointToolMode.Target)
+            {
+                Point2Formatted = string.Empty;
+                Point2 = point;
+            }
+        }
+        /// <summary>
+        /// Handler for "Enter" key press
+        /// If pressed when input textbox for observer or target is focused
+        ///     will set the correct tool mode and then call OnNewMapPointEvent
+        /// If pressed anywhere else, resets tool mode and calls base method
+        /// </summary>
+        /// <param name="obj">ToolMode from resources</param>
+        internal override void OnEnterKeyCommand(object obj)
+        {
+            var keyCommandMode = obj as string;
+
+            if(keyCommandMode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
+            {
+                ToolMode = MapPointToolMode.Observer;
+                OnNewMapPointEvent(Point1);
+            }
+            else if (keyCommandMode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
+            {
+                ToolMode = MapPointToolMode.Target;
+                OnNewMapPointEvent(Point2);
+            }
+            else
+            {
+                ToolMode = MapPointToolMode.Unknown;
+                base.OnEnterKeyCommand(obj);
+            }
+        }
         /// <summary>
         /// Method to check to see point is withing the currently selected surface
         /// returns true if there is no surface selected or point is contained by layer AOI

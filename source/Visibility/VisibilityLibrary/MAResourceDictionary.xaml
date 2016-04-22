@@ -45,7 +45,7 @@
     <Style x:Key="buttonProperties" TargetType="Button">
         <Setter Property="Content">
             <Setter.Value>
-                <Image Source="/VisibilityLibrary;component/Images/GeoprocessingEnvironmentSettings32_d.png" Width="18" Height="18" />
+                <Image Source="/VisibilityLibrary;component/Images/GeoprocessingEnvironmentSettings32_d.png" Width="16" Height="16" />
             </Setter.Value>
         </Setter>
         <Setter Property="Command" Value="{Binding EditPropertiesDialogCommand}" />

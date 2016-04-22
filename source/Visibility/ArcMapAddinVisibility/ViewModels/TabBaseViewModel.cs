@@ -23,6 +23,7 @@ using ESRI.ArcGIS.Display;
 using VisibilityLibrary.Helpers;
 using VisibilityLibrary;
 using VisibilityLibrary.ViewModels;
+using VisibilityLibrary.Models;
 
 namespace ArcMapAddinVisibility.ViewModels
 {
@@ -120,7 +121,7 @@ namespace ArcMapAddinVisibility.ViewModels
                         return string.Empty;
 
                     // only format if the Point1 data was generated from a mouse click
-                    return string.Format("{0:0.0#####} {1:0.0#####}", Point1.Y, Point1.X);
+                    return GetFormattedPoint(Point1);
                 }
                 else
                 {
@@ -186,7 +187,7 @@ namespace ArcMapAddinVisibility.ViewModels
                         return string.Empty;
 
                     // only format if the Point2 data was generated from a mouse click
-                    return string.Format("{0:0.0#####} {1:0.0#####}", Point2.Y, Point2.X);
+                    return GetFormattedPoint(Point2);
                 }
                 else
                 {
@@ -572,6 +573,47 @@ namespace ArcMapAddinVisibility.ViewModels
         }
         #endregion
         #region Private Functions
+        /// <summary>
+        /// Method will return a formatted point as a string based on the configuration settings for display coordinate type
+        /// </summary>
+        /// <param name="point">IPoint that is to be formatted</param>
+        /// <returns>String that is formatted based on addin config display coordinate type</returns>
+        private string GetFormattedPoint(IPoint point)
+        {
+            var result = string.Format("{0:0.0} {1:0.0}", point.Y, point.X);
+            var cn = point as IConversionNotation;
+            if (cn != null)
+            {
+                switch (VisibilityConfig.AddInConfig.DisplayCoordinateType)
+                {
+                    case CoordinateTypes.DD:
+                        result = cn.GetDDFromCoords(6);
+                        break;
+                    case CoordinateTypes.DDM:
+                        result = cn.GetDDMFromCoords(4);
+                        break;
+                    case CoordinateTypes.DMS:
+                        result = cn.GetDMSFromCoords(2);
+                        break;
+                    case CoordinateTypes.GARS:
+                        result = cn.GetGARSFromCoords();
+                        break;
+                    case CoordinateTypes.MGRS:
+                        result = cn.CreateMGRS(5, true, esriMGRSModeEnum.esriMGRSMode_Automatic);
+                        break;
+                    case CoordinateTypes.USNG:
+                        result = cn.GetUSNGFromCoords(5, true, true);
+                        break;
+                    case CoordinateTypes.UTM:
+                        result = cn.GetUTMFromCoords(esriUTMConversionOptionsEnum.esriUTMAddSpaces | esriUTMConversionOptionsEnum.esriUTMUseNS);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            return result;
+        }
+
         /// <summary>
         /// Method used to totally reset the tool
         /// reset points, feedback

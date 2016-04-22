@@ -1,22 +1,23 @@
 ﻿<UserControl x:Class="VisibilityLibrary.Views.VisibilityLLOSView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:VisibilityLibrary"
-             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:prop="clr-namespace:VisibilityLibrary.Properties"
-             mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="300">
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             d:DesignHeight="600"
+             d:DesignWidth="300"
+             mc:Ignorable="d">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/VisibilityLibrary;component/MAResourceDictionary.xaml"/>
+                <ResourceDictionary Source="/VisibilityLibrary;component/MAResourceDictionary.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
-        <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <ScrollViewer Padding="0,0,3,0" VerticalScrollBarVisibility="Auto">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -37,31 +38,71 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <TextBlock Grid.ColumnSpan="3" Text="{x:Static prop:Resources.LabelInputSurface}" Margin="3,3,0,0" />
+                <TextBlock Grid.ColumnSpan="3"
+                           Margin="3,3,0,0"
+                           Text="{x:Static prop:Resources.LabelInputSurface}" />
                 <Grid Grid.Row="1" Grid.ColumnSpan="3">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <ComboBox  ItemsSource="{Binding SurfaceLayerNames}" SelectedItem="{Binding SelectedSurfaceName}" Margin="3,3,0,0">
+                    <ComboBox Margin="3,3,0,0"
+                              ItemsSource="{Binding SurfaceLayerNames}"
+                              SelectedItem="{Binding SelectedSurfaceName}">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel>
-                                    <TextBlock Text="{Binding}"/>
+                                    <TextBlock Text="{Binding}" />
                                 </StackPanel>
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>
-                    <Button Style="{StaticResource buttonProperties}" 
-                        Grid.Column="1" 
-                        Margin="3,3,0,0" />
+                    <Button Grid.Column="1"
+                            Margin="3,3,0,0"
+                            Style="{StaticResource buttonProperties}" />
                 </Grid>
-                <TextBlock Grid.Row="2" Grid.ColumnSpan="3" Text="{x:Static prop:Resources.LabelObserverPoints}" Margin="3,3,0,0" />
-                <ListBox x:Name="listBoxObservers" Grid.Row="3" Grid.ColumnSpan="2" ItemsSource="{Binding ObserverAddInPoints}" ScrollViewer.VerticalScrollBarVisibility="Visible" 
-                 PreviewMouseRightButtonDown="ListBox_PreviewMouseRightButtonDown"
-                 SelectionMode="Multiple"
-                 Height="60" Margin="3,3,0,0">
+                <TextBlock Grid.Row="2"
+                           Grid.ColumnSpan="3"
+                           Margin="3,3,0,0"
+                           Text="{x:Static prop:Resources.LabelObserverPoints}" />
+                <TextBox Grid.Row="3"
+                         Grid.ColumnSpan="2"
+                         Margin="3,3,0,0"
+                         VerticalContentAlignment="Center"
+                         Text="{Binding Path=Point1Formatted,
+                                        UpdateSourceTrigger=PropertyChanged,
+                                        ValidatesOnExceptions=True}"
+                         Validation.ErrorTemplate="{StaticResource errorTemplate}">
+                    <TextBox.InputBindings>
+                        <KeyBinding Key="Enter"
+                                    Command="{Binding EnterKeyCommand}"
+                                    CommandParameter="{x:Static prop:Resources.ToolModeObserver}" />
+                    </TextBox.InputBindings>
+                </TextBox>
+                <Button Grid.Row="3"
+                        Grid.Column="2"
+                        Margin="3,3,0,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Command="{Binding ActivateToolCommand}"
+                        CommandParameter="{x:Static prop:Resources.ToolModeObserver}"
+                        ToolTip="{x:Static prop:Resources.TooltipObserverMapPointTool}">
+                    <Image Width="16"
+                           Height="16"
+                           Source="/VisibilityLibrary;component/Images/Add_Point32_d.png" />
+                </Button>
+                <ListBox x:Name="listBoxObservers"
+                         Grid.Row="4"
+                         Grid.ColumnSpan="3"
+                         Height="60"
+                         Margin="3,3,0,0"
+                         ItemsSource="{Binding ObserverAddInPoints}"
+                         PreviewMouseRightButtonDown="ListBox_PreviewMouseRightButtonDown"
+                         ScrollViewer.VerticalScrollBarVisibility="Visible"
+                         SelectionMode="Multiple">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
@@ -71,23 +112,60 @@
                     </ListBox.ItemTemplate>
                     <ListBox.ContextMenu>
                         <ContextMenu DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Self}}">
-                            <MenuItem Header="{x:Static prop:Resources.MenuLabelDelete}" Command="{Binding DataContext.DeletePointCommand}" CommandParameter="{Binding Path=SelectedItems}" />
-                            <MenuItem Header="{x:Static prop:Resources.MenuLabelDeleteAll}" Command="{Binding DataContext.DeleteAllPointsCommand}" CommandParameter="{x:Static prop:Resources.ToolModeObserver}" />
+                            <MenuItem Command="{Binding DataContext.DeletePointCommand}"
+                                      CommandParameter="{Binding Path=SelectedItems}"
+                                      Header="{x:Static prop:Resources.MenuLabelDelete}" />
+                            <MenuItem Command="{Binding DataContext.DeleteAllPointsCommand}"
+                                      CommandParameter="{x:Static prop:Resources.ToolModeObserver}"
+                                      Header="{x:Static prop:Resources.MenuLabelDeleteAll}" />
                         </ContextMenu>
                     </ListBox.ContextMenu>
                     <ListBox.InputBindings>
-                        <KeyBinding Key="Delete" Command="{Binding DeletePointCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}}, Path=SelectedItems}" />
+                        <KeyBinding Key="Delete"
+                                    Command="{Binding DeletePointCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}},
+                                                               Path=SelectedItems}" />
                     </ListBox.InputBindings>
                 </ListBox>
-                <Button Grid.Row="3" Grid.Column="2" Command="{Binding ActivateToolCommand}" CommandParameter="{x:Static prop:Resources.ToolModeObserver}" VerticalAlignment="Center"
-            HorizontalAlignment="Center" ToolTip="{x:Static prop:Resources.TooltipObserverMapPointTool}" Margin="3,3,0,0">
-                    <Image Source="/VisibilityLibrary;component/Images/Add_Point32_d.png" Width="18" Height="18" />
+                <TextBlock Grid.Row="5"
+                           Grid.ColumnSpan="3"
+                           Margin="3,3,0,0"
+                           Text="{x:Static prop:Resources.LabelTargetPoints}" />
+                <TextBox Grid.Row="6"
+                         Grid.ColumnSpan="2"
+                         Margin="3,3,0,0"
+                         VerticalContentAlignment="Center"
+                         Text="{Binding Path=Point2Formatted,
+                                        UpdateSourceTrigger=PropertyChanged,
+                                        ValidatesOnExceptions=True}"
+                         Validation.ErrorTemplate="{StaticResource errorTemplate}">
+                    <TextBox.InputBindings>
+                        <KeyBinding Key="Enter"
+                                    Command="{Binding EnterKeyCommand}"
+                                    CommandParameter="{x:Static prop:Resources.ToolModeTarget}" />
+                    </TextBox.InputBindings>
+                </TextBox>
+                <Button Grid.Row="6"
+                        Grid.Column="2"
+                        Margin="3,3,0,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Command="{Binding ActivateToolCommand}"
+                        CommandParameter="{x:Static prop:Resources.ToolModeTarget}"
+                        ToolTip="{x:Static prop:Resources.TooltipTargetMapPointTool}">
+                    <Image Width="16"
+                           Height="16"
+                           Source="/VisibilityLibrary;component/Images/Add_Point32_d.png" />
                 </Button>
-                <TextBlock Grid.Row="4" Grid.ColumnSpan="3" Text="{x:Static prop:Resources.LabelTargetPoints}" Margin="3,3,0,0" />
-                <ListBox x:Name="listBoxTargets" Grid.Row="5" Grid.ColumnSpan="2" ItemsSource="{Binding TargetAddInPoints}" ScrollViewer.VerticalScrollBarVisibility="Visible" 
-                 PreviewMouseRightButtonDown="ListBox_PreviewMouseRightButtonDown"
-                 SelectionMode="Multiple"
-                 Height="60" Margin="3,3,0,0">
+                <ListBox x:Name="listBoxTargets"
+                         Grid.Row="7"
+                         Grid.ColumnSpan="3"
+                         Height="60"
+                         Margin="3,3,0,0"
+                         ItemsSource="{Binding TargetAddInPoints}"
+                         PreviewMouseRightButtonDown="ListBox_PreviewMouseRightButtonDown"
+                         ScrollViewer.VerticalScrollBarVisibility="Visible"
+                         SelectionMode="Multiple">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
@@ -97,37 +175,58 @@
                     </ListBox.ItemTemplate>
                     <ListBox.ContextMenu>
                         <ContextMenu DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Self}}">
-                            <MenuItem Header="{x:Static prop:Resources.MenuLabelDelete}" Command="{Binding DataContext.DeletePointCommand}" CommandParameter="{Binding Path=SelectedItems}" />
-                            <MenuItem Header="{x:Static prop:Resources.MenuLabelDeleteAll}" Command="{Binding DataContext.DeleteAllPointsCommand}" CommandParameter="{x:Static prop:Resources.ToolModeTarget}" />
+                            <MenuItem Command="{Binding DataContext.DeletePointCommand}"
+                                      CommandParameter="{Binding Path=SelectedItems}"
+                                      Header="{x:Static prop:Resources.MenuLabelDelete}" />
+                            <MenuItem Command="{Binding DataContext.DeleteAllPointsCommand}"
+                                      CommandParameter="{x:Static prop:Resources.ToolModeTarget}"
+                                      Header="{x:Static prop:Resources.MenuLabelDeleteAll}" />
                         </ContextMenu>
                     </ListBox.ContextMenu>
                     <ListBox.InputBindings>
-                        <KeyBinding Key="Delete" Command="{Binding DeletePointCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}}, Path=SelectedItems}" />
+                        <KeyBinding Key="Delete"
+                                    Command="{Binding DeletePointCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}},
+                                                               Path=SelectedItems}" />
                     </ListBox.InputBindings>
                 </ListBox>
-                <Button Grid.Row="5" Grid.Column="2" Command="{Binding ActivateToolCommand}" CommandParameter="{x:Static prop:Resources.ToolModeTarget}" VerticalAlignment="Center"
-                HorizontalAlignment="Center" ToolTip="{x:Static prop:Resources.TooltipTargetMapPointTool}" Margin="3,3,0,0">
-                    <Image Source="/VisibilityLibrary;component/Images/Add_Point32_d.png" Width="18" Height="18" />
-                </Button>
-                <GroupBox Header="{x:Static prop:Resources.LabelOffsets}" 
-                          Grid.Row="6" Grid.ColumnSpan="4"
-                          Margin="0,3,0,0">
+                <GroupBox Grid.Row="8"
+                          Grid.ColumnSpan="4"
+                          Margin="0,3,0,0"
+                          Header="{x:Static prop:Resources.LabelOffsets}">
                     <StackPanel>
-                        <TextBlock Text="{x:Static prop:Resources.LabelObserverOffset}" Margin="3,3,0,0" />
-                        <TextBox x:Name="tbObserverOffset" Text="{Binding ObserverOffset, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
-                            Validation.ErrorTemplate="{StaticResource errorTemplate}" Margin="3,3,0,0" />
-                        <TextBlock Text="{x:Static prop:Resources.LabelTargetOffset}" Margin="3,3,0,0" />
-                        <TextBox x:Name="tbTargetOffset" Text="{Binding TargetOffset, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
-                            Validation.ErrorTemplate="{StaticResource errorTemplate}" Margin="3,3,0,0" />
+                        <TextBlock Margin="3,3,0,0" Text="{x:Static prop:Resources.LabelObserverOffset}" />
+                        <TextBox x:Name="tbObserverOffset"
+                                 Margin="3,3,0,0"
+                                 Text="{Binding ObserverOffset,
+                                                UpdateSourceTrigger=PropertyChanged,
+                                                ValidatesOnExceptions=True}"
+                                 Validation.ErrorTemplate="{StaticResource errorTemplate}" />
+                        <TextBlock Margin="3,3,0,0" Text="{x:Static prop:Resources.LabelTargetOffset}" />
+                        <TextBox x:Name="tbTargetOffset"
+                                 Margin="3,3,0,0"
+                                 Text="{Binding TargetOffset,
+                                                UpdateSourceTrigger=PropertyChanged,
+                                                ValidatesOnExceptions=True}"
+                                 Validation.ErrorTemplate="{StaticResource errorTemplate}" />
                         <ComboBox x:Name="cmbOffsetUnitType"
-                            ItemsSource="{Binding Source={StaticResource lineDistanceData}}" 
-                            SelectedItem="{Binding Path=OffsetUnitType, Mode=TwoWay}"                      
-                            Height="Auto" Margin="3,3,0,0">
-                        </ComboBox>
+                                  Height="Auto"
+                                  Margin="3,3,0,0"
+                                  ItemsSource="{Binding Source={StaticResource lineDistanceData}}"
+                                  SelectedItem="{Binding Path=OffsetUnitType,
+                                                         Mode=TwoWay}" />
                     </StackPanel>
                 </GroupBox>
-                <StackPanel Grid.Row="12" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Grid.Row="12" Grid.Column="0" Content="{x:Static prop:Resources.LabelCancel}" ToolTip="{x:Static prop:Resources.LabelCancel}" Command="{Binding CancelCommand}" Margin="3,20,0,0">
+                <StackPanel Grid.Row="14"
+                            Grid.ColumnSpan="3"
+                            HorizontalAlignment="Right"
+                            Orientation="Horizontal">
+                    <Button Grid.Row="14"
+                            Grid.Column="0"
+                            Margin="3,20,0,0"
+                            Command="{Binding CancelCommand}"
+                            Content="{x:Static prop:Resources.LabelCancel}"
+                            ToolTip="{x:Static prop:Resources.LabelCancel}">
                         <Button.Style>
                             <Style TargetType="Button">
                                 <Setter Property="IsEnabled" Value="False" />
@@ -154,7 +253,12 @@
                             </Style>
                         </Button.Style>
                     </Button>
-                    <Button Grid.Row="12" Grid.Column="1" Content="{x:Static prop:Resources.LabelOK}" ToolTip="{x:Static prop:Resources.LabelOK}" Command="{Binding SubmitCommand}" Margin="3,20,0,0">
+                    <Button Grid.Row="14"
+                            Grid.Column="1"
+                            Margin="3,20,0,0"
+                            Command="{Binding SubmitCommand}"
+                            Content="{x:Static prop:Resources.LabelOK}"
+                            ToolTip="{x:Static prop:Resources.LabelOK}">
                         <Button.Style>
                             <Style TargetType="Button">
                                 <Setter Property="IsEnabled" Value="False" />
@@ -174,7 +278,12 @@
                             </Style>
                         </Button.Style>
                     </Button>
-                    <Button Grid.Row="12" Grid.Column="2" Content="{x:Static prop:Resources.LabelClearGraphics}" ToolTip="{x:Static prop:Resources.LabelClearGraphics}" Command="{Binding ClearGraphicsCommand}" Margin="3,20,0,0">
+                    <Button Grid.Row="14"
+                            Grid.Column="2"
+                            Margin="3,20,0,0"
+                            Command="{Binding ClearGraphicsCommand}"
+                            Content="{x:Static prop:Resources.LabelClearGraphics}"
+                            ToolTip="{x:Static prop:Resources.LabelClearGraphics}">
                         <Button.Style>
                             <Style TargetType="Button">
                                 <Setter Property="IsEnabled" Value="False" />
