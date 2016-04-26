@@ -147,8 +147,7 @@ namespace ProAppVisibilityModule.ViewModels
 
             // remove graphics from map
             var guidList = observers.Select(x => x.GUID).ToList();
-            //RemoveGraphics(guidList);
-            //TODO update for Pro
+            RemoveGraphics(guidList);
 
             foreach (var point in observers)
             {
@@ -216,8 +215,8 @@ namespace ProAppVisibilityModule.ViewModels
                 // in tool mode "Observer" we add observer points
                 // otherwise ignore
                 
-                AddGraphicToMap(point, ColorFactory.Blue, true, 5.0);
-                var addInPoint = new AddInPoint() { Point = point };
+                var guid = AddGraphicToMap(point, ColorFactory.Blue, true, 5.0).Result;
+                var addInPoint = new AddInPoint() { Point = point, GUID = guid };
                 Application.Current.Dispatcher.Invoke(() =>
                     {
                         ObserverAddInPoints.Insert(0, addInPoint);

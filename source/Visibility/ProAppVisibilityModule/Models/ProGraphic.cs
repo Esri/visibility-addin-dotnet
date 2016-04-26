@@ -19,9 +19,10 @@ namespace ProAppVisibilityModule.Models
 {
     public class ProGraphic
     {
-        public ProGraphic(IDisposable _disposable, Geometry _geometry, bool _isTemp = false)
+        public ProGraphic(IDisposable _disposable, string guid, Geometry _geometry, bool _isTemp = false)
         {
             Disposable = _disposable;
+            GUID = guid;
             Geometry = _geometry;
             IsTemp = _isTemp;
         }
@@ -29,10 +30,16 @@ namespace ProAppVisibilityModule.Models
         // properties   
 
         /// <summary>
-        /// Property for the unique id of the graphic (guid)
+        /// Property to hold the disposable object
+        /// calling dispose on this object will remove it from the map
         /// </summary>
         //public string UniqueId { get; set; }
         public IDisposable Disposable { get; set; }
+
+        /// <summary>
+        /// Property for the unique id of the graphic (guid)
+        /// </summary>
+        public string GUID { get; set; }
 
         /// <summary>
         /// Property for the geometry of the graphic

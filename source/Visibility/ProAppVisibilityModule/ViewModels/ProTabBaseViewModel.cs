@@ -67,8 +67,9 @@ namespace ProAppVisibilityModule.ViewModels
         #region Properties
 
         // lists to store GUIDs of graphics, temp feedback and map graphics
-        private static List<string> TempGraphicsList = new List<string>();
-        private static List<string> MapGraphicsList = new List<string>();
+        //private static List<string> TempGraphicsList = new List<string>();
+        //private static List<string> MapGraphicsList = new List<string>();
+        private static List<ProGraphic> ProGraphicsList = new List<ProGraphic>();
 
         //internal bool HasPoint1 = false;
         //internal bool HasPoint2 = false;
@@ -76,13 +77,13 @@ namespace ProAppVisibilityModule.ViewModels
 
         private List<IDisposable> overlayObjects = new List<IDisposable>();
         // lists to store GUIDs of graphics, temp feedback and map graphics
-        private static List<ProGraphic> GraphicsList = new List<ProGraphic>();
+        //private static List<ProGraphic> GraphicsList = new List<ProGraphic>();
 
         public bool HasMapGraphics
         {
             get
             {
-                return MapGraphicsList.Any();
+                return ProGraphicsList.Any(g => g.IsTemp == false);
             }
         }
 
@@ -398,12 +399,12 @@ namespace ProAppVisibilityModule.ViewModels
             if (MapView.Active == null)
                 return;
 
-            foreach(var item in GraphicsList)
+            foreach(var item in ProGraphicsList)
             {
                 item.Disposable.Dispose();
             }
 
-            GraphicsList.Clear();
+            ProGraphicsList.Clear();
 
             RaisePropertyChanged(() => HasMapGraphics);
         }
@@ -413,15 +414,29 @@ namespace ProAppVisibilityModule.ViewModels
         /// </summary>
         internal void ClearTempGraphics()
         {
-            var list = GraphicsList.Where(g => g.IsTemp == true).ToList();
+            var list = ProGraphicsList.Where(g => g.IsTemp == true).ToList();
 
             foreach (var item in list)
             {
                 item.Disposable.Dispose();
-                GraphicsList.Remove(item);
+                ProGraphicsList.Remove(item);
             }
 
             RaisePropertyChanged(() => HasMapGraphics);
+        }
+        
+        /// <summary>
+        /// Removes graphics from the map
+        /// </summary>
+        /// <param name="guidList">list of GUIDs</param>
+        internal void RemoveGraphics(List<string> guidList)
+        {
+            var list = ProGraphicsList.Where(g => guidList.Contains(g.GUID)).ToList();
+            foreach(var graphic in list)
+            {
+                graphic.Disposable.Dispose();
+                ProGraphicsList.Remove(graphic);
+            }
         }
 
         /// <summary>
@@ -602,16 +617,16 @@ namespace ProAppVisibilityModule.ViewModels
         //}
 
 
-        internal async void AddGraphicToMap(Geometry geom, bool IsTempGraphic = false, double size = 1.0)
+        internal async Task<string> AddGraphicToMap(Geometry geom, bool IsTempGraphic = false, double size = 1.0)
         {
             // default color Red
-            await AddGraphicToMap(geom, ColorFactory.Red, IsTempGraphic, size);
+            return await AddGraphicToMap(geom, ColorFactory.Red, IsTempGraphic, size);
         }
 
-        internal async Task AddGraphicToMap(Geometry geom, CIMColor color, bool IsTempGraphic = false, double size = 1.0, string text = "")
+        internal async Task<string> AddGraphicToMap(Geometry geom, CIMColor color, bool IsTempGraphic = false, double size = 1.0, string text = "")
         {
             if (geom == null || MapView.Active == null)
-                return;
+                return string.Empty;
 
             CIMSymbolReference symbol = null;
 
@@ -648,13 +663,16 @@ namespace ProAppVisibilityModule.ViewModels
                 });
             }
 
-            await QueuedTask.Run(() =>
+            var result = await QueuedTask.Run(() =>
             {
                 var disposable = MapView.Active.AddOverlay(geom, symbol);
                 overlayObjects.Add(disposable);
-
-                GraphicsList.Add(new ProGraphic(disposable, geom, IsTempGraphic));
+                var guid = Guid.NewGuid().ToString();
+                ProGraphicsList.Add(new ProGraphic(disposable, guid, geom, IsTempGraphic));
+                return guid;
             });
+
+            return result;
         }
 
 

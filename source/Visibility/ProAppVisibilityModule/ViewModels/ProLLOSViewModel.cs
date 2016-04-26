@@ -129,8 +129,8 @@ namespace ProAppVisibilityModule.ViewModels
             if (ToolMode == MapPointToolMode.Target)
             {
                 //TODO square symbol, add symbol to parameter list, etc
-                AddGraphicToMap(point, ColorFactory.Red, true, 5.0);
-                var addInPoint = new AddInPoint() { Point = point };
+                var guid = AddGraphicToMap(point, ColorFactory.Red, true, 5.0).Result;
+                var addInPoint = new AddInPoint() { Point = point, GUID = guid };
                 Application.Current.Dispatcher.Invoke(() =>
                     {
                         TargetAddInPoints.Insert(0, addInPoint);
