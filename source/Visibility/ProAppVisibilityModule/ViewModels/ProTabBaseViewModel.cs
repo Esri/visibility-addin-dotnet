@@ -25,6 +25,7 @@ using ArcGIS.Core.Geometry;
 using System.Threading.Tasks;
 using ArcGIS.Core.CIM;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
+using ProAppVisibilityModule.Helpers;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -67,8 +68,6 @@ namespace ProAppVisibilityModule.ViewModels
         #region Properties
 
         // lists to store GUIDs of graphics, temp feedback and map graphics
-        //private static List<string> TempGraphicsList = new List<string>();
-        //private static List<string> MapGraphicsList = new List<string>();
         private static List<ProGraphic> ProGraphicsList = new List<ProGraphic>();
 
         //internal bool HasPoint1 = false;
@@ -76,8 +75,6 @@ namespace ProAppVisibilityModule.ViewModels
         //internal INewLineFeedback feedback = null;
 
         private List<IDisposable> overlayObjects = new List<IDisposable>();
-        // lists to store GUIDs of graphics, temp feedback and map graphics
-        //private static List<ProGraphic> GraphicsList = new List<ProGraphic>();
 
         public bool HasMapGraphics
         {
@@ -87,177 +84,142 @@ namespace ProAppVisibilityModule.ViewModels
             }
         }
 
-        //private IPoint point1 = null;
-        ///// <summary>
-        ///// Property for the first IPoint
-        ///// </summary>
-        //public virtual IPoint Point1
-        //{
-        //    get
-        //    {
-        //        return point1;
-        //    }
-        //    set
-        //    {
-        //        // do not add anything to the map from here
-        //        point1 = value;
-        //        RaisePropertyChanged(() => Point1);
-        //        RaisePropertyChanged(() => Point1Formatted);
-        //    }
-        //}
+        private MapPoint point1 = null;
+        /// <summary>
+        /// Property for the first IPoint
+        /// </summary>
+        public virtual MapPoint Point1
+        {
+            get
+            {
+                return point1;
+            }
+            set
+            {
+                // do not add anything to the map from here
+                point1 = value;
+                RaisePropertyChanged(() => Point1);
+                RaisePropertyChanged(() => Point1Formatted);
+            }
+        }
 
-        //private IPoint point2 = null;
-        ///// <summary>
-        ///// Property for the second IPoint
-        ///// Not all tools need a second point
-        ///// </summary>
-        //public virtual IPoint Point2
-        //{
-        //    get
-        //    {
-        //        return point2;
-        //    }
-        //    set
-        //    {
-        //        point2 = value;
-        //        RaisePropertyChanged(() => Point2);
-        //        RaisePropertyChanged(() => Point2Formatted);
-        //    }
-        //}
-        //string point1Formatted = string.Empty;
-        ///// <summary>
-        ///// String property for the first IPoint
-        ///// This is used to format the point for the UI and allow string input of different types of coordinates
-        ///// </summary>
-        //public string Point1Formatted
-        //{
-        //    get
-        //    {
-        //        // return a formatted first point depending on how it was entered, manually or via map point tool
-        //        if (string.IsNullOrWhiteSpace(point1Formatted))
-        //        {
-        //            if (Point1 == null)
-        //                return string.Empty;
+        private MapPoint point2 = null;
+        /// <summary>
+        /// Property for the second IPoint
+        /// Not all tools need a second point
+        /// </summary>
+        public virtual MapPoint Point2
+        {
+            get
+            {
+                return point2;
+            }
+            set
+            {
+                point2 = value;
+                RaisePropertyChanged(() => Point2);
+                RaisePropertyChanged(() => Point2Formatted);
+            }
+        }
+        string point1Formatted = string.Empty;
+        /// <summary>
+        /// String property for the first IPoint
+        /// This is used to format the point for the UI and allow string input of different types of coordinates
+        /// </summary>
+        public string Point1Formatted
+        {
+            get
+            {
+                // return a formatted first point depending on how it was entered, manually or via map point tool
+                if (string.IsNullOrWhiteSpace(point1Formatted))
+                {
+                    if (Point1 == null)
+                        return string.Empty;
 
-        //            // only format if the Point1 data was generated from a mouse click
-        //            return string.Format("{0:0.0#####} {1:0.0#####}", Point1.Y, Point1.X);
-        //        }
-        //        else
-        //        {
-        //            // this was user inputed so just return the inputed string
-        //            return point1Formatted;
-        //        }
-        //    }
+                    // only format if the Point1 data was generated from a mouse click
+                    return MapPointHelper.GetMapPointAsDisplayString(Point1);
+                }
+                else
+                {
+                    // this was user inputed so just return the inputed string
+                    return point1Formatted;
+                }
+            }
 
-        //    set
-        //    {
-        //        if (string.IsNullOrWhiteSpace(value))
-        //        {
-        //            point1Formatted = string.Empty;
-        //            RaisePropertyChanged(() => Point1Formatted);
-        //            return;
-        //        }
-        //        // try to convert string to an IPoint
-        //        var point = GetPointFromString(value);
-        //        if (point != null)
-        //        {
-        //            // clear temp graphics
-        //            ClearTempGraphics();
-        //            point1Formatted = value;
-        //            HasPoint1 = true;
-        //            Point1 = point;
-        //            AddGraphicToMap(Point1, true);
-        //            // lets try feedback
-        //            var mxdoc = ArcMap.Application.Document as IMxDocument;
-        //            var av = mxdoc.FocusMap as IActiveView;
-        //            point.Project(mxdoc.FocusMap.SpatialReference);
-        //            CreateFeedback(point, av);
-        //            feedback.Start(point);
-        //            if (Point2 != null)
-        //            {
-        //                UpdateDistance(GetPolylineFromFeedback(Point1, Point2));
-        //                FeedbackMoveTo(Point2);
-        //            }
-        //        }
-        //        else
-        //        {
-        //            // invalid coordinate, reset and throw exception
-        //            Point1 = null;
-        //            HasPoint1 = false;
-        //            throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEInvalidCoordinate);
-        //        }
-        //    }
-        //}
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    point1Formatted = string.Empty;
+                    RaisePropertyChanged(() => Point1Formatted);
+                    return;
+                }
+                // try to convert string to a MapPoint
+                var point = GetMapPointFromString(value);
+                if (point != null)
+                {
+                    point1Formatted = value;
+                    Point1 = point;
+                    //AddGraphicToMap(Point1, true);
+                }
+                else
+                {
+                    // invalid coordinate, reset and throw exception
+                    Point1 = null;
+                    throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEInvalidCoordinate);
+                }
+            }
+        }
 
-        //string point2Formatted = string.Empty;
-        ///// <summary>
-        ///// String property for the second IPoint
-        ///// This is used to format the point for the UI and allow string input of different types of coordinates
-        ///// Input types like GARS, MGRS, USNG, UTM
-        ///// </summary>
-        //public string Point2Formatted
-        //{
-        //    get
-        //    {
-        //        // return a formatted second point depending on how it was entered, manually or via map point tool
-        //        if (string.IsNullOrWhiteSpace(point2Formatted))
-        //        {
-        //            if (Point2 == null)
-        //                return string.Empty;
+        string point2Formatted = string.Empty;
+        /// <summary>
+        /// String property for the second IPoint
+        /// This is used to format the point for the UI and allow string input of different types of coordinates
+        /// Input types like GARS, MGRS, USNG, UTM
+        /// </summary>
+        public string Point2Formatted
+        {
+            get
+            {
+                // return a formatted second point depending on how it was entered, manually or via map point tool
+                if (string.IsNullOrWhiteSpace(point2Formatted))
+                {
+                    if (Point2 == null)
+                        return string.Empty;
 
-        //            // only format if the Point2 data was generated from a mouse click
-        //            return string.Format("{0:0.0#####} {1:0.0#####}", Point2.Y, Point2.X);
-        //        }
-        //        else
-        //        {
-        //            // this was user inputed so just return the inputed string
-        //            return point2Formatted;
-        //        }
-        //    }
-        //    set
-        //    {
-        //        if (string.IsNullOrWhiteSpace(value))
-        //        {
-        //            point2Formatted = string.Empty;
-        //            RaisePropertyChanged(() => Point2Formatted);
-        //            return;
-        //        }
-        //        // try to convert string to an IPoint
-        //        var point = GetPointFromString(value);
-        //        if (point != null)
-        //        {
-        //            point2Formatted = value;
-        //            //HasPoint2 = true;
-        //            Point2 = point;
-        //            var mxdoc = ArcMap.Application.Document as IMxDocument;
-        //            var av = mxdoc.FocusMap as IActiveView;
-        //            Point2.Project(mxdoc.FocusMap.SpatialReference);
-
-        //            //if (feedback != null)
-        //            //{
-        //            //    // I have to create a new point here, otherwise "MoveTo" will change the spatial reference to world mercator
-        //            //    FeedbackMoveTo(point);
-        //            //}
-        //            if (HasPoint1)
-        //            {
-        //                // lets try feedback
-        //                CreateFeedback(Point1, av);
-        //                feedback.Start(Point1);
-        //                UpdateDistance(GetPolylineFromFeedback(Point1, Point2));
-        //                // I have to create a new point here, otherwise "MoveTo" will change the spatial reference to world mercator
-        //                FeedbackMoveTo(point);
-        //            }
-
-        //        }
-        //        else
-        //        {
-        //            // invalid coordinate, reset and throw exception
-        //            Point2 = null;
-        //            HasPoint2 = false;
-        //            throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEInvalidCoordinate);
-        //        }
-        //    }
-        //}
+                    // only format if the Point2 data was generated from a mouse click
+                    return MapPointHelper.GetMapPointAsDisplayString(Point2);
+                }
+                else
+                {
+                    // this was user inputed so just return the inputed string
+                    return point2Formatted;
+                }
+            }
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    point2Formatted = string.Empty;
+                    RaisePropertyChanged(() => Point2Formatted);
+                    return;
+                }
+                // try to convert string to an IPoint
+                var point = GetMapPointFromString(value);
+                if (point != null)
+                {
+                    point2Formatted = value;
+                    Point2 = point;
+                    //AddGraphicToMap(Point2, true);
+                }
+                else
+                {
+                    // invalid coordinate, reset and throw exception
+                    Point2 = null;
+                    throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEInvalidCoordinate);
+                }
+            }
+        }
 
         private bool isActiveTab = false;
         /// <summary>
@@ -564,6 +526,64 @@ namespace ProAppVisibilityModule.ViewModels
 
             IsActiveTab = (obj == this);
         }
+
+        /// <summary>
+        /// Method used to convert a string to a known coordinate
+        /// Assumes WGS84 for now
+        /// </summary>
+        /// <param name="coordinate">the coordinate as a string</param>
+        /// <returns>MapPoint if successful, null if not</returns>
+        internal MapPoint GetMapPointFromString(string coordinate)
+        {
+            MapPoint point = null;
+
+            // future use if order of GetValues is not acceptable
+            //var listOfTypes = new List<GeoCoordinateType>(new GeoCoordinateType[] {
+            //    GeoCoordinateType.DD,
+            //    GeoCoordinateType.DDM,
+            //    GeoCoordinateType.DMS,
+            //    GeoCoordinateType.GARS,
+            //    GeoCoordinateType.GeoRef,
+            //    GeoCoordinateType.MGRS,
+            //    GeoCoordinateType.USNG,
+            //    GeoCoordinateType.UTM
+            //});
+
+            var listOfTypes = Enum.GetValues(typeof(GeoCoordinateType)).Cast<GeoCoordinateType>();
+
+            foreach (var type in listOfTypes)
+            {
+                try
+                {
+                    point = QueuedTask.Run(() =>
+                    {
+                        return MapPointBuilder.FromGeoCoordinateString(coordinate, MapView.Active.Map.SpatialReference, type, FromGeoCoordinateMode.Default);
+                    }).Result;
+                }
+                catch (Exception ex)
+                {
+                    // do nothing
+                }
+
+                if (point != null)
+                    return point;
+            }
+
+            try
+            {
+                point = QueuedTask.Run(() =>
+                {
+                    return MapPointBuilder.FromGeoCoordinateString(coordinate, MapView.Active.Map.SpatialReference, GeoCoordinateType.UTM, FromGeoCoordinateMode.UtmNorthSouth);
+                }).Result;
+            }
+            catch (Exception ex)
+            {
+                // do nothing
+            }
+
+            return point;
+        }
+
 
         //internal string AddTextToMap(string text, IGeometry geom, IColor color, bool IsTempGraphic = false, int size = 12)
         //{
