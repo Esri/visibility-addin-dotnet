@@ -25,6 +25,8 @@ using ArcGIS.Core.Geometry;
 using ArcMapAddinVisibility.Models;
 using ArcGIS.Desktop.Mapping;
 using System.Windows;
+using ArcGIS.Desktop.Framework.Threading.Tasks;
+using System.Threading.Tasks;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -425,6 +427,18 @@ namespace ProAppVisibilityModule.ViewModels
         //    return null;
         //}
 
+        internal async Task<List<string>> GetSurfaceNamesFromMap()
+        {
+            var layerList = MapView.Active.Map.GetLayersAsFlattenedList();
+
+            var elevationSurfaceList = await QueuedTask.Run(() =>
+                {
+                    return layerList.Where(l => l.GetDefinition().LayerElevation != null).ToList();
+                });
+
+            return elevationSurfaceList.Select(l => l.Name).ToList();
+        }
+
         /// <summary>
         /// Method to get all the names of the raster/tin layers that support ISurface
         /// we use this method to populate a combobox for input selection of surface layer
@@ -498,16 +512,15 @@ namespace ProAppVisibilityModule.ViewModels
         /// Override to add aditional items in the class to reset tool
         /// </summary>
         /// <param name="toolReset"></param>
-        internal override void Reset(bool toolReset)
+        internal override async void Reset(bool toolReset)
         {
             base.Reset(toolReset);
 
-            // TODO update to Pro
-            //if (ArcMap.Document == null || ArcMap.Document.FocusMap == null)
-            //    return;
+            if (MapView.Active == null || MapView.Active.Map == null)
+                return;
 
-            //// reset surface names OC
-            //ResetSurfaceNames(ArcMap.Document.FocusMap);
+            // reset surface names OC
+            await ResetSurfaceNames();
 
             // reset observer points
             ObserverAddInPoints.Clear();
@@ -522,25 +535,27 @@ namespace ProAppVisibilityModule.ViewModels
         /// <param name="map">IMap</param>
         /// 
         //TODO update to Pro
-        //internal void ResetSurfaceNames(IMap map)
-        //{
-        //    // keep the current selection if it's still valid
-        //    var tempName = SelectedSurfaceName;
+        internal async Task ResetSurfaceNames()
+        {
+            // keep the current selection if it's still valid
+            var tempName = SelectedSurfaceName;
 
-        //    SurfaceLayerNames.Clear();
+            SurfaceLayerNames.Clear();
 
-        //    foreach (var name in GetSurfaceNamesFromMap(map, (this.GetType() == typeof(LLOSViewModel)) ? true : false))
-        //        SurfaceLayerNames.Add(name);
+            var names = await GetSurfaceNamesFromMap();
 
-        //    if (SurfaceLayerNames.Contains(tempName))
-        //        SelectedSurfaceName = tempName;
-        //    else if (SurfaceLayerNames.Any())
-        //        SelectedSurfaceName = SurfaceLayerNames[0];
-        //    else
-        //        SelectedSurfaceName = string.Empty;
+            foreach (var name in names)
+                SurfaceLayerNames.Add(name);
 
-        //    RaisePropertyChanged(() => SelectedSurfaceName);
-        //}
+            if (SurfaceLayerNames.Contains(tempName))
+                SelectedSurfaceName = tempName;
+            else if (SurfaceLayerNames.Any())
+                SelectedSurfaceName = SurfaceLayerNames[0];
+            else
+                SelectedSurfaceName = string.Empty;
+
+            RaisePropertyChanged(() => SelectedSurfaceName);
+        }
 
         /// <summary>
         /// Method to handle the display coordinate type change
