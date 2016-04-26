@@ -160,6 +160,31 @@ namespace ProAppVisibilityModule.ViewModels
         #region Event handlers
 
         /// <summary>
+        /// Overrite OnKeyKeyCommand to handle manual input
+        /// </summary>
+        /// <param name="obj"></param>
+        internal override void OnEnterKeyCommand(object obj)
+        {
+            var keyCommandMode = obj as string;
+
+            if(keyCommandMode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
+            {
+                ToolMode = MapPointToolMode.Observer;
+                OnNewMapPointEvent(Point1);
+            }
+            else if (keyCommandMode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
+            {
+                ToolMode = MapPointToolMode.Target;
+                OnNewMapPointEvent(Point2);
+            }
+            else
+            {
+                ToolMode = MapPointToolMode.Unknown;
+                base.OnEnterKeyCommand(obj);
+            }
+        }
+
+        /// <summary>
         /// Method called when the map TOC is updated
         /// Reset surface names
         /// </summary>
@@ -199,7 +224,7 @@ namespace ProAppVisibilityModule.ViewModels
         /// Override this event to collect observer points based on tool mode
         /// </summary>
         /// <param name="obj">MapPointToolMode</param>
-        internal override void OnNewMapPointEvent(object obj)
+        internal override async void OnNewMapPointEvent(object obj)
         {
             if (!IsActiveTab)
                 return;
@@ -215,7 +240,7 @@ namespace ProAppVisibilityModule.ViewModels
                 // in tool mode "Observer" we add observer points
                 // otherwise ignore
                 
-                var guid = AddGraphicToMap(point, ColorFactory.Blue, true, 5.0).Result;
+                var guid = await AddGraphicToMap(point, ColorFactory.Blue, true, 5.0);
                 var addInPoint = new AddInPoint() { Point = point, GUID = guid };
                 Application.Current.Dispatcher.Invoke(() =>
                     {
@@ -223,6 +248,29 @@ namespace ProAppVisibilityModule.ViewModels
                     });
             }
         }
+
+        internal override void OnMouseMoveEvent(object obj)
+        {
+            if (!IsActiveTab)
+                return;
+
+            var point = obj as MapPoint;
+
+            if (point == null)
+                return;
+
+            if (ToolMode == MapPointToolMode.Observer)
+            {
+                Point1Formatted = string.Empty;
+                Point1 = point;
+            }
+            else if (ToolMode == MapPointToolMode.Target)
+            {
+                Point2Formatted = string.Empty;
+                Point2 = point;
+            }
+        }
+
         /// <summary>
         /// Method to check to see point is withing the currently selected surface
         /// returns true if there is no surface selected or point is contained by layer AOI

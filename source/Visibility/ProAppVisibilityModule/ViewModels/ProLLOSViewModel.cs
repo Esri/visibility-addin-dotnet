@@ -114,7 +114,7 @@ namespace ProAppVisibilityModule.ViewModels
 
         #endregion
 
-        internal override void OnNewMapPointEvent(object obj)
+        internal override async void OnNewMapPointEvent(object obj)
         {
             base.OnNewMapPointEvent(obj);
 
@@ -129,7 +129,7 @@ namespace ProAppVisibilityModule.ViewModels
             if (ToolMode == MapPointToolMode.Target)
             {
                 //TODO square symbol, add symbol to parameter list, etc
-                var guid = AddGraphicToMap(point, ColorFactory.Red, true, 5.0).Result;
+                var guid = await AddGraphicToMap(point, ColorFactory.Red, true, 5.0);
                 var addInPoint = new AddInPoint() { Point = point, GUID = guid };
                 Application.Current.Dispatcher.Invoke(() =>
                     {

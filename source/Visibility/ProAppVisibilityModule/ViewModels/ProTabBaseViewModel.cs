@@ -899,12 +899,7 @@ namespace ProAppVisibilityModule.ViewModels
             if (point == null)
                 return;
 
-            //TODO add this back in when manual input is added
-            // dynamically update start point if not set yet
-            //if (!HasPoint1)
-            //{
-            //    Point1 = point;
-            //}
+            // do nothing
         }
 
         /// <summary>

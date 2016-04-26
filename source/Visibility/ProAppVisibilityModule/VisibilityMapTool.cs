@@ -42,10 +42,29 @@ namespace ProAppVisibilityModule
             }
             catch (Exception ex)
             {
-
+                // do nothing
             }
 
             base.OnToolMouseDown(e);
         }
+
+        protected override void OnToolMouseMove(MapViewMouseEventArgs e)
+        {
+            try
+            {
+                QueuedTask.Run(() =>
+                {
+                    var mp = MapView.Active.ClientToMap(e.ClientPoint);
+                    Mediator.NotifyColleagues(VisibilityLibrary.Constants.MOUSE_MOVE_POINT, mp);
+                });
+            }
+            catch (Exception ex)
+            {
+                // do nothing
+            }
+
+            base.OnToolMouseMove(e);
+        }
+
     }
 }
