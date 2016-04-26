@@ -45,7 +45,6 @@ namespace ArcMapAddinVisibility.ViewModels
         public double TopVerticalFOV { get; set; }
         public bool ShowNonVisibleData { get; set; }
         public int RunCount { get; set; }
-        public ISpatialReference SelectedSurfaceSpatialRef { get; set; }
 
         private bool isCancelEnabled;
         public bool IsCancelEnabled
@@ -1032,24 +1031,6 @@ namespace ArcMapAddinVisibility.ViewModels
             }
 
             return null;
-        }
-
-        ///<summary>Get the spatial reference information of a dataset that is supplied.</summary>
-        ///<param name="dataset">An IDataset, this could be a table, feature class, feature dataset, workspace etc.</param> 
-        ///<returns>An ISpatialReference interface if successful, nothing otherwise.</returns>
-        public ESRI.ArcGIS.Geometry.ISpatialReference GetSpatialReferenceFromDataset(ESRI.ArcGIS.Geodatabase.IDataset dataset)
-        {
-            //If the dataset supports IGeoDataset
-            if (dataset is ESRI.ArcGIS.Geodatabase.IGeoDataset)
-            {
-                //then grab the spatial reference information and return it.
-                ESRI.ArcGIS.Geodatabase.IGeoDataset geoDataset = (ESRI.ArcGIS.Geodatabase.IGeoDataset)dataset;
-                return geoDataset.SpatialReference;
-            }
-            else
-            {
-                return null; //otherwise return null
-            }
         }
 
         #endregion
