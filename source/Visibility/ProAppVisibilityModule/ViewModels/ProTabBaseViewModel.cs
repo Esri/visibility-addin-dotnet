@@ -15,16 +15,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using VisibilityLibrary.Helpers;
-using VisibilityLibrary;
-using VisibilityLibrary.ViewModels;
-using ArcGIS.Desktop.Mapping;
-using ProAppVisibilityModule.Models;
+using System.Threading.Tasks;
 using ArcGIS.Desktop.Framework;
 using ArcGIS.Core.Geometry;
-using System.Threading.Tasks;
 using ArcGIS.Core.CIM;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
+using ArcGIS.Desktop.Mapping;
+using VisibilityLibrary.Helpers;
+using VisibilityLibrary.ViewModels;
+using ProAppVisibilityModule.Models;
 using ProAppVisibilityModule.Helpers;
 
 namespace ProAppVisibilityModule.ViewModels
@@ -380,18 +379,10 @@ namespace ProAppVisibilityModule.ViewModels
                 DeactivateTool("Esri_ArcMapAddinVisibility_MapPointTool");
             }
 
-            ResetPoints();
             Point1 = null;
             Point2 = null;
             Point1Formatted = string.Empty;
             Point2Formatted = string.Empty;
-        }
-        /// <summary>
-        /// Resets Points 1 and 2
-        /// </summary>
-        internal virtual void ResetPoints()
-        {
-            //HasPoint1 = HasPoint2 = false;
         }
 
         /// <summary>
