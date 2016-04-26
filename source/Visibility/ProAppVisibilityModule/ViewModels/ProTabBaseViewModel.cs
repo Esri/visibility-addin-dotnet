@@ -38,7 +38,7 @@ namespace ProAppVisibilityModule.ViewModels
         {
             //properties
             //LineType = LineTypes.Geodesic;
-            LineDistanceType = DistanceTypes.Meters;
+            //LineDistanceType = DistanceTypes.Meters;
 
             //commands
             ClearGraphicsCommand = new VisibilityLibrary.Helpers.RelayCommand(OnClearGraphics);
@@ -69,10 +69,6 @@ namespace ProAppVisibilityModule.ViewModels
 
         // lists to store GUIDs of graphics, temp feedback and map graphics
         private static List<ProGraphic> ProGraphicsList = new List<ProGraphic>();
-
-        //internal bool HasPoint1 = false;
-        //internal bool HasPoint2 = false;
-        //internal INewLineFeedback feedback = null;
 
         private List<IDisposable> overlayObjects = new List<IDisposable>();
 
@@ -239,77 +235,6 @@ namespace ProAppVisibilityModule.ViewModels
             }
         }
 
-        DistanceTypes lineDistanceType = DistanceTypes.Meters;
-        /// <summary>
-        /// Property for the distance type
-        /// </summary>
-        public DistanceTypes LineDistanceType
-        {
-            get { return lineDistanceType; }
-            set
-            {
-                var before = lineDistanceType;
-                lineDistanceType = value;
-                //UpdateDistanceFromTo(before, value);
-                //TODO update for Pro
-            }
-        }
-
-        //double distance = 0.0;
-        ///// <summary>
-        ///// Property for the distance/length
-        ///// </summary>
-        //public virtual double Distance
-        //{
-        //    get { return distance; }
-        //    set
-        //    {
-        //        if (value < 0.0)
-        //            throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEMustBePositive);
-
-        //        distance = value;
-        //        DistanceString = distance.ToString("N"); // use current culture number format
-        //        RaisePropertyChanged(() => Distance);
-        //        RaisePropertyChanged(() => DistanceString);
-        //    }
-        //}
-
-        //string distanceString = String.Empty;
-        ///// <summary>
-        ///// Distance property as a string
-        ///// </summary>
-        //public virtual string DistanceString
-        //{
-        //    get
-        //    {
-        //        return Distance.ToString("N"); // use current culture number format
-        //    }
-        //    set
-        //    {
-        //        // lets avoid an infinite loop here
-        //        if (string.Equals(distanceString, value))
-        //            return;
-
-        //        distanceString = value;
-
-        //        // update distance
-        //        double d = 0.0;
-        //        if (double.TryParse(distanceString, out d))
-        //        {
-        //            Distance = d;
-        //        }
-        //        else
-        //        {
-        //            throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEInvalidInput);
-        //        }
-        //    }
-        //}
-
-        /// <summary>
-        /// Property for the type of geodesy line
-        /// </summary>
-//        public LineTypes LineType { get; set; }
-
         /// <summary>
         /// Property used to test if there is enough info to create a line map element
         /// </summary>
@@ -402,18 +327,6 @@ namespace ProAppVisibilityModule.ViewModels
         }
 
         /// <summary>
-        /// Method used to move temp graphics to map graphics
-        /// Tools use this to make temp graphics permanent on completion
-        /// otherwise temp graphics get cleared on reset/cancel
-        /// </summary>
-        //internal void MoveTempGraphicsToMapGraphics()
-        //{
-        //    MapGraphicsList.AddRange(TempGraphicsList);
-        //    TempGraphicsList.Clear();
-        //    RaisePropertyChanged(() => HasMapGraphics);
-        //}
-
-        /// <summary>
         /// Handler for the "Enter"key command
         /// Calls CreateMapElement
         /// </summary>
@@ -434,41 +347,12 @@ namespace ProAppVisibilityModule.ViewModels
             if (!IsActiveTab)
                 return;
 
-            //var mxdoc = ArcMap.Application.Document as IMxDocument;
-            //var av = mxdoc.FocusMap as IActiveView;
-            //var point = obj as IPoint;
+            var point = obj as MapPoint;
 
-            //if (point == null)
-            //    return;
+            if (point == null)
+                return;
 
-            //if (!HasPoint1)
-            //{
-            //    // clear temp graphics
-            //    ClearTempGraphics();
-            //    Point1 = point;
-            //    HasPoint1 = true;
-            //    Point1Formatted = string.Empty;
-
-            //    AddGraphicToMap(Point1, true);
-
-            //    // lets try feedback
-            //    CreateFeedback(point, av);
-            //    feedback.Start(point);
-            //}
-            //else if (!HasPoint2)
-            //{
-            //    ResetFeedback();
-            //    Point2 = point;
-            //    HasPoint2 = true;
-            //    point2Formatted = string.Empty;
-            //    RaisePropertyChanged(() => Point2Formatted);
-            //}
-
-            //if (HasPoint1 && HasPoint2)
-            //{
-            //    CreateMapElement();
-            //    ResetPoints();
-            //}
+            // do nothing
         }
 
         #endregion
@@ -499,12 +383,10 @@ namespace ProAppVisibilityModule.ViewModels
             }
 
             ResetPoints();
-            //Point1 = null;
-            //Point2 = null;
-            //Point1Formatted = string.Empty;
-            //Point2Formatted = string.Empty;
-
-            //Distance = 0.0;
+            Point1 = null;
+            Point2 = null;
+            Point1Formatted = string.Empty;
+            Point2Formatted = string.Empty;
         }
         /// <summary>
         /// Resets Points 1 and 2
@@ -833,58 +715,6 @@ namespace ProAppVisibilityModule.ViewModels
         }
 
         /// <summary>
-        /// Get the currently selected geodetic type
-        /// </summary>
-        /// <returns>esriGeodeticType</returns>
-        //internal esriGeodeticType GetEsriGeodeticType()
-        //{
-        //    esriGeodeticType type = esriGeodeticType.esriGeodeticTypeGeodesic;
-
-        //    switch (LineType)
-        //    {
-        //        case LineTypes.Geodesic:
-        //            type = esriGeodeticType.esriGeodeticTypeGeodesic;
-        //            break;
-        //        case LineTypes.GreatElliptic:
-        //            type = esriGeodeticType.esriGeodeticTypeGreatElliptic;
-        //            break;
-        //        case LineTypes.Loxodrome:
-        //            type = esriGeodeticType.esriGeodeticTypeLoxodrome;
-        //            break;
-        //        default:
-        //            type = esriGeodeticType.esriGeodeticTypeGeodesic;
-        //            break;
-        //    }
-
-        //    return type;
-        //}
-        //internal double GetGeodeticLengthFromPolyline(IPolyline polyline)
-        //{
-        //    if (polyline == null)
-        //        return 0.0;
-
-        //    var polycurvegeo = polyline as IPolycurveGeodetic;
-
-        //    var geodeticType = GetEsriGeodeticType();
-        //    var linearUnit = GetLinearUnit();
-        //    var geodeticLength = polycurvegeo.get_LengthGeodetic(geodeticType, linearUnit);
-
-        //    return geodeticLength;
-        //}
-        /// <summary>
-        /// Gets the distance/lenght of a polyline
-        /// </summary>
-        /// <param name="geometry">IGeometry</param>
-        //internal void UpdateDistance(IGeometry geometry)
-        //{
-        //    var polyline = geometry as IPolyline;
-
-        //    if (polyline == null)
-        //        return;
-
-        //    Distance = GetGeodeticLengthFromPolyline(polyline);
-        //}
-        /// <summary>
         /// Handler for the mouse move event
         /// When the mouse moves accross the map, IPoints are returned to aid in updating feedback to user
         /// </summary>
@@ -901,105 +731,6 @@ namespace ProAppVisibilityModule.ViewModels
 
             // do nothing
         }
-
-        /// <summary>
-        /// Method used to convert a string to a known coordinate
-        /// Assumes WGS84 for now
-        /// Uses the IConversionNotation interface
-        /// </summary>
-        /// <param name="coordinate">the coordinate as a string</param>
-        /// <returns>IPoint if successful, null if not</returns>
-        //internal IPoint GetPointFromString(string coordinate)
-        //{
-        //    Type t = Type.GetTypeFromProgID("esriGeometry.SpatialReferenceEnvironment");
-        //    System.Object obj = Activator.CreateInstance(t);
-        //    ISpatialReferenceFactory srFact = obj as ISpatialReferenceFactory;
-
-        //    // Use the enumeration to create an instance of the predefined object.
-
-        //    IGeographicCoordinateSystem geographicCS =
-        //        srFact.CreateGeographicCoordinateSystem((int)
-        //        esriSRGeoCSType.esriSRGeoCS_WGS1984);
-
-        //    var point = new Point() as IPoint;
-        //    point.SpatialReference = geographicCS;
-        //    var cn = point as IConversionNotation;
-
-        //    if (cn == null)
-        //        return null;
-
-        //    try { cn.PutCoordsFromDD(coordinate); return point; }
-        //    catch { }
-        //    try { cn.PutCoordsFromDDM(coordinate); return point; }
-        //    catch { }
-        //    try { cn.PutCoordsFromDMS(coordinate); return point; }
-        //    catch { }
-        //    try { cn.PutCoordsFromGARS(esriGARSModeEnum.esriGARSModeCENTER, coordinate); return point; }
-        //    catch { }
-        //    try { cn.PutCoordsFromGARS(esriGARSModeEnum.esriGARSModeLL, coordinate); return point; }
-        //    catch { }
-        //    try { cn.PutCoordsFromMGRS(coordinate, esriMGRSModeEnum.esriMGRSMode_Automatic); return point; }
-        //    catch { }
-        //    try { cn.PutCoordsFromMGRS(coordinate, esriMGRSModeEnum.esriMGRSMode_NewStyle); return point; }
-        //    catch { }
-        //    try { cn.PutCoordsFromMGRS(coordinate, esriMGRSModeEnum.esriMGRSMode_NewWith180InZone01); return point; }
-        //    catch { }
-        //    try { cn.PutCoordsFromMGRS(coordinate, esriMGRSModeEnum.esriMGRSMode_OldStyle); return point; }
-        //    catch { }
-        //    try { cn.PutCoordsFromMGRS(coordinate, esriMGRSModeEnum.esriMGRSMode_OldWith180InZone01); return point; }
-        //    catch { }
-        //    try { cn.PutCoordsFromMGRS(coordinate, esriMGRSModeEnum.esriMGRSMode_USNG); return point; }
-        //    catch { }
-        //    try { cn.PutCoordsFromUSNG(coordinate); return point; }
-        //    catch { }
-        //    try { cn.PutCoordsFromUTM(esriUTMConversionOptionsEnum.esriUTMAddSpaces, coordinate); return point; }
-        //    catch { }
-        //    try { cn.PutCoordsFromUTM(esriUTMConversionOptionsEnum.esriUTMUseNS, coordinate); return point; }
-        //    catch { }
-        //    try { cn.PutCoordsFromUTM(esriUTMConversionOptionsEnum.esriUTMAddSpaces | esriUTMConversionOptionsEnum.esriUTMUseNS, coordinate); return point; }
-        //    catch { }
-        //    try { cn.PutCoordsFromUTM(esriUTMConversionOptionsEnum.esriUTMNoOptions, coordinate); return point; }
-        //    catch { }
-        //    try { cn.PutCoordsFromGeoRef(coordinate); return point; }
-        //    catch { }
-
-        //    // lets see if we have a PCS coordinate
-        //    // we'll assume the same units as the map units
-        //    // get spatial reference of map
-        //    if (ArcMap.Document == null || ArcMap.Document.FocusMap == null || ArcMap.Document.FocusMap.SpatialReference == null)
-        //        return null;
-
-        //    var map = ArcMap.Document.FocusMap;
-        //    var pcs = map.SpatialReference as IProjectedCoordinateSystem;
-
-        //    if (pcs == null)
-        //        return null;
-
-        //    point.SpatialReference = map.SpatialReference;
-        //    // get pcs coordinate from input
-        //    coordinate = coordinate.Trim();
-
-        //    Regex regexMercator = new Regex(@"^(?<latitude>\-?\d+\.?\d*)[+,;:\s]*(?<longitude>\-?\d+\.?\d*)");
-
-        //    var matchMercator = regexMercator.Match(coordinate);
-
-        //    if (matchMercator.Success && matchMercator.Length == coordinate.Length)
-        //    {
-        //        try
-        //        {
-        //            var Lat = Double.Parse(matchMercator.Groups["latitude"].Value);
-        //            var Lon = Double.Parse(matchMercator.Groups["longitude"].Value);
-        //            point.PutCoords(Lon, Lat);
-        //            return point;
-        //        }
-        //        catch
-        //        {
-        //            return null;
-        //        }
-        //    }
-
-        //    return null;
-        //}
  
         #endregion Private Functions
     }
