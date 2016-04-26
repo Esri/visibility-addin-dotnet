@@ -85,8 +85,7 @@ namespace ArcMapAddinVisibility.ViewModels
         public string SelectedSurfaceName { get; set; }
         public DistanceTypes OffsetUnitType { get; set; }
         public AngularTypes AngularUnitType { get; set; }
-        public ISpatialReference SelectedSurfaceSpatialRef { get; set; }
-
+        
         #endregion
 
         #region Commands
@@ -318,13 +317,13 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <returns></returns>
         internal double GetOffsetInZUnits(IMap map, double offset, double zFactor, DistanceTypes distanceType)
         {
-            if (map.SpatialReference == null)
+            if (SelectedSurfaceSpatialRef == null)
                 return offset;
 
             double offsetInMapUnits = 0.0;
             DistanceTypes distanceTo = DistanceTypes.Meters; // default to meters
 
-            var pcs = map.SpatialReference as IProjectedCoordinateSystem;
+            var pcs = SelectedSurfaceSpatialRef as IProjectedCoordinateSystem;
 
             if (pcs != null)
             {

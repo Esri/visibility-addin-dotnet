@@ -22,6 +22,7 @@ using ESRI.ArcGIS.Display;
 using VisibilityLibrary.Helpers;
 using System.Collections;
 using ArcMapAddinVisibility.Models;
+using ESRI.ArcGIS.Carto;
 
 namespace ArcMapAddinVisibility.ViewModels
 {
@@ -179,6 +180,12 @@ namespace ArcMapAddinVisibility.ViewModels
 
                 if (surface == null)
                     return;
+
+                // Set Spatial Reference of selected surface
+                ILayer surfaceLayer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
+                IDataset pDataset = surfaceLayer as IDataset;
+                ISpatialReference pSR = GetSpatialReferenceFromDataset(pDataset);
+                SelectedSurfaceSpatialRef = pSR;
 
                 var geoBridge = new GeoDatabaseHelperClass() as IGeoDatabaseBridge2;
 
