@@ -82,7 +82,7 @@ namespace ProAppVisibilityModule.ViewModels
 
         private MapPoint point1 = null;
         /// <summary>
-        /// Property for the first IPoint
+        /// Property for the observer MapPoint
         /// </summary>
         public virtual MapPoint Point1
         {
@@ -101,7 +101,7 @@ namespace ProAppVisibilityModule.ViewModels
 
         private MapPoint point2 = null;
         /// <summary>
-        /// Property for the second IPoint
+        /// Property for the target MapPoint
         /// Not all tools need a second point
         /// </summary>
         public virtual MapPoint Point2
@@ -119,7 +119,7 @@ namespace ProAppVisibilityModule.ViewModels
         }
         string point1Formatted = string.Empty;
         /// <summary>
-        /// String property for the first IPoint
+        /// String property for the observer MapPoint
         /// This is used to format the point for the UI and allow string input of different types of coordinates
         /// </summary>
         public string Point1Formatted
@@ -156,7 +156,6 @@ namespace ProAppVisibilityModule.ViewModels
                 {
                     point1Formatted = value;
                     Point1 = point;
-                    //AddGraphicToMap(Point1, true);
                 }
                 else
                 {
@@ -169,7 +168,7 @@ namespace ProAppVisibilityModule.ViewModels
 
         string point2Formatted = string.Empty;
         /// <summary>
-        /// String property for the second IPoint
+        /// String property for the target MapPoint
         /// This is used to format the point for the UI and allow string input of different types of coordinates
         /// Input types like GARS, MGRS, USNG, UTM
         /// </summary>
@@ -200,13 +199,12 @@ namespace ProAppVisibilityModule.ViewModels
                     RaisePropertyChanged(() => Point2Formatted);
                     return;
                 }
-                // try to convert string to an IPoint
+                // try to convert string to a MapPoint
                 var point = GetMapPointFromString(value);
                 if (point != null)
                 {
                     point2Formatted = value;
                     Point2 = point;
-                    //AddGraphicToMap(Point2, true);
                 }
                 else
                 {
@@ -341,7 +339,7 @@ namespace ProAppVisibilityModule.ViewModels
         /// <summary>
         /// Handler for the new map point click event
         /// </summary>
-        /// <param name="obj">IPoint</param>
+        /// <param name="obj">MapPoint</param>
         internal virtual void OnNewMapPointEvent(object obj)
         {
             if (!IsActiveTab)
@@ -466,7 +464,7 @@ namespace ProAppVisibilityModule.ViewModels
             return point;
         }
 
-
+        //TODO update for Pro ??? 
         //internal string AddTextToMap(string text, IGeometry geom, IColor color, bool IsTempGraphic = false, int size = 12)
         //{
         //    if (geom == null || ArcMap.Document == null || ArcMap.Document.FocusMap == null)
@@ -659,66 +657,66 @@ namespace ProAppVisibilityModule.ViewModels
         /// </summary>
         /// <param name="fromType">DistanceTypes</param>
         /// <param name="toType">DistanceTypes</param>
-        internal double GetDistanceFromTo(DistanceTypes fromType, DistanceTypes toType, double input)
-        {
-            double length = input;
+        //internal double GetDistanceFromTo(DistanceTypes fromType, DistanceTypes toType, double input)
+        //{
+        //    double length = input;
 
-            try
-            {
-                if (fromType == DistanceTypes.Meters && toType == DistanceTypes.Kilometers)
-                    length /= 1000.0;
-                else if (fromType == DistanceTypes.Meters && toType == DistanceTypes.Feet)
-                    length *= 3.28084;
-                else if (fromType == DistanceTypes.Meters && toType == DistanceTypes.SurveyFoot)
-                    length *= 3.280833333;
-                else if (fromType == DistanceTypes.Meters && toType == DistanceTypes.NauticalMile)
-                    length *= 0.000539957;
-                else if (fromType == DistanceTypes.Kilometers && toType == DistanceTypes.Meters)
-                    length *= 1000.0;
-                else if (fromType == DistanceTypes.Kilometers && toType == DistanceTypes.Feet)
-                    length *= 3280.84;
-                else if (fromType == DistanceTypes.Kilometers && toType == DistanceTypes.SurveyFoot)
-                    length *= 3280.833333;
-                else if (fromType == DistanceTypes.Kilometers && toType == DistanceTypes.NauticalMile)
-                    length *= 0.539957;
-                else if (fromType == DistanceTypes.Feet && toType == DistanceTypes.Kilometers)
-                    length *= 0.0003048;
-                else if (fromType == DistanceTypes.Feet && toType == DistanceTypes.Meters)
-                    length *= 0.3048;
-                else if (fromType == DistanceTypes.Feet && toType == DistanceTypes.SurveyFoot)
-                    length *= 0.999998000004;
-                else if (fromType == DistanceTypes.Feet && toType == DistanceTypes.NauticalMile)
-                    length *= 0.000164579;
-                else if (fromType == DistanceTypes.SurveyFoot && toType == DistanceTypes.Kilometers)
-                    length *= 0.0003048006096;
-                else if (fromType == DistanceTypes.SurveyFoot && toType == DistanceTypes.Meters)
-                    length *= 0.3048006096;
-                else if (fromType == DistanceTypes.SurveyFoot && toType == DistanceTypes.Feet)
-                    length *= 1.000002;
-                else if (fromType == DistanceTypes.SurveyFoot && toType == DistanceTypes.NauticalMile)
-                    length *= 0.00016457916285097;
-                else if (fromType == DistanceTypes.NauticalMile && toType == DistanceTypes.Kilometers)
-                    length *= 1.852001376036;
-                else if (fromType == DistanceTypes.NauticalMile && toType == DistanceTypes.Meters)
-                    length *= 1852.001376036;
-                else if (fromType == DistanceTypes.NauticalMile && toType == DistanceTypes.Feet)
-                    length *= 6076.1154855643;
-                else if (fromType == DistanceTypes.NauticalMile && toType == DistanceTypes.SurveyFoot)
-                    length *= 6076.1033333576;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
+        //    try
+        //    {
+        //        if (fromType == DistanceTypes.Meters && toType == DistanceTypes.Kilometers)
+        //            length /= 1000.0;
+        //        else if (fromType == DistanceTypes.Meters && toType == DistanceTypes.Feet)
+        //            length *= 3.28084;
+        //        else if (fromType == DistanceTypes.Meters && toType == DistanceTypes.SurveyFoot)
+        //            length *= 3.280833333;
+        //        else if (fromType == DistanceTypes.Meters && toType == DistanceTypes.NauticalMile)
+        //            length *= 0.000539957;
+        //        else if (fromType == DistanceTypes.Kilometers && toType == DistanceTypes.Meters)
+        //            length *= 1000.0;
+        //        else if (fromType == DistanceTypes.Kilometers && toType == DistanceTypes.Feet)
+        //            length *= 3280.84;
+        //        else if (fromType == DistanceTypes.Kilometers && toType == DistanceTypes.SurveyFoot)
+        //            length *= 3280.833333;
+        //        else if (fromType == DistanceTypes.Kilometers && toType == DistanceTypes.NauticalMile)
+        //            length *= 0.539957;
+        //        else if (fromType == DistanceTypes.Feet && toType == DistanceTypes.Kilometers)
+        //            length *= 0.0003048;
+        //        else if (fromType == DistanceTypes.Feet && toType == DistanceTypes.Meters)
+        //            length *= 0.3048;
+        //        else if (fromType == DistanceTypes.Feet && toType == DistanceTypes.SurveyFoot)
+        //            length *= 0.999998000004;
+        //        else if (fromType == DistanceTypes.Feet && toType == DistanceTypes.NauticalMile)
+        //            length *= 0.000164579;
+        //        else if (fromType == DistanceTypes.SurveyFoot && toType == DistanceTypes.Kilometers)
+        //            length *= 0.0003048006096;
+        //        else if (fromType == DistanceTypes.SurveyFoot && toType == DistanceTypes.Meters)
+        //            length *= 0.3048006096;
+        //        else if (fromType == DistanceTypes.SurveyFoot && toType == DistanceTypes.Feet)
+        //            length *= 1.000002;
+        //        else if (fromType == DistanceTypes.SurveyFoot && toType == DistanceTypes.NauticalMile)
+        //            length *= 0.00016457916285097;
+        //        else if (fromType == DistanceTypes.NauticalMile && toType == DistanceTypes.Kilometers)
+        //            length *= 1.852001376036;
+        //        else if (fromType == DistanceTypes.NauticalMile && toType == DistanceTypes.Meters)
+        //            length *= 1852.001376036;
+        //        else if (fromType == DistanceTypes.NauticalMile && toType == DistanceTypes.Feet)
+        //            length *= 6076.1154855643;
+        //        else if (fromType == DistanceTypes.NauticalMile && toType == DistanceTypes.SurveyFoot)
+        //            length *= 6076.1033333576;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine(ex);
+        //    }
 
-            return length;
-        }
+        //    return length;
+        //}
 
         /// <summary>
         /// Handler for the mouse move event
-        /// When the mouse moves accross the map, IPoints are returned to aid in updating feedback to user
+        /// When the mouse moves accross the map, MapPoints are returned to aid in updating feedback to user
         /// </summary>
-        /// <param name="obj">IPoint</param>
+        /// <param name="obj">MapPoint</param>
         internal virtual void OnMouseMoveEvent(object obj)
         {
             if (!IsActiveTab)

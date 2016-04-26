@@ -27,6 +27,7 @@ using ArcGIS.Desktop.Mapping;
 using System.Windows;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using System.Threading.Tasks;
+using ArcGIS.Desktop.Mapping.Events;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -53,6 +54,12 @@ namespace ProAppVisibilityModule.ViewModels
             DeleteAllPointsCommand = new RelayCommand(OnDeleteAllPointsCommand);
             EditPropertiesDialogCommand = new RelayCommand(OnEditPropertiesDialogCommand);
 
+            ActiveMapViewChangedEvent.Subscribe(OnActiveMapViewChanged);
+        }
+
+        ~ProLOSBaseViewModel()
+        {
+            ActiveMapViewChangedEvent.Unsubscribe(OnActiveMapViewChanged);
         }
 
         #region Properties
@@ -278,7 +285,7 @@ namespace ProAppVisibilityModule.ViewModels
         /// returns true if there is no surface selected or point is contained by layer AOI
         /// returns false if the point is not contained in the layer AOI
         /// </summary>
-        /// <param name="point">IPoint to validate</param>
+        /// <param name="point">MapPoint to validate</param>
         /// <param name="showPopup">boolean to show popup message or not</param>
         /// <returns></returns>
         internal async Task<bool> IsValidPoint(MapPoint point, bool showPopup = false)
@@ -316,8 +323,8 @@ namespace ProAppVisibilityModule.ViewModels
         /// <summary>
         /// Method used to check to see if a point is contained by an envelope
         /// </summary>
-        /// <param name="point">IPoint</param>
-        /// <param name="env">IEnvelope</param>
+        /// <param name="point">MapPoint</param>
+        /// <param name="env">Envelope</param>
         /// <returns></returns>
         //TODO update to Pro
         internal async Task<bool> IsPointWithinExtent(MapPoint point, Envelope env)
@@ -526,10 +533,12 @@ namespace ProAppVisibilityModule.ViewModels
         /// Method used to reset the currently selected surfacename 
         /// Use when toc items or map changes, on tab selection changed, etc
         /// </summary>
-        /// <param name="map">IMap</param>
         /// 
         internal async Task ResetSurfaceNames()
         {
+            if (MapView.Active == null || MapView.Active.Map == null)
+                return;
+
             // keep the current selection if it's still valid
             var tempName = SelectedSurfaceName;
 
@@ -562,6 +571,11 @@ namespace ProAppVisibilityModule.ViewModels
             foreach (var item in list)
                 ObserverAddInPoints.Add(item);
             RaisePropertyChanged(() => HasMapGraphics);
+        }
+
+        private async void OnActiveMapViewChanged(ActiveMapViewChangedEventArgs obj)
+        {
+            await ResetSurfaceNames();
         }
     }
 }
