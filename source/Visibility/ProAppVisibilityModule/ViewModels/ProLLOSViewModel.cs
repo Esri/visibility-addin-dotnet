@@ -123,13 +123,12 @@ namespace ProAppVisibilityModule.ViewModels
 
             var point = obj as MapPoint;
 
-            if (point == null || !IsValidPoint(point))
+            if (point == null || !IsValidPoint(point).Result)
                 return;
 
             if (ToolMode == MapPointToolMode.Target)
             {
-                //TODO square symbol, add symbol to parameter list, etc
-                var guid = await AddGraphicToMap(point, ColorFactory.Red, true, 5.0);
+                var guid = await AddGraphicToMap(point, ColorFactory.Red, true, 5.0, markerStyle: SimpleMarkerStyle.Square);
                 var addInPoint = new AddInPoint() { Point = point, GUID = guid };
                 Application.Current.Dispatcher.Invoke(() =>
                     {

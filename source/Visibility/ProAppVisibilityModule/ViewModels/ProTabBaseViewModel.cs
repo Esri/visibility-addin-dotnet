@@ -525,7 +525,7 @@ namespace ProAppVisibilityModule.ViewModels
             return await AddGraphicToMap(geom, ColorFactory.Red, IsTempGraphic, size);
         }
 
-        internal async Task<string> AddGraphicToMap(Geometry geom, CIMColor color, bool IsTempGraphic = false, double size = 1.0, string text = "")
+        internal async Task<string> AddGraphicToMap(Geometry geom, CIMColor color, bool IsTempGraphic = false, double size = 1.0, string text = "", SimpleMarkerStyle markerStyle = SimpleMarkerStyle.Circle)
         {
             if (geom == null || MapView.Active == null)
                 return string.Empty;
@@ -543,7 +543,7 @@ namespace ProAppVisibilityModule.ViewModels
             {
                 await QueuedTask.Run(() =>
                 {
-                    var s = SymbolFactory.ConstructPointSymbol(color, size, SimpleMarkerStyle.Circle);
+                    var s = SymbolFactory.ConstructPointSymbol(color, size, markerStyle);
                     symbol = new CIMSymbolReference() { Symbol = s };
                 });
             }

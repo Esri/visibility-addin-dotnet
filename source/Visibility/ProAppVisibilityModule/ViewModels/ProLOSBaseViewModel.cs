@@ -233,7 +233,7 @@ namespace ProAppVisibilityModule.ViewModels
 
             var point = obj as MapPoint;
 
-            if (point == null || !IsValidPoint(point, true))
+            if (point == null || !IsValidPoint(point, true).Result)
                 return;
 
             // ok, we have a point
@@ -281,18 +281,22 @@ namespace ProAppVisibilityModule.ViewModels
         /// <param name="point">IPoint to validate</param>
         /// <param name="showPopup">boolean to show popup message or not</param>
         /// <returns></returns>
-        internal bool IsValidPoint(MapPoint point, bool showPopup = false)
+        internal async Task<bool> IsValidPoint(MapPoint point, bool showPopup = false)
         {
             var validPoint = true;
 
-            //TODO update to Pro, if point is within the surface layer?
-            //if (!string.IsNullOrWhiteSpace(SelectedSurfaceName) && ArcMap.Document != null && ArcMap.Document.FocusMap != null)
-            //{
-            //    validPoint = IsPointWithinExtent(point, GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName).AreaOfInterest);
+            if (!string.IsNullOrWhiteSpace(SelectedSurfaceName) && MapView.Active != null && MapView.Active.Map != null)
+            {
+                var layer = GetLayerFromMapByName(SelectedSurfaceName);
+                var env = await QueuedTask.Run(() =>
+                    {
+                        return layer.QueryExtent();
+                    });
+                validPoint = await IsPointWithinExtent(point, env);
 
-            //    if (validPoint == false && showPopup)
-            //        System.Windows.Forms.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgOutOfAOI);
-            //}
+                if (validPoint == false && showPopup)
+                    ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgOutOfAOI);
+            }
 
             return validPoint;
         }
@@ -316,15 +320,15 @@ namespace ProAppVisibilityModule.ViewModels
         /// <param name="env">IEnvelope</param>
         /// <returns></returns>
         //TODO update to Pro
-        //internal bool IsPointWithinExtent(MapPoint point, IEnvelope env)
-        //{
-        //    var relationOp = env as IRelationalOperator;
+        internal async Task<bool> IsPointWithinExtent(MapPoint point, Envelope env)
+        {
+            var result = await QueuedTask.Run(() =>
+                {
+                    return GeometryEngine.Contains(env, point);
+                });
 
-        //    if (relationOp == null)
-        //        return false;
-
-        //    return relationOp.Contains(point);
-        //}
+            return result;
+        }
 
         /// <summary>
         /// Method to get a z offset distance in the correct units for the map
@@ -404,28 +408,18 @@ namespace ProAppVisibilityModule.ViewModels
 
         //    return null;
         //}
+
         /// <summary>
-        /// returns ILayer if found in the map layer collection
+        /// returns Layer if found in the map
         /// </summary>
-        /// <param name="map">IMap</param>
         /// <param name="name">string name of layer</param>
-        /// <returns></returns>
+        /// <returns>Layer</returns>
         /// 
-        //TODO update to Pro
-        //public ILayer GetLayerFromMapByName(IMap map, string name)
-        //{
-        //    for (int x = 0; x < map.LayerCount; x++)
-        //    {
-        //        var layer = map.get_Layer(x);
-
-        //        if (layer == null || layer.Name != name)
-        //            continue;
-
-        //        return layer;
-        //    }
-
-        //    return null;
-        //}
+        internal Layer GetLayerFromMapByName(string name)
+        {
+            var layer = MapView.Active.Map.GetLayersAsFlattenedList().FirstOrDefault(l => l.Name == name);
+            return layer;
+        }
 
         internal async Task<List<string>> GetSurfaceNamesFromMap()
         {
@@ -534,7 +528,6 @@ namespace ProAppVisibilityModule.ViewModels
         /// </summary>
         /// <param name="map">IMap</param>
         /// 
-        //TODO update to Pro
         internal async Task ResetSurfaceNames()
         {
             // keep the current selection if it's still valid
