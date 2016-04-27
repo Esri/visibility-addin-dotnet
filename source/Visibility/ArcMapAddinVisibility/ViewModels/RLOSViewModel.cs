@@ -194,7 +194,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
             if (SelectedSurfaceSpatialRef is IGeographicCoordinateSystem)
             {
-                MessageBox.Show("The selected surface has not been projected.  Please use appropriate projection and try again.");
+                MessageBox.Show("The selected surface has not been projected.  Please project your data and try again.", "Surface Projection");
                 return;
             }
 
@@ -273,18 +273,18 @@ namespace ArcMapAddinVisibility.ViewModels
                     ILayer layer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
                     string layerPath = GetLayerPath(layer);
 
-                IFeatureLayer ipFeatureLayer = new FeatureLayerClass();
-                ipFeatureLayer.FeatureClass = pointFc;
+                    IFeatureLayer ipFeatureLayer = new FeatureLayerClass();
+                    ipFeatureLayer.FeatureClass = pointFc;
 
-                IDataset ipDataset = (IDataset)pointFc;
-                string outputFcName = ipDataset.BrowseName + "_output";
-                string strPath = ipDataset.Workspace.PathName + "\\" + ipDataset.BrowseName;
-                string outPath = ipDataset.Workspace.PathName + "\\" + outputFcName;
+                    IDataset ipDataset = (IDataset)pointFc;
+                    string outputFcName = ipDataset.BrowseName + "_output";
+                    string strPath = ipDataset.Workspace.PathName + "\\" + ipDataset.BrowseName;
+                    string outPath = ipDataset.Workspace.PathName + "\\" + outputFcName;
 
-                IVariantArray parameters = new VarArrayClass();
+                    IVariantArray parameters = new VarArrayClass();
                     parameters.Add(layerPath);
-                parameters.Add(strPath);
-                parameters.Add(outPath);
+                    parameters.Add(strPath);
+                    parameters.Add(outPath);
 
                     esriLicenseStatus status = GetSpatialAnalystLicense();
 
