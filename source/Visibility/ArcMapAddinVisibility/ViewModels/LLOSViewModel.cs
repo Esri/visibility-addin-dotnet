@@ -12,18 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// System
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections.ObjectModel;
+using System.Collections;
+using System.Windows;
+
+// Esri
 using ESRI.ArcGIS.Geodatabase;
 using ESRI.ArcGIS.Geometry;
 using ESRI.ArcGIS.Display;
-using VisibilityLibrary.Helpers;
-using System.Collections;
-using ArcMapAddinVisibility.Models;
 using ESRI.ArcGIS.Carto;
-using System.Windows;
+
+// Solution
+using VisibilityLibrary.Helpers;
+using ArcMapAddinVisibility.Models;
 
 namespace ArcMapAddinVisibility.ViewModels
 {
