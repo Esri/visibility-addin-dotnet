@@ -199,7 +199,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
             if (SelectedSurfaceSpatialRef is IGeographicCoordinateSystem)
             {
-                MessageBox.Show("The selected surface has not been projected.  Please project your data and try again.", "Surface Projection");
+                MessageBox.Show(VisibilityLibrary.Properties.Resources.RLOSUserPrompt, VisibilityLibrary.Properties.Resources.RLOSUserPromptCaption);
                 return;
             }
 
