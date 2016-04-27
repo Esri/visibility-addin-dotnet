@@ -28,6 +28,7 @@ using VisibilityLibrary.Helpers;
 using VisibilityLibrary.Views;
 using VisibilityLibrary.ViewModels;
 using ArcMapAddinVisibility.Models;
+using System.Diagnostics;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -529,20 +530,29 @@ namespace ProAppVisibilityModule.ViewModels
         /// Override to add aditional items in the class to reset tool
         /// </summary>
         /// <param name="toolReset"></param>
-        internal override async void Reset(bool toolReset)
+        internal override async Task Reset(bool toolReset)
         {
-            base.Reset(toolReset);
+            try
+            {
+                await base.Reset(toolReset);
 
-            if (MapView.Active == null || MapView.Active.Map == null)
-                return;
+                if (MapView.Active == null || MapView.Active.Map == null)
+                    return;
 
-            // reset surface names OC
-            await ResetSurfaceNames();
+                // reset surface names OC
+                await ResetSurfaceNames();
+                Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        // reset observer points
+                        ObserverAddInPoints.Clear();
+                    
+                        ClearTempGraphics();
+                    });
+            }
+            catch(Exception ex)
+            {
 
-            // reset observer points
-            ObserverAddInPoints.Clear();
-
-            ClearTempGraphics();
+            }
         }
 
         /// <summary>
@@ -551,27 +561,38 @@ namespace ProAppVisibilityModule.ViewModels
         /// </summary>
         internal async Task ResetSurfaceNames()
         {
-            if (MapView.Active == null || MapView.Active.Map == null)
-                return;
+            try
+            {
+                if (MapView.Active == null || MapView.Active.Map == null)
+                    return;
 
-            // keep the current selection if it's still valid
-            var tempName = SelectedSurfaceName;
+                // keep the current selection if it's still valid
+                var tempName = SelectedSurfaceName;
 
-            SurfaceLayerNames.Clear();
+                Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        SurfaceLayerNames.Clear();
+                    });
 
-            var names = await GetSurfaceNamesFromMap();
+                var names = await GetSurfaceNamesFromMap();
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    foreach (var name in names)
+                        SurfaceLayerNames.Add(name);
+                });
+                if (SurfaceLayerNames.Contains(tempName))
+                    SelectedSurfaceName = tempName;
+                else if (SurfaceLayerNames.Any())
+                    SelectedSurfaceName = SurfaceLayerNames[0];
+                else
+                    SelectedSurfaceName = string.Empty;
 
-            foreach (var name in names)
-                SurfaceLayerNames.Add(name);
-
-            if (SurfaceLayerNames.Contains(tempName))
-                SelectedSurfaceName = tempName;
-            else if (SurfaceLayerNames.Any())
-                SelectedSurfaceName = SurfaceLayerNames[0];
-            else
-                SelectedSurfaceName = string.Empty;
-
-            RaisePropertyChanged(() => SelectedSurfaceName);
+                RaisePropertyChanged(() => SelectedSurfaceName);
+            }
+            catch(Exception ex)
+            {
+                Debug.Print(ex.Message);
+            }
         }
 
         /// <summary>

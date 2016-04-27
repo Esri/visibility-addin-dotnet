@@ -22,6 +22,13 @@ using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Mapping;
 using VisibilityLibrary.Helpers;
 using ArcMapAddinVisibility.Models;
+using ProAppVisibilityModule.Helpers;
+using System.Threading.Tasks;
+using ArcGIS.Core.Data;
+using ArcGIS.Desktop.Core;
+using ArcGIS.Desktop.Editing;
+using ArcGIS.Desktop.Framework.Threading.Tasks;
+using System.Diagnostics;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -33,7 +40,17 @@ namespace ProAppVisibilityModule.ViewModels
             IsActiveTab = true;
 
             // commands
-            SubmitCommand = new RelayCommand(OnSubmitCommand);
+            SubmitCommand = new RelayCommand(async (obj) => 
+            {
+                try
+                {
+                    await OnSubmitCommand(obj);
+                }
+                catch(Exception ex)
+                {
+                    Debug.Print(ex.Message);
+                }
+            });
         }
 
         #region Properties
@@ -50,20 +67,37 @@ namespace ProAppVisibilityModule.ViewModels
         /// Method to handle the Submit/OK button command
         /// </summary>
         /// <param name="obj">null</param>
-        private void OnSubmitCommand(object obj)
+        private async Task OnSubmitCommand(object obj)
         {
-            // TODO udpate wait cursor/progressor
-            //var savedCursor = System.Windows.Forms.Cursor.Current;
-            //System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
-            //System.Windows.Forms.Application.DoEvents();
-            // promote temp graphics
-            //MoveTempGraphicsToMapGraphics();
+            try
+            {
 
-            CreateMapElement();
+                await Task.Run(async () =>
+                    {
+                        // TODO udpate wait cursor/progressor
+                        //var savedCursor = System.Windows.Forms.Cursor.Current;
+                        //System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
+                        //System.Windows.Forms.Application.DoEvents();
+                        // promote temp graphics
+                        //MoveTempGraphicsToMapGraphics();
+                        try
+                        {
+                            await CreateMapElement();
 
-            Reset(true);
+                            await Reset(true);
+                        }
+                        catch(Exception ex)
+                        {
+                            Debug.Print(ex.Message);
+                        }
 
-            //System.Windows.Forms.Cursor.Current = savedCursor;
+                        //System.Windows.Forms.Cursor.Current = savedCursor;
+                    });
+            }
+            catch(Exception ex)
+            {
+                Debug.Print(ex.Message);
+            }
         }
 
         /// <summary>
@@ -158,15 +192,25 @@ namespace ProAppVisibilityModule.ViewModels
         /// Method override reset to include TargetAddInPoints
         /// </summary>
         /// <param name="toolReset"></param>
-        internal override void Reset(bool toolReset)
+        internal override async Task Reset(bool toolReset)
         {
-            base.Reset(toolReset);
+            try
+            {
+                await base.Reset(toolReset);
 
-            if (MapView.Active == null || MapView.Active.Map == null)
-                return;
+                if (MapView.Active == null || MapView.Active.Map == null)
+                    return;
 
-            // reset target points
-            TargetAddInPoints.Clear();
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    // reset target points
+                    TargetAddInPoints.Clear();
+                });
+            }
+            catch(Exception ex)
+            {
+                Debug.Print(ex.Message);
+            }
         }
 
         /// <summary>
@@ -193,19 +237,20 @@ namespace ProAppVisibilityModule.ViewModels
         /// Visualize an observer that can see no targets with a RED circle on top of a BLUE circle
         /// Visualize an observer that can see at least one target with a GREEN circle on top of a BLUE circle
         /// </summary>
-        internal override void CreateMapElement()
+        internal override async Task CreateMapElement()
         {
             try
             {
                 IsRunning = true;
 
                 //TODO update to Pro
-                //if (!CanCreateElement || ArcMap.Document == null || ArcMap.Document.FocusMap == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
-                //    return;
+                if (!CanCreateElement || MapView.Active == null || MapView.Active.Map == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
+                    return;
 
-                base.CreateMapElement();
 
-                // take your observer and target points and get lines of sight
+                // take your observer and target points and construct sight lines
+
+                await CreateObserverFeatureLayer();
 
                 //TODO update to Pro
                 //var surface = GetSurfaceFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
@@ -307,6 +352,8 @@ namespace ProAppVisibilityModule.ViewModels
                 //}
 
                 //VisualizeTargets(DictionaryTargetObserverCount);
+
+                await base.CreateMapElement();
             }
             catch(Exception ex)
             {
@@ -315,6 +362,112 @@ namespace ProAppVisibilityModule.ViewModels
             finally
             {
                 IsRunning = false;
+            }
+        }
+
+        private async Task CreateObserverFeatureLayer()
+        {
+            try
+            {
+                await FeatureClassHelper.CreateLayer("vis_observers", "POINT");
+
+                // add fields for observer offset
+
+                await FeatureClassHelper.AddFieldToLayer("vis_observers", "offset", "DOUBLE");
+
+                // add observer points to feature layer
+
+                await CreatingObserverFeatures();
+
+                //ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(() =>
+                //{
+                //    //Create the edit operation
+                //    var createOperation = new ArcGIS.Desktop.Editing.EditOperation();
+                //    createOperation.Name = "Generate observer points";
+                //    createOperation.SelectNewFeatures = false;
+
+                //    //Loop through csv data
+                //    foreach (var item in ObserverAddInPoints)
+                //    {
+                //        //Create the point geometry
+                //        //ArcGIS.Core.Geometry.MapPoint newMapPoint = ArcGIS.Core.Geometry.MapPointBuilder.CreateMapPoint(item.X, item.Y);
+
+                //        // include the attributes via a dictionary
+                //        var atts = new Dictionary<string, object>();
+                //        atts.Add("offset", ObserverOffset.Value);
+                //        //TODO get shape field name
+                //        atts.Add("Shape", item.Point);   // I know the shape field is called Shape - but dont assume
+
+                //        // queue feature creation
+                //        createOperation.Create(layer, atts);
+                //    }
+
+                //    // execute the edit (feature creation) operation
+                //    return createOperation.Execute();
+                //});
+            }
+            catch(Exception ex)
+            {
+                Debug.Print(ex.Message);
+            }
+        }
+
+        private async Task CreatingObserverFeatures()
+        {
+            try
+            {
+                string message = String.Empty;
+                bool creationResult = false;
+                await ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(async () =>
+                {
+                    using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
+                    using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>("vis_observers"))
+                    using (FeatureClassDefinition facilitySiteDefinition = enterpriseFeatureClass.GetDefinition())
+                    {
+                        EditOperation editOperation = new EditOperation();
+                        editOperation.Callback(context =>
+                        {
+                            try
+                            {
+                                var shapeFieldName = facilitySiteDefinition.GetShapeField();
+
+                                foreach (var item in ObserverAddInPoints)
+                                {
+                                    //int facilityIdIndex = facilitySiteDefinition.FindField("FACILITYID");
+                                    using (var rowBuffer = enterpriseFeatureClass.CreateRowBuffer())
+                                    {
+                                        // Either the field index or the field name can be used in the indexer.
+                                        rowBuffer["offset"] = ObserverOffset.Value;
+
+                                        rowBuffer[shapeFieldName] = item.Point;
+
+                                        using (var feature = enterpriseFeatureClass.CreateRow(rowBuffer))
+                                        {
+                                            //To Indicate that the attribute table has to be updated
+                                            context.Invalidate(feature);
+                                        }
+                                    }
+                                }
+                            }
+                            catch (GeodatabaseException exObj)
+                            {
+                                message = exObj.Message;
+                            }
+                        }, enterpriseFeatureClass);
+
+                        //var task = editOperation.ExecuteAsync();
+                        creationResult = await editOperation.ExecuteAsync(); //task.Result;
+                        if (!creationResult)
+                            message = editOperation.ErrorMessage;
+                    }
+                });
+                if (!creationResult)
+                    MessageBox.Show(message);
+
+            }
+            catch(Exception ex)
+            {
+                Debug.Print(ex.Message);
             }
         }
 

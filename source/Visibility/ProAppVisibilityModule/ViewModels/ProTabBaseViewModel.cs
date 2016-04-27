@@ -25,6 +25,8 @@ using VisibilityLibrary.Helpers;
 using VisibilityLibrary.ViewModels;
 using ProAppVisibilityModule.Models;
 using ProAppVisibilityModule.Helpers;
+using System.Windows;
+using System.Diagnostics;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -246,17 +248,24 @@ namespace ProAppVisibilityModule.ViewModels
         /// <param name="obj"></param>
         private void OnClearGraphics(object obj)
         {
-            if (MapView.Active == null)
-                return;
-
-            foreach (var item in ProGraphicsList)
+            try
             {
-                item.Disposable.Dispose();
+                if (MapView.Active == null)
+                    return;
+
+                foreach (var item in ProGraphicsList)
+                {
+                    item.Disposable.Dispose();
+                }
+
+                ProGraphicsList.Clear();
+
+                RaisePropertyChanged(() => HasMapGraphics);
             }
-
-            ProGraphicsList.Clear();
-
-            RaisePropertyChanged(() => HasMapGraphics);
+            catch(Exception ex)
+            {
+                Debug.Print(ex.Message);
+            }
         }
 
         /// <summary>
@@ -336,9 +345,12 @@ namespace ProAppVisibilityModule.ViewModels
         /// Derived class must override this method in order to create map elements
         /// Clears temp graphics by default
         /// </summary>
-        internal virtual void CreateMapElement()
+        internal virtual async Task CreateMapElement()
         {
-            ClearTempGraphics();
+                await Task.Run(() =>
+                    {
+                        ClearTempGraphics();
+                    });
         }
 
         /// <summary>
@@ -351,7 +363,10 @@ namespace ProAppVisibilityModule.ViewModels
             foreach (var item in list)
             {
                 item.Disposable.Dispose();
-                ProGraphicsList.Remove(item);
+                Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        ProGraphicsList.Remove(item);
+                    });
             }
 
             RaisePropertyChanged(() => HasMapGraphics);
@@ -362,7 +377,7 @@ namespace ProAppVisibilityModule.ViewModels
         /// reset points, feedback
         /// clear out textboxes
         /// </summary>
-        internal virtual void Reset(bool toolReset)
+        internal virtual async Task Reset(bool toolReset)
         {
             if (toolReset)
             {
@@ -533,7 +548,10 @@ namespace ProAppVisibilityModule.ViewModels
             if (FrameworkApplication.CurrentTool != null &&
                 FrameworkApplication.CurrentTool.Equals(toolname))
             {
-                FrameworkApplication.SetCurrentToolAsync(String.Empty);
+                Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        FrameworkApplication.SetCurrentToolAsync(String.Empty);
+                    });
             }
         }
 
