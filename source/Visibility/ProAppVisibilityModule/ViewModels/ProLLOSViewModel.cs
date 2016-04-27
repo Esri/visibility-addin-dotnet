@@ -16,12 +16,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections.ObjectModel;
-using VisibilityLibrary.Helpers;
 using System.Collections;
-using ArcMapAddinVisibility.Models;
+using System.Windows;
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Mapping;
-using System.Windows;
+using VisibilityLibrary.Helpers;
+using ArcMapAddinVisibility.Models;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -66,6 +66,11 @@ namespace ProAppVisibilityModule.ViewModels
             //System.Windows.Forms.Cursor.Current = savedCursor;
         }
 
+        /// <summary>
+        /// Method override to handle deletion of points
+        /// Here we need to do target points in addition to observers
+        /// </summary>
+        /// <param name="obj">List of AddInPoint</param>
         internal override void OnDeletePointCommand(object obj)
         {
             // take care of ObserverPoints
@@ -81,7 +86,10 @@ namespace ProAppVisibilityModule.ViewModels
             DeleteTargetPoints(targets);
         }
 
-
+        /// <summary>
+        /// Method used to delete target points
+        /// </summary>
+        /// <param name="targets">List<AddInPoint></param>
         private void DeleteTargetPoints(List<AddInPoint> targets)
         {
             if (targets == null || !targets.Any())
@@ -89,8 +97,7 @@ namespace ProAppVisibilityModule.ViewModels
 
             // remove map graphics
             var guidList = targets.Select(x => x.GUID).ToList();
-            //RemoveGraphics(guidList);
-            //TODO update for Pro
+            RemoveGraphics(guidList);
 
             // remove from collection
             foreach (var obj in targets)
@@ -99,6 +106,11 @@ namespace ProAppVisibilityModule.ViewModels
             }
         }
 
+        /// <summary>
+        /// Method used to delete all points
+        /// Here we need to handle target points in addition to observers
+        /// </summary>
+        /// <param name="obj"></param>
         internal override void OnDeleteAllPointsCommand(object obj)
         {
             var mode = obj.ToString();
@@ -114,7 +126,12 @@ namespace ProAppVisibilityModule.ViewModels
 
         #endregion
 
-        internal override void OnNewMapPointEvent(object obj)
+        /// <summary>
+        /// Method override to handle new map points
+        /// Here we must take of targets in addition to observers
+        /// </summary>
+        /// <param name="obj">MapPoint</param>
+        internal override async void OnNewMapPointEvent(object obj)
         {
             base.OnNewMapPointEvent(obj);
 
@@ -123,14 +140,13 @@ namespace ProAppVisibilityModule.ViewModels
 
             var point = obj as MapPoint;
 
-            if (point == null || !IsValidPoint(point))
+            if (point == null || !IsValidPoint(point).Result)
                 return;
 
             if (ToolMode == MapPointToolMode.Target)
             {
-                //TODO square symbol, add symbol to parameter list, etc
-                AddGraphicToMap(point, ColorFactory.Red, true, 5.0);
-                var addInPoint = new AddInPoint() { Point = point };
+                var guid = await AddGraphicToMap(point, ColorFactory.Red, true, 5.0, markerStyle: SimpleMarkerStyle.Square);
+                var addInPoint = new AddInPoint() { Point = point, GUID = guid };
                 Application.Current.Dispatcher.Invoke(() =>
                     {
                         TargetAddInPoints.Insert(0, addInPoint);
@@ -138,18 +154,25 @@ namespace ProAppVisibilityModule.ViewModels
             }
         }
 
+        /// <summary>
+        /// Method override reset to include TargetAddInPoints
+        /// </summary>
+        /// <param name="toolReset"></param>
         internal override void Reset(bool toolReset)
         {
             base.Reset(toolReset);
 
-            // TODO update to Pro
-            //if (ArcMap.Document == null || ArcMap.Document.FocusMap == null)
-            //    return;
+            if (MapView.Active == null || MapView.Active.Map == null)
+                return;
 
             // reset target points
             TargetAddInPoints.Clear();
         }
 
+        /// <summary>
+        /// Method override to determine if we can execute tool
+        /// Check for surface, observers, targets, and offsets
+        /// </summary>
         public override bool CanCreateElement
         {
             get
@@ -157,7 +180,8 @@ namespace ProAppVisibilityModule.ViewModels
                 return (!string.IsNullOrWhiteSpace(SelectedSurfaceName) 
                     && ObserverAddInPoints.Any() 
                     && TargetAddInPoints.Any()
-                    && TargetOffset.HasValue);
+                    && TargetOffset.HasValue
+                    && ObserverOffset.HasValue);
             }
         }
 

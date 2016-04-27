@@ -24,6 +24,7 @@ using VisibilityLibrary.Helpers;
 using VisibilityLibrary;
 using VisibilityLibrary.ViewModels;
 using VisibilityLibrary.Models;
+using ArcMapAddinVisibility.Models;
 
 namespace ArcMapAddinVisibility.ViewModels
 {
@@ -49,14 +50,14 @@ namespace ArcMapAddinVisibility.ViewModels
         #region Properties
 
         // lists to store GUIDs of graphics, temp feedback and map graphics
-        private static List<string> TempGraphicsList = new List<string>();
-        private static List<string> MapGraphicsList = new List<string>();
+        private static List<AMGraphic> GraphicsList = new List<AMGraphic>();
 
         public bool HasMapGraphics
         {
             get
             {
-                return MapGraphicsList.Any();
+                // only non temp graphics please
+                return GraphicsList.Any(g => g.IsTemp == false);
             }
         }
 
@@ -263,9 +264,9 @@ namespace ArcMapAddinVisibility.ViewModels
         #region Private Event Functions
 
         /// <summary>
-        /// Clears all the graphics from the maps graphic container
-        /// Inlucdes temp and map graphics
-        /// Only removes temp and map graphics that were created by this add-in
+        /// Clears all the graphics from the maps graphic container except temp graphics
+        /// Inlucdes map graphics only
+        /// Only removes map graphics that were created by this add-in
         /// </summary>
         /// <param name="obj"></param>
         private void OnClearGraphics(object obj)
@@ -280,7 +281,7 @@ namespace ArcMapAddinVisibility.ViewModels
             if (gc == null)
                 return;
 
-            RemoveGraphics(gc, MapGraphicsList);
+            RemoveGraphics(gc, GraphicsList.Where(g => g.IsTemp == false).ToList());
 
             //av.PartialRefresh(esriViewDrawPhase.esriViewGraphics, null, null);
             av.Refresh(); // sometimes a partial refresh is not working
@@ -301,7 +302,7 @@ namespace ArcMapAddinVisibility.ViewModels
             if (gc == null)
                 return;
 
-            RemoveGraphics(gc, TempGraphicsList);
+            RemoveGraphics(gc, GraphicsList.Where(g => g.IsTemp == true).ToList());
 
             av.PartialRefresh(esriViewDrawPhase.esriViewGraphics, null, null);
         }
@@ -311,7 +312,7 @@ namespace ArcMapAddinVisibility.ViewModels
         /// </summary>
         /// <param name="gc">map graphics container</param>
         /// <param name="list">list of GUIDs to remove</param>
-        internal void RemoveGraphics(IGraphicsContainer gc, List<string> list)
+        internal void RemoveGraphics(IGraphicsContainer gc, List<AMGraphic> list)
         {
             if (gc == null || !list.Any())
                 return;
@@ -322,7 +323,7 @@ namespace ArcMapAddinVisibility.ViewModels
             while (element != null)
             {
                 var eleProps = element as IElementProperties;
-                if (list.Contains(eleProps.Name))
+                if(list.Any(g => g.UniqueId == eleProps.Name))
                 {
                     elementList.Add(element);
                 }
@@ -334,7 +335,12 @@ namespace ArcMapAddinVisibility.ViewModels
                 gc.DeleteElement(ele);
             }
 
-            list.Clear();
+            // remove from master graphics list
+            foreach(var graphic in list)
+            {
+                if (GraphicsList.Contains(graphic))
+                    GraphicsList.Remove(graphic);
+            }
             elementList.Clear();
             
             RaisePropertyChanged(() => HasMapGraphics);
@@ -355,7 +361,8 @@ namespace ArcMapAddinVisibility.ViewModels
             if (gc == null)
                 return;
 
-            RemoveGraphics(gc, guidList);
+            var graphics = GraphicsList.Where(g => guidList.Contains(g.UniqueId)).ToList();
+            RemoveGraphics(gc, graphics);
 
             av.Refresh();
         }
@@ -537,10 +544,7 @@ namespace ArcMapAddinVisibility.ViewModels
             var eprop = element as IElementProperties;
             eprop.Name = Guid.NewGuid().ToString();
 
-            if (IsTempGraphic)
-                TempGraphicsList.Add(eprop.Name);
-            else
-                MapGraphicsList.Add(eprop.Name);
+            GraphicsList.Add(new AMGraphic(eprop.Name, geom, IsTempGraphic));
 
             gc.AddElement(element, 0);
 
@@ -623,10 +627,7 @@ namespace ArcMapAddinVisibility.ViewModels
             var eprop = element as IElementProperties;
             eprop.Name = Guid.NewGuid().ToString();
 
-            if (IsTempGraphic)
-                TempGraphicsList.Add(eprop.Name);
-            else
-                MapGraphicsList.Add(eprop.Name);
+            GraphicsList.Add(new AMGraphic(eprop.Name, geom, IsTempGraphic)); 
 
             gc.AddElement(element, 0);
 

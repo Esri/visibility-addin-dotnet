@@ -61,8 +61,6 @@ namespace ArcMapAddinVisibility.ViewModels
             var savedCursor = System.Windows.Forms.Cursor.Current;
             System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
             System.Windows.Forms.Application.DoEvents();
-            // promote temp graphics
-            //MoveTempGraphicsToMapGraphics();
 
             CreateMapElement();
 
@@ -85,7 +83,6 @@ namespace ArcMapAddinVisibility.ViewModels
 
             DeleteTargetPoints(targets);
         }
-
 
         private void DeleteTargetPoints(List<AddInPoint> targets)
         {

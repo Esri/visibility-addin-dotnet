@@ -27,6 +27,12 @@ namespace ProAppVisibilityModule
             return base.OnToolActivateAsync(active);
         }
 
+        /// <summary>
+        /// Method to capture tool mouse down event
+        /// We only want to handle the left mouse down
+        /// Get MapPoint from ClientPoint and notify
+        /// </summary>
+        /// <param name="e">MapViewMouseButtonEventArgs</param>
         protected override void OnToolMouseDown(MapViewMouseButtonEventArgs e)
         {
             if (e.ChangedButton != System.Windows.Input.MouseButton.Left)
@@ -42,10 +48,33 @@ namespace ProAppVisibilityModule
             }
             catch (Exception ex)
             {
-
+                // do nothing
             }
 
             base.OnToolMouseDown(e);
+        }
+
+        /// <summary>
+        /// Method to handle the Tool Mouse Move event
+        /// Get MapPoint from ClientPoint and notify
+        /// </summary>
+        /// <param name="e">MapViewMouseEventArgs</param>
+        protected override void OnToolMouseMove(MapViewMouseEventArgs e)
+        {
+            try
+            {
+                QueuedTask.Run(() =>
+                {
+                    var mp = MapView.Active.ClientToMap(e.ClientPoint);
+                    Mediator.NotifyColleagues(VisibilityLibrary.Constants.MOUSE_MOVE_POINT, mp);
+                });
+            }
+            catch (Exception ex)
+            {
+                // do nothing
+            }
+
+            base.OnToolMouseMove(e);
         }
     }
 }

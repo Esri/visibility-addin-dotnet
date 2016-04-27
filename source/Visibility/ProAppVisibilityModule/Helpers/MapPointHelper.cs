@@ -21,7 +21,11 @@ namespace ProAppVisibilityModule.Helpers
 {
     public static class MapPointHelper
     {
-    
+        /// <summary>
+        /// Helper method to get a string value of a MapPoint based on display configuration
+        /// </summary>
+        /// <param name="mp"></param>
+        /// <returns></returns>
         public static string GetMapPointAsDisplayString(MapPoint mp)
         {
             if (mp == null)

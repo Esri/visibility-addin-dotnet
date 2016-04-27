@@ -17,14 +17,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Collections.ObjectModel;
 using System.Collections;
+using System.Windows;
+using System.Threading.Tasks;
+using ArcGIS.Core.Geometry;
+using ArcGIS.Desktop.Mapping;
+using ArcGIS.Desktop.Framework.Threading.Tasks;
+using ArcGIS.Desktop.Mapping.Events;
 using VisibilityLibrary;
 using VisibilityLibrary.Helpers;
 using VisibilityLibrary.Views;
 using VisibilityLibrary.ViewModels;
-using ArcGIS.Core.Geometry;
 using ArcMapAddinVisibility.Models;
-using ArcGIS.Desktop.Mapping;
-using System.Windows;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -51,6 +54,12 @@ namespace ProAppVisibilityModule.ViewModels
             DeleteAllPointsCommand = new RelayCommand(OnDeleteAllPointsCommand);
             EditPropertiesDialogCommand = new RelayCommand(OnEditPropertiesDialogCommand);
 
+            ActiveMapViewChangedEvent.Subscribe(OnActiveMapViewChanged);
+        }
+
+        ~ProLOSBaseViewModel()
+        {
+            ActiveMapViewChangedEvent.Unsubscribe(OnActiveMapViewChanged);
         }
 
         #region Properties
@@ -110,7 +119,7 @@ namespace ProAppVisibilityModule.ViewModels
         /// <summary>
         /// Command method to delete points
         /// </summary>
-        /// <param name="obj"></param>
+        /// <param name="obj">List of AddInPoint</param>
         internal virtual void OnDeletePointCommand(object obj)
         {
             // remove observer points
@@ -140,6 +149,11 @@ namespace ProAppVisibilityModule.ViewModels
 
             dlg.ShowDialog();
         }
+
+        /// <summary>
+        /// Method used to delete points frome the view's observer listbox
+        /// </summary>
+        /// <param name="observers">List of AddInPoint</param>
         private void DeletePoints(List<AddInPoint> observers)
         {
             if (observers == null || !observers.Any())
@@ -147,9 +161,9 @@ namespace ProAppVisibilityModule.ViewModels
 
             // remove graphics from map
             var guidList = observers.Select(x => x.GUID).ToList();
-            //RemoveGraphics(guidList);
-            //TODO update for Pro
+            RemoveGraphics(guidList);
 
+            // remove items from collection
             foreach (var point in observers)
             {
                 ObserverAddInPoints.Remove(point);
@@ -160,6 +174,32 @@ namespace ProAppVisibilityModule.ViewModels
 
         #region Event handlers
 
+        /// <summary>
+        /// Override OnKeyKeyCommand to handle manual input
+        /// </summary>
+        /// <param name="obj"></param>
+        internal override void OnEnterKeyCommand(object obj)
+        {
+            var keyCommandMode = obj as string;
+
+            if(keyCommandMode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
+            {
+                ToolMode = MapPointToolMode.Observer;
+                OnNewMapPointEvent(Point1);
+            }
+            else if (keyCommandMode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
+            {
+                ToolMode = MapPointToolMode.Target;
+                OnNewMapPointEvent(Point2);
+            }
+            else
+            {
+                ToolMode = MapPointToolMode.Unknown;
+                base.OnEnterKeyCommand(obj);
+            }
+        }
+
+        // TODO remove if found to be unused
         /// <summary>
         /// Method called when the map TOC is updated
         /// Reset surface names
@@ -180,7 +220,7 @@ namespace ProAppVisibilityModule.ViewModels
         /// observer points and target points
         /// </summary>
         /// <param name="obj">ToolMode string from resource file</param>
-        internal override void OnActivateTool(object obj)
+        internal override void OnActivateToolCommand(object obj)
         {
             var mode = obj.ToString();
             ToolMode = MapPointToolMode.Unknown;
@@ -193,21 +233,21 @@ namespace ProAppVisibilityModule.ViewModels
             else if (mode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
                 ToolMode = MapPointToolMode.Target;
 
-            base.OnActivateTool(obj);
+            base.OnActivateToolCommand(obj);
         }
 
         /// <summary>
         /// Override this event to collect observer points based on tool mode
         /// </summary>
         /// <param name="obj">MapPointToolMode</param>
-        internal override void OnNewMapPointEvent(object obj)
+        internal override async void OnNewMapPointEvent(object obj)
         {
             if (!IsActiveTab)
                 return;
 
             var point = obj as MapPoint;
 
-            if (point == null || !IsValidPoint(point, true))
+            if (point == null || !IsValidPoint(point, true).Result)
                 return;
 
             // ok, we have a point
@@ -216,34 +256,65 @@ namespace ProAppVisibilityModule.ViewModels
                 // in tool mode "Observer" we add observer points
                 // otherwise ignore
                 
-                AddGraphicToMap(point, ColorFactory.Blue, true, 5.0);
-                var addInPoint = new AddInPoint() { Point = point };
+                var guid = await AddGraphicToMap(point, ColorFactory.Blue, true, 5.0);
+                var addInPoint = new AddInPoint() { Point = point, GUID = guid };
                 Application.Current.Dispatcher.Invoke(() =>
                     {
                         ObserverAddInPoints.Insert(0, addInPoint);
                     });
             }
         }
+
+        /// <summary>
+        /// Method to update manual input boxes on mouse movement
+        /// </summary>
+        /// <param name="obj"></param>
+        internal override void OnMouseMoveEvent(object obj)
+        {
+            if (!IsActiveTab)
+                return;
+
+            var point = obj as MapPoint;
+
+            if (point == null)
+                return;
+
+            if (ToolMode == MapPointToolMode.Observer)
+            {
+                Point1Formatted = string.Empty;
+                Point1 = point;
+            }
+            else if (ToolMode == MapPointToolMode.Target)
+            {
+                Point2Formatted = string.Empty;
+                Point2 = point;
+            }
+        }
+
         /// <summary>
         /// Method to check to see point is withing the currently selected surface
         /// returns true if there is no surface selected or point is contained by layer AOI
         /// returns false if the point is not contained in the layer AOI
         /// </summary>
-        /// <param name="point">IPoint to validate</param>
+        /// <param name="point">MapPoint to validate</param>
         /// <param name="showPopup">boolean to show popup message or not</param>
         /// <returns></returns>
-        internal bool IsValidPoint(MapPoint point, bool showPopup = false)
+        internal async Task<bool> IsValidPoint(MapPoint point, bool showPopup = false)
         {
             var validPoint = true;
 
-            //TODO update to Pro, if point is within the surface layer?
-            //if (!string.IsNullOrWhiteSpace(SelectedSurfaceName) && ArcMap.Document != null && ArcMap.Document.FocusMap != null)
-            //{
-            //    validPoint = IsPointWithinExtent(point, GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName).AreaOfInterest);
+            if (!string.IsNullOrWhiteSpace(SelectedSurfaceName) && MapView.Active != null && MapView.Active.Map != null)
+            {
+                var layer = GetLayerFromMapByName(SelectedSurfaceName);
+                var env = await QueuedTask.Run(() =>
+                    {
+                        return layer.QueryExtent();
+                    });
+                validPoint = await IsPointWithinExtent(point, env);
 
-            //    if (validPoint == false && showPopup)
-            //        System.Windows.Forms.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgOutOfAOI);
-            //}
+                if (validPoint == false && showPopup)
+                    ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgOutOfAOI);
+            }
 
             return validPoint;
         }
@@ -263,20 +334,20 @@ namespace ProAppVisibilityModule.ViewModels
         /// <summary>
         /// Method used to check to see if a point is contained by an envelope
         /// </summary>
-        /// <param name="point">IPoint</param>
-        /// <param name="env">IEnvelope</param>
-        /// <returns></returns>
-        //TODO update to Pro
-        //internal bool IsPointWithinExtent(MapPoint point, IEnvelope env)
-        //{
-        //    var relationOp = env as IRelationalOperator;
+        /// <param name="point">MapPoint</param>
+        /// <param name="env">Envelope</param>
+        /// <returns>bool</returns>
+        internal async Task<bool> IsPointWithinExtent(MapPoint point, Envelope env)
+        {
+            var result = await QueuedTask.Run(() =>
+                {
+                    return GeometryEngine.Contains(env, point);
+                });
 
-        //    if (relationOp == null)
-        //        return false;
+            return result;
+        }
 
-        //    return relationOp.Contains(point);
-        //}
-
+        // TODO remove if found to be unused
         /// <summary>
         /// Method to get a z offset distance in the correct units for the map
         /// </summary>
@@ -355,29 +426,36 @@ namespace ProAppVisibilityModule.ViewModels
 
         //    return null;
         //}
+
         /// <summary>
-        /// returns ILayer if found in the map layer collection
+        /// returns Layer if found in the map
         /// </summary>
-        /// <param name="map">IMap</param>
         /// <param name="name">string name of layer</param>
-        /// <returns></returns>
+        /// <returns>Layer</returns>
         /// 
-        //TODO update to Pro
-        //public ILayer GetLayerFromMapByName(IMap map, string name)
-        //{
-        //    for (int x = 0; x < map.LayerCount; x++)
-        //    {
-        //        var layer = map.get_Layer(x);
+        internal Layer GetLayerFromMapByName(string name)
+        {
+            var layer = MapView.Active.Map.GetLayersAsFlattenedList().FirstOrDefault(l => l.Name == name);
+            return layer;
+        }
 
-        //        if (layer == null || layer.Name != name)
-        //            continue;
+        /// <summary>
+        /// Method used to get a list of surface layer names from the map
+        /// </summary>
+        /// <returns></returns>
+        internal async Task<List<string>> GetSurfaceNamesFromMap()
+        {
+            var layerList = MapView.Active.Map.GetLayersAsFlattenedList();
 
-        //        return layer;
-        //    }
+            var elevationSurfaceList = await QueuedTask.Run(() =>
+                {
+                    return layerList.Where(l => l.GetDefinition().LayerElevation != null).ToList();
+                });
 
-        //    return null;
-        //}
+            return elevationSurfaceList.Select(l => l.Name).ToList();
+        }
 
+        // TODO remove if found to be unused
         /// <summary>
         /// Method to get all the names of the raster/tin layers that support ISurface
         /// we use this method to populate a combobox for input selection of surface layer
@@ -451,16 +529,15 @@ namespace ProAppVisibilityModule.ViewModels
         /// Override to add aditional items in the class to reset tool
         /// </summary>
         /// <param name="toolReset"></param>
-        internal override void Reset(bool toolReset)
+        internal override async void Reset(bool toolReset)
         {
             base.Reset(toolReset);
 
-            // TODO update to Pro
-            //if (ArcMap.Document == null || ArcMap.Document.FocusMap == null)
-            //    return;
+            if (MapView.Active == null || MapView.Active.Map == null)
+                return;
 
-            //// reset surface names OC
-            //ResetSurfaceNames(ArcMap.Document.FocusMap);
+            // reset surface names OC
+            await ResetSurfaceNames();
 
             // reset observer points
             ObserverAddInPoints.Clear();
@@ -472,28 +549,30 @@ namespace ProAppVisibilityModule.ViewModels
         /// Method used to reset the currently selected surfacename 
         /// Use when toc items or map changes, on tab selection changed, etc
         /// </summary>
-        /// <param name="map">IMap</param>
-        /// 
-        //TODO update to Pro
-        //internal void ResetSurfaceNames(IMap map)
-        //{
-        //    // keep the current selection if it's still valid
-        //    var tempName = SelectedSurfaceName;
+        internal async Task ResetSurfaceNames()
+        {
+            if (MapView.Active == null || MapView.Active.Map == null)
+                return;
 
-        //    SurfaceLayerNames.Clear();
+            // keep the current selection if it's still valid
+            var tempName = SelectedSurfaceName;
 
-        //    foreach (var name in GetSurfaceNamesFromMap(map, (this.GetType() == typeof(LLOSViewModel)) ? true : false))
-        //        SurfaceLayerNames.Add(name);
+            SurfaceLayerNames.Clear();
 
-        //    if (SurfaceLayerNames.Contains(tempName))
-        //        SelectedSurfaceName = tempName;
-        //    else if (SurfaceLayerNames.Any())
-        //        SelectedSurfaceName = SurfaceLayerNames[0];
-        //    else
-        //        SelectedSurfaceName = string.Empty;
+            var names = await GetSurfaceNamesFromMap();
 
-        //    RaisePropertyChanged(() => SelectedSurfaceName);
-        //}
+            foreach (var name in names)
+                SurfaceLayerNames.Add(name);
+
+            if (SurfaceLayerNames.Contains(tempName))
+                SelectedSurfaceName = tempName;
+            else if (SurfaceLayerNames.Any())
+                SelectedSurfaceName = SurfaceLayerNames[0];
+            else
+                SelectedSurfaceName = string.Empty;
+
+            RaisePropertyChanged(() => SelectedSurfaceName);
+        }
 
         /// <summary>
         /// Method to handle the display coordinate type change
@@ -507,6 +586,15 @@ namespace ProAppVisibilityModule.ViewModels
             foreach (var item in list)
                 ObserverAddInPoints.Add(item);
             RaisePropertyChanged(() => HasMapGraphics);
+        }
+
+        /// <summary>
+        /// Handler for active map view changed event
+        /// </summary>
+        /// <param name="obj"></param>
+        private async void OnActiveMapViewChanged(ActiveMapViewChangedEventArgs obj)
+        {
+            await ResetSurfaceNames();
         }
     }
 }

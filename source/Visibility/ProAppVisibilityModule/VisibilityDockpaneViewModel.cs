@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Windows.Controls;
 using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Contracts;
+using VisibilityLibrary.Helpers;
 using VisibilityLibrary.Views;
 using VisibilityLibrary.Models;
 using ProAppVisibilityModule.ViewModels;
-using System.Windows.Controls;
-using VisibilityLibrary.Helpers;
 
 namespace ProAppVisibilityModule
 {
@@ -38,6 +38,9 @@ namespace ProAppVisibilityModule
         }
 
         object selectedTab = null;
+        /// <summary>
+        /// Property to notify when tab selection changes
+        /// </summary>
         public object SelectedTab
         {
             get { return selectedTab; }
@@ -59,6 +62,7 @@ namespace ProAppVisibilityModule
         public VisibilityRLOSView RLOSView { get; set; }
 
         #endregion
+
         /// <summary>
         /// Show the DockPane.
         /// </summary>
