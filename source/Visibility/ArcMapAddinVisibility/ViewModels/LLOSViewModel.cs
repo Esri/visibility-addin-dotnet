@@ -195,7 +195,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
                 if (ArcMap.Document.FocusMap.SpatialReference.FactoryCode != SelectedSurfaceSpatialRef.FactoryCode)
                 {
-                    MessageBox.Show("Spatial Reference of Data Frame and surface must match.  Please change the Spatial Reference of the Data Frame and try again.", "Unmatched Spatial References");
+                    MessageBox.Show(VisibilityLibrary.Properties.Resources.LLOSUserPrompt, VisibilityLibrary.Properties.Resources.LLOSUserPromptCaption);
                     return;
                 }
 
