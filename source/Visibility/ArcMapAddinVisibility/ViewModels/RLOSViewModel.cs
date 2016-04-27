@@ -12,7 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using VisibilityLibrary.Helpers;
+// System
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows;
+
+// Esri
 using ESRI.ArcGIS.ADF;
 using ESRI.ArcGIS.Carto;
 using ESRI.ArcGIS.DataSourcesGDB;
@@ -22,10 +28,9 @@ using ESRI.ArcGIS.GeoAnalyst;
 using ESRI.ArcGIS.Geodatabase;
 using ESRI.ArcGIS.Geometry;
 using ESRI.ArcGIS.Geoprocessing;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows;
+
+// Solution
+using VisibilityLibrary.Helpers;
 using VisibilityLibrary;
 
 namespace ArcMapAddinVisibility.ViewModels
@@ -185,6 +190,19 @@ namespace ArcMapAddinVisibility.ViewModels
             if (surface == null)
                 return;
 
+            // Determine if selected surface is projected or geographic
+            ILayer surfaceLayer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
+            IDataset pDataset = default(IDataset);
+            pDataset = surfaceLayer as IDataset;
+            ISpatialReference pSR = GetSpatialReferenceFromDataset(pDataset);
+            SelectedSurfaceSpatialRef = pSR;
+
+            if (SelectedSurfaceSpatialRef is IGeographicCoordinateSystem)
+            {
+                MessageBox.Show("The selected surface has not been projected.  Please project your data and try again.", "Surface Projection");
+                return;
+            }
+
             using (ComReleaser oComReleaser = new ComReleaser())
             {
 
@@ -194,12 +212,12 @@ namespace ArcMapAddinVisibility.ViewModels
                 StartEditOperation((IWorkspace)workspace);
 
                 // Create feature class
-                IFeatureClass pointFc = CreateObserversFeatureClass(workspace, "Output" + RunCount.ToString());
+                IFeatureClass pointFc = CreateObserversFeatureClass(workspace, SelectedSurfaceSpatialRef, "Output" + RunCount.ToString());
 
                 double finalObserverOffset = GetOffsetInZUnits(ArcMap.Document.FocusMap, ObserverOffset.Value, surface.ZFactor, OffsetUnitType);
                 double finalSurfaceOffset = GetOffsetInZUnits(ArcMap.Document.FocusMap, SurfaceOffset, surface.ZFactor, OffsetUnitType);
 
-                double conversionFactor = GetConversionFactor(ArcMap.Document.FocusMap.SpatialReference);
+                double conversionFactor = GetConversionFactor(SelectedSurfaceSpatialRef);
                 double convertedMinDistance = MinDistance * conversionFactor;
                 double convertedMaxDistance = MaxDistance * conversionFactor;
                 double finalMinDistance = GetLinearDistance(ArcMap.Document.FocusMap, convertedMinDistance, OffsetUnitType);
@@ -260,18 +278,18 @@ namespace ArcMapAddinVisibility.ViewModels
                     ILayer layer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
                     string layerPath = GetLayerPath(layer);
 
-                IFeatureLayer ipFeatureLayer = new FeatureLayerClass();
-                ipFeatureLayer.FeatureClass = pointFc;
+                    IFeatureLayer ipFeatureLayer = new FeatureLayerClass();
+                    ipFeatureLayer.FeatureClass = pointFc;
 
-                IDataset ipDataset = (IDataset)pointFc;
-                string outputFcName = ipDataset.BrowseName + "_output";
-                string strPath = ipDataset.Workspace.PathName + "\\" + ipDataset.BrowseName;
-                string outPath = ipDataset.Workspace.PathName + "\\" + outputFcName;
+                    IDataset ipDataset = (IDataset)pointFc;
+                    string outputFcName = ipDataset.BrowseName + "_output";
+                    string strPath = ipDataset.Workspace.PathName + "\\" + ipDataset.BrowseName;
+                    string outPath = ipDataset.Workspace.PathName + "\\" + outputFcName;
 
-                IVariantArray parameters = new VarArrayClass();
+                    IVariantArray parameters = new VarArrayClass();
                     parameters.Add(layerPath);
-                parameters.Add(strPath);
-                parameters.Add(outPath);
+                    parameters.Add(strPath);
+                    parameters.Add(outPath);
 
                     esriLicenseStatus status = GetSpatialAnalystLicense();
 
@@ -563,9 +581,10 @@ namespace ArcMapAddinVisibility.ViewModels
         /// Create the point feature class for observer locations
         /// </summary> 
         /// <param name="featWorkspace"></param> 
+        /// <param name="spatialRef">Spatial Reference of the surface</param>
         /// <param name="name"></param> 
         /// <returns></returns> 
-        public static IFeatureClass CreateObserversFeatureClass(IFeatureWorkspace featWorkspace, string name)
+        public static IFeatureClass CreateObserversFeatureClass(IFeatureWorkspace featWorkspace, ISpatialReference spatialRef, string name)
         {
 
             IFieldsEdit pFldsEdt = new FieldsClass();
@@ -580,7 +599,7 @@ namespace ArcMapAddinVisibility.ViewModels
             IGeometryDefEdit pGeoDef;
             pGeoDef = new GeometryDefClass();
             pGeoDef.GeometryType_2 = esriGeometryType.esriGeometryPoint;
-            pGeoDef.SpatialReference_2 = ArcMap.Document.FocusMap.SpatialReference;
+            pGeoDef.SpatialReference_2 = spatialRef;
             pGeoDef.HasZ_2 = true;
 
             pFldEdt = new FieldClass();
@@ -726,9 +745,10 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <param name="workspace">IFeatureWorkspace</param>
         /// <param name="geomList">List of geometries to create the mask</param>
         /// <param name="gp">IGeoProcessor2</param>
+        /// <param name="fcName">Name of feature class</param>
         private string SetGPMask(IFeatureWorkspace workspace, List<IGeometry> geomList, IGeoProcessor2 gp, string fcName)
         {
-            IFeatureClass maskFc = CreateMaskFeatureClass(workspace, fcName + "_" + RunCount.ToString());
+            IFeatureClass maskFc = CreateMaskFeatureClass(workspace, SelectedSurfaceSpatialRef, fcName + "_" + RunCount.ToString());
 
             foreach (IGeometry geom in geomList)
             {
@@ -825,12 +845,12 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <returns></returns>
         private double GetLinearDistance(IMap map, double inputDistance, DistanceTypes distanceType)
         {
-            if (map.SpatialReference == null)
+            if (SelectedSurfaceSpatialRef == null)
                 return inputDistance;
 
             DistanceTypes distanceTo = DistanceTypes.Meters; // default to meters
 
-            var pcs = map.SpatialReference as IProjectedCoordinateSystem;
+            var pcs = SelectedSurfaceSpatialRef as IProjectedCoordinateSystem;
 
             if (pcs != null)
             {
@@ -839,7 +859,7 @@ namespace ArcMapAddinVisibility.ViewModels
             }
             else
             {
-                var gcs = map.SpatialReference as IGeographicCoordinateSystem;
+                var gcs = SelectedSurfaceSpatialRef as IGeographicCoordinateSystem;
                 if (gcs != null)
                 {
                     distanceTo = GetDistanceType(gcs.CoordinateUnit.FactoryCode);
@@ -856,9 +876,10 @@ namespace ArcMapAddinVisibility.ViewModels
         /// Create a polygon feature class used to store buffer geometries for observer points
         /// </summary>
         /// <param name="featWorkspace">IFeatureWorkspace</param>
+        /// <param name="spatialRef">ISpatialReference of selected surface</param>
         /// <param name="name">Name of the feature class</param>
         /// <returns>IFeatureClass</returns>
-        private static IFeatureClass CreateMaskFeatureClass(IFeatureWorkspace featWorkspace, string name)
+        private static IFeatureClass CreateMaskFeatureClass(IFeatureWorkspace featWorkspace, ISpatialReference spatialRef, string name)
         {
 
             IFieldsEdit pFldsEdt = new FieldsClass();
@@ -873,7 +894,7 @@ namespace ArcMapAddinVisibility.ViewModels
             IGeometryDefEdit pGeoDef;
             pGeoDef = new GeometryDefClass();
             pGeoDef.GeometryType_2 = esriGeometryType.esriGeometryPolygon;
-            pGeoDef.SpatialReference_2 = ArcMap.Document.FocusMap.SpatialReference;
+            pGeoDef.SpatialReference_2 = spatialRef;
 
             pFldEdt = new FieldClass();
             pFldEdt.Name_2 = "SHAPE";
@@ -946,12 +967,12 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <returns></returns>
         private double GetAngularDistance(IMap map, double inputDistance, AngularTypes angularType)
         {
-            if (map.SpatialReference == null)
+            if (SelectedSurfaceSpatialRef == null)
                 return inputDistance;
 
             AngularTypes angularDistanceTo = AngularTypes.DEGREES; // default to degrees
 
-            var gcs = map.SpatialReference as IGeographicCoordinateSystem;
+            var gcs = SelectedSurfaceSpatialRef as IGeographicCoordinateSystem;
 
             if (gcs != null)
             {

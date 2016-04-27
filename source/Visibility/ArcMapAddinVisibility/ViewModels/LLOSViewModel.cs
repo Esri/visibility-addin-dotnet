@@ -12,15 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// System
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections.ObjectModel;
+using System.Collections;
+using System.Windows;
+
+// Esri
 using ESRI.ArcGIS.Geodatabase;
 using ESRI.ArcGIS.Geometry;
 using ESRI.ArcGIS.Display;
+using ESRI.ArcGIS.Carto;
+
+// Solution
 using VisibilityLibrary.Helpers;
-using System.Collections;
 using ArcMapAddinVisibility.Models;
 
 namespace ArcMapAddinVisibility.ViewModels
@@ -179,6 +186,18 @@ namespace ArcMapAddinVisibility.ViewModels
 
                 if (surface == null)
                     return;
+
+                // Set Spatial Reference of selected surface
+                ILayer surfaceLayer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
+                IDataset pDataset = surfaceLayer as IDataset;
+                ISpatialReference pSR = GetSpatialReferenceFromDataset(pDataset);
+                SelectedSurfaceSpatialRef = pSR;
+
+                if (ArcMap.Document.FocusMap.SpatialReference.FactoryCode != SelectedSurfaceSpatialRef.FactoryCode)
+                {
+                    MessageBox.Show("Spatial Reference of Data Frame and surface must match.  Please change the Spatial Reference of the Data Frame and try again.", "Unmatched Spatial References");
+                    return;
+                }
 
                 var geoBridge = new GeoDatabaseHelperClass() as IGeoDatabaseBridge2;
 

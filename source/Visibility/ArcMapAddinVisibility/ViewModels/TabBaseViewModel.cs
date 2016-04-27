@@ -230,6 +230,11 @@ namespace ArcMapAddinVisibility.ViewModels
             }
         }
 
+        /// <summary>
+        /// Property used to set / get the spatial reference of the selected surface
+        /// </summary>
+        public ISpatialReference SelectedSurfaceSpatialRef { get; set; }
+
         #endregion
 
         #region Commands
