@@ -85,7 +85,7 @@ namespace ArcMapAddinVisibility.ViewModels
         public string SelectedSurfaceName { get; set; }
         public DistanceTypes OffsetUnitType { get; set; }
         public AngularTypes AngularUnitType { get; set; }
-
+        
         #endregion
 
         #region Commands
@@ -317,13 +317,13 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <returns></returns>
         internal double GetOffsetInZUnits(IMap map, double offset, double zFactor, DistanceTypes distanceType)
         {
-            if (map.SpatialReference == null)
+            if (SelectedSurfaceSpatialRef == null)
                 return offset;
 
             double offsetInMapUnits = 0.0;
             DistanceTypes distanceTo = DistanceTypes.Meters; // default to meters
 
-            var pcs = map.SpatialReference as IProjectedCoordinateSystem;
+            var pcs = SelectedSurfaceSpatialRef as IProjectedCoordinateSystem;
 
             if (pcs != null)
             {
@@ -469,6 +469,24 @@ namespace ArcMapAddinVisibility.ViewModels
             }
 
             return list;
+        }
+
+        ///<summary>Get the spatial reference information of a dataset that is supplied.</summary>
+        ///<param name="dataset">An IDataset, this could be a table, feature class, feature dataset, workspace etc.</param> 
+        ///<returns>An ISpatialReference interface if successful, nothing otherwise.</returns>
+        public ESRI.ArcGIS.Geometry.ISpatialReference GetSpatialReferenceFromDataset(ESRI.ArcGIS.Geodatabase.IDataset dataset)
+        {
+            //If the dataset supports IGeoDataset
+            if (dataset is ESRI.ArcGIS.Geodatabase.IGeoDataset)
+            {
+                //then grab the spatial reference information and return it.
+                ESRI.ArcGIS.Geodatabase.IGeoDataset geoDataset = (ESRI.ArcGIS.Geodatabase.IGeoDataset)dataset;
+                return geoDataset.SpatialReference;
+            }
+            else
+            {
+                return null; //otherwise return null
+            }
         }
 
         /// <summary>
