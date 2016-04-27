@@ -12,20 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using ArcGIS.Core.Geometry;
-using ArcGIS.Desktop.Mapping;
 using System;
 using System.Linq;
 using System.Windows;
+using ArcGIS.Core.Geometry;
+using ArcGIS.Desktop.Mapping;
 using VisibilityLibrary;
 using VisibilityLibrary.Helpers;
 
 namespace ProAppVisibilityModule.ViewModels
 {
-
     public class ProRLOSViewModel : ProLOSBaseViewModel
     {
-
         #region Properties
 
         public double SurfaceOffset { get; set; }

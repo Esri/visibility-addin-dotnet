@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using ArcGIS.Core.Geometry;
 using System;
+using ArcGIS.Core.Geometry;
 
 namespace ProAppVisibilityModule.Models
 {

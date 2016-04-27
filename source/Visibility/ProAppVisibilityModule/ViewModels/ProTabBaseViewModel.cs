@@ -35,13 +35,9 @@ namespace ProAppVisibilityModule.ViewModels
     {
         public ProTabBaseViewModel()
         {
-            //properties
-            //LineType = LineTypes.Geodesic;
-            //LineDistanceType = DistanceTypes.Meters;
-
             //commands
             ClearGraphicsCommand = new VisibilityLibrary.Helpers.RelayCommand(OnClearGraphics);
-            //ActivateToolCommand = new RelayCommand(OnActivateTool);
+            ActivateToolCommand = new VisibilityLibrary.Helpers.RelayCommand(OnActivateToolCommand);
             EnterKeyCommand = new VisibilityLibrary.Helpers.RelayCommand(OnEnterKeyCommand);
             CancelCommand = new VisibilityLibrary.Helpers.RelayCommand(OnCancelCommand);
 
@@ -49,28 +45,18 @@ namespace ProAppVisibilityModule.ViewModels
             Mediator.Register(VisibilityLibrary.Constants.NEW_MAP_POINT, OnNewMapPointEvent);
             Mediator.Register(VisibilityLibrary.Constants.MOUSE_MOVE_POINT, OnMouseMoveEvent);
             Mediator.Register(VisibilityLibrary.Constants.TAB_ITEM_SELECTED, OnTabItemSelected);
-
-            ActivateToolCommand = new VisibilityLibrary.Helpers.RelayCommand(OnActivateTool);
-
-        }
-
-        //private System.Threading.Tasks.Task OnActivateTool()
-        //{
-        //    await FrameworkApplication.SetCurrentToolAsync("ProAppVisibilityModule_MapTool");
-        //}
-
-        internal virtual void OnActivateTool(object obj)
-        { 
-            FrameworkApplication.SetCurrentToolAsync("ProAppVisibilityModule_MapTool");
         }
 
         #region Properties
 
-        // lists to store GUIDs of graphics, temp feedback and map graphics
+        /// <summary>
+        /// lists to store GUIDs of graphics, temp feedback and map graphics
+        /// </summary>
         private static List<ProGraphic> ProGraphicsList = new List<ProGraphic>();
 
-        private List<IDisposable> overlayObjects = new List<IDisposable>();
-
+        /// <summary>
+        /// Property used to determine if there are non temp graphics
+        /// </summary>
         public bool HasMapGraphics
         {
             get
@@ -233,14 +219,13 @@ namespace ProAppVisibilityModule.ViewModels
         }
 
         /// <summary>
-        /// Property used to test if there is enough info to create a line map element
+        /// Property used to test if there is enough info to create a map element(s)
         /// </summary>
         public virtual bool CanCreateElement
         {
             get
             {
-                //TODO update for Pro
-                return true; //(Point1 != null && Point2 != null);
+                return false;
             }
         }
 
@@ -249,28 +234,9 @@ namespace ProAppVisibilityModule.ViewModels
         #region Commands
 
         public VisibilityLibrary.Helpers.RelayCommand ClearGraphicsCommand { get; set; }
-        //public RelayCommand ActivateToolCommand { get; set; }
         public VisibilityLibrary.Helpers.RelayCommand EnterKeyCommand { get; set; }
         public VisibilityLibrary.Helpers.RelayCommand CancelCommand { get; set; }
         public VisibilityLibrary.Helpers.RelayCommand ActivateToolCommand { get; set; }
-
-        private void OnCancelCommand(object obj)
-        {
-            Reset(true);
-        }
-
-        #endregion
-
-        /// <summary>
-        /// Method is called when a user pressed the "Enter" key or when a second point is created for a line from mouse clicks
-        /// Derived class must override this method in order to create map elements
-        /// Clears temp graphics by default
-        /// </summary>
-        internal virtual void CreateMapElement()
-        {
-            ClearTempGraphics();
-        }
-        #region Private Event Functions
 
         /// <summary>
         /// Clears all the graphics from the maps graphic container
@@ -283,7 +249,7 @@ namespace ProAppVisibilityModule.ViewModels
             if (MapView.Active == null)
                 return;
 
-            foreach(var item in ProGraphicsList)
+            foreach (var item in ProGraphicsList)
             {
                 item.Disposable.Dispose();
             }
@@ -291,6 +257,88 @@ namespace ProAppVisibilityModule.ViewModels
             ProGraphicsList.Clear();
 
             RaisePropertyChanged(() => HasMapGraphics);
+        }
+
+        /// <summary>
+        /// Handler for the "Enter"key command
+        /// Calls CreateMapElement
+        /// </summary>
+        /// <param name="obj"></param>
+        internal virtual void OnEnterKeyCommand(object obj)
+        {
+            if (!CanCreateElement)
+                return;
+
+            CreateMapElement();
+        }
+
+        /// <summary>
+        /// Handler for the cancel command
+        /// </summary>
+        /// <param name="obj"></param>
+        private void OnCancelCommand(object obj)
+        {
+            Reset(true);
+        }
+
+        /// <summary>
+        /// Handler for the activate tool command
+        /// Sets the current tool
+        /// </summary>
+        /// <param name="obj"></param>
+        internal virtual void OnActivateToolCommand(object obj)
+        {
+            FrameworkApplication.SetCurrentToolAsync("ProAppVisibilityModule_MapTool");
+        }
+
+        #endregion
+
+        #region Event Methods
+
+        /// <summary>
+        /// Handler for the new map point click event
+        /// </summary>
+        /// <param name="obj">MapPoint</param>
+        internal virtual void OnNewMapPointEvent(object obj)
+        {
+            if (!IsActiveTab)
+                return;
+
+            var point = obj as MapPoint;
+
+            if (point == null)
+                return;
+
+            // do nothing
+        }
+
+        #endregion
+
+        #region Internal Methods
+
+        /// <summary>
+        /// Removes graphics from the map
+        /// </summary>
+        /// <param name="guidList">list of GUIDs</param>
+        internal void RemoveGraphics(List<string> guidList)
+        {
+            var list = ProGraphicsList.Where(g => guidList.Contains(g.GUID)).ToList();
+            foreach (var graphic in list)
+            {
+                graphic.Disposable.Dispose();
+                ProGraphicsList.Remove(graphic);
+            }
+
+            RaisePropertyChanged(() => HasMapGraphics);
+        }
+
+        /// <summary>
+        /// Derived class must override this method in order to create map elements
+        /// Clears temp graphics by default
+        /// </summary>
+        internal virtual void CreateMapElement()
+        {
+            ClearTempGraphics();
         }
 
         /// <summary>
@@ -310,64 +358,6 @@ namespace ProAppVisibilityModule.ViewModels
         }
         
         /// <summary>
-        /// Removes graphics from the map
-        /// </summary>
-        /// <param name="guidList">list of GUIDs</param>
-        internal void RemoveGraphics(List<string> guidList)
-        {
-            var list = ProGraphicsList.Where(g => guidList.Contains(g.GUID)).ToList();
-            foreach(var graphic in list)
-            {
-                graphic.Disposable.Dispose();
-                ProGraphicsList.Remove(graphic);
-            }
-        }
-
-        /// <summary>
-        /// Handler for the "Enter"key command
-        /// Calls CreateMapElement
-        /// </summary>
-        /// <param name="obj"></param>
-        internal virtual void OnEnterKeyCommand(object obj)
-        {
-            if (!CanCreateElement)
-                return;
-
-            CreateMapElement();
-        }
-        /// <summary>
-        /// Handler for the new map point click event
-        /// </summary>
-        /// <param name="obj">MapPoint</param>
-        internal virtual void OnNewMapPointEvent(object obj)
-        {
-            if (!IsActiveTab)
-                return;
-
-            var point = obj as MapPoint;
-
-            if (point == null)
-                return;
-
-            // do nothing
-        }
-
-        #endregion
-        #region Public Functions
-        /// <summary>
-        /// Method used to deactivate tool
-        /// </summary>
-        public void DeactivateTool(string toolname)
-        {
-            if (FrameworkApplication.CurrentTool != null &&
-                FrameworkApplication.CurrentTool.Equals(toolname))
-            {
-                FrameworkApplication.SetCurrentToolAsync(String.Empty);
-            }
-        }
-        #endregion
-        #region Private Functions
-        /// <summary>
         /// Method used to totally reset the tool
         /// reset points, feedback
         /// clear out textboxes
@@ -376,26 +366,13 @@ namespace ProAppVisibilityModule.ViewModels
         {
             if (toolReset)
             {
-                DeactivateTool("Esri_ArcMapAddinVisibility_MapPointTool");
+                DeactivateTool("ProAppVisibilityModule_MapTool");
             }
 
             Point1 = null;
             Point2 = null;
             Point1Formatted = string.Empty;
             Point2Formatted = string.Empty;
-        }
-
-        /// <summary>
-        /// Handler for the tab item selected event
-        /// Helps keep track of which tab item/viewmodel is active
-        /// </summary>
-        /// <param name="obj">bool if selected or not</param>
-        private void OnTabItemSelected(object obj)
-        {
-            if (obj == null)
-                return;
-
-            IsActiveTab = (obj == this);
         }
 
         /// <summary>
@@ -455,7 +432,113 @@ namespace ProAppVisibilityModule.ViewModels
             return point;
         }
 
+        internal async Task<string> AddGraphicToMap(Geometry geom, bool IsTempGraphic = false, double size = 1.0)
+        {
+            // default color Red
+            return await AddGraphicToMap(geom, ColorFactory.Red, IsTempGraphic, size);
+        }
+
+        internal async Task<string> AddGraphicToMap(Geometry geom, CIMColor color, bool IsTempGraphic = false, double size = 1.0, string text = "", SimpleMarkerStyle markerStyle = SimpleMarkerStyle.Circle)
+        {
+            if (geom == null || MapView.Active == null)
+                return string.Empty;
+
+            CIMSymbolReference symbol = null;
+
+            if (!string.IsNullOrWhiteSpace(text) && geom.GeometryType == GeometryType.Point)
+            {
+                await QueuedTask.Run(() =>
+                {
+                    // TODO add text graphic
+                    //var tg = new CIMTextGraphic() { Placement = Anchor.CenterPoint, Text = text};
+                });
+            }
+            else if (geom.GeometryType == GeometryType.Point)
+            {
+                await QueuedTask.Run(() =>
+                {
+                    var s = SymbolFactory.ConstructPointSymbol(color, size, markerStyle);
+                    symbol = new CIMSymbolReference() { Symbol = s };
+                });
+            }
+            else if (geom.GeometryType == GeometryType.Polyline)
+            {
+                await QueuedTask.Run(() =>
+                {
+                    var s = SymbolFactory.ConstructLineSymbol(color, size);
+                    symbol = new CIMSymbolReference() { Symbol = s };
+                });
+            }
+            else if (geom.GeometryType == GeometryType.Polygon)
+            {
+                await QueuedTask.Run(() =>
+                {
+                    var outline = SymbolFactory.ConstructStroke(ColorFactory.Black, 1.0, SimpleLineStyle.Solid);
+                    var s = SymbolFactory.ConstructPolygonSymbol(color, SimpleFillStyle.Solid, outline);
+                    symbol = new CIMSymbolReference() { Symbol = s };
+                });
+            }
+
+            var result = await QueuedTask.Run(() =>
+            {
+                var disposable = MapView.Active.AddOverlay(geom, symbol);
+                var guid = Guid.NewGuid().ToString();
+                ProGraphicsList.Add(new ProGraphic(disposable, guid, geom, IsTempGraphic));
+                return guid;
+            });
+
+            return result;
+        }
+
+        /// <summary>
+        /// Handler for the mouse move event
+        /// When the mouse moves accross the map, MapPoints are returned to aid in updating feedback to user
+        /// </summary>
+        /// <param name="obj">MapPoint</param>
+        internal virtual void OnMouseMoveEvent(object obj)
+        {
+            if (!IsActiveTab)
+                return;
+
+            var point = obj as MapPoint;
+
+            if (point == null)
+                return;
+
+            // do nothing
+        }
+
+        #endregion Internal Methods
+
+        #region Private Methods
+
+        /// <summary>
+        /// Handler for the tab item selected event
+        /// Helps keep track of which tab item/viewmodel is active
+        /// </summary>
+        /// <param name="obj">bool if selected or not</param>
+        private void OnTabItemSelected(object obj)
+        {
+            if (obj == null)
+                return;
+
+            IsActiveTab = (obj == this);
+        }
+
+        /// <summary>
+        /// Method used to deactivate tool
+        /// </summary>
+        private void DeactivateTool(string toolname)
+        {
+            if (FrameworkApplication.CurrentTool != null &&
+                FrameworkApplication.CurrentTool.Equals(toolname))
+            {
+                FrameworkApplication.SetCurrentToolAsync(String.Empty);
+            }
+        }
+
         //TODO update for Pro ??? 
+        // TODO remove if found to be not needed
         //internal string AddTextToMap(string text, IGeometry geom, IColor color, bool IsTempGraphic = false, int size = 12)
         //{
         //    if (geom == null || ArcMap.Document == null || ArcMap.Document.FocusMap == null)
@@ -508,65 +591,8 @@ namespace ProAppVisibilityModule.ViewModels
         //}
 
 
-        internal async Task<string> AddGraphicToMap(Geometry geom, bool IsTempGraphic = false, double size = 1.0)
-        {
-            // default color Red
-            return await AddGraphicToMap(geom, ColorFactory.Red, IsTempGraphic, size);
-        }
 
-        internal async Task<string> AddGraphicToMap(Geometry geom, CIMColor color, bool IsTempGraphic = false, double size = 1.0, string text = "", SimpleMarkerStyle markerStyle = SimpleMarkerStyle.Circle)
-        {
-            if (geom == null || MapView.Active == null)
-                return string.Empty;
-
-            CIMSymbolReference symbol = null;
-
-            if(!string.IsNullOrWhiteSpace(text) && geom.GeometryType == GeometryType.Point)
-            {
-                await QueuedTask.Run(() =>
-                    {
-                        //var tg = new CIMTextGraphic() { Placement = Anchor.CenterPoint, Text = text};
-                    });
-            }
-            else if (geom.GeometryType == GeometryType.Point)
-            {
-                await QueuedTask.Run(() =>
-                {
-                    var s = SymbolFactory.ConstructPointSymbol(color, size, markerStyle);
-                    symbol = new CIMSymbolReference() { Symbol = s };
-                });
-            }
-            else if (geom.GeometryType == GeometryType.Polyline)
-            {
-                await QueuedTask.Run(() =>
-                {
-                    var s = SymbolFactory.ConstructLineSymbol(color, size);
-                    symbol = new CIMSymbolReference() { Symbol = s };
-                });
-            }
-            else if (geom.GeometryType == GeometryType.Polygon)
-            {
-                await QueuedTask.Run(() =>
-                {
-                    var outline = SymbolFactory.ConstructStroke(ColorFactory.Black, 1.0, SimpleLineStyle.Solid);
-                    var s = SymbolFactory.ConstructPolygonSymbol(color, SimpleFillStyle.Solid, outline);
-                    symbol = new CIMSymbolReference() { Symbol = s };
-                });
-            }
-
-            var result = await QueuedTask.Run(() =>
-            {
-                var disposable = MapView.Active.AddOverlay(geom, symbol);
-                overlayObjects.Add(disposable);
-                var guid = Guid.NewGuid().ToString();
-                ProGraphicsList.Add(new ProGraphic(disposable, guid, geom, IsTempGraphic));
-                return guid;
-            });
-
-            return result;
-        }
-
-
+        // TODO remove if found to be not needed
         //internal DistanceTypes GetDistanceType(int linearUnitFactoryCode)
         //{ 
         //    DistanceTypes distanceType = DistanceTypes.Meters;
@@ -595,11 +621,13 @@ namespace ProAppVisibilityModule.ViewModels
         //    return distanceType;
         //}
 
+        // TODO remove if found to be not needed
         //internal ISpatialReferenceFactory3 srf3 = null;
         //internal ILinearUnit GetLinearUnit()
         //{
         //    return GetLinearUnit(LineDistanceType);
         //}
+        // TODO remove if found to be not needed
         /// <summary>
         /// Gets the linear unit from the esri constants for linear units
         /// </summary>
@@ -638,11 +666,7 @@ namespace ProAppVisibilityModule.ViewModels
         //    return srf3.CreateUnit(unitType) as ILinearUnit;
         //}
 
-        //private void UpdateDistanceFromTo(DistanceTypes fromType, DistanceTypes toType)
-        //{
-        //    Distance = GetDistanceFromTo(fromType, toType, Distance);
-        //}
-
+        // TODO remove if found to be not needed
         /// <summary>
         /// Ugly method to convert to/from different types of distance units
         /// </summary>
@@ -702,25 +726,7 @@ namespace ProAppVisibilityModule.ViewModels
 
         //    return length;
         //}
-
-        /// <summary>
-        /// Handler for the mouse move event
-        /// When the mouse moves accross the map, MapPoints are returned to aid in updating feedback to user
-        /// </summary>
-        /// <param name="obj">MapPoint</param>
-        internal virtual void OnMouseMoveEvent(object obj)
-        {
-            if (!IsActiveTab)
-                return;
-
-            var point = obj as MapPoint;
-
-            if (point == null)
-                return;
-
-            // do nothing
-        }
  
-        #endregion Private Functions
+        #endregion Private Methods
     }
 }

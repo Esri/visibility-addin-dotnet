@@ -17,17 +17,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Collections.ObjectModel;
 using System.Collections;
+using System.Windows;
+using System.Threading.Tasks;
+using ArcGIS.Core.Geometry;
+using ArcGIS.Desktop.Mapping;
+using ArcGIS.Desktop.Framework.Threading.Tasks;
+using ArcGIS.Desktop.Mapping.Events;
 using VisibilityLibrary;
 using VisibilityLibrary.Helpers;
 using VisibilityLibrary.Views;
 using VisibilityLibrary.ViewModels;
-using ArcGIS.Core.Geometry;
 using ArcMapAddinVisibility.Models;
-using ArcGIS.Desktop.Mapping;
-using System.Windows;
-using ArcGIS.Desktop.Framework.Threading.Tasks;
-using System.Threading.Tasks;
-using ArcGIS.Desktop.Mapping.Events;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -119,7 +119,7 @@ namespace ProAppVisibilityModule.ViewModels
         /// <summary>
         /// Command method to delete points
         /// </summary>
-        /// <param name="obj"></param>
+        /// <param name="obj">List of AddInPoint</param>
         internal virtual void OnDeletePointCommand(object obj)
         {
             // remove observer points
@@ -149,6 +149,11 @@ namespace ProAppVisibilityModule.ViewModels
 
             dlg.ShowDialog();
         }
+
+        /// <summary>
+        /// Method used to delete points frome the view's observer listbox
+        /// </summary>
+        /// <param name="observers">List of AddInPoint</param>
         private void DeletePoints(List<AddInPoint> observers)
         {
             if (observers == null || !observers.Any())
@@ -158,6 +163,7 @@ namespace ProAppVisibilityModule.ViewModels
             var guidList = observers.Select(x => x.GUID).ToList();
             RemoveGraphics(guidList);
 
+            // remove items from collection
             foreach (var point in observers)
             {
                 ObserverAddInPoints.Remove(point);
@@ -169,7 +175,7 @@ namespace ProAppVisibilityModule.ViewModels
         #region Event handlers
 
         /// <summary>
-        /// Overrite OnKeyKeyCommand to handle manual input
+        /// Override OnKeyKeyCommand to handle manual input
         /// </summary>
         /// <param name="obj"></param>
         internal override void OnEnterKeyCommand(object obj)
@@ -193,6 +199,7 @@ namespace ProAppVisibilityModule.ViewModels
             }
         }
 
+        // TODO remove if found to be unused
         /// <summary>
         /// Method called when the map TOC is updated
         /// Reset surface names
@@ -213,7 +220,7 @@ namespace ProAppVisibilityModule.ViewModels
         /// observer points and target points
         /// </summary>
         /// <param name="obj">ToolMode string from resource file</param>
-        internal override void OnActivateTool(object obj)
+        internal override void OnActivateToolCommand(object obj)
         {
             var mode = obj.ToString();
             ToolMode = MapPointToolMode.Unknown;
@@ -226,7 +233,7 @@ namespace ProAppVisibilityModule.ViewModels
             else if (mode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
                 ToolMode = MapPointToolMode.Target;
 
-            base.OnActivateTool(obj);
+            base.OnActivateToolCommand(obj);
         }
 
         /// <summary>
@@ -258,6 +265,10 @@ namespace ProAppVisibilityModule.ViewModels
             }
         }
 
+        /// <summary>
+        /// Method to update manual input boxes on mouse movement
+        /// </summary>
+        /// <param name="obj"></param>
         internal override void OnMouseMoveEvent(object obj)
         {
             if (!IsActiveTab)
@@ -325,8 +336,7 @@ namespace ProAppVisibilityModule.ViewModels
         /// </summary>
         /// <param name="point">MapPoint</param>
         /// <param name="env">Envelope</param>
-        /// <returns></returns>
-        //TODO update to Pro
+        /// <returns>bool</returns>
         internal async Task<bool> IsPointWithinExtent(MapPoint point, Envelope env)
         {
             var result = await QueuedTask.Run(() =>
@@ -337,6 +347,7 @@ namespace ProAppVisibilityModule.ViewModels
             return result;
         }
 
+        // TODO remove if found to be unused
         /// <summary>
         /// Method to get a z offset distance in the correct units for the map
         /// </summary>
@@ -428,6 +439,10 @@ namespace ProAppVisibilityModule.ViewModels
             return layer;
         }
 
+        /// <summary>
+        /// Method used to get a list of surface layer names from the map
+        /// </summary>
+        /// <returns></returns>
         internal async Task<List<string>> GetSurfaceNamesFromMap()
         {
             var layerList = MapView.Active.Map.GetLayersAsFlattenedList();
@@ -440,6 +455,7 @@ namespace ProAppVisibilityModule.ViewModels
             return elevationSurfaceList.Select(l => l.Name).ToList();
         }
 
+        // TODO remove if found to be unused
         /// <summary>
         /// Method to get all the names of the raster/tin layers that support ISurface
         /// we use this method to populate a combobox for input selection of surface layer
@@ -533,7 +549,6 @@ namespace ProAppVisibilityModule.ViewModels
         /// Method used to reset the currently selected surfacename 
         /// Use when toc items or map changes, on tab selection changed, etc
         /// </summary>
-        /// 
         internal async Task ResetSurfaceNames()
         {
             if (MapView.Active == null || MapView.Active.Map == null)
@@ -573,6 +588,10 @@ namespace ProAppVisibilityModule.ViewModels
             RaisePropertyChanged(() => HasMapGraphics);
         }
 
+        /// <summary>
+        /// Handler for active map view changed event
+        /// </summary>
+        /// <param name="obj"></param>
         private async void OnActiveMapViewChanged(ActiveMapViewChangedEventArgs obj)
         {
             await ResetSurfaceNames();
