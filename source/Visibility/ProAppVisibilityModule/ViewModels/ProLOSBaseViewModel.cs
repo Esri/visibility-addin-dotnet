@@ -313,8 +313,10 @@ namespace ProAppVisibilityModule.ViewModels
                     });
                 validPoint = await IsPointWithinExtent(point, env);
 
+                //TODO add a caption
                 if (validPoint == false && showPopup)
-                    ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgOutOfAOI);
+                    ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgOutOfAOI,
+                                                                        VisibilityLibrary.Properties.Resources.MsgOutOfAOI);
             }
 
             return validPoint;
@@ -566,6 +568,8 @@ namespace ProAppVisibilityModule.ViewModels
                 if (MapView.Active == null || MapView.Active.Map == null)
                     return;
 
+                var names = await GetSurfaceNamesFromMap();
+
                 // keep the current selection if it's still valid
                 var tempName = SelectedSurfaceName;
 
@@ -574,7 +578,6 @@ namespace ProAppVisibilityModule.ViewModels
                         SurfaceLayerNames.Clear();
                     });
 
-                var names = await GetSurfaceNamesFromMap();
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     foreach (var name in names)
@@ -617,5 +620,48 @@ namespace ProAppVisibilityModule.ViewModels
         {
             await ResetSurfaceNames();
         }
+
+        internal double ConvertFromTo(DistanceTypes fromType, DistanceTypes toType, double input)
+        {
+            double result = 0.0;
+
+            var linearUnitFrom = GetLinearUnit(fromType);
+            var linearUnitTo = GetLinearUnit(toType);
+
+            var unit = LinearUnit.CreateLinearUnit(linearUnitFrom.FactoryCode);
+
+            result = unit.ConvertTo(input, linearUnitTo);
+
+            return result;
+        }
+
+        internal LinearUnit GetLinearUnit(DistanceTypes dtype)
+        {
+            LinearUnit result = LinearUnit.Meters;
+            switch (dtype)
+            {
+                case DistanceTypes.Feet:
+                    result = LinearUnit.Feet;
+                    break;
+                case DistanceTypes.Kilometers:
+                    result = LinearUnit.Kilometers;
+                    break;
+                case DistanceTypes.Miles:
+                    result = LinearUnit.Miles;
+                    break;
+                case DistanceTypes.NauticalMile:
+                    result = LinearUnit.NauticalMiles;
+                    break;
+                case DistanceTypes.Yards:
+                    result = LinearUnit.Yards;
+                    break;
+                case DistanceTypes.Meters:
+                default:
+                    result = LinearUnit.Meters;
+                    break;
+            }
+            return result;
+        }
+
     }
 }

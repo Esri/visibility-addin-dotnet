@@ -312,4 +312,10 @@
   <data name="RLOSUserPromptCaption" xml:space="preserve">
     <value>Surface Projection</value>
   </data>
+  <data name="EnumMiles" xml:space="preserve">
+    <value>Miles</value>
+  </data>
+  <data name="EnumYards" xml:space="preserve">
+    <value>Yards</value>
+  </data>
 </root>

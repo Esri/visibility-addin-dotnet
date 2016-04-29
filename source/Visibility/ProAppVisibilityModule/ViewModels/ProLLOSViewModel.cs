@@ -357,7 +357,8 @@ namespace ProAppVisibilityModule.ViewModels
             }
             catch(Exception ex)
             {
-                ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.ExceptionSomethingWentWrong);
+                ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.ExceptionSomethingWentWrong,
+                                                                VisibilityLibrary.Properties.Resources.ExceptionSomethingWentWrong);
             }
             finally
             {
@@ -374,37 +375,43 @@ namespace ProAppVisibilityModule.ViewModels
                 // add fields for observer offset
 
                 await FeatureClassHelper.AddFieldToLayer("vis_observers", "offset", "DOUBLE");
+                await FeatureClassHelper.AddFieldToLayer("vis_observers", "offsetWithZ", "DOUBLE");
+
+                await FeatureClassHelper.CreateLayer("vis_targets", "POINT");
+
+                // add fields for target offset
+
+                await FeatureClassHelper.AddFieldToLayer("vis_targets", "offset", "DOUBLE");
+                await FeatureClassHelper.AddFieldToLayer("vis_targets", "offsetWithZ", "DOUBLE");
 
                 // add observer points to feature layer
 
-                await CreatingObserverFeatures();
+                await CreatingFeatures("vis_observers", ObserverAddInPoints, ConvertFromTo(OffsetUnitType, VisibilityLibrary.DistanceTypes.Meters, ObserverOffset.Value));
 
-                //ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(() =>
-                //{
-                //    //Create the edit operation
-                //    var createOperation = new ArcGIS.Desktop.Editing.EditOperation();
-                //    createOperation.Name = "Generate observer points";
-                //    createOperation.SelectNewFeatures = false;
+                // add target points to feature layer
 
-                //    //Loop through csv data
-                //    foreach (var item in ObserverAddInPoints)
-                //    {
-                //        //Create the point geometry
-                //        //ArcGIS.Core.Geometry.MapPoint newMapPoint = ArcGIS.Core.Geometry.MapPointBuilder.CreateMapPoint(item.X, item.Y);
+                await CreatingFeatures("vis_targets", TargetAddInPoints, ConvertFromTo(OffsetUnitType, VisibilityLibrary.DistanceTypes.Meters, TargetOffset.Value));
 
-                //        // include the attributes via a dictionary
-                //        var atts = new Dictionary<string, object>();
-                //        atts.Add("offset", ObserverOffset.Value);
-                //        //TODO get shape field name
-                //        atts.Add("Shape", item.Point);   // I know the shape field is called Shape - but dont assume
+                // update with surface information
 
-                //        // queue feature creation
-                //        createOperation.Create(layer, atts);
-                //    }
+                await FeatureClassHelper.AddSurfaceInformation("vis_observers", SelectedSurfaceName, "Z");
+                await FeatureClassHelper.AddSurfaceInformation("vis_targets", SelectedSurfaceName, "Z");
 
-                //    // execute the edit (feature creation) operation
-                //    return createOperation.Execute();
-                //});
+                await UpdateShapeWithZ("vis_observers", "Z", ObserverOffset.Value);
+                await UpdateShapeWithZ("vis_targets", "Z", TargetOffset.Value);
+
+                await FeatureClassHelper.Delete( CoreModule.CurrentProject.DefaultGeodatabasePath + "\\vis_sight_lines");
+                await FeatureClassHelper.Delete(CoreModule.CurrentProject.DefaultGeodatabasePath + "\\vis_los_output");
+
+                // create sight lines
+
+                await FeatureClassHelper.CreateSightLines("vis_observers", "vis_targets", CoreModule.CurrentProject.DefaultGeodatabasePath + "\\vis_sight_lines", "offsetWithZ", "offsetWithZ");
+
+                // LOS
+
+                await FeatureClassHelper.CreateLOS(SelectedSurfaceName, "vis_sight_lines", CoreModule.CurrentProject.DefaultGeodatabasePath + "\\vis_los_output");
+
+                Reset(true);
             }
             catch(Exception ex)
             {
@@ -412,7 +419,7 @@ namespace ProAppVisibilityModule.ViewModels
             }
         }
 
-        private async Task CreatingObserverFeatures()
+        private async Task CreatingFeatures(string featureClassName, ObservableCollection<AddInPoint> collection, double offset)
         {
             try
             {
@@ -421,7 +428,7 @@ namespace ProAppVisibilityModule.ViewModels
                 await ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(async () =>
                 {
                     using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
-                    using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>("vis_observers"))
+                    using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(featureClassName))
                     using (FeatureClassDefinition facilitySiteDefinition = enterpriseFeatureClass.GetDefinition())
                     {
                         EditOperation editOperation = new EditOperation();
@@ -431,15 +438,15 @@ namespace ProAppVisibilityModule.ViewModels
                             {
                                 var shapeFieldName = facilitySiteDefinition.GetShapeField();
 
-                                foreach (var item in ObserverAddInPoints)
+                                foreach (var item in collection)
                                 {
                                     //int facilityIdIndex = facilitySiteDefinition.FindField("FACILITYID");
                                     using (var rowBuffer = enterpriseFeatureClass.CreateRowBuffer())
                                     {
                                         // Either the field index or the field name can be used in the indexer.
-                                        rowBuffer["offset"] = ObserverOffset.Value;
-
-                                        rowBuffer[shapeFieldName] = item.Point;
+                                        rowBuffer["offset"] = offset;
+                                        var point = MapPointBuilder.CreateMapPoint(item.Point.X, item.Point.Y, 0.0, item.Point.SpatialReference);
+                                        rowBuffer[shapeFieldName] = point;
 
                                         using (var feature = enterpriseFeatureClass.CreateRow(rowBuffer))
                                         {
@@ -459,6 +466,8 @@ namespace ProAppVisibilityModule.ViewModels
                         creationResult = await editOperation.ExecuteAsync(); //task.Result;
                         if (!creationResult)
                             message = editOperation.ErrorMessage;
+
+                        await Project.Current.SaveEditsAsync();
                     }
                 });
                 if (!creationResult)
@@ -466,6 +475,70 @@ namespace ProAppVisibilityModule.ViewModels
 
             }
             catch(Exception ex)
+            {
+                Debug.Print(ex.Message);
+            }
+        }
+
+        private async Task UpdateShapeWithZ(string featureClassName, string zFieldName, double offsetInMeters)
+        {
+            try
+            {
+                string message = String.Empty;
+                bool creationResult = false;
+                await ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(async () =>
+                {
+                    using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
+                    using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(featureClassName))
+                    using (FeatureClassDefinition facilitySiteDefinition = enterpriseFeatureClass.GetDefinition())
+                    {
+                        int zFieldIndex = facilitySiteDefinition.FindField(zFieldName);
+
+                        EditOperation editOperation = new EditOperation();
+                        editOperation.Callback(context =>
+                        {
+                            try
+                            {
+                                var shapeFieldName = facilitySiteDefinition.GetShapeField();
+
+                                using (RowCursor rowCursor = enterpriseFeatureClass.Search(null, false))
+                                {
+                                    while(rowCursor.MoveNext())
+                                    {
+                                        using(Feature feature = (Feature)rowCursor.Current)
+                                        {
+                                            context.Invalidate(feature);
+                                            var mp = (MapPoint)feature[shapeFieldName];
+                                            var z = (Double)feature[zFieldIndex] + offsetInMeters;
+                                            feature["offsetWithZ"] = z;
+                                            feature.SetShape(MapPointBuilder.CreateMapPoint(mp.X, mp.Y, z, mp.SpatialReference));
+
+                                            feature.Store();
+
+                                            context.Invalidate(feature);
+                                        }
+                                    }
+                                }
+                            }
+                            catch (GeodatabaseException exObj)
+                            {
+                                message = exObj.Message;
+                            }
+                        }, enterpriseFeatureClass);
+
+                        //var task = editOperation.ExecuteAsync();
+                        creationResult = await editOperation.ExecuteAsync(); //task.Result;
+                        if (!creationResult)
+                            message = editOperation.ErrorMessage;
+
+                        await Project.Current.SaveEditsAsync();
+                    }
+                });
+                if (!creationResult)
+                    MessageBox.Show(message);
+
+            }
+            catch (Exception ex)
             {
                 Debug.Print(ex.Message);
             }
