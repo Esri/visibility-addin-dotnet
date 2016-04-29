@@ -123,37 +123,6 @@ namespace ProAppVisibilityModule.Helpers
                     Debug.Print(msg.Text);
             }
         }
-        //public static async Task AddZInformation()
-        //{
-        //    //AddZInformation_3d
-        //    List<object> arguments = new List<object>();
-        //    // in_surface
-        //    arguments.Add(surfaceName);
-        //    // in_line_feature_class
-        //    arguments.Add(lineFeatureClassName);
-        //    // out_los_feature_class
-        //    arguments.Add(outLOSFeatureClass);
-        //    // out_obstruction_feature_class (Optional)
-        //    //arguments.Add("");
-        //    //// use_curvature (Optional)
-        //    //arguments.Add("");
-        //    //// use_refraction (Optional)
-        //    //arguments.Add("");
-        //    //// refraction_factor (Optional)
-        //    //arguments.Add("");
-        //    //// pyramid_level_resolution (Optional)
-        //    //arguments.Add("");
-        //    //// in_features (optional) multipatch features
-        //    //arguments.Add("");
-
-        //    IGPResult result = await Geoprocessing.ExecuteToolAsync("LineOfSight_3d", Geoprocessing.MakeValueArray(arguments.ToArray()), flags: GPExecuteToolFlags.Default);
-
-        //    if (result.IsFailed)
-        //    {
-        //        foreach (var msg in result.Messages)
-        //            Debug.Print(msg.Text);
-        //    }
-        //}
 
         public static async Task CreateLOS(string surfaceName, 
                                             string lineFeatureClassName, 
