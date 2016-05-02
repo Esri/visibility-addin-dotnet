@@ -18,17 +18,16 @@ using System.Linq;
 using System.Collections.ObjectModel;
 using System.Collections;
 using System.Windows;
+using System.Diagnostics;
+using System.Threading.Tasks;
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Mapping;
-using VisibilityLibrary.Helpers;
-using ArcMapAddinVisibility.Models;
-using ProAppVisibilityModule.Helpers;
-using System.Threading.Tasks;
 using ArcGIS.Core.Data;
 using ArcGIS.Desktop.Core;
 using ArcGIS.Desktop.Editing;
-using ArcGIS.Desktop.Framework.Threading.Tasks;
-using System.Diagnostics;
+using VisibilityLibrary.Helpers;
+using ProAppVisibilityModule.Helpers;
+using ProAppVisibilityModule.Models;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -231,11 +230,6 @@ namespace ProAppVisibilityModule.ViewModels
 
         /// <summary>
         /// Here we need to create the lines of sight and determine is a target can be seen or not
-        /// Visualize the visible targets with GREEN circles
-        /// Visualize the non visible targets with RED circles
-        /// Visualize the number of observers that can see a target with a label #
-        /// Visualize an observer that can see no targets with a RED circle on top of a BLUE circle
-        /// Visualize an observer that can see at least one target with a GREEN circle on top of a BLUE circle
         /// </summary>
         internal override async Task CreateMapElement()
         {
@@ -243,115 +237,10 @@ namespace ProAppVisibilityModule.ViewModels
             {
                 IsRunning = true;
 
-                //TODO update to Pro
                 if (!CanCreateElement || MapView.Active == null || MapView.Active.Map == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
                     return;
 
-
-                // take your observer and target points and construct sight lines
-
-                await CreateObserverFeatureLayer();
-
-                //TODO update to Pro
-                //var surface = GetSurfaceFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
-
-                //if (surface == null)
-                //    return;
-
-                //var geoBridge = new GeoDatabaseHelperClass() as IGeoDatabaseBridge2;
-
-                //if (geoBridge == null)
-                //    return;
-
-                //IPoint pointObstruction = null;
-                //IPolyline polyVisible = null;
-                //IPolyline polyInvisible = null;
-                //bool targetIsVisible = false;
-
-                //double finalObserverOffset = GetOffsetInZUnits(ArcMap.Document.FocusMap, ObserverOffset.Value, surface.ZFactor, OffsetUnitType);
-                //double finalTargetOffset = GetOffsetInZUnits(ArcMap.Document.FocusMap, TargetOffset.Value, surface.ZFactor, OffsetUnitType);
-
-                //var DictionaryTargetObserverCount = new Dictionary<IPoint, int>();
-
-                //foreach (var observerPoint in ObserverAddInPoints)
-                //{
-                //    // keep track of visible targets for this observer
-                //    var CanSeeAtLeastOneTarget = false;
-
-                //    var z1 = surface.GetElevation(observerPoint.Point) + finalObserverOffset;
-
-                //    if (surface.IsVoidZ(z1))
-                //    {
-                //        if (double.IsNaN(z1))
-                //            z1 = 0.000001;
-                //    }
-
-                //    foreach (var targetPoint in TargetAddInPoints)
-                //    {
-                //        var z2 = surface.GetElevation(targetPoint.Point) + finalTargetOffset;
-
-                //        if (surface.IsVoidZ(z2))
-                //        {
-                //            if (double.IsNaN(z2))
-                //                z2 = 0.000001;
-                //        }
-
-                //        var fromPoint = new PointClass() { Z = z1, X = observerPoint.Point.X, Y = observerPoint.Point.Y, ZAware = true } as IPoint;
-                //        var toPoint = new PointClass() { Z = z2, X = targetPoint.Point.X, Y = targetPoint.Point.Y, ZAware = true } as IPoint;
-
-                //        geoBridge.GetLineOfSight(surface, fromPoint, toPoint,
-                //            out pointObstruction, out polyVisible, out polyInvisible, out targetIsVisible, false, false);
-
-                //        // set the flag if we can see at least one target
-                //        if (targetIsVisible)
-                //        {
-                //            CanSeeAtLeastOneTarget = true;
-
-                //            // update target observer count
-                //            UpdateTargetObserverCount(DictionaryTargetObserverCount, targetPoint.Point);
-                //        }
-
-                //        if (polyVisible != null)
-                //        {
-                //            AddGraphicToMap(polyVisible, new RgbColorClass() { Green = 255 });
-                //        }
-
-                //        if (polyInvisible != null)
-                //        {
-                //            AddGraphicToMap(polyInvisible, new RgbColorClass() { Red = 255 });
-                //        }
-
-                //        if (polyVisible == null && polyInvisible == null)
-                //        {
-                //            var pcol = new PolylineClass() as IPointCollection;
-                //            pcol.AddPoint(fromPoint);
-                //            pcol.AddPoint(toPoint);
-
-                //            if (targetIsVisible)
-                //                AddGraphicToMap(pcol as IPolyline, new RgbColorClass() { Green = 255 });
-                //            else
-                //                AddGraphicToMap(pcol as IPolyline, new RgbColorClass() { Red = 255 });
-                //        }
-                //    }
-
-                //    // visualize observer
-
-                //    // add blue dot
-                //    AddGraphicToMap(observerPoint.Point, new RgbColorClass() { Blue = 255 }, size: 10);
-
-                //    if (CanSeeAtLeastOneTarget)
-                //    {
-                //        // add green dot
-                //        AddGraphicToMap(observerPoint.Point, new RgbColorClass() { Green = 255 });
-                //    }
-                //    else
-                //    {
-                //        // add red dot
-                //        AddGraphicToMap(observerPoint.Point, new RgbColorClass() { Red = 255 });
-                //    }
-                //}
-
-                //VisualizeTargets(DictionaryTargetObserverCount);
+                await ExecuteVisibilityLLOS();
 
                 await base.CreateMapElement();
             }
@@ -366,7 +255,7 @@ namespace ProAppVisibilityModule.ViewModels
             }
         }
 
-        private async Task CreateObserverFeatureLayer()
+        private async Task ExecuteVisibilityLLOS()
         {
             try
             {
@@ -411,7 +300,7 @@ namespace ProAppVisibilityModule.ViewModels
 
                 await FeatureClassHelper.CreateLOS(SelectedSurfaceName, "vis_sight_lines", CoreModule.CurrentProject.DefaultGeodatabasePath + "\\vis_los_output");
 
-                Reset(true);
+                await Reset(true);
             }
             catch(Exception ex)
             {
@@ -429,18 +318,17 @@ namespace ProAppVisibilityModule.ViewModels
                 {
                     using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
                     using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(featureClassName))
-                    using (FeatureClassDefinition facilitySiteDefinition = enterpriseFeatureClass.GetDefinition())
+                    using (FeatureClassDefinition fcDefinition = enterpriseFeatureClass.GetDefinition())
                     {
                         EditOperation editOperation = new EditOperation();
                         editOperation.Callback(context =>
                         {
                             try
                             {
-                                var shapeFieldName = facilitySiteDefinition.GetShapeField();
+                                var shapeFieldName = fcDefinition.GetShapeField();
 
                                 foreach (var item in collection)
                                 {
-                                    //int facilityIdIndex = facilitySiteDefinition.FindField("FACILITYID");
                                     using (var rowBuffer = enterpriseFeatureClass.CreateRowBuffer())
                                     {
                                         // Either the field index or the field name can be used in the indexer.
@@ -462,8 +350,7 @@ namespace ProAppVisibilityModule.ViewModels
                             }
                         }, enterpriseFeatureClass);
 
-                        //var task = editOperation.ExecuteAsync();
-                        creationResult = await editOperation.ExecuteAsync(); //task.Result;
+                        creationResult = await editOperation.ExecuteAsync();
                         if (!creationResult)
                             message = editOperation.ErrorMessage;
 
@@ -490,16 +377,16 @@ namespace ProAppVisibilityModule.ViewModels
                 {
                     using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
                     using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(featureClassName))
-                    using (FeatureClassDefinition facilitySiteDefinition = enterpriseFeatureClass.GetDefinition())
+                    using (FeatureClassDefinition fcDefinition = enterpriseFeatureClass.GetDefinition())
                     {
-                        int zFieldIndex = facilitySiteDefinition.FindField(zFieldName);
+                        int zFieldIndex = fcDefinition.FindField(zFieldName);
 
                         EditOperation editOperation = new EditOperation();
                         editOperation.Callback(context =>
                         {
                             try
                             {
-                                var shapeFieldName = facilitySiteDefinition.GetShapeField();
+                                var shapeFieldName = fcDefinition.GetShapeField();
 
                                 using (RowCursor rowCursor = enterpriseFeatureClass.Search(null, false))
                                 {
@@ -526,8 +413,7 @@ namespace ProAppVisibilityModule.ViewModels
                             }
                         }, enterpriseFeatureClass);
 
-                        //var task = editOperation.ExecuteAsync();
-                        creationResult = await editOperation.ExecuteAsync(); //task.Result;
+                        creationResult = await editOperation.ExecuteAsync();
                         if (!creationResult)
                             message = editOperation.ErrorMessage;
 
@@ -541,39 +427,6 @@ namespace ProAppVisibilityModule.ViewModels
             catch (Exception ex)
             {
                 Debug.Print(ex.Message);
-            }
-        }
-
-        private void VisualizeTargets(Dictionary<MapPoint, int> dict)
-        {
-            // visualize targets
-            foreach (var targetPoint in TargetAddInPoints)
-            {
-                if (dict.ContainsKey(targetPoint.Point))
-                {
-                    //TODO update to Pro
-                    // add green circle
-                    //AddGraphicToMap(targetPoint.Point, new RgbColorClass() { Green = 255 }, size: 10);
-                    // add label
-                    //AddTextToMap(dict[targetPoint.Point].ToString(), targetPoint.Point, new RgbColorClass(), size: 10);
-                }
-                else
-                {
-                    // add red circle
-                    //AddGraphicToMap(targetPoint.Point, new RgbColorClass() { Red = 255 }, size: 10);
-                }
-            }
-        }
-
-        private void UpdateTargetObserverCount(Dictionary<MapPoint, int> dict, MapPoint targetPoint)
-        {
-            if (dict.ContainsKey(targetPoint))
-            {
-                dict[targetPoint] += 1;
-            }
-            else
-            {
-                dict.Add(targetPoint, 1);
             }
         }
 

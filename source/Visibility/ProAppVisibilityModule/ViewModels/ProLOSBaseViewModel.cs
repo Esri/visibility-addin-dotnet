@@ -19,6 +19,7 @@ using System.Collections.ObjectModel;
 using System.Collections;
 using System.Windows;
 using System.Threading.Tasks;
+using System.Diagnostics;
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
@@ -27,8 +28,7 @@ using VisibilityLibrary;
 using VisibilityLibrary.Helpers;
 using VisibilityLibrary.Views;
 using VisibilityLibrary.ViewModels;
-using ArcMapAddinVisibility.Models;
-using System.Diagnostics;
+using ProAppVisibilityModule.Models;
 
 namespace ProAppVisibilityModule.ViewModels
 {
