@@ -321,4 +321,25 @@
   <data name="CaptionError" xml:space="preserve">
     <value>Error</value>
   </data>
+  <data name="LOSOutputLayerName" xml:space="preserve">
+    <value>vis_los_output</value>
+  </data>
+  <data name="ObserversLayerName" xml:space="preserve">
+    <value>vis_observers</value>
+  </data>
+  <data name="OffsetFieldName" xml:space="preserve">
+    <value>offset</value>
+  </data>
+  <data name="OffsetWithZFieldName" xml:space="preserve">
+    <value>offsetWithZ</value>
+  </data>
+  <data name="SightLinesLayerName" xml:space="preserve">
+    <value>vis_sight_lines</value>
+  </data>
+  <data name="TargetsLayerName" xml:space="preserve">
+    <value>vis_targets</value>
+  </data>
+  <data name="ZFieldName" xml:space="preserve">
+    <value>Z</value>
+  </data>
 </root>

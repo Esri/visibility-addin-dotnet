@@ -529,6 +529,15 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to vis_los_output.
+        /// </summary>
+        public static string LOSOutputLayerName {
+            get {
+                return ResourceManager.GetString("LOSOutputLayerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Delete.
         /// </summary>
         public static string MenuLabelDelete {
@@ -574,6 +583,33 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to vis_observers.
+        /// </summary>
+        public static string ObserversLayerName {
+            get {
+                return ResourceManager.GetString("ObserversLayerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to offset.
+        /// </summary>
+        public static string OffsetFieldName {
+            get {
+                return ResourceManager.GetString("OffsetFieldName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to offsetWithZ.
+        /// </summary>
+        public static string OffsetWithZFieldName {
+            get {
+                return ResourceManager.GetString("OffsetWithZFieldName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The selected surface has not been projected.  Please project your data and try again..
         /// </summary>
         public static string RLOSUserPrompt {
@@ -588,6 +624,24 @@ namespace VisibilityLibrary.Properties {
         public static string RLOSUserPromptCaption {
             get {
                 return ResourceManager.GetString("RLOSUserPromptCaption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to vis_sight_lines.
+        /// </summary>
+        public static string SightLinesLayerName {
+            get {
+                return ResourceManager.GetString("SightLinesLayerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to vis_targets.
+        /// </summary>
+        public static string TargetsLayerName {
+            get {
+                return ResourceManager.GetString("TargetsLayerName", resourceCulture);
             }
         }
         
@@ -669,6 +723,15 @@ namespace VisibilityLibrary.Properties {
         public static string TooltipTargetMapPointTool {
             get {
                 return ResourceManager.GetString("TooltipTargetMapPointTool", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Z.
+        /// </summary>
+        public static string ZFieldName {
+            get {
+                return ResourceManager.GetString("ZFieldName", resourceCulture);
             }
         }
     }
