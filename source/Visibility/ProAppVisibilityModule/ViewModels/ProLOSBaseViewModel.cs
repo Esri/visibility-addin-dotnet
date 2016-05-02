@@ -316,7 +316,7 @@ namespace ProAppVisibilityModule.ViewModels
                 //TODO add a caption
                 if (validPoint == false && showPopup)
                     ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgOutOfAOI,
-                                                                        VisibilityLibrary.Properties.Resources.MsgOutOfAOI);
+                                                                        VisibilityLibrary.Properties.Resources.CaptionError);
             }
 
             return validPoint;

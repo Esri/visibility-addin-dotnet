@@ -247,7 +247,7 @@ namespace ProAppVisibilityModule.ViewModels
             catch(Exception ex)
             {
                 ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.ExceptionSomethingWentWrong,
-                                                                VisibilityLibrary.Properties.Resources.ExceptionSomethingWentWrong);
+                                                                VisibilityLibrary.Properties.Resources.CaptionError);
             }
             finally
             {

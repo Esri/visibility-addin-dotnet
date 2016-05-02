@@ -106,6 +106,15 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error.
+        /// </summary>
+        public static string CaptionError {
+            get {
+                return ResourceManager.GetString("CaptionError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to DD.
         /// </summary>
         public static string EnumCTDD {

@@ -318,4 +318,7 @@
   <data name="EnumYards" xml:space="preserve">
     <value>Yards</value>
   </data>
+  <data name="CaptionError" xml:space="preserve">
+    <value>Error</value>
+  </data>
 </root>
