@@ -269,6 +269,7 @@
                                             <Condition Binding="{Binding ElementName=listBoxTargets, Path=HasItems}" Value="True" />
                                             <Condition Binding="{Binding ElementName=tbObserverOffset, Path=(Validation.HasError)}" Value="False" />
                                             <Condition Binding="{Binding ElementName=tbTargetOffset, Path=(Validation.HasError)}" Value="False" />
+                                            <Condition Binding="{Binding IsRunning}" Value="False" />
                                         </MultiDataTrigger.Conditions>
                                         <MultiDataTrigger.Setters>
                                             <Setter Property="IsEnabled" Value="True" />
