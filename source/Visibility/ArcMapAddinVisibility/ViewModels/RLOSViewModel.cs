@@ -193,8 +193,9 @@ namespace ArcMapAddinVisibility.ViewModels
             // Determine if selected surface is projected or geographic
             ILayer surfaceLayer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
             var geoDataset = surfaceLayer as IGeoDataset;
+            SelectedSurfaceSpatialRef = geoDataset.SpatialReference;
 
-            if (geoDataset.SpatialReference is IGeographicCoordinateSystem)
+            if (SelectedSurfaceSpatialRef is IGeographicCoordinateSystem)
             {
                 MessageBox.Show(VisibilityLibrary.Properties.Resources.RLOSUserPrompt, VisibilityLibrary.Properties.Resources.RLOSUserPromptCaption);
                 return;
