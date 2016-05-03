@@ -19,6 +19,7 @@ using System.Collections.ObjectModel;
 using System.Collections;
 using System.Windows;
 using System.Threading.Tasks;
+using System.Diagnostics;
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
@@ -27,7 +28,7 @@ using VisibilityLibrary;
 using VisibilityLibrary.Helpers;
 using VisibilityLibrary.Views;
 using VisibilityLibrary.ViewModels;
-using ArcMapAddinVisibility.Models;
+using ProAppVisibilityModule.Models;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -46,20 +47,23 @@ namespace ProAppVisibilityModule.ViewModels
             SurfaceLayerNames = new ObservableCollection<string>();
             SelectedSurfaceName = string.Empty;
 
-            //TODO update for Pro
-            //Mediator.Register(Constants.MAP_TOC_UPDATED, OnMapTocUpdated);
             Mediator.Register(VisibilityLibrary.Constants.DISPLAY_COORDINATE_TYPE_CHANGED, OnDisplayCoordinateTypeChanged);
 
             DeletePointCommand = new RelayCommand(OnDeletePointCommand);
             DeleteAllPointsCommand = new RelayCommand(OnDeleteAllPointsCommand);
             EditPropertiesDialogCommand = new RelayCommand(OnEditPropertiesDialogCommand);
 
+            // subscribe to some mapping events
             ActiveMapViewChangedEvent.Subscribe(OnActiveMapViewChanged);
+            LayersAddedEvent.Subscribe(OnLayersAdded);
+            LayersRemovedEvent.Subscribe(OnLayersAdded);
         }
 
         ~ProLOSBaseViewModel()
         {
             ActiveMapViewChangedEvent.Unsubscribe(OnActiveMapViewChanged);
+            LayersAddedEvent.Unsubscribe(OnLayersAdded);
+            LayersRemovedEvent.Unsubscribe(OnLayersAdded);
         }
 
         #region Properties
@@ -199,22 +203,6 @@ namespace ProAppVisibilityModule.ViewModels
             }
         }
 
-        // TODO remove if found to be unused
-        /// <summary>
-        /// Method called when the map TOC is updated
-        /// Reset surface names
-        /// </summary>
-        /// <param name="obj">not used</param>
-        //private void OnMapTocUpdated(object obj)
-        //{
-        //    if (ArcMap.Document == null || ArcMap.Document.FocusMap == null)
-        //        return;
-
-        //    var map = ArcMap.Document.FocusMap;
-
-        //    ResetSurfaceNames(map);
-        //}
-
         /// <summary>
         /// Override this method to implement a "Mode" to separate the input of
         /// observer points and target points
@@ -313,7 +301,8 @@ namespace ProAppVisibilityModule.ViewModels
                 validPoint = await IsPointWithinExtent(point, env);
 
                 if (validPoint == false && showPopup)
-                    ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgOutOfAOI);
+                    ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgOutOfAOI,
+                                                                        VisibilityLibrary.Properties.Resources.CaptionError);
             }
 
             return validPoint;
@@ -347,86 +336,6 @@ namespace ProAppVisibilityModule.ViewModels
             return result;
         }
 
-        // TODO remove if found to be unused
-        /// <summary>
-        /// Method to get a z offset distance in the correct units for the map
-        /// </summary>
-        /// <param name="map">IMap</param>
-        /// <param name="offset">the input offset</param>
-        /// <param name="zFactor">ISurface z factor</param>
-        /// <param name="distanceType">the "from" distance unit type</param>
-        /// <returns></returns>
-        // Update to Pro
-        //internal double GetOffsetInZUnits(IMap map, double offset, double zFactor, DistanceTypes distanceType)
-        //{
-        //    if (map.SpatialReference == null)
-        //        return offset;
-
-        //    double offsetInMapUnits = 0.0;
-        //    DistanceTypes distanceTo = DistanceTypes.Meters; // default to meters
-
-        //    var pcs = map.SpatialReference as IProjectedCoordinateSystem;
-
-        //    if (pcs != null)
-        //    {
-        //        // need to convert the offset from the input distance type to the spatial reference linear type
-        //        // then apply the zFactor
-        //        distanceTo = GetDistanceType(pcs.CoordinateUnit.FactoryCode);
-        //    }
-
-        //    offsetInMapUnits = GetDistanceFromTo(distanceType, distanceTo, offset);
-
-        //    var result = offsetInMapUnits / zFactor;
-
-        //    return result;
-        //}
-
-        /// <summary>
-        /// Method to get a ISurface from a map with layer name
-        /// </summary>
-        /// <param name="map">IMap that contains surface layer</param>
-        /// <param name="name">Name of the layer that you are looking for</param>
-        /// <returns>ISurface</returns>
-        //TODO udpate to Pro
-        //public ISurface GetSurfaceFromMapByName(IMap map, string name)
-        //{
-        //    for (int x = 0; x < map.LayerCount; x++)
-        //    {
-        //        var layer = map.get_Layer(x);
-
-        //        if (layer == null || layer.Name != name)
-        //            continue;
-
-        //        var tin = layer as ITinLayer;
-        //        if (tin != null)
-        //        {
-        //            return tin.Dataset as ISurface;
-        //        }
-
-        //        var rasterSurface = new RasterSurfaceClass() as IRasterSurface;
-        //        ISurface surface = null;
-
-        //        var mosaicLayer = layer as IMosaicLayer;
-        //        var rasterLayer = layer as IRasterLayer;
-
-        //        if (mosaicLayer != null && mosaicLayer.PreviewLayer != null && mosaicLayer.PreviewLayer.Raster != null)
-        //        {
-        //            rasterSurface.PutRaster(mosaicLayer.PreviewLayer.Raster, 0);
-        //        }
-        //        else if (rasterLayer != null && rasterLayer.Raster != null)
-        //        {
-        //            rasterSurface.PutRaster(rasterLayer.Raster, 0);
-        //        }
-
-        //        surface = rasterSurface as ISurface;
-
-        //        if (surface != null)
-        //            return surface;
-        //    }
-
-        //    return null;
-        //}
-
         /// <summary>
         /// returns Layer if found in the map
         /// </summary>
@@ -449,100 +358,41 @@ namespace ProAppVisibilityModule.ViewModels
 
             var elevationSurfaceList = await QueuedTask.Run(() =>
                 {
-                    return layerList.Where(l => l.GetDefinition().LayerElevation != null).ToList();
+                    return layerList.Where(l => l.GetDefinition().LayerElevation != null && 
+                        !string.IsNullOrWhiteSpace(l.GetDefinition().LayerElevation.MapElevationID)).ToList();
+                    
                 });
 
             return elevationSurfaceList.Select(l => l.Name).ToList();
         }
 
-        // TODO remove if found to be unused
-        /// <summary>
-        /// Method to get all the names of the raster/tin layers that support ISurface
-        /// we use this method to populate a combobox for input selection of surface layer
-        /// </summary>
-        /// <param name="map">IMap</param>
-        /// <returns></returns>
-        /// 
-        //TODO update to Pro
-        //public List<string> GetSurfaceNamesFromMap(IMap map, bool IncludeTinLayers = false)
-        //{
-        //    var list = new List<string>();
-
-        //    for (int x = 0; x < map.LayerCount; x++)
-        //    {
-        //        try
-        //        {
-        //            var layer = map.get_Layer(x);
-
-        //            if (layer == null)
-        //                continue;
-
-        //            var tin = layer as ITinLayer;
-
-        //            if (tin != null)
-        //            {
-        //                if (IncludeTinLayers)
-        //                    list.Add(layer.Name);
-
-        //                continue;
-        //            }
-
-        //            var rasterSurface = new RasterSurfaceClass() as IRasterSurface;
-        //            ISurface surface = null;
-
-        //            var ml = layer as IMosaicLayer;
-
-        //            if (ml != null)
-        //            {
-        //                if (ml.PreviewLayer != null && ml.PreviewLayer.Raster != null)
-        //                {
-        //                    rasterSurface.PutRaster(ml.PreviewLayer.Raster, 0);
-
-        //                    surface = rasterSurface as ISurface;
-        //                    if (surface != null)
-        //                        list.Add(layer.Name);
-        //                }
-        //                continue;
-        //            }
-
-        //            var rasterLayer = layer as IRasterLayer;
-        //            if (rasterLayer != null && rasterLayer.Raster != null)
-        //            {
-        //                rasterSurface.PutRaster(rasterLayer.Raster, 0);
-
-        //                surface = rasterSurface as ISurface;
-        //                if (surface != null)
-        //                    list.Add(layer.Name);
-        //                continue;
-        //            }
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            Console.WriteLine(ex);
-        //        }
-        //    }
-
-        //    return list;
-        //}
-
         /// <summary>
         /// Override to add aditional items in the class to reset tool
         /// </summary>
         /// <param name="toolReset"></param>
-        internal override async void Reset(bool toolReset)
+        internal override async Task Reset(bool toolReset)
         {
-            base.Reset(toolReset);
+            try
+            {
+                await base.Reset(toolReset);
 
-            if (MapView.Active == null || MapView.Active.Map == null)
-                return;
+                if (MapView.Active == null || MapView.Active.Map == null)
+                    return;
 
-            // reset surface names OC
-            await ResetSurfaceNames();
+                // reset surface names OC
+                await ResetSurfaceNames();
+                Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        // reset observer points
+                        ObserverAddInPoints.Clear();
+                    
+                        ClearTempGraphics();
+                    });
+            }
+            catch(Exception ex)
+            {
 
-            // reset observer points
-            ObserverAddInPoints.Clear();
-
-            ClearTempGraphics();
+            }
         }
 
         /// <summary>
@@ -551,27 +401,39 @@ namespace ProAppVisibilityModule.ViewModels
         /// </summary>
         internal async Task ResetSurfaceNames()
         {
-            if (MapView.Active == null || MapView.Active.Map == null)
-                return;
+            try
+            {
+                if (MapView.Active == null || MapView.Active.Map == null)
+                    return;
 
-            // keep the current selection if it's still valid
-            var tempName = SelectedSurfaceName;
+                var names = await GetSurfaceNamesFromMap();
 
-            SurfaceLayerNames.Clear();
+                // keep the current selection if it's still valid
+                var tempName = SelectedSurfaceName;
 
-            var names = await GetSurfaceNamesFromMap();
+                Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        SurfaceLayerNames.Clear();
+                    });
 
-            foreach (var name in names)
-                SurfaceLayerNames.Add(name);
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    foreach (var name in names)
+                        SurfaceLayerNames.Add(name);
+                });
+                if (SurfaceLayerNames.Contains(tempName))
+                    SelectedSurfaceName = tempName;
+                else if (SurfaceLayerNames.Any())
+                    SelectedSurfaceName = SurfaceLayerNames[0];
+                else
+                    SelectedSurfaceName = string.Empty;
 
-            if (SurfaceLayerNames.Contains(tempName))
-                SelectedSurfaceName = tempName;
-            else if (SurfaceLayerNames.Any())
-                SelectedSurfaceName = SurfaceLayerNames[0];
-            else
-                SelectedSurfaceName = string.Empty;
-
-            RaisePropertyChanged(() => SelectedSurfaceName);
+                RaisePropertyChanged(() => SelectedSurfaceName);
+            }
+            catch(Exception ex)
+            {
+                Debug.Print(ex.Message);
+            }
         }
 
         /// <summary>
@@ -596,5 +458,57 @@ namespace ProAppVisibilityModule.ViewModels
         {
             await ResetSurfaceNames();
         }
+
+        /// <summary>
+        /// Handler for when layers are added or removed
+        /// </summary>
+        /// <param name="obj"></param>
+        private async void OnLayersAdded(LayerEventsArgs obj)
+        {
+            await ResetSurfaceNames();
+        }
+
+        internal double ConvertFromTo(DistanceTypes fromType, DistanceTypes toType, double input)
+        {
+            double result = 0.0;
+
+            var linearUnitFrom = GetLinearUnit(fromType);
+            var linearUnitTo = GetLinearUnit(toType);
+
+            var unit = LinearUnit.CreateLinearUnit(linearUnitFrom.FactoryCode);
+
+            result = unit.ConvertTo(input, linearUnitTo);
+
+            return result;
+        }
+
+        internal LinearUnit GetLinearUnit(DistanceTypes dtype)
+        {
+            LinearUnit result = LinearUnit.Meters;
+            switch (dtype)
+            {
+                case DistanceTypes.Feet:
+                    result = LinearUnit.Feet;
+                    break;
+                case DistanceTypes.Kilometers:
+                    result = LinearUnit.Kilometers;
+                    break;
+                case DistanceTypes.Miles:
+                    result = LinearUnit.Miles;
+                    break;
+                case DistanceTypes.NauticalMile:
+                    result = LinearUnit.NauticalMiles;
+                    break;
+                case DistanceTypes.Yards:
+                    result = LinearUnit.Yards;
+                    break;
+                case DistanceTypes.Meters:
+                default:
+                    result = LinearUnit.Meters;
+                    break;
+            }
+            return result;
+        }
+
     }
 }

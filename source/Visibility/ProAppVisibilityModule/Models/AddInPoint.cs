@@ -16,7 +16,7 @@ using ArcGIS.Core.Geometry;
 using VisibilityLibrary.Helpers;
 using ProAppVisibilityModule.Helpers;
 
-namespace ArcMapAddinVisibility.Models
+namespace ProAppVisibilityModule.Models
 {
     public class AddInPoint : NotificationObject
     {

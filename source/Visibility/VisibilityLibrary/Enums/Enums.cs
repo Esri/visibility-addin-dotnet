@@ -46,11 +46,14 @@ namespace VisibilityLibrary
         [LocalizableDescription(@"EnumMeters", typeof(Resources))]
         Meters = 3,
 
-        [LocalizableDescription(@"EnumNauticalMile", typeof(Resources))]
-        NauticalMile = 4,
+        [LocalizableDescription(@"EnumMiles", typeof(Resources))]
+        Miles = 4,
 
-        [LocalizableDescription(@"EnumSurveyFoot", typeof(Resources))]
-        SurveyFoot = 5
+        [LocalizableDescription(@"EnumNauticalMile", typeof(Resources))]
+        NauticalMile = 5,
+
+        [LocalizableDescription(@"EnumYards", typeof(Resources))]
+        Yards = 6
     }
 
     public enum AngularTypes : int

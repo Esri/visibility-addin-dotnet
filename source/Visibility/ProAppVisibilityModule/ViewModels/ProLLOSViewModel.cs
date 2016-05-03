@@ -18,10 +18,16 @@ using System.Linq;
 using System.Collections.ObjectModel;
 using System.Collections;
 using System.Windows;
+using System.Diagnostics;
+using System.Threading.Tasks;
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Mapping;
+using ArcGIS.Core.Data;
+using ArcGIS.Desktop.Core;
+using ArcGIS.Desktop.Editing;
 using VisibilityLibrary.Helpers;
-using ArcMapAddinVisibility.Models;
+using ProAppVisibilityModule.Helpers;
+using ProAppVisibilityModule.Models;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -33,7 +39,17 @@ namespace ProAppVisibilityModule.ViewModels
             IsActiveTab = true;
 
             // commands
-            SubmitCommand = new RelayCommand(OnSubmitCommand);
+            SubmitCommand = new RelayCommand(async (obj) => 
+            {
+                try
+                {
+                    await OnSubmitCommand(obj);
+                }
+                catch(Exception ex)
+                {
+                    Debug.Print(ex.Message);
+                }
+            });
         }
 
         #region Properties
@@ -50,20 +66,31 @@ namespace ProAppVisibilityModule.ViewModels
         /// Method to handle the Submit/OK button command
         /// </summary>
         /// <param name="obj">null</param>
-        private void OnSubmitCommand(object obj)
+        private async Task OnSubmitCommand(object obj)
         {
-            // TODO udpate wait cursor/progressor
-            //var savedCursor = System.Windows.Forms.Cursor.Current;
-            //System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
-            //System.Windows.Forms.Application.DoEvents();
-            // promote temp graphics
-            //MoveTempGraphicsToMapGraphics();
+            try
+            {
 
-            CreateMapElement();
+                await Task.Run(async () =>
+                    {
+                        // TODO udpate wait cursor/progressor
+                        try
+                        {
+                            await CreateMapElement();
 
-            Reset(true);
+                            await Reset(true);
+                        }
+                        catch(Exception ex)
+                        {
+                            Debug.Print(ex.Message);
+                        }
 
-            //System.Windows.Forms.Cursor.Current = savedCursor;
+                    });
+            }
+            catch(Exception ex)
+            {
+                Debug.Print(ex.Message);
+            }
         }
 
         /// <summary>
@@ -158,15 +185,25 @@ namespace ProAppVisibilityModule.ViewModels
         /// Method override reset to include TargetAddInPoints
         /// </summary>
         /// <param name="toolReset"></param>
-        internal override void Reset(bool toolReset)
+        internal override async Task Reset(bool toolReset)
         {
-            base.Reset(toolReset);
+            try
+            {
+                await base.Reset(toolReset);
 
-            if (MapView.Active == null || MapView.Active.Map == null)
-                return;
+                if (MapView.Active == null || MapView.Active.Map == null)
+                    return;
 
-            // reset target points
-            TargetAddInPoints.Clear();
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    // reset target points
+                    TargetAddInPoints.Clear();
+                });
+            }
+            catch(Exception ex)
+            {
+                Debug.Print(ex.Message);
+            }
         }
 
         /// <summary>
@@ -187,130 +224,24 @@ namespace ProAppVisibilityModule.ViewModels
 
         /// <summary>
         /// Here we need to create the lines of sight and determine is a target can be seen or not
-        /// Visualize the visible targets with GREEN circles
-        /// Visualize the non visible targets with RED circles
-        /// Visualize the number of observers that can see a target with a label #
-        /// Visualize an observer that can see no targets with a RED circle on top of a BLUE circle
-        /// Visualize an observer that can see at least one target with a GREEN circle on top of a BLUE circle
         /// </summary>
-        internal override void CreateMapElement()
+        internal override async Task CreateMapElement()
         {
             try
             {
                 IsRunning = true;
 
-                //TODO update to Pro
-                //if (!CanCreateElement || ArcMap.Document == null || ArcMap.Document.FocusMap == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
-                //    return;
+                if (!CanCreateElement || MapView.Active == null || MapView.Active.Map == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
+                    return;
 
-                base.CreateMapElement();
+                await ExecuteVisibilityLLOS();
 
-                // take your observer and target points and get lines of sight
-
-                //TODO update to Pro
-                //var surface = GetSurfaceFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
-
-                //if (surface == null)
-                //    return;
-
-                //var geoBridge = new GeoDatabaseHelperClass() as IGeoDatabaseBridge2;
-
-                //if (geoBridge == null)
-                //    return;
-
-                //IPoint pointObstruction = null;
-                //IPolyline polyVisible = null;
-                //IPolyline polyInvisible = null;
-                //bool targetIsVisible = false;
-
-                //double finalObserverOffset = GetOffsetInZUnits(ArcMap.Document.FocusMap, ObserverOffset.Value, surface.ZFactor, OffsetUnitType);
-                //double finalTargetOffset = GetOffsetInZUnits(ArcMap.Document.FocusMap, TargetOffset.Value, surface.ZFactor, OffsetUnitType);
-
-                //var DictionaryTargetObserverCount = new Dictionary<IPoint, int>();
-
-                //foreach (var observerPoint in ObserverAddInPoints)
-                //{
-                //    // keep track of visible targets for this observer
-                //    var CanSeeAtLeastOneTarget = false;
-
-                //    var z1 = surface.GetElevation(observerPoint.Point) + finalObserverOffset;
-
-                //    if (surface.IsVoidZ(z1))
-                //    {
-                //        if (double.IsNaN(z1))
-                //            z1 = 0.000001;
-                //    }
-
-                //    foreach (var targetPoint in TargetAddInPoints)
-                //    {
-                //        var z2 = surface.GetElevation(targetPoint.Point) + finalTargetOffset;
-
-                //        if (surface.IsVoidZ(z2))
-                //        {
-                //            if (double.IsNaN(z2))
-                //                z2 = 0.000001;
-                //        }
-
-                //        var fromPoint = new PointClass() { Z = z1, X = observerPoint.Point.X, Y = observerPoint.Point.Y, ZAware = true } as IPoint;
-                //        var toPoint = new PointClass() { Z = z2, X = targetPoint.Point.X, Y = targetPoint.Point.Y, ZAware = true } as IPoint;
-
-                //        geoBridge.GetLineOfSight(surface, fromPoint, toPoint,
-                //            out pointObstruction, out polyVisible, out polyInvisible, out targetIsVisible, false, false);
-
-                //        // set the flag if we can see at least one target
-                //        if (targetIsVisible)
-                //        {
-                //            CanSeeAtLeastOneTarget = true;
-
-                //            // update target observer count
-                //            UpdateTargetObserverCount(DictionaryTargetObserverCount, targetPoint.Point);
-                //        }
-
-                //        if (polyVisible != null)
-                //        {
-                //            AddGraphicToMap(polyVisible, new RgbColorClass() { Green = 255 });
-                //        }
-
-                //        if (polyInvisible != null)
-                //        {
-                //            AddGraphicToMap(polyInvisible, new RgbColorClass() { Red = 255 });
-                //        }
-
-                //        if (polyVisible == null && polyInvisible == null)
-                //        {
-                //            var pcol = new PolylineClass() as IPointCollection;
-                //            pcol.AddPoint(fromPoint);
-                //            pcol.AddPoint(toPoint);
-
-                //            if (targetIsVisible)
-                //                AddGraphicToMap(pcol as IPolyline, new RgbColorClass() { Green = 255 });
-                //            else
-                //                AddGraphicToMap(pcol as IPolyline, new RgbColorClass() { Red = 255 });
-                //        }
-                //    }
-
-                //    // visualize observer
-
-                //    // add blue dot
-                //    AddGraphicToMap(observerPoint.Point, new RgbColorClass() { Blue = 255 }, size: 10);
-
-                //    if (CanSeeAtLeastOneTarget)
-                //    {
-                //        // add green dot
-                //        AddGraphicToMap(observerPoint.Point, new RgbColorClass() { Green = 255 });
-                //    }
-                //    else
-                //    {
-                //        // add red dot
-                //        AddGraphicToMap(observerPoint.Point, new RgbColorClass() { Red = 255 });
-                //    }
-                //}
-
-                //VisualizeTargets(DictionaryTargetObserverCount);
+                await base.CreateMapElement();
             }
             catch(Exception ex)
             {
-                ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.ExceptionSomethingWentWrong);
+                ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.ExceptionSomethingWentWrong,
+                                                                VisibilityLibrary.Properties.Resources.CaptionError);
             }
             finally
             {
@@ -318,36 +249,184 @@ namespace ProAppVisibilityModule.ViewModels
             }
         }
 
-        private void VisualizeTargets(Dictionary<MapPoint, int> dict)
+        private async Task ExecuteVisibilityLLOS()
         {
-            // visualize targets
-            foreach (var targetPoint in TargetAddInPoints)
+            try
             {
-                if (dict.ContainsKey(targetPoint.Point))
-                {
-                    //TODO update to Pro
-                    // add green circle
-                    //AddGraphicToMap(targetPoint.Point, new RgbColorClass() { Green = 255 }, size: 10);
-                    // add label
-                    //AddTextToMap(dict[targetPoint.Point].ToString(), targetPoint.Point, new RgbColorClass(), size: 10);
-                }
-                else
-                {
-                    // add red circle
-                    //AddGraphicToMap(targetPoint.Point, new RgbColorClass() { Red = 255 }, size: 10);
-                }
+                await FeatureClassHelper.CreateLayer(VisibilityLibrary.Properties.Resources.ObserversLayerName, "POINT");
+
+                // add fields for observer offset
+
+                await FeatureClassHelper.AddFieldToLayer(VisibilityLibrary.Properties.Resources.ObserversLayerName, VisibilityLibrary.Properties.Resources.OffsetFieldName, "DOUBLE");
+                await FeatureClassHelper.AddFieldToLayer(VisibilityLibrary.Properties.Resources.ObserversLayerName, VisibilityLibrary.Properties.Resources.OffsetWithZFieldName, "DOUBLE");
+
+                await FeatureClassHelper.CreateLayer(VisibilityLibrary.Properties.Resources.TargetsLayerName, "POINT");
+
+                // add fields for target offset
+
+                await FeatureClassHelper.AddFieldToLayer(VisibilityLibrary.Properties.Resources.TargetsLayerName, VisibilityLibrary.Properties.Resources.OffsetFieldName, "DOUBLE");
+                await FeatureClassHelper.AddFieldToLayer(VisibilityLibrary.Properties.Resources.TargetsLayerName, VisibilityLibrary.Properties.Resources.OffsetWithZFieldName, "DOUBLE");
+
+                // add observer points to feature layer
+
+                await CreatingFeatures(VisibilityLibrary.Properties.Resources.ObserversLayerName, ObserverAddInPoints, ConvertFromTo(OffsetUnitType, VisibilityLibrary.DistanceTypes.Meters, ObserverOffset.Value));
+
+                // add target points to feature layer
+
+                await CreatingFeatures(VisibilityLibrary.Properties.Resources.TargetsLayerName, TargetAddInPoints, ConvertFromTo(OffsetUnitType, VisibilityLibrary.DistanceTypes.Meters, TargetOffset.Value));
+
+                // update with surface information
+
+                await FeatureClassHelper.AddSurfaceInformation(VisibilityLibrary.Properties.Resources.ObserversLayerName, SelectedSurfaceName, VisibilityLibrary.Properties.Resources.ZFieldName);
+                await FeatureClassHelper.AddSurfaceInformation(VisibilityLibrary.Properties.Resources.TargetsLayerName, SelectedSurfaceName, VisibilityLibrary.Properties.Resources.ZFieldName);
+
+                await UpdateShapeWithZ(VisibilityLibrary.Properties.Resources.ObserversLayerName, VisibilityLibrary.Properties.Resources.ZFieldName, ObserverOffset.Value);
+                await UpdateShapeWithZ(VisibilityLibrary.Properties.Resources.TargetsLayerName, VisibilityLibrary.Properties.Resources.ZFieldName, TargetOffset.Value);
+
+                await FeatureClassHelper.Delete(CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.SightLinesLayerName);
+                await FeatureClassHelper.Delete(CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.LOSOutputLayerName);
+
+                // create sight lines
+
+                await FeatureClassHelper.CreateSightLines(VisibilityLibrary.Properties.Resources.ObserversLayerName, 
+                    VisibilityLibrary.Properties.Resources.TargetsLayerName,
+                    CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.SightLinesLayerName, 
+                    VisibilityLibrary.Properties.Resources.OffsetWithZFieldName, 
+                    VisibilityLibrary.Properties.Resources.OffsetWithZFieldName);
+
+                // LOS
+
+                await FeatureClassHelper.CreateLOS(SelectedSurfaceName, 
+                    VisibilityLibrary.Properties.Resources.SightLinesLayerName,
+                    CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.LOSOutputLayerName);
+
+                await Reset(true);
+            }
+            catch(Exception ex)
+            {
+                Debug.Print(ex.Message);
             }
         }
 
-        private void UpdateTargetObserverCount(Dictionary<MapPoint, int> dict, MapPoint targetPoint)
+        private async Task CreatingFeatures(string featureClassName, ObservableCollection<AddInPoint> collection, double offset)
         {
-            if (dict.ContainsKey(targetPoint))
+            try
             {
-                dict[targetPoint] += 1;
+                string message = String.Empty;
+                bool creationResult = false;
+                await ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(async () =>
+                {
+                    using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
+                    using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(featureClassName))
+                    using (FeatureClassDefinition fcDefinition = enterpriseFeatureClass.GetDefinition())
+                    {
+                        EditOperation editOperation = new EditOperation();
+                        editOperation.Callback(context =>
+                        {
+                            try
+                            {
+                                var shapeFieldName = fcDefinition.GetShapeField();
+
+                                foreach (var item in collection)
+                                {
+                                    using (var rowBuffer = enterpriseFeatureClass.CreateRowBuffer())
+                                    {
+                                        // Either the field index or the field name can be used in the indexer.
+                                        rowBuffer[VisibilityLibrary.Properties.Resources.OffsetFieldName] = offset;
+                                        var point = MapPointBuilder.CreateMapPoint(item.Point.X, item.Point.Y, 0.0, item.Point.SpatialReference);
+                                        rowBuffer[shapeFieldName] = point;
+
+                                        using (var feature = enterpriseFeatureClass.CreateRow(rowBuffer))
+                                        {
+                                            //To Indicate that the attribute table has to be updated
+                                            context.Invalidate(feature);
+                                        }
+                                    }
+                                }
+                            }
+                            catch (GeodatabaseException exObj)
+                            {
+                                message = exObj.Message;
+                            }
+                        }, enterpriseFeatureClass);
+
+                        creationResult = await editOperation.ExecuteAsync();
+                        if (!creationResult)
+                            message = editOperation.ErrorMessage;
+
+                        await Project.Current.SaveEditsAsync();
+                    }
+                });
+                if (!creationResult)
+                    MessageBox.Show(message);
+
             }
-            else
+            catch(Exception ex)
             {
-                dict.Add(targetPoint, 1);
+                Debug.Print(ex.Message);
+            }
+        }
+
+        private async Task UpdateShapeWithZ(string featureClassName, string zFieldName, double offsetInMeters)
+        {
+            try
+            {
+                string message = String.Empty;
+                bool creationResult = false;
+                await ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(async () =>
+                {
+                    using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
+                    using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(featureClassName))
+                    using (FeatureClassDefinition fcDefinition = enterpriseFeatureClass.GetDefinition())
+                    {
+                        int zFieldIndex = fcDefinition.FindField(zFieldName);
+
+                        EditOperation editOperation = new EditOperation();
+                        editOperation.Callback(context =>
+                        {
+                            try
+                            {
+                                var shapeFieldName = fcDefinition.GetShapeField();
+
+                                using (RowCursor rowCursor = enterpriseFeatureClass.Search(null, false))
+                                {
+                                    while(rowCursor.MoveNext())
+                                    {
+                                        using(Feature feature = (Feature)rowCursor.Current)
+                                        {
+                                            context.Invalidate(feature);
+                                            var mp = (MapPoint)feature[shapeFieldName];
+                                            var z = (Double)feature[zFieldIndex] + offsetInMeters;
+                                            feature[VisibilityLibrary.Properties.Resources.OffsetWithZFieldName] = z;
+                                            feature.SetShape(MapPointBuilder.CreateMapPoint(mp.X, mp.Y, z, mp.SpatialReference));
+
+                                            feature.Store();
+
+                                            context.Invalidate(feature);
+                                        }
+                                    }
+                                }
+                            }
+                            catch (GeodatabaseException exObj)
+                            {
+                                message = exObj.Message;
+                            }
+                        }, enterpriseFeatureClass);
+
+                        creationResult = await editOperation.ExecuteAsync();
+                        if (!creationResult)
+                            message = editOperation.ErrorMessage;
+
+                        await Project.Current.SaveEditsAsync();
+                    }
+                });
+                if (!creationResult)
+                    MessageBox.Show(message);
+
+            }
+            catch (Exception ex)
+            {
+                Debug.Print(ex.Message);
             }
         }
 

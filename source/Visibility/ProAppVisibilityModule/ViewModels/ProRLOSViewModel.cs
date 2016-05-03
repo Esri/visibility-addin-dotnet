@@ -19,6 +19,7 @@ using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Mapping;
 using VisibilityLibrary;
 using VisibilityLibrary.Helpers;
+using System.Threading.Tasks;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -163,19 +164,20 @@ namespace ProAppVisibilityModule.ViewModels
         /// <summary>
         /// Where all of the work is done.  Override from TabBaseViewModel
         /// </summary>
-        internal override void CreateMapElement()
+        internal override Task CreateMapElement()
         {
+            return Task.Run(() => { });
         }
 
-        internal override void Reset(bool toolReset)
+        internal override async Task Reset(bool toolReset)
         {
-            base.Reset(toolReset);
+            await base.Reset(toolReset);
 
-            if (MapView.Active == null)
-                return;
+            //if (MapView.Active == null)
+            //    return;
 
-            // Disable buttons
-            EnableOkCancelClearBtns(false);
+            //// Disable buttons
+            //EnableOkCancelClearBtns(false);
         }
 
         /// <summary>
