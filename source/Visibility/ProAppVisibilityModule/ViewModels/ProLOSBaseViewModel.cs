@@ -57,6 +57,7 @@ namespace ProAppVisibilityModule.ViewModels
             ActiveMapViewChangedEvent.Subscribe(OnActiveMapViewChanged);
             LayersAddedEvent.Subscribe(OnLayersAdded);
             LayersRemovedEvent.Subscribe(OnLayersAdded);
+            MapPropertyChangedEvent.Subscribe(OnMapPropertyChanged);
         }
 
         ~ProLOSBaseViewModel()
@@ -64,6 +65,7 @@ namespace ProAppVisibilityModule.ViewModels
             ActiveMapViewChangedEvent.Unsubscribe(OnActiveMapViewChanged);
             LayersAddedEvent.Unsubscribe(OnLayersAdded);
             LayersRemovedEvent.Unsubscribe(OnLayersAdded);
+            MapPropertyChangedEvent.Unsubscribe(OnMapPropertyChanged);
         }
 
         #region Properties
@@ -467,6 +469,13 @@ namespace ProAppVisibilityModule.ViewModels
         {
             await ResetSurfaceNames();
         }
+
+
+        private async void OnMapPropertyChanged(MapPropertyChangedEventArgs obj)
+        {
+            await ResetSurfaceNames();
+        }
+
 
         internal double ConvertFromTo(DistanceTypes fromType, DistanceTypes toType, double input)
         {
