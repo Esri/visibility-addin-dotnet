@@ -186,11 +186,8 @@ namespace ArcMapAddinVisibility.ViewModels
 
                 // Set Spatial Reference of selected surface
                 ILayer surfaceLayer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
-                IDataset pDataset = surfaceLayer as IDataset;
-                ISpatialReference pSR = GetSpatialReferenceFromDataset(pDataset);
-                SelectedSurfaceSpatialRef = pSR;
-
-                if (ArcMap.Document.FocusMap.SpatialReference.FactoryCode != SelectedSurfaceSpatialRef.FactoryCode)
+                var geoDataset = surfaceLayer as IGeoDataset;
+                if (geoDataset != null && ArcMap.Document.FocusMap.SpatialReference.FactoryCode != geoDataset.SpatialReference.FactoryCode)
                 {
                     MessageBox.Show(VisibilityLibrary.Properties.Resources.LLOSUserPrompt, VisibilityLibrary.Properties.Resources.LLOSUserPromptCaption);
                     return;
@@ -293,7 +290,8 @@ namespace ArcMapAddinVisibility.ViewModels
             }
             catch(Exception ex)
             {
-                System.Windows.Forms.MessageBox.Show(VisibilityLibrary.Properties.Resources.ExceptionSomethingWentWrong);
+                System.Windows.Forms.MessageBox.Show(VisibilityLibrary.Properties.Resources.ExceptionSomethingWentWrong,
+                                                     VisibilityLibrary.Properties.Resources.CaptionError);
             }
             finally
             {
