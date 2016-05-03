@@ -61,7 +61,7 @@ ArcGIS Add-in provides the capability to quickly do line of sight analyses.
 * Running the add-in
 	* To run from a stand-alone deployment
 		* ArcMap
-			* Install the add-in from the application folder by double clicking the add-in
+			* Install the add-in from the latest Release on Github (https://github.com/Esri/visibility-addin-dotnet/releases)
 			* Add the add-in command to a toolbar via menu option 
 				* "Customize -> Customize mode"
 				* Select "Commands" Tab
