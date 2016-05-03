@@ -65,6 +65,7 @@ namespace ProAppVisibilityModule.ViewModels
             ActiveMapViewChangedEvent.Unsubscribe(OnActiveMapViewChanged);
             LayersAddedEvent.Unsubscribe(OnLayersAdded);
             LayersRemovedEvent.Unsubscribe(OnLayersAdded);
+            MapPropertyChangedEvent.Unsubscribe(OnMapPropertyChanged);
         }
 
         #region Properties
