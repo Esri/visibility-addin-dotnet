@@ -193,6 +193,8 @@ namespace ArcMapAddinVisibility.ViewModels
                     return;
                 }
 
+                SelectedSurfaceSpatialRef = geoDataset.SpatialReference;
+
                 var geoBridge = new GeoDatabaseHelperClass() as IGeoDatabaseBridge2;
 
                 if (geoBridge == null)
