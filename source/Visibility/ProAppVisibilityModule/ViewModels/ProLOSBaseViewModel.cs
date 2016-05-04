@@ -29,6 +29,7 @@ using VisibilityLibrary.Helpers;
 using VisibilityLibrary.Views;
 using VisibilityLibrary.ViewModels;
 using ProAppVisibilityModule.Models;
+using ArcGIS.Core.CIM;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -360,12 +361,24 @@ namespace ProAppVisibilityModule.ViewModels
 
             var elevationSurfaceList = await QueuedTask.Run(() =>
                 {
-                    return layerList.Where(l => l.GetDefinition().LayerElevation != null && 
-                        !string.IsNullOrWhiteSpace(l.GetDefinition().LayerElevation.MapElevationID)).ToList();
-                    
+                    var list = new List<Layer>();
+                    foreach(var layer in layerList)
+                    {
+                        var def = layer.GetDefinition();
+                        if(def != null && def.LayerType == ArcGIS.Core.CIM.MapLayerType.Operational && 
+                            (def is CIMRasterLayer || def is CIMTinLayer || def is CIMLASDatasetLayer || def is CIMMosaicLayer))
+                        {
+                            list.Add(layer);
+                        }
+                    }
+
+                    return list;
                 });
 
-            return elevationSurfaceList.Select(l => l.Name).ToList();
+            var sortedList = elevationSurfaceList.Select(l => l.Name).ToList();
+            sortedList.Sort();
+
+            return sortedList;
         }
 
         /// <summary>
