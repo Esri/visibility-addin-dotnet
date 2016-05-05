@@ -238,7 +238,7 @@ namespace ProAppVisibilityModule.ViewModels
 
             var point = obj as MapPoint;
 
-            if (point == null || !IsValidPoint(point, true).Result)
+            if (point == null || !(await IsValidPoint(point, true)))
                 return;
 
             // ok, we have a point

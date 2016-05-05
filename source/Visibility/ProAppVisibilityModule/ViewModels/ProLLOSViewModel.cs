@@ -167,7 +167,7 @@ namespace ProAppVisibilityModule.ViewModels
 
             var point = obj as MapPoint;
 
-            if (point == null || !IsValidPoint(point).Result)
+            if (point == null || !(await IsValidPoint(point)))
                 return;
 
             if (ToolMode == MapPointToolMode.Target)
