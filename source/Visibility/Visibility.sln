@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisibilityLibrary", "Visibi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProAppVisibilityModule", "ProAppVisibilityModule\ProAppVisibilityModule.csproj", "{4DE1A8A8-BCA3-40C7-8929-041023F2D3E6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisibilityLibrary.Tests", "VisibilityLibrary.Tests\VisibilityLibrary.Tests.csproj", "{6ED31CCE-5012-4F6B-AC29-DC4607FB540E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{4DE1A8A8-BCA3-40C7-8929-041023F2D3E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4DE1A8A8-BCA3-40C7-8929-041023F2D3E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4DE1A8A8-BCA3-40C7-8929-041023F2D3E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6ED31CCE-5012-4F6B-AC29-DC4607FB540E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6ED31CCE-5012-4F6B-AC29-DC4607FB540E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6ED31CCE-5012-4F6B-AC29-DC4607FB540E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6ED31CCE-5012-4F6B-AC29-DC4607FB540E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
