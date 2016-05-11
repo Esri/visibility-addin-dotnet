@@ -205,8 +205,8 @@ namespace ArcMapAddinVisibility.ViewModels
                 IPolyline polyInvisible = null;
                 bool targetIsVisible = false;
 
-                double finalObserverOffset = GetOffsetInZUnits(ArcMap.Document.FocusMap, ObserverOffset.Value, surface.ZFactor, OffsetUnitType);
-                double finalTargetOffset = GetOffsetInZUnits(ArcMap.Document.FocusMap, TargetOffset.Value, surface.ZFactor, OffsetUnitType);
+                double finalObserverOffset = GetOffsetInZUnits(ObserverOffset.Value, surface.ZFactor, OffsetUnitType);
+                double finalTargetOffset = GetOffsetInZUnits(TargetOffset.Value, surface.ZFactor, OffsetUnitType);
 
                 var DictionaryTargetObserverCount = new Dictionary<IPoint, int>();
 
