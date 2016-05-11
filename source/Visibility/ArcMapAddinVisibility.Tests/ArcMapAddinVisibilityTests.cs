@@ -24,7 +24,7 @@ namespace ArcMapAddinVisibility.Tests
             aoInitialize.Initialize(esriLicenseProductCode.esriLicenseProductCodeAdvanced); 
         }
 
-        [TestMethod]
+        [TestMethod, Description("Tests converting Point to string")]
         public void PointToStringConverterTest()
         {
             var pointConverter = new IPointToStringConverter();
@@ -41,7 +41,7 @@ namespace ArcMapAddinVisibility.Tests
             Assert.IsFalse(output.Equals("NA"));
         }
 
-        [TestMethod]
+        [TestMethod, Description("Tests creating AMGraphic object")]
         public void CreateAMGraphicTest()
         {
             var amGraphic = new AMGraphic("tempGraphic", null);
@@ -63,7 +63,7 @@ namespace ArcMapAddinVisibility.Tests
         #endregion
 
         #region LOSBaseViewModel
-        [TestMethod]
+        [TestMethod, Description("Tests creating LOSBaseViewModel object")]
         public void CreateLOSBaseViewModelTest()
         {
             var losBaseViewModel = new LOSBaseViewModel();
@@ -73,21 +73,21 @@ namespace ArcMapAddinVisibility.Tests
         #endregion
 
         #region RLOSViewModel
-        [TestMethod]
+        [TestMethod, Description("Tests creating RLOSViewModel object")]
         public void CreateRLOSViewModelTest()
         {
             var rlosViewModel = new RLOSViewModel();
             Assert.IsNotNull(rlosViewModel);
         }
 
-        [TestMethod]
+        [TestMethod, Description("Tests creating a FeatureWorkspace")]
         public void CreateFeatureWorkspaceTest()
         {
             var workspace = CreateFeatureWorkspace();
             Assert.IsNotNull(workspace);
         }
 
-        [TestMethod]
+        [TestMethod, Description("Tests creating an observers feature class")]
         public void CreateObserversFeatureClassTest()
         {
             var workspace = CreateFeatureWorkspace();
@@ -124,7 +124,7 @@ namespace ArcMapAddinVisibility.Tests
             Assert.IsTrue(index >= 0);
         }
 
-        [TestMethod]
+        [TestMethod, Description("Tests start/stop edit operations")]
         public void StartStopEditTest()
         {
             IWorkspace workspace = CreateFeatureWorkspace() as IWorkspace;
