@@ -25,7 +25,7 @@ namespace ArcMapAddinVisibility.Tests
         }
 
         [TestMethod]
-        public void PointToStringConverter()
+        public void PointToStringConverterTest()
         {
             var pointConverter = new IPointToStringConverter();
             Assert.IsNotNull(pointConverter);
@@ -42,7 +42,7 @@ namespace ArcMapAddinVisibility.Tests
         }
 
         [TestMethod]
-        public void CreateAMGraphic()
+        public void CreateAMGraphicTest()
         {
             var amGraphic = new AMGraphic("tempGraphic", null);
             Assert.IsNotNull(amGraphic);
@@ -54,7 +54,7 @@ namespace ArcMapAddinVisibility.Tests
 
         #region LLOSViewModel
         [TestMethod]
-        public void CreateLLOSViewModel()
+        public void CreateLLOSViewModelTest()
         {
             var llosViewModel = new LLOSViewModel();
             Assert.IsNotNull(llosViewModel);
@@ -64,7 +64,7 @@ namespace ArcMapAddinVisibility.Tests
 
         #region LOSBaseViewModel
         [TestMethod]
-        public void CreateLOSBaseViewModel()
+        public void CreateLOSBaseViewModelTest()
         {
             var losBaseViewModel = new LOSBaseViewModel();
             Assert.IsNotNull(losBaseViewModel);
@@ -74,7 +74,7 @@ namespace ArcMapAddinVisibility.Tests
 
         #region RLOSViewModel
         [TestMethod]
-        public void CreateRLOSViewModel()
+        public void CreateRLOSViewModelTest()
         {
             var rlosViewModel = new RLOSViewModel();
             Assert.IsNotNull(rlosViewModel);
