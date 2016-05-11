@@ -310,12 +310,11 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <summary>
         /// Method to get a z offset distance in the correct units for the map
         /// </summary>
-        /// <param name="map">IMap</param>
         /// <param name="offset">the input offset</param>
         /// <param name="zFactor">ISurface z factor</param>
         /// <param name="distanceType">the "from" distance unit type</param>
         /// <returns></returns>
-        internal double GetOffsetInZUnits(IMap map, double offset, double zFactor, DistanceTypes distanceType)
+        internal double GetOffsetInZUnits(double offset, double zFactor, DistanceTypes distanceType)
         {
             if (SelectedSurfaceSpatialRef == null)
                 return offset;
