@@ -15,6 +15,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArcMapAddinVisibility.Tests
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProAppVisibilityModule.Tests", "ProAppVisibilityModule.Tests\ProAppVisibilityModule.Tests.csproj", "{B3882DC4-BC2C-4BD7-9802-BDA76954B067}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4DE1A8A8-BCA3-40C7-8929-041023F2D3E6} = {4DE1A8A8-BCA3-40C7-8929-041023F2D3E6}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

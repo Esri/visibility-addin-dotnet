@@ -18,14 +18,42 @@
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+// ArcGIS
+using ArcGIS.Core.Hosting;
+using ArcGIS.Core.Geometry;
+
+// Solution
+using ProAppVisibilityModule.Models;
+
 namespace ProAppVisibilityModule.Tests
 {
     [TestClass]
     public class ProAppVisibilityModuleTests
     {
-        [TestMethod]
-        public void TestMethod1()
+        //Use ClassInitialize to run code before running the first test in the class
+        [ClassInitialize()]
+        [TestCategory("ArcGISPro")]
+        public static void MyClassInitialize(TestContext testContext)
         {
+            //Host.Initialize();
+        }
+
+        [TestMethod, Description("Tests creating ProGraphic object")]
+        [TestCategory("ArcGISPro")]
+        public void CreateProGraphicTest()
+        {
+            var guid = Guid.NewGuid().ToString();
+            Geometry geom = null;
+            var proGraphic = new ProGraphic(null, guid, geom);
+            Assert.IsNotNull(proGraphic);
+            Assert.IsTrue(proGraphic.IsTemp == false);
+        }
+
+        [TestMethod, Description("Tests MapPointHelper")]
+        [TestCategory("ArcGISPro")]
+        public async void GetMapPointAsDisplayStringTest()
+        {
+            await ProAppVisibilityModule.Helpers.FeatureClassHelper.CreateLayer("testFc", "POINT");
         }
     }
 }

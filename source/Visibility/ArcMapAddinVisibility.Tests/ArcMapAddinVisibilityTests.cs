@@ -37,16 +37,18 @@ namespace ArcMapAddinVisibility.Tests
     {
         //Use ClassInitialize to run code before running the first test in the class
         [ClassInitialize()]
+        [TestCategory("ArcMapAddin")]
         public static void MyClassInitialize(TestContext testContext)
         {
             bool blnBoundToRuntime = ESRI.ArcGIS.RuntimeManager.Bind(ESRI.ArcGIS.ProductCode.EngineOrDesktop);
             Assert.IsTrue(blnBoundToRuntime, "Not bound to runtime");
 
             IAoInitialize aoInitialize = new AoInitializeClass();
-            aoInitialize.Initialize(esriLicenseProductCode.esriLicenseProductCodeAdvanced); 
+            aoInitialize.Initialize(esriLicenseProductCode.esriLicenseProductCodeBasic); 
         }
 
         [TestMethod, Description("Tests converting Point to string")]
+        [TestCategory("ArcMapAddin")]
         public void PointToStringConverterTest()
         {
             var pointConverter = new IPointToStringConverter();
@@ -64,6 +66,7 @@ namespace ArcMapAddinVisibility.Tests
         }
 
         [TestMethod, Description("Tests creating AMGraphic object")]
+        [TestCategory("ArcMapAddin")]
         public void CreateAMGraphicTest()
         {
             var amGraphic = new AMGraphic("tempGraphic", null);
@@ -75,7 +78,8 @@ namespace ArcMapAddinVisibility.Tests
         #region Test ViewModels
 
         #region LLOSViewModel
-        [TestMethod]
+        [TestMethod, Description("Tests creating LLOSViewModel object")]
+        [TestCategory("ArcMapAddin")]
         public void CreateLLOSViewModelTest()
         {
             var llosViewModel = new LLOSViewModel();
@@ -86,6 +90,7 @@ namespace ArcMapAddinVisibility.Tests
 
         #region LOSBaseViewModel
         [TestMethod, Description("Tests creating LOSBaseViewModel object")]
+        [TestCategory("ArcMapAddin")]
         public void CreateLOSBaseViewModelTest()
         {
             var losBaseViewModel = new LOSBaseViewModel();
@@ -96,6 +101,7 @@ namespace ArcMapAddinVisibility.Tests
 
         #region RLOSViewModel
         [TestMethod, Description("Tests creating RLOSViewModel object")]
+        [TestCategory("ArcMapAddin")]
         public void CreateRLOSViewModelTest()
         {
             var rlosViewModel = new RLOSViewModel();
@@ -103,6 +109,7 @@ namespace ArcMapAddinVisibility.Tests
         }
 
         [TestMethod, Description("Tests creating a FeatureWorkspace")]
+        [TestCategory("ArcMapAddin")]
         public void CreateFeatureWorkspaceTest()
         {
             var workspace = CreateFeatureWorkspace();
@@ -110,6 +117,7 @@ namespace ArcMapAddinVisibility.Tests
         }
 
         [TestMethod, Description("Tests creating an observers feature class")]
+        [TestCategory("ArcMapAddin")]
         public void CreateObserversFeatureClassTest()
         {
             var workspace = CreateFeatureWorkspace();
@@ -147,6 +155,7 @@ namespace ArcMapAddinVisibility.Tests
         }
 
         [TestMethod, Description("Tests start/stop edit operations")]
+        [TestCategory("ArcMapAddin")]
         public void StartStopEditTest()
         {
             IWorkspace workspace = CreateFeatureWorkspace() as IWorkspace;
