@@ -48,12 +48,5 @@ namespace ProAppVisibilityModule.Tests
             Assert.IsNotNull(proGraphic);
             Assert.IsTrue(proGraphic.IsTemp == false);
         }
-
-        [TestMethod, Description("Tests MapPointHelper")]
-        [TestCategory("ArcGISPro")]
-        public async void GetMapPointAsDisplayStringTest()
-        {
-            await ProAppVisibilityModule.Helpers.FeatureClassHelper.CreateLayer("testFc", "POINT");
-        }
     }
 }
