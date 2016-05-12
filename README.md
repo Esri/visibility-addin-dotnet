@@ -53,8 +53,12 @@ ArcGIS Add-in provides the capability to quickly do line of sight analyses.
 		* Open and build solution file
 	* To use MSBuild to build the solution
 		* Open a Visual Studio Command Prompt: Start Menu | Visual Studio 2013 | Visual Studio Tools | Developer Command Prompt for VS2013
-		* ``` cd visibility-addin-dotnet\source\ArcMapAddinVisibility ```
-		* ``` msbuild ArcMapAddinVisibility.sln /property:Configuration=Release ```
+		* ` cd visibility-addin-dotnet\source\ArcMapAddinVisibility `
+		* ` msbuild ArcMapAddinVisibility.sln /property:Configuration=Release `
+	* To run Unit test from command prompt ◾Open a Visual Studio Command Prompt: Start Menu | Visual Studio 2013 | Visual Studio Tools | Developer Command Prompt for VS2013
+		* ` cd visibility-addin-dotnet\source\Visibility\ArcMapAddinVisibility.Tests\bin\Release `
+		* ` MSTest /testcontainer:ArcMapAddinVisibility.Tests.dll * `
+
 	* Note : Assembly references are based on a default install of the SDK, you may have to update the references if you chose an alternate install option
 
 ## Desktop Users
