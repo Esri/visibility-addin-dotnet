@@ -212,8 +212,8 @@ namespace ArcMapAddinVisibility.ViewModels
                 // Create feature class
                 IFeatureClass pointFc = CreateObserversFeatureClass(workspace, SelectedSurfaceSpatialRef, "Output" + RunCount.ToString());
 
-                double finalObserverOffset = GetOffsetInZUnits(ArcMap.Document.FocusMap, ObserverOffset.Value, surface.ZFactor, OffsetUnitType);
-                double finalSurfaceOffset = GetOffsetInZUnits(ArcMap.Document.FocusMap, SurfaceOffset, surface.ZFactor, OffsetUnitType);
+                double finalObserverOffset = GetOffsetInZUnits(ObserverOffset.Value, surface.ZFactor, OffsetUnitType);
+                double finalSurfaceOffset = GetOffsetInZUnits(SurfaceOffset, surface.ZFactor, OffsetUnitType);
 
                 double conversionFactor = GetConversionFactor(SelectedSurfaceSpatialRef);
                 double convertedMinDistance = MinDistance * conversionFactor;
@@ -326,7 +326,7 @@ namespace ArcMapAddinVisibility.ViewModels
                     if (outputFeatureLayer != null)
                     {
                         // set the renderer
-                        IFeatureRenderer featRend = UnqueValueRenderer(workspace, finalFc);
+                        IFeatureRenderer featRend = UniqueValueRenderer(workspace, finalFc);
                         IGeoFeatureLayer geoLayer = outputFeatureLayer as IGeoFeatureLayer;
                         geoLayer.Renderer = featRend;
                         geoLayer.Name = "VisibilityLayer_" + RunCount.ToString();
@@ -388,7 +388,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
         #region public
 
-        public IFeatureRenderer UnqueValueRenderer(IFeatureWorkspace workspace, IFeatureClass fc)
+        public IFeatureRenderer UniqueValueRenderer(IFeatureWorkspace workspace, IFeatureClass fc)
         {
             try
             {
@@ -498,18 +498,26 @@ namespace ArcMapAddinVisibility.ViewModels
         /// Start Editing operation
         /// </summary>
         /// <param name="ipWorkspace">IWorkspace</param>
-        public static void StartEditOperation(IWorkspace ipWorkspace)
+        public static bool StartEditOperation(IWorkspace ipWorkspace)
         {
+            bool blnWasSuccessful = false;
             IWorkspaceEdit ipWsEdit = ipWorkspace as IWorkspaceEdit;
-            try
+
+            if (ipWsEdit != null)
             {
-                ipWsEdit.StartEditOperation();
+                try
+                {
+                    ipWsEdit.StartEditOperation();
+                    blnWasSuccessful = true;
+                }
+                catch (Exception ex)
+                {
+                    ipWsEdit.AbortEditOperation();
+                    throw (ex);
+                }
             }
-            catch (Exception ex)
-            {
-                ipWsEdit.AbortEditOperation();
-                throw (ex);
-            }
+            
+            return blnWasSuccessful;
         }
 
         /// <summary>
@@ -521,15 +529,18 @@ namespace ArcMapAddinVisibility.ViewModels
         {
             bool blnWasSuccessful = false;
             IWorkspaceEdit ipWsEdit = ipWorkspace as IWorkspaceEdit;
-
-            try
+            if (ipWsEdit != null)
             {
-                ipWsEdit.StopEditOperation();
-                blnWasSuccessful = true;
-            }
-            catch (Exception ex)
-            {
-                ipWsEdit.AbortEditOperation();
+                try
+                {
+                    ipWsEdit.StopEditOperation();
+                    blnWasSuccessful = true;
+                }
+                catch (Exception ex)
+                {
+                    ipWsEdit.AbortEditOperation();
+                    throw (ex);
+                }
             }
 
             return blnWasSuccessful;
