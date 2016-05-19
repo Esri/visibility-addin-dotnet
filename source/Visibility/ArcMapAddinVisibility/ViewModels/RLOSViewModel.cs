@@ -330,7 +330,7 @@ namespace ArcMapAddinVisibility.ViewModels
                         IGeoFeatureLayer geoLayer = outputFeatureLayer as IGeoFeatureLayer;
                         geoLayer.Renderer = featRend;
                         geoLayer.Name = "VisibilityLayer_" + RunCount.ToString();
-
+                        
                         // Set the layer transparency
                         IDisplayFilterManager filterManager = (IDisplayFilterManager)outputFeatureLayer;
                         ITransparencyDisplayFilter filter = new TransparencyDisplayFilter(); 
@@ -428,13 +428,20 @@ namespace ArcMapAddinVisibility.ViewModels
 
                 ISimpleFillSymbol fillSymbol = new SimpleFillSymbolClass();
                 ISimpleFillSymbol fillSymbol2 = new SimpleFillSymbolClass();
+
+                ISimpleLineSymbol outlineSymbol = new SimpleLineSymbolClass();
+                outlineSymbol.Color = new RgbColorClass() { NullColor = true } as IColor;
+                outlineSymbol.Style = esriSimpleLineStyle.esriSLSSolid;
+
                 if (ShowNonVisibleData == true)
                 {                  
                     fillSymbol.Color = new RgbColorClass() { Red = 255 } as IColor;
+                    fillSymbol.Outline = outlineSymbol;
                     uvRenderer.AddValue("0", "", fillSymbol as ISymbol);
-                    uvRenderer.set_Label("0", "Non-Visible");                
+                    uvRenderer.set_Label("0", "Non-Visible");    
                 }
                     fillSymbol2.Color = new RgbColorClass() { Green = 255 } as IColor;
+                    fillSymbol2.Outline = outlineSymbol;
                     uvRenderer.AddValue("1", "", fillSymbol2 as ISymbol);
                     uvRenderer.set_Label("1", "Visible by 1 Observer");
 
@@ -445,6 +452,7 @@ namespace ArcMapAddinVisibility.ViewModels
                     {
                         ISimpleFillSymbol newFillSymbol = new SimpleFillSymbolClass();
                         newFillSymbol.Color = colorRamp.get_Color(i);
+                        newFillSymbol.Outline = outlineSymbol;
                         uvRenderer.AddValue(i.ToString(), "", newFillSymbol as ISymbol);
                         string label = "Visible by " + i.ToString() + " Observers";
                         uvRenderer.set_Label(i.ToString(), label);
