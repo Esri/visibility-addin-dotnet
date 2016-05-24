@@ -342,4 +342,7 @@
   <data name="ZFieldName" xml:space="preserve">
     <value>Z</value>
   </data>
+  <data name="RLOSOutputLayerName" xml:space="preserve">
+    <value>vis_rlos_output</value>
+  </data>
 </root>

@@ -15,11 +15,14 @@
 using System;
 using System.Linq;
 using System.Windows;
+using System.Threading.Tasks;
+using System.Diagnostics;
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Mapping;
+using ArcGIS.Desktop.Core;
 using VisibilityLibrary;
 using VisibilityLibrary.Helpers;
-using System.Threading.Tasks;
+using ProAppVisibilityModule.Helpers;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -90,21 +93,21 @@ namespace ProAppVisibilityModule.ViewModels
 
         public RelayCommand SubmitCommand { get; set; }
 
-        private void OnSubmitCommand(object obj)
+        private async void OnSubmitCommand(object obj)
         {
             DisplayProgressBar = Visibility.Visible;
-            CreateMapElement();
+            await CreateMapElement();
             DisplayProgressBar = Visibility.Hidden;
         }
 
-        private void OnCancelCommand(object obj)
+        private async void OnCancelCommand(object obj)
         {
-            Reset(true);
+            await Reset(true);
         }
 
-        private void OnClearCommand(object obj)
+        private async void OnClearCommand(object obj)
         {
-            Reset(true);
+            await Reset(true);
         }
 
 
@@ -164,17 +167,73 @@ namespace ProAppVisibilityModule.ViewModels
         /// <summary>
         /// Where all of the work is done.  Override from TabBaseViewModel
         /// </summary>
-        internal override Task CreateMapElement()
+        internal override async Task CreateMapElement()
         {
-            return Task.Run(() => { });
+            try
+            {
+                IsRunning = true;
+
+                if (!CanCreateElement || MapView.Active == null || MapView.Active.Map == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
+                    return;
+
+                await ExecuteVisibilityRLOS();
+
+                //await base.CreateMapElement();
+            }
+            catch (Exception ex)
+            {
+                ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.ExceptionSomethingWentWrong,
+                                                                VisibilityLibrary.Properties.Resources.CaptionError);
+            }
+            finally
+            {
+                IsRunning = false;
+            }
+        }
+
+        private async Task ExecuteVisibilityRLOS()
+        {
+            try
+            {
+                await FeatureClassHelper.CreateLayer(VisibilityLibrary.Properties.Resources.ObserversLayerName, "POINT");
+
+                // add fields for observer offset
+
+                await FeatureClassHelper.AddFieldToLayer(VisibilityLibrary.Properties.Resources.ObserversLayerName, VisibilityLibrary.Properties.Resources.OffsetFieldName, "DOUBLE");
+                await FeatureClassHelper.AddFieldToLayer(VisibilityLibrary.Properties.Resources.ObserversLayerName, VisibilityLibrary.Properties.Resources.OffsetWithZFieldName, "DOUBLE");
+
+                // add observer points to feature layer
+
+                await FeatureClassHelper.CreatingFeatures(VisibilityLibrary.Properties.Resources.ObserversLayerName, ObserverAddInPoints, ConvertFromTo(OffsetUnitType, VisibilityLibrary.DistanceTypes.Meters, ObserverOffset.Value));
+
+                // update with surface information
+
+                await FeatureClassHelper.AddSurfaceInformation(VisibilityLibrary.Properties.Resources.ObserversLayerName, SelectedSurfaceName, VisibilityLibrary.Properties.Resources.ZFieldName);
+
+                await FeatureClassHelper.UpdateShapeWithZ(VisibilityLibrary.Properties.Resources.ObserversLayerName, VisibilityLibrary.Properties.Resources.ZFieldName, ObserverOffset.Value);
+
+                await FeatureClassHelper.Delete(CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.RLOSOutputLayerName);
+
+
+                // Visibility
+
+                await FeatureClassHelper.CreateVisibility(SelectedSurfaceName, VisibilityLibrary.Properties.Resources.ObserversLayerName,
+                    CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.RLOSOutputLayerName);
+
+                //await Reset(true);
+            }
+            catch (Exception ex)
+            {
+                Debug.Print(ex.Message);
+            }
         }
 
         internal override async Task Reset(bool toolReset)
         {
             await base.Reset(toolReset);
 
-            //if (MapView.Active == null)
-            //    return;
+            if (MapView.Active == null)
+                return;
 
             //// Disable buttons
             //EnableOkCancelClearBtns(false);

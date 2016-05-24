@@ -22,9 +22,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Mapping;
-using ArcGIS.Core.Data;
 using ArcGIS.Desktop.Core;
-using ArcGIS.Desktop.Editing;
 using VisibilityLibrary.Helpers;
 using ProAppVisibilityModule.Helpers;
 using ProAppVisibilityModule.Models;
@@ -269,19 +267,19 @@ namespace ProAppVisibilityModule.ViewModels
 
                 // add observer points to feature layer
 
-                await CreatingFeatures(VisibilityLibrary.Properties.Resources.ObserversLayerName, ObserverAddInPoints, ConvertFromTo(OffsetUnitType, VisibilityLibrary.DistanceTypes.Meters, ObserverOffset.Value));
+                await FeatureClassHelper.CreatingFeatures(VisibilityLibrary.Properties.Resources.ObserversLayerName, ObserverAddInPoints, ConvertFromTo(OffsetUnitType, VisibilityLibrary.DistanceTypes.Meters, ObserverOffset.Value));
 
                 // add target points to feature layer
 
-                await CreatingFeatures(VisibilityLibrary.Properties.Resources.TargetsLayerName, TargetAddInPoints, ConvertFromTo(OffsetUnitType, VisibilityLibrary.DistanceTypes.Meters, TargetOffset.Value));
+                await FeatureClassHelper.CreatingFeatures(VisibilityLibrary.Properties.Resources.TargetsLayerName, TargetAddInPoints, ConvertFromTo(OffsetUnitType, VisibilityLibrary.DistanceTypes.Meters, TargetOffset.Value));
 
                 // update with surface information
 
                 await FeatureClassHelper.AddSurfaceInformation(VisibilityLibrary.Properties.Resources.ObserversLayerName, SelectedSurfaceName, VisibilityLibrary.Properties.Resources.ZFieldName);
                 await FeatureClassHelper.AddSurfaceInformation(VisibilityLibrary.Properties.Resources.TargetsLayerName, SelectedSurfaceName, VisibilityLibrary.Properties.Resources.ZFieldName);
 
-                await UpdateShapeWithZ(VisibilityLibrary.Properties.Resources.ObserversLayerName, VisibilityLibrary.Properties.Resources.ZFieldName, ObserverOffset.Value);
-                await UpdateShapeWithZ(VisibilityLibrary.Properties.Resources.TargetsLayerName, VisibilityLibrary.Properties.Resources.ZFieldName, TargetOffset.Value);
+                await FeatureClassHelper.UpdateShapeWithZ(VisibilityLibrary.Properties.Resources.ObserversLayerName, VisibilityLibrary.Properties.Resources.ZFieldName, ObserverOffset.Value);
+                await FeatureClassHelper.UpdateShapeWithZ(VisibilityLibrary.Properties.Resources.TargetsLayerName, VisibilityLibrary.Properties.Resources.ZFieldName, TargetOffset.Value);
 
                 await FeatureClassHelper.Delete(CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.SightLinesLayerName);
                 await FeatureClassHelper.Delete(CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.LOSOutputLayerName);
@@ -303,128 +301,6 @@ namespace ProAppVisibilityModule.ViewModels
                 await Reset(true);
             }
             catch(Exception ex)
-            {
-                Debug.Print(ex.Message);
-            }
-        }
-
-        private async Task CreatingFeatures(string featureClassName, ObservableCollection<AddInPoint> collection, double offset)
-        {
-            try
-            {
-                string message = String.Empty;
-                bool creationResult = false;
-                await ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(async () =>
-                {
-                    using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
-                    using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(featureClassName))
-                    using (FeatureClassDefinition fcDefinition = enterpriseFeatureClass.GetDefinition())
-                    {
-                        EditOperation editOperation = new EditOperation();
-                        editOperation.Callback(context =>
-                        {
-                            try
-                            {
-                                var shapeFieldName = fcDefinition.GetShapeField();
-
-                                foreach (var item in collection)
-                                {
-                                    using (var rowBuffer = enterpriseFeatureClass.CreateRowBuffer())
-                                    {
-                                        // Either the field index or the field name can be used in the indexer.
-                                        rowBuffer[VisibilityLibrary.Properties.Resources.OffsetFieldName] = offset;
-                                        var point = MapPointBuilder.CreateMapPoint(item.Point.X, item.Point.Y, 0.0, item.Point.SpatialReference);
-                                        rowBuffer[shapeFieldName] = point;
-
-                                        using (var feature = enterpriseFeatureClass.CreateRow(rowBuffer))
-                                        {
-                                            //To Indicate that the attribute table has to be updated
-                                            context.Invalidate(feature);
-                                        }
-                                    }
-                                }
-                            }
-                            catch (GeodatabaseException exObj)
-                            {
-                                message = exObj.Message;
-                            }
-                        }, enterpriseFeatureClass);
-
-                        creationResult = await editOperation.ExecuteAsync();
-                        if (!creationResult)
-                            message = editOperation.ErrorMessage;
-
-                        await Project.Current.SaveEditsAsync();
-                    }
-                });
-                if (!creationResult)
-                    MessageBox.Show(message);
-
-            }
-            catch(Exception ex)
-            {
-                Debug.Print(ex.Message);
-            }
-        }
-
-        private async Task UpdateShapeWithZ(string featureClassName, string zFieldName, double offsetInMeters)
-        {
-            try
-            {
-                string message = String.Empty;
-                bool creationResult = false;
-                await ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(async () =>
-                {
-                    using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
-                    using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(featureClassName))
-                    using (FeatureClassDefinition fcDefinition = enterpriseFeatureClass.GetDefinition())
-                    {
-                        int zFieldIndex = fcDefinition.FindField(zFieldName);
-
-                        EditOperation editOperation = new EditOperation();
-                        editOperation.Callback(context =>
-                        {
-                            try
-                            {
-                                var shapeFieldName = fcDefinition.GetShapeField();
-
-                                using (RowCursor rowCursor = enterpriseFeatureClass.Search(null, false))
-                                {
-                                    while(rowCursor.MoveNext())
-                                    {
-                                        using(Feature feature = (Feature)rowCursor.Current)
-                                        {
-                                            context.Invalidate(feature);
-                                            var mp = (MapPoint)feature[shapeFieldName];
-                                            var z = (Double)feature[zFieldIndex] + offsetInMeters;
-                                            feature[VisibilityLibrary.Properties.Resources.OffsetWithZFieldName] = z;
-                                            feature.SetShape(MapPointBuilder.CreateMapPoint(mp.X, mp.Y, z, mp.SpatialReference));
-
-                                            feature.Store();
-
-                                            context.Invalidate(feature);
-                                        }
-                                    }
-                                }
-                            }
-                            catch (GeodatabaseException exObj)
-                            {
-                                message = exObj.Message;
-                            }
-                        }, enterpriseFeatureClass);
-
-                        creationResult = await editOperation.ExecuteAsync();
-                        if (!creationResult)
-                            message = editOperation.ErrorMessage;
-
-                        await Project.Current.SaveEditsAsync();
-                    }
-                });
-                if (!creationResult)
-                    MessageBox.Show(message);
-
-            }
-            catch (Exception ex)
             {
                 Debug.Print(ex.Message);
             }

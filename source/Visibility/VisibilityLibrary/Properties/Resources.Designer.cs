@@ -610,6 +610,15 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to vis_rlos_output.
+        /// </summary>
+        public static string RLOSOutputLayerName {
+            get {
+                return ResourceManager.GetString("RLOSOutputLayerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The selected surface has not been projected.  Please project your data and try again..
         /// </summary>
         public static string RLOSUserPrompt {
