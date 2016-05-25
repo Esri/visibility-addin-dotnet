@@ -12,12 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using ArcGIS.Core.CIM;
 using ArcGIS.Core.Data;
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Core;
 using ArcGIS.Desktop.Core.Geoprocessing;
 using ArcGIS.Desktop.Editing;
 using ArcGIS.Desktop.Framework.Dialogs;
+using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 using ProAppVisibilityModule.Models;
 using System;
@@ -41,7 +43,7 @@ namespace ProAppVisibilityModule.Helpers
         /// <item>POLYLINE</item>
         /// <item>POLYGON</item></list></param>
         /// <returns></returns>
-        public static async Task CreateLayer(string featureclassName, string featureclassType)
+        public static async Task CreateLayer(string featureclassName, string featureclassType, bool zEnabled, bool addToMap)
         {
             List<object> arguments = new List<object>();
             // store the results in the default geodatabase
@@ -55,11 +57,21 @@ namespace ProAppVisibilityModule.Helpers
             // m values
             arguments.Add("DISABLED");
             // z values
-            arguments.Add("ENABLED");
+            if(zEnabled)
+                arguments.Add("ENABLED");
+            else
+                arguments.Add("DISABLED");
 
             arguments.Add(MapView.Active.Map.SpatialReference);
 
-            IGPResult result = await Geoprocessing.ExecuteToolAsync("CreateFeatureclass_management", Geoprocessing.MakeValueArray(arguments.ToArray()));
+            var environments = Geoprocessing.MakeEnvironmentArray(overwriteoutput: true);
+
+            IGPResult result = await Geoprocessing.ExecuteToolAsync("CreateFeatureclass_management", 
+                Geoprocessing.MakeValueArray(arguments.ToArray()), 
+                environments, 
+                null,
+                null,
+                addToMap ? GPExecuteToolFlags.Default : GPExecuteToolFlags.None);
         }
 
         public static async Task AddFieldToLayer(string tableName, string fieldName, string fieldType)
@@ -190,13 +202,38 @@ namespace ProAppVisibilityModule.Helpers
             }
         }
 
+        public static async Task IntersectOutput(string inputRasterLayer, string outputPolygonLayer, bool simplify, string rasterField)
+        {
+            //RasterToPolygon_conversion (in_raster, out_polygon_features, {simplify}, {raster_field})
+            List<object> arguments = new List<object>();
+            // in_raster
+            arguments.Add(inputRasterLayer);
+            // out_polygon_features
+            arguments.Add(outputPolygonLayer);
+            // {simplify}
+            arguments.Add(simplify);
+            // {raster_field}
+            arguments.Add(rasterField);
+
+            var environments = Geoprocessing.MakeEnvironmentArray(overwriteoutput: true);
+
+            IGPResult result = await Geoprocessing.ExecuteToolAsync("RasterToPolygon_conversion", Geoprocessing.MakeValueArray(arguments.ToArray()), environments);
+
+            if (result.IsFailed)
+            {
+                foreach (var msg in result.Messages)
+                    Debug.Print(msg.Text);
+            }
+        }
+
         public static async Task CreateVisibility(string surfaceName, string observerFeatureClassName, string outRLOSFeatureClass, 
                                                     double observerOffset, double surfaceOffset, 
                                                     double minDistance, double maxDistance,
                                                     double horizontalStartAngle, double horizontalEndAngle,
                                                     double verticalUpperAngle, double verticalLowerAngle,
                                                     bool showNonVisibleData,
-                                                    System.Collections.Generic.IReadOnlyList<System.Collections.Generic.KeyValuePair<string, string>> environments)
+                                                    System.Collections.Generic.IReadOnlyList<System.Collections.Generic.KeyValuePair<string, string>> environments,
+                                                    bool addToMap)
         {
             //Visibility (in_raster, in_observer_features, {out_agl_raster}, {analysis_type}, {nonvisible_cell_value}, {z_factor}, 
             // {curvature_correction}, {refractivity_coefficient}, {surface_offset}, {observer_elevation}, {observer_offset}, {inner_radius}, 
@@ -213,7 +250,7 @@ namespace ProAppVisibilityModule.Helpers
             // analysis_type
             arguments.Add("FREQUENCY");
             // nonvisible_cell_value
-            arguments.Add(!showNonVisibleData); // TRUE or FALSE
+            arguments.Add("ZERO");
             // z_factor
             arguments.Add(1.0);
             // curvature_correction
@@ -239,7 +276,8 @@ namespace ProAppVisibilityModule.Helpers
             // vertical_lower_angle
             arguments.Add(verticalLowerAngle);
 
-            IGPResult result = await Geoprocessing.ExecuteToolAsync("Visibility_3d", Geoprocessing.MakeValueArray(arguments.ToArray()), environments);
+            IGPResult result = await Geoprocessing.ExecuteToolAsync("Visibility_3d", Geoprocessing.MakeValueArray(arguments.ToArray()), environments,
+                null, null, addToMap ? GPExecuteToolFlags.Default : GPExecuteToolFlags.None);
 
             if (result.IsFailed)
             {
@@ -247,7 +285,34 @@ namespace ProAppVisibilityModule.Helpers
                     Debug.Print(msg.Text);
             }
         }
+        public static async Task CreateUniqueValueRenderer(FeatureLayer featureLayer, bool showNonVisData)
+        {
+            await QueuedTask.Run(() =>
+                {
+                    // color ramp
+                    CIMICCColorSpace colorSpace = new CIMICCColorSpace()
+                    {
+                        URL = "Default RGB"
+                    };
 
+                    CIMContinuousColorRamp continuousColorRamp = new CIMLinearContinuousColorRamp();
+                    continuousColorRamp.FromColor = CIMColor.CreateRGBColor(0, 255, 0); // green
+                    continuousColorRamp.ToColor = CIMColor.CreateRGBColor(160, 32, 240);// purple
+                    continuousColorRamp.ColorSpace = colorSpace;
+
+                    UniqueValueRendererDefinition uvRendererDef = new UniqueValueRendererDefinition()
+                    {
+                        ColorRamp = continuousColorRamp,
+                        UseDefaultSymbol = true,
+                        ValueFields = new string[] { "gridcode" },
+                        DefaultSymbol = showNonVisData ? new CIMSymbolReference() { Symbol = SymbolFactory.ConstructPolygonSymbol(ColorFactory.Red) } : 
+                                                         new CIMSymbolReference() { Symbol = SymbolFactory.ConstructPolygonSymbol(ColorFactory.CreateRGBColor(0,0,0,0)) }
+                    };
+                    var renderer = featureLayer.CreateRenderer(uvRendererDef);
+                    featureLayer.SetRenderer(renderer);
+                    
+                });
+        }
 
         public static async Task CreatingFeatures(string featureClassName, ObservableCollection<AddInPoint> collection, double offset)
         {
@@ -371,5 +436,70 @@ namespace ProAppVisibilityModule.Helpers
             }
         }
 
+
+        internal static async Task UpdateFieldWithValue(string rlosConvertedPolygonsLayer, bool add)
+        {
+            try
+            {
+                string message = String.Empty;
+                bool creationResult = false;
+                await ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(async () =>
+                {
+                    using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
+                    using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(rlosConvertedPolygonsLayer))
+                    using (FeatureClassDefinition fcDefinition = enterpriseFeatureClass.GetDefinition())
+                    {
+                        int gridcodeFieldIndex = fcDefinition.FindField("gridcode");
+
+                        EditOperation editOperation = new EditOperation();
+                        editOperation.Callback(context =>
+                        {
+                            try
+                            {
+                                //var shapeFieldName = fcDefinition.GetShapeField();
+
+                                using (RowCursor rowCursor = enterpriseFeatureClass.Search(null, false))
+                                {
+                                    while (rowCursor.MoveNext())
+                                    {
+                                        using (Feature feature = (Feature)rowCursor.Current)
+                                        {
+                                            context.Invalidate(feature);
+                                            //var mp = (MapPoint)feature[shapeFieldName];
+                                            var gridcode = (int)feature[gridcodeFieldIndex];
+                                            //if (gridcode == 0)
+                                            {
+                                                feature[gridcodeFieldIndex] = add ? ++gridcode : --gridcode;
+
+                                                feature.Store();
+
+                                                context.Invalidate(feature);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            catch (GeodatabaseException exObj)
+                            {
+                                message = exObj.Message;
+                            }
+                        }, enterpriseFeatureClass);
+
+                        creationResult = await editOperation.ExecuteAsync();
+                        if (!creationResult)
+                            message = editOperation.ErrorMessage;
+
+                        await Project.Current.SaveEditsAsync();
+                    }
+                });
+                if (!creationResult)
+                    MessageBox.Show(message);
+
+            }
+            catch (Exception ex)
+            {
+                Debug.Print(ex.Message);
+            }
+        }
     }
 }

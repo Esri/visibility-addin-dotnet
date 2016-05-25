@@ -198,7 +198,7 @@ namespace ProAppVisibilityModule.ViewModels
         {
             try
             {
-                await FeatureClassHelper.CreateLayer(VisibilityLibrary.Properties.Resources.ObserversLayerName, "POINT");
+                await FeatureClassHelper.CreateLayer(VisibilityLibrary.Properties.Resources.ObserversLayerName, "POINT", true, true);
 
                 // add fields for observer offset
 
@@ -215,7 +215,7 @@ namespace ProAppVisibilityModule.ViewModels
 
                 await FeatureClassHelper.UpdateShapeWithZ(VisibilityLibrary.Properties.Resources.ObserversLayerName, VisibilityLibrary.Properties.Resources.ZFieldName, ObserverOffset.Value);
 
-                await FeatureClassHelper.Delete(CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.RLOSOutputLayerName);
+                //await FeatureClassHelper.Delete(CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.RLOSOutputLayerName);
 
 
                 // Visibility
@@ -235,18 +235,32 @@ namespace ProAppVisibilityModule.ViewModels
 
                 string maskFeatureClassName = CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.RLOSMaskLayerName;
 
-                await CreateMask(maskFeatureClassName, maxDistanceInMapUnits);
+                await CreateMask(VisibilityLibrary.Properties.Resources.RLOSMaskLayerName, maxDistanceInMapUnits, surfaceSR);
 
-                var environments = Geoprocessing.MakeEnvironmentArray(mask: maskFeatureClassName);
+                var environments = Geoprocessing.MakeEnvironmentArray(mask: maskFeatureClassName, overwriteoutput: true);
+                var rlosOutputLayer = CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.RLOSOutputLayerName;
 
                 await FeatureClassHelper.CreateVisibility(SelectedSurfaceName, VisibilityLibrary.Properties.Resources.ObserversLayerName,
-                    CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.RLOSOutputLayerName,
+                    rlosOutputLayer,
                     observerOffsetInMapZUnits, surfaceOffsetInMapZUnits,
                     minDistanceInMapUnits, maxDistanceInMapUnits,
                     horizontalStartAngleInDegrees, horizontalEndAngleInDegrees,
                     verticalUpperAngleInDegrees, verticalLowerAngleInDegrees,
                     ShowNonVisibleData,
-                    environments);
+                    environments,
+                    false);
+
+                var rlosConvertedPolygonsLayer = CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.RLOSConvertedPolygonsLayerName;
+
+                //await FeatureClassHelper.Delete(rlosConvertedPolygonsLayer);
+
+                await FeatureClassHelper.IntersectOutput(rlosOutputLayer, rlosConvertedPolygonsLayer, false, "Value");
+
+                await FeatureClassHelper.UpdateFieldWithValue(VisibilityLibrary.Properties.Resources.RLOSConvertedPolygonsLayerName, true);
+
+                await FeatureClassHelper.CreateUniqueValueRenderer(GetLayerFromMapByName(VisibilityLibrary.Properties.Resources.RLOSConvertedPolygonsLayerName) as FeatureLayer, ShowNonVisibleData);
+
+                await FeatureClassHelper.UpdateFieldWithValue(VisibilityLibrary.Properties.Resources.RLOSConvertedPolygonsLayerName, false);
 
                 //await Reset(true);
             }
@@ -288,12 +302,12 @@ namespace ProAppVisibilityModule.ViewModels
         /// <param name="maskFeatureClassName"></param>
         /// <param name="bufferDistance"></param>
         /// <returns></returns>
-        private async Task CreateMask(string maskFeatureClassName, double bufferDistance)
+        private async Task CreateMask(string maskFeatureClassName, double bufferDistance, SpatialReference surfaceSR)
         {
             // delete old
-            await FeatureClassHelper.Delete(maskFeatureClassName);
+            //await FeatureClassHelper.Delete(maskFeatureClassName);
             // create new
-            await FeatureClassHelper.CreateLayer(maskFeatureClassName, "POLYGON");
+            await FeatureClassHelper.CreateLayer(maskFeatureClassName, "POLYGON", false, false);
 
             try
             {
@@ -317,7 +331,8 @@ namespace ProAppVisibilityModule.ViewModels
                                     using (var rowBuffer = enterpriseFeatureClass.CreateRowBuffer())
                                     {
                                         // Either the field index or the field name can be used in the indexer.
-                                        var polygon = GeometryEngine.Buffer(observer.Point, bufferDistance);
+                                        var point = GeometryEngine.Project(observer.Point, surfaceSR);
+                                        var polygon = GeometryEngine.Buffer(point, bufferDistance*2.0);
                                         rowBuffer[shapeFieldName] = polygon;
 
                                         using (var feature = enterpriseFeatureClass.CreateRow(rowBuffer))

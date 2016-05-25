@@ -348,4 +348,7 @@
   <data name="RLOSMaskLayerName" xml:space="preserve">
     <value>vis_rlos_mask</value>
   </data>
+  <data name="RLOSConvertedPolygonsLayerName" xml:space="preserve">
+    <value>vis_rlos_conv_polygons</value>
+  </data>
 </root>

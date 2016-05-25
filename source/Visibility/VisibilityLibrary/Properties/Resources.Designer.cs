@@ -610,6 +610,15 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to vis_rlos_conv_polygons.
+        /// </summary>
+        public static string RLOSConvertedPolygonsLayerName {
+            get {
+                return ResourceManager.GetString("RLOSConvertedPolygonsLayerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to vis_rlos_mask.
         /// </summary>
         public static string RLOSMaskLayerName {
