@@ -256,7 +256,11 @@ namespace ProAppVisibilityModule.ViewModels
             }
         }
 
-
+        /// <summary>
+        /// Method to get spatial reference from a feature class
+        /// </summary>
+        /// <param name="fcName">name of feature class</param>
+        /// <returns>SpatialReference</returns>
         private async Task<SpatialReference> GetSpatialReference(string fcName)
         {
             try
@@ -277,6 +281,13 @@ namespace ProAppVisibilityModule.ViewModels
             }
             return null;
         }
+
+        /// <summary>
+        /// Method used to create a mask for geoprocessing environment
+        /// </summary>
+        /// <param name="maskFeatureClassName"></param>
+        /// <param name="bufferDistance"></param>
+        /// <returns></returns>
         private async Task CreateMask(string maskFeatureClassName, double bufferDistance)
         {
             // delete old
@@ -306,8 +317,6 @@ namespace ProAppVisibilityModule.ViewModels
                                     using (var rowBuffer = enterpriseFeatureClass.CreateRowBuffer())
                                     {
                                         // Either the field index or the field name can be used in the indexer.
-                                        //rowBuffer[VisibilityLibrary.Properties.Resources.OffsetFieldName] = offset;
-                                        //var point = MapPointBuilder.CreateMapPoint(item.Point.X, item.Point.Y, 0.0, item.Point.SpatialReference);
                                         var polygon = GeometryEngine.Buffer(observer.Point, bufferDistance);
                                         rowBuffer[shapeFieldName] = polygon;
 
