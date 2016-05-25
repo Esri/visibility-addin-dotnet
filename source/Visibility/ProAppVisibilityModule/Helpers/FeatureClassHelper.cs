@@ -190,7 +190,13 @@ namespace ProAppVisibilityModule.Helpers
             }
         }
 
-        public static async Task CreateVisibility(string surfaceName, string observerFeatureClassName, string outRLOSFeatureClass)
+        public static async Task CreateVisibility(string surfaceName, string observerFeatureClassName, string outRLOSFeatureClass, 
+                                                    double observerOffset, double surfaceOffset, 
+                                                    double minDistance, double maxDistance,
+                                                    double horizontalStartAngle, double horizontalEndAngle,
+                                                    double verticalUpperAngle, double verticalLowerAngle,
+                                                    bool showNonVisibleData,
+                                                    System.Collections.Generic.IReadOnlyList<System.Collections.Generic.KeyValuePair<string, string>> environments)
         {
             //Visibility (in_raster, in_observer_features, {out_agl_raster}, {analysis_type}, {nonvisible_cell_value}, {z_factor}, 
             // {curvature_correction}, {refractivity_coefficient}, {surface_offset}, {observer_elevation}, {observer_offset}, {inner_radius}, 
@@ -207,33 +213,33 @@ namespace ProAppVisibilityModule.Helpers
             // analysis_type
             arguments.Add("FREQUENCY");
             // nonvisible_cell_value
-            arguments.Add("");
+            arguments.Add(!showNonVisibleData); // TRUE or FALSE
             // z_factor
             arguments.Add(1.0);
             // curvature_correction
             arguments.Add("FALSE");
             // refractivity_coefficient
-            arguments.Add(0.13);
+            arguments.Add(""); // default is 0.13
             // surface_offset
-            arguments.Add("");
+            arguments.Add(surfaceOffset); // or field OFFSETB
             // observer_elevation
-            arguments.Add("");
+            arguments.Add(""); // or field SPOT
             // observer_offset
-            arguments.Add("");
+            arguments.Add(observerOffset); // or field OFFSETA
             // inner_radius
-            arguments.Add("");
+            arguments.Add(minDistance);
             // outer_radius
-            arguments.Add("");
+            arguments.Add(maxDistance);
             // horizontal_start_angle
-            arguments.Add("");
+            arguments.Add(horizontalStartAngle);
             // horizontal_end_angle
-            arguments.Add("");
+            arguments.Add(horizontalEndAngle);
             // vertical_upper_angle
-            arguments.Add("");
+            arguments.Add(verticalUpperAngle);
             // vertical_lower_angle
-            arguments.Add("");
+            arguments.Add(verticalLowerAngle);
 
-            IGPResult result = await Geoprocessing.ExecuteToolAsync("Visibility_3d", Geoprocessing.MakeValueArray(arguments.ToArray()));
+            IGPResult result = await Geoprocessing.ExecuteToolAsync("Visibility_3d", Geoprocessing.MakeValueArray(arguments.ToArray()), environments);
 
             if (result.IsFailed)
             {

@@ -23,6 +23,9 @@ using ArcGIS.Desktop.Core;
 using VisibilityLibrary;
 using VisibilityLibrary.Helpers;
 using ProAppVisibilityModule.Helpers;
+using ArcGIS.Desktop.Core.Geoprocessing;
+using ArcGIS.Core.Data;
+using ArcGIS.Desktop.Editing;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -217,10 +220,121 @@ namespace ProAppVisibilityModule.ViewModels
 
                 // Visibility
 
+                var surfaceSR = await GetSpatialReference(SelectedSurfaceName);
+
+                var observerOffsetInMapZUnits = GetAsMapZUnits(surfaceSR, ObserverOffset.Value);
+                var surfaceOffsetInMapZUnits = GetAsMapZUnits(surfaceSR, SurfaceOffset);
+                var minDistanceInMapUnits = GetAsMapUnits(surfaceSR, MinDistance);
+                var maxDistanceInMapUnits = GetAsMapUnits(surfaceSR, MaxDistance);
+                var horizontalStartAngleInDegrees = GetAngularDistanceFromTo(AngularUnitType, AngularTypes.DEGREES, LeftHorizontalFOV);
+                var horizontalEndAngleInDegrees = GetAngularDistanceFromTo(AngularUnitType, AngularTypes.DEGREES, RightHorizontalFOV);
+                var verticalUpperAngleInDegrees = GetAngularDistanceFromTo(AngularUnitType, AngularTypes.DEGREES, TopVerticalFOV);
+                var verticalLowerAngleInDegrees = GetAngularDistanceFromTo(AngularUnitType, AngularTypes.DEGREES, BottomVerticalFOV);
+
+                // TODO clamp angle values
+
+                string maskFeatureClassName = CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.RLOSMaskLayerName;
+
+                await CreateMask(maskFeatureClassName, maxDistanceInMapUnits);
+
+                var environments = Geoprocessing.MakeEnvironmentArray(mask: maskFeatureClassName);
+
                 await FeatureClassHelper.CreateVisibility(SelectedSurfaceName, VisibilityLibrary.Properties.Resources.ObserversLayerName,
-                    CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.RLOSOutputLayerName);
+                    CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.RLOSOutputLayerName,
+                    observerOffsetInMapZUnits, surfaceOffsetInMapZUnits,
+                    minDistanceInMapUnits, maxDistanceInMapUnits,
+                    horizontalStartAngleInDegrees, horizontalEndAngleInDegrees,
+                    verticalUpperAngleInDegrees, verticalLowerAngleInDegrees,
+                    ShowNonVisibleData,
+                    environments);
 
                 //await Reset(true);
+            }
+            catch (Exception ex)
+            {
+                Debug.Print(ex.Message);
+            }
+        }
+
+
+        private async Task<SpatialReference> GetSpatialReference(string fcName)
+        {
+            try
+            {
+                return await ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(() =>
+                {
+                    using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
+                    using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(fcName))
+                    using (FeatureClassDefinition fcDefinition = enterpriseFeatureClass.GetDefinition())
+                    {
+                        return fcDefinition.GetSpatialReference();
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                Debug.Print(ex.Message);
+            }
+            return null;
+        }
+        private async Task CreateMask(string maskFeatureClassName, double bufferDistance)
+        {
+            // delete old
+            await FeatureClassHelper.Delete(maskFeatureClassName);
+            // create new
+            await FeatureClassHelper.CreateLayer(maskFeatureClassName, "POLYGON");
+
+            try
+            {
+                string message = String.Empty;
+                bool creationResult = false;
+                await ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(async () =>
+                {
+                    using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
+                    using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(maskFeatureClassName))
+                    using (FeatureClassDefinition fcDefinition = enterpriseFeatureClass.GetDefinition())
+                    {
+                        EditOperation editOperation = new EditOperation();
+                        editOperation.Callback(context =>
+                        {
+                            try
+                            {
+                                var shapeFieldName = fcDefinition.GetShapeField();
+
+                                foreach (var observer in ObserverAddInPoints)
+                                {
+                                    using (var rowBuffer = enterpriseFeatureClass.CreateRowBuffer())
+                                    {
+                                        // Either the field index or the field name can be used in the indexer.
+                                        //rowBuffer[VisibilityLibrary.Properties.Resources.OffsetFieldName] = offset;
+                                        //var point = MapPointBuilder.CreateMapPoint(item.Point.X, item.Point.Y, 0.0, item.Point.SpatialReference);
+                                        var polygon = GeometryEngine.Buffer(observer.Point, bufferDistance);
+                                        rowBuffer[shapeFieldName] = polygon;
+
+                                        using (var feature = enterpriseFeatureClass.CreateRow(rowBuffer))
+                                        {
+                                            //To Indicate that the attribute table has to be updated
+                                            context.Invalidate(feature);
+                                        }
+                                    }
+                                }
+                            }
+                            catch (GeodatabaseException exObj)
+                            {
+                                message = exObj.Message;
+                            }
+                        }, enterpriseFeatureClass);
+
+                        creationResult = await editOperation.ExecuteAsync();
+                        if (!creationResult)
+                            message = editOperation.ErrorMessage;
+
+                        await Project.Current.SaveEditsAsync();
+                    }
+                });
+                if (!creationResult)
+                    MessageBox.Show(message);
+
             }
             catch (Exception ex)
             {

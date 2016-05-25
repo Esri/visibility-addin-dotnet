@@ -345,4 +345,7 @@
   <data name="RLOSOutputLayerName" xml:space="preserve">
     <value>vis_rlos_output</value>
   </data>
+  <data name="RLOSMaskLayerName" xml:space="preserve">
+    <value>vis_rlos_mask</value>
+  </data>
 </root>

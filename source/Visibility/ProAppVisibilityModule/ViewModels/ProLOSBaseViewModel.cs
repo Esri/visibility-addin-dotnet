@@ -465,6 +465,45 @@ namespace ProAppVisibilityModule.ViewModels
             RaisePropertyChanged(() => HasMapGraphics);
         }
 
+        internal double GetAsMapZUnits(SpatialReference sr, double value)
+        {
+            double result = value;
+
+            Unit unit = null;
+            // get map Z unit
+            try
+            {
+                unit = sr.ZUnit;
+            }
+            catch { }
+
+            if (unit == null)
+                unit = sr.Unit;
+
+            var offsetLinearUnit = GetLinearUnit(OffsetUnitType);
+
+            result = offsetLinearUnit.ConvertTo(value, unit as LinearUnit);
+
+            return result;
+        }
+
+        internal double GetAsMapUnits(SpatialReference sr, double value)
+        {
+            double result = value;
+
+            // get map unit
+            var mapUnit = sr.Unit as LinearUnit;
+
+            if (mapUnit == null)
+                return result;
+
+            var offsetLinearUnit = GetLinearUnit(OffsetUnitType);
+
+            result = offsetLinearUnit.ConvertTo(value, mapUnit);
+
+            return result;
+        }
+
         /// <summary>
         /// Handler for active map view changed event
         /// </summary>

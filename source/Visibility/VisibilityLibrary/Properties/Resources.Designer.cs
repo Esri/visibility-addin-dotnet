@@ -610,6 +610,15 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to vis_rlos_mask.
+        /// </summary>
+        public static string RLOSMaskLayerName {
+            get {
+                return ResourceManager.GetString("RLOSMaskLayerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to vis_rlos_output.
         /// </summary>
         public static string RLOSOutputLayerName {
