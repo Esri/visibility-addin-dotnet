@@ -176,176 +176,190 @@ namespace ArcMapAddinVisibility.ViewModels
         /// </summary>
         internal override void CreateMapElement()
         {
-            if (!CanCreateElement || ArcMap.Document == null || ArcMap.Document.FocusMap == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
-                return;
-
-            //base.CreateMapElement();
-
-            var surface = GetSurfaceFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
-
-            if (surface == null)
-                return;
-
-            // Determine if selected surface is projected or geographic
-            ILayer surfaceLayer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
-            var geoDataset = surfaceLayer as IGeoDataset;
-            SelectedSurfaceSpatialRef = geoDataset.SpatialReference;
-
-            if (SelectedSurfaceSpatialRef is IGeographicCoordinateSystem)
+            try
             {
-                MessageBox.Show(VisibilityLibrary.Properties.Resources.RLOSUserPrompt, VisibilityLibrary.Properties.Resources.RLOSUserPromptCaption);
-                return;
-            }
+                IsRunning = true;
 
-            using (ComReleaser oComReleaser = new ComReleaser())
-            {
+                if (!CanCreateElement || ArcMap.Document == null || ArcMap.Document.FocusMap == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
+                    return;
 
-                // Create feature workspace
-                IFeatureWorkspace workspace = CreateFeatureWorkspace("tempWorkspace");
+                //base.CreateMapElement();
 
-                StartEditOperation((IWorkspace)workspace);
+                var surface = GetSurfaceFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
 
-                // Create feature class
-                IFeatureClass pointFc = CreateObserversFeatureClass(workspace, SelectedSurfaceSpatialRef, "Output" + RunCount.ToString());
+                if (surface == null)
+                    return;
 
-                double finalObserverOffset = GetOffsetInZUnits(ObserverOffset.Value, surface.ZFactor, OffsetUnitType);
-                double finalSurfaceOffset = GetOffsetInZUnits(SurfaceOffset, surface.ZFactor, OffsetUnitType);
+                // Determine if selected surface is projected or geographic
+                ILayer surfaceLayer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
+                var geoDataset = surfaceLayer as IGeoDataset;
+                SelectedSurfaceSpatialRef = geoDataset.SpatialReference;
 
-                double conversionFactor = GetConversionFactor(SelectedSurfaceSpatialRef);
-                double convertedMinDistance = MinDistance * conversionFactor;
-                double convertedMaxDistance = MaxDistance * conversionFactor;
-                double finalMinDistance = GetLinearDistance(ArcMap.Document.FocusMap, convertedMinDistance, OffsetUnitType);
-                double finalMaxDistance = GetLinearDistance(ArcMap.Document.FocusMap, convertedMaxDistance, OffsetUnitType);
-
-                double finalLeftHorizontalFOV = GetAngularDistance(ArcMap.Document.FocusMap, LeftHorizontalFOV, AngularUnitType);
-                double finalRightHorizontalFOV = GetAngularDistance(ArcMap.Document.FocusMap, RightHorizontalFOV, AngularUnitType);
-                double finalBottomVerticalFOV = GetAngularDistance(ArcMap.Document.FocusMap, BottomVerticalFOV, AngularUnitType);
-                double finalTopVerticalFOV = GetAngularDistance(ArcMap.Document.FocusMap, TopVerticalFOV, AngularUnitType);
-
-                // Out radius geometries
-                List<IGeometry> radius2GeomList = new List<IGeometry>();
-                List<IGeometry> radius1_2GeomList = new List<IGeometry>();
-                List<IGeometry> donutGeomList = new List<IGeometry>();
-
-                foreach (var observerPoint in ObserverAddInPoints)
+                if (SelectedSurfaceSpatialRef is IGeographicCoordinateSystem)
                 {
-                    // Create buffer geometries for final Min/Max distance
-                    ITopologicalOperator topologicalOperator = observerPoint.Point as ITopologicalOperator;
-                    IGeometry geom = topologicalOperator.Buffer(finalMaxDistance);
-                    radius2GeomList.Add(geom);
-                    radius1_2GeomList.Add(geom);
-                    if (finalMinDistance > 0)
+                    MessageBox.Show(VisibilityLibrary.Properties.Resources.RLOSUserPrompt, VisibilityLibrary.Properties.Resources.RLOSUserPromptCaption);
+                    return;
+                }
+
+                using (ComReleaser oComReleaser = new ComReleaser())
+                {
+
+                    // Create feature workspace
+                    IFeatureWorkspace workspace = CreateFeatureWorkspace("tempWorkspace");
+
+                    StartEditOperation((IWorkspace)workspace);
+
+                    // Create feature class
+                    IFeatureClass pointFc = CreateObserversFeatureClass(workspace, SelectedSurfaceSpatialRef, "Output" + RunCount.ToString());
+
+                    double finalObserverOffset = GetOffsetInZUnits(ObserverOffset.Value, surface.ZFactor, OffsetUnitType);
+                    double finalSurfaceOffset = GetOffsetInZUnits(SurfaceOffset, surface.ZFactor, OffsetUnitType);
+
+                    double conversionFactor = GetConversionFactor(SelectedSurfaceSpatialRef);
+                    double convertedMinDistance = MinDistance * conversionFactor;
+                    double convertedMaxDistance = MaxDistance * conversionFactor;
+                    double finalMinDistance = GetLinearDistance(ArcMap.Document.FocusMap, convertedMinDistance, OffsetUnitType);
+                    double finalMaxDistance = GetLinearDistance(ArcMap.Document.FocusMap, convertedMaxDistance, OffsetUnitType);
+
+                    double finalLeftHorizontalFOV = GetAngularDistance(ArcMap.Document.FocusMap, LeftHorizontalFOV, AngularUnitType);
+                    double finalRightHorizontalFOV = GetAngularDistance(ArcMap.Document.FocusMap, RightHorizontalFOV, AngularUnitType);
+                    double finalBottomVerticalFOV = GetAngularDistance(ArcMap.Document.FocusMap, BottomVerticalFOV, AngularUnitType);
+                    double finalTopVerticalFOV = GetAngularDistance(ArcMap.Document.FocusMap, TopVerticalFOV, AngularUnitType);
+
+                    // Out radius geometries
+                    List<IGeometry> radius2GeomList = new List<IGeometry>();
+                    List<IGeometry> radius1_2GeomList = new List<IGeometry>();
+                    List<IGeometry> donutGeomList = new List<IGeometry>();
+
+                    foreach (var observerPoint in ObserverAddInPoints)
                     {
-                        IGeometry geom2 = topologicalOperator.Buffer(finalMinDistance);
-                        
-                        ITopologicalOperator eraseTopo = geom as ITopologicalOperator;
-                        IGeometry erasedGeom = eraseTopo.Difference(geom2);
-                        donutGeomList.Add(erasedGeom);
-                    }    
-                    else
-                    {
+                        // Create buffer geometries for final Min/Max distance
+                        ITopologicalOperator topologicalOperator = observerPoint.Point as ITopologicalOperator;
+                        IGeometry geom = topologicalOperator.Buffer(finalMaxDistance);
+                        radius2GeomList.Add(geom);
                         radius1_2GeomList.Add(geom);
+                        if (finalMinDistance > 0)
+                        {
+                            IGeometry geom2 = topologicalOperator.Buffer(finalMinDistance);
+
+                            ITopologicalOperator eraseTopo = geom as ITopologicalOperator;
+                            IGeometry erasedGeom = eraseTopo.Difference(geom2);
+                            donutGeomList.Add(erasedGeom);
+                        }
+                        else
+                        {
+                            radius1_2GeomList.Add(geom);
+                        }
+
+                        double z1 = surface.GetElevation(observerPoint.Point) + finalObserverOffset;
+
+                        //create a new point feature
+                        IFeature ipFeature = pointFc.CreateFeature();
+
+                        // Set the field values for the feature
+                        SetFieldValues(finalObserverOffset, finalSurfaceOffset, finalMinDistance, finalMaxDistance, finalLeftHorizontalFOV,
+                            finalRightHorizontalFOV, finalBottomVerticalFOV, finalTopVerticalFOV, ipFeature);
+
+                        //Create shape 
+                        IPoint point = new PointClass() { Z = z1, X = observerPoint.Point.X, Y = observerPoint.Point.Y, ZAware = true };
+                        ipFeature.Shape = point;
+                        ipFeature.Store();
                     }
 
-                    double z1 = surface.GetElevation(observerPoint.Point) + finalObserverOffset;
+                    IFeatureClassDescriptor fd = new FeatureClassDescriptorClass();
+                    fd.Create(pointFc, null, "OBJECTID");
 
-                    //create a new point feature
-                    IFeature ipFeature = pointFc.CreateFeature();
+                    StopEditOperation((IWorkspace)workspace);
 
-                    // Set the field values for the feature
-                    SetFieldValues(finalObserverOffset, finalSurfaceOffset, finalMinDistance, finalMaxDistance, finalLeftHorizontalFOV, 
-                        finalRightHorizontalFOV, finalBottomVerticalFOV, finalTopVerticalFOV, ipFeature);
-
-                    //Create shape 
-                    IPoint point = new PointClass() { Z = z1, X = observerPoint.Point.X, Y = observerPoint.Point.Y, ZAware = true };
-                    ipFeature.Shape = point;
-                    ipFeature.Store();
-                }
-
-                IFeatureClassDescriptor fd = new FeatureClassDescriptorClass();
-                fd.Create(pointFc, null, "OBJECTID");
-
-                StopEditOperation((IWorkspace)workspace);
-
-                try
-                {
-                    ILayer layer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
-                    string layerPath = GetLayerPath(layer);
-
-                    IFeatureLayer ipFeatureLayer = new FeatureLayerClass();
-                    ipFeatureLayer.FeatureClass = pointFc;
-
-                    IDataset ipDataset = (IDataset)pointFc;
-                    string outputFcName = ipDataset.BrowseName + "_output";
-                    string strPath = ipDataset.Workspace.PathName + "\\" + ipDataset.BrowseName;
-                    string outPath = ipDataset.Workspace.PathName + "\\" + outputFcName;
-
-                    IVariantArray parameters = new VarArrayClass();
-                    parameters.Add(layerPath);
-                    parameters.Add(strPath);
-                    parameters.Add(outPath);
-
-                    esriLicenseStatus status = GetSpatialAnalystLicense();
-
-                    IGeoProcessor2 gp = new GeoProcessorClass();
-
-                    gp.AddOutputsToMap = false;
-
-                    // Add a mask to buffer the output to selected distance
-                    SetGPMask(workspace, radius2GeomList, gp, "radiusMask");
-
-                    object oResult = gp.Execute("Visibility_sa", parameters, null);
-                    IGeoProcessorResult ipResult = (IGeoProcessorResult)oResult;
-
-                    ComReleaser.ReleaseCOMObject(gp);
-                    gp = null;
-                    GC.Collect();
-
-                    // Add buffer geometries to the map
-                    foreach (IGeometry geom in radius1_2GeomList)
+                    try
                     {
-                        var color = new RgbColorClass() { Blue = 255 } as IColor;
-                        AddGraphicToMap(geom, color, true);
+                        ILayer layer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
+                        string layerPath = GetLayerPath(layer);
+
+                        IFeatureLayer ipFeatureLayer = new FeatureLayerClass();
+                        ipFeatureLayer.FeatureClass = pointFc;
+
+                        IDataset ipDataset = (IDataset)pointFc;
+                        string outputFcName = ipDataset.BrowseName + "_output";
+                        string strPath = ipDataset.Workspace.PathName + "\\" + ipDataset.BrowseName;
+                        string outPath = ipDataset.Workspace.PathName + "\\" + outputFcName;
+
+                        IVariantArray parameters = new VarArrayClass();
+                        parameters.Add(layerPath);
+                        parameters.Add(strPath);
+                        parameters.Add(outPath);
+
+                        esriLicenseStatus status = GetSpatialAnalystLicense();
+
+                        IGeoProcessor2 gp = new GeoProcessorClass();
+
+                        gp.AddOutputsToMap = false;
+
+                        // Add a mask to buffer the output to selected distance
+                        SetGPMask(workspace, radius2GeomList, gp, "radiusMask");
+
+                        object oResult = gp.Execute("Visibility_sa", parameters, null);
+                        IGeoProcessorResult ipResult = (IGeoProcessorResult)oResult;
+
+                        ComReleaser.ReleaseCOMObject(gp);
+                        gp = null;
+                        GC.Collect();
+
+                        // Add buffer geometries to the map
+                        foreach (IGeometry geom in radius1_2GeomList)
+                        {
+                            var color = new RgbColorClass() { Blue = 255 } as IColor;
+                            AddGraphicToMap(geom, color, true);
+                        }
+
+                        IRasterLayer outputRasterLayer = new RasterLayerClass();
+                        outputRasterLayer.CreateFromFilePath(outPath);
+
+                        string fcName = IntersectOutput(outputRasterLayer, ipDataset, workspace, donutGeomList);
+
+                        IFeatureClass finalFc = workspace.OpenFeatureClass(fcName);
+
+                        IFeatureLayer outputFeatureLayer = new FeatureLayerClass();
+                        outputFeatureLayer.FeatureClass = finalFc;
+
+                        //Add it to a map if the layer is valid.
+                        if (outputFeatureLayer != null)
+                        {
+                            // set the renderer
+                            IFeatureRenderer featRend = UniqueValueRenderer(workspace, finalFc);
+                            IGeoFeatureLayer geoLayer = outputFeatureLayer as IGeoFeatureLayer;
+                            geoLayer.Renderer = featRend;
+                            geoLayer.Name = "VisibilityLayer_" + RunCount.ToString();
+
+                            // Set the layer transparency
+                            IDisplayFilterManager filterManager = (IDisplayFilterManager)outputFeatureLayer;
+                            ITransparencyDisplayFilter filter = new TransparencyDisplayFilter();
+                            filter.Transparency = 80;
+                            filterManager.DisplayFilter = filter;
+
+                            ESRI.ArcGIS.Carto.IMap map = ArcMap.Document.FocusMap;
+                            map.AddLayer((ILayer)outputFeatureLayer);
+                        }
+
+                        RunCount += 1;
                     }
-
-                    IRasterLayer outputRasterLayer = new RasterLayerClass();
-                    outputRasterLayer.CreateFromFilePath(outPath);
-
-                    string fcName = IntersectOutput(outputRasterLayer, ipDataset, workspace, donutGeomList);
-          
-                    IFeatureClass finalFc = workspace.OpenFeatureClass(fcName);
-
-                    IFeatureLayer outputFeatureLayer = new FeatureLayerClass();
-                    outputFeatureLayer.FeatureClass = finalFc;
-
-                    //Add it to a map if the layer is valid.
-                    if (outputFeatureLayer != null)
+                    catch (Exception ex)
                     {
-                        // set the renderer
-                        IFeatureRenderer featRend = UniqueValueRenderer(workspace, finalFc);
-                        IGeoFeatureLayer geoLayer = outputFeatureLayer as IGeoFeatureLayer;
-                        geoLayer.Renderer = featRend;
-                        geoLayer.Name = "VisibilityLayer_" + RunCount.ToString();
-                        
-                        // Set the layer transparency
-                        IDisplayFilterManager filterManager = (IDisplayFilterManager)outputFeatureLayer;
-                        ITransparencyDisplayFilter filter = new TransparencyDisplayFilter(); 
- 			            filter.Transparency = 80; 
- 			            filterManager.DisplayFilter = filter; 
-
-                        ESRI.ArcGIS.Carto.IMap map = ArcMap.Document.FocusMap;
-                        map.AddLayer((ILayer)outputFeatureLayer);
+                        string exception = ex.ToString();
+                        System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
                     }
 
-                    RunCount += 1;
+                    //Reset(true);
                 }
-                catch (Exception ex)
-                {
-                    string exception = ex.ToString();
-                    System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
-                }
-
-                //Reset(true);
+            }
+            catch(Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show(VisibilityLibrary.Properties.Resources.ExceptionSomethingWentWrong,
+                                                     VisibilityLibrary.Properties.Resources.CaptionError);
+            }
+            finally
+            {
+                IsRunning = false;
             }
         }
 
