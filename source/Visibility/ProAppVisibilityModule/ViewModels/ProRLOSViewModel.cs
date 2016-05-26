@@ -198,6 +198,14 @@ namespace ProAppVisibilityModule.ViewModels
         {
             try
             {
+                var surfaceSR = await GetSpatialReferenceFromLayer(SelectedSurfaceName);
+
+                if(surfaceSR == null || !surfaceSR.IsProjected)
+                {
+                    MessageBox.Show(VisibilityLibrary.Properties.Resources.RLOSUserPrompt, VisibilityLibrary.Properties.Resources.RLOSUserPromptCaption);
+                    return;
+                }
+
                 await FeatureClassHelper.CreateLayer(VisibilityLibrary.Properties.Resources.ObserversLayerName, "POINT", true, true);
 
                 // add fields for observer offset
@@ -215,12 +223,7 @@ namespace ProAppVisibilityModule.ViewModels
 
                 await FeatureClassHelper.UpdateShapeWithZ(VisibilityLibrary.Properties.Resources.ObserversLayerName, VisibilityLibrary.Properties.Resources.ZFieldName, ObserverOffset.Value);
 
-                //await FeatureClassHelper.Delete(CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.RLOSOutputLayerName);
-
-
                 // Visibility
-
-                var surfaceSR = await GetSpatialReference(SelectedSurfaceName);
 
                 var observerOffsetInMapZUnits = GetAsMapZUnits(surfaceSR, ObserverOffset.Value);
                 var surfaceOffsetInMapZUnits = GetAsMapZUnits(surfaceSR, SurfaceOffset);
@@ -252,8 +255,6 @@ namespace ProAppVisibilityModule.ViewModels
 
                 var rlosConvertedPolygonsLayer = CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.RLOSConvertedPolygonsLayerName;
 
-                //await FeatureClassHelper.Delete(rlosConvertedPolygonsLayer);
-
                 await FeatureClassHelper.IntersectOutput(rlosOutputLayer, rlosConvertedPolygonsLayer, false, "Value");
 
                 await FeatureClassHelper.UpdateFieldWithValue(VisibilityLibrary.Properties.Resources.RLOSConvertedPolygonsLayerName, true);
@@ -273,20 +274,17 @@ namespace ProAppVisibilityModule.ViewModels
         /// <summary>
         /// Method to get spatial reference from a feature class
         /// </summary>
-        /// <param name="fcName">name of feature class</param>
+        /// <param name="fcName">name of layer</param>
         /// <returns>SpatialReference</returns>
-        private async Task<SpatialReference> GetSpatialReference(string fcName)
+        private async Task<SpatialReference> GetSpatialReferenceFromLayer(string layerName)
         {
             try
             {
                 return await ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(() =>
                 {
-                    using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
-                    using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(fcName))
-                    using (FeatureClassDefinition fcDefinition = enterpriseFeatureClass.GetDefinition())
-                    {
-                        return fcDefinition.GetSpatialReference();
-                    }
+                    var layer = GetLayerFromMapByName(layerName);
+
+                    return layer.GetSpatialReference();
                 });
             }
             catch (Exception ex)
@@ -304,8 +302,6 @@ namespace ProAppVisibilityModule.ViewModels
         /// <returns></returns>
         private async Task CreateMask(string maskFeatureClassName, double bufferDistance, SpatialReference surfaceSR)
         {
-            // delete old
-            //await FeatureClassHelper.Delete(maskFeatureClassName);
             // create new
             await FeatureClassHelper.CreateLayer(maskFeatureClassName, "POLYGON", false, false);
 
@@ -332,7 +328,7 @@ namespace ProAppVisibilityModule.ViewModels
                                     {
                                         // Either the field index or the field name can be used in the indexer.
                                         var point = GeometryEngine.Project(observer.Point, surfaceSR);
-                                        var polygon = GeometryEngine.Buffer(point, bufferDistance*2.0);
+                                        var polygon = GeometryEngine.Buffer(point, bufferDistance);
                                         rowBuffer[shapeFieldName] = polygon;
 
                                         using (var feature = enterpriseFeatureClass.CreateRow(rowBuffer))

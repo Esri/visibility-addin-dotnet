@@ -310,7 +310,8 @@ namespace ProAppVisibilityModule.Helpers
                     };
                     var renderer = featureLayer.CreateRenderer(uvRendererDef);
                     featureLayer.SetRenderer(renderer);
-                    
+
+                    featureLayer.SetTransparency(50.0);
                 });
         }
 
