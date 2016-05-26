@@ -72,11 +72,11 @@
                          Grid.ColumnSpan="2"
                          Margin="3,3,0,0"
                          VerticalContentAlignment="Center"
+                         Style="{StaticResource textboxStyle}"
                          Text="{Binding Path=Point1Formatted,
                                         UpdateSourceTrigger=PropertyChanged,
                                         ValidatesOnExceptions=True}"
-                         Validation.ErrorTemplate="{StaticResource errorTemplate}"
-                         Style="{StaticResource textboxStyle}">
+                         Validation.ErrorTemplate="{StaticResource errorTemplate}">
                     <TextBox.InputBindings>
                         <KeyBinding Key="Enter"
                                     Command="{Binding EnterKeyCommand}"
@@ -147,11 +147,11 @@
                          Grid.ColumnSpan="2"
                          Margin="3,3,0,0"
                          VerticalContentAlignment="Center"
+                         Style="{StaticResource textboxStyle}"
                          Text="{Binding Path=Point2Formatted,
                                         UpdateSourceTrigger=PropertyChanged,
                                         ValidatesOnExceptions=True}"
-                         Validation.ErrorTemplate="{StaticResource errorTemplate}"
-                         Style="{StaticResource textboxStyle}">
+                         Validation.ErrorTemplate="{StaticResource errorTemplate}">
                     <TextBox.InputBindings>
                         <KeyBinding Key="Enter"
                                     Command="{Binding EnterKeyCommand}"
@@ -222,19 +222,19 @@
                         <TextBlock Margin="3,3,0,0" Text="{x:Static prop:Resources.LabelObserverOffset}" />
                         <TextBox x:Name="tbObserverOffset"
                                  Margin="3,3,0,0"
+                                 Style="{StaticResource textboxStyle}"
                                  Text="{Binding ObserverOffset,
                                                 UpdateSourceTrigger=PropertyChanged,
                                                 ValidatesOnExceptions=True}"
-                                 Validation.ErrorTemplate="{StaticResource errorTemplate}" 
-                                 Style="{StaticResource textboxStyle}" />
+                                 Validation.ErrorTemplate="{StaticResource errorTemplate}" />
                         <TextBlock Margin="3,3,0,0" Text="{x:Static prop:Resources.LabelTargetOffset}" />
                         <TextBox x:Name="tbTargetOffset"
                                  Margin="3,3,0,0"
+                                 Style="{StaticResource textboxStyle}"
                                  Text="{Binding TargetOffset,
                                                 UpdateSourceTrigger=PropertyChanged,
                                                 ValidatesOnExceptions=True}"
-                                 Validation.ErrorTemplate="{StaticResource errorTemplate}"
-                                 Style="{StaticResource textboxStyle}" />
+                                 Validation.ErrorTemplate="{StaticResource errorTemplate}" />
                         <ComboBox x:Name="cmbOffsetUnitType"
                                   Height="Auto"
                                   Margin="3,3,0,0"

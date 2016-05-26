@@ -79,11 +79,11 @@
                          Grid.ColumnSpan="2"
                          Margin="3,3,0,0"
                          VerticalContentAlignment="Center"
+                         Style="{StaticResource textboxStyle}"
                          Text="{Binding Path=Point1Formatted,
                                         UpdateSourceTrigger=PropertyChanged,
                                         ValidatesOnExceptions=True}"
-                         Validation.ErrorTemplate="{StaticResource errorTemplate}"
-                         Style="{StaticResource textboxStyle}">
+                         Validation.ErrorTemplate="{StaticResource errorTemplate}">
                     <TextBox.InputBindings>
                         <KeyBinding Key="Enter"
                                     Command="{Binding EnterKeyCommand}"
@@ -288,11 +288,11 @@
                                            Text="{x:Static prop:Resources.LabelObserverOffset}" />
                                 <TextBox x:Name="tbObserverOffset"
                                          Margin="3,3,0,0"
+                                         Style="{StaticResource textboxStyle}"
                                          Text="{Binding ObserverOffset,
                                                         UpdateSourceTrigger=PropertyChanged,
                                                         ValidatesOnExceptions=True}"
-                                         Validation.ErrorTemplate="{StaticResource errorTemplate}"
-                                         Style="{StaticResource textboxStyle}">
+                                         Validation.ErrorTemplate="{StaticResource errorTemplate}">
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
                                     </TextBox.InputBindings>
@@ -303,11 +303,11 @@
                                            Text="{x:Static prop:Resources.LabelSurfaceOffset}" />
                                 <TextBox x:Name="tbSurfaceOffset"
                                          Margin="3,3,0,0"
+                                         Style="{StaticResource textboxStyle}"
                                          Text="{Binding SurfaceOffset,
                                                         UpdateSourceTrigger=PropertyChanged,
                                                         ValidatesOnExceptions=True}"
-                                         Validation.ErrorTemplate="{StaticResource errorTemplate}"
-                                         Style="{StaticResource textboxStyle}">
+                                         Validation.ErrorTemplate="{StaticResource errorTemplate}">
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
                                     </TextBox.InputBindings>
@@ -318,8 +318,7 @@
                                           Margin="3,3,0,0"
                                           ItemsSource="{Binding Source={StaticResource lineDistanceData}}"
                                           SelectedItem="{Binding Path=OffsetUnitType,
-                                                                 Mode=TwoWay}">
-                                </ComboBox>
+                                                                 Mode=TwoWay}" />
                             </StackPanel>
                         </GroupBox>
                         <GroupBox Grid.Row="5"
@@ -335,11 +334,11 @@
                                          Grid.Column="0"
                                          Margin="3,3,0,0"
                                          HorizontalAlignment="Stretch"
+                                         Style="{StaticResource textboxStyle}"
                                          Text="{Binding MinDistance,
                                                         UpdateSourceTrigger=PropertyChanged,
                                                         ValidatesOnExceptions=True}"
-                                         Validation.ErrorTemplate="{StaticResource errorTemplate}"
-                                         Style="{StaticResource textboxStyle}">
+                                         Validation.ErrorTemplate="{StaticResource errorTemplate}">
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
                                     </TextBox.InputBindings>
@@ -353,11 +352,11 @@
                                          Grid.Column="2"
                                          Margin="3,3,0,0"
                                          HorizontalAlignment="Stretch"
+                                         Style="{StaticResource textboxStyle}"
                                          Text="{Binding MaxDistance,
                                                         UpdateSourceTrigger=PropertyChanged,
                                                         ValidatesOnExceptions=True}"
-                                         Validation.ErrorTemplate="{StaticResource errorTemplate}"
-                                         Style="{StaticResource textboxStyle}">
+                                         Validation.ErrorTemplate="{StaticResource errorTemplate}">
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
                                     </TextBox.InputBindings>
@@ -387,11 +386,11 @@
                                 <TextBox x:Name="tbHFOVFrom"
                                          Grid.Row="1"
                                          Margin="3,3,0,0"
+                                         Style="{StaticResource textboxStyle}"
                                          Text="{Binding LeftHorizontalFOV,
                                                         UpdateSourceTrigger=PropertyChanged,
                                                         ValidatesOnExceptions=True}"
-                                         Validation.ErrorTemplate="{StaticResource errorTemplate}"
-                                         Style="{StaticResource textboxStyle}">
+                                         Validation.ErrorTemplate="{StaticResource errorTemplate}">
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
                                     </TextBox.InputBindings>
@@ -406,11 +405,11 @@
                                          Grid.Row="1"
                                          Grid.Column="2"
                                          Margin="3,3,0,0"
+                                         Style="{StaticResource textboxStyle}"
                                          Text="{Binding RightHorizontalFOV,
                                                         UpdateSourceTrigger=PropertyChanged,
                                                         ValidatesOnExceptions=True}"
-                                         Validation.ErrorTemplate="{StaticResource errorTemplate}"
-                                         Style="{StaticResource textboxStyle}">
+                                         Validation.ErrorTemplate="{StaticResource errorTemplate}">
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
                                     </TextBox.InputBindings>
@@ -423,11 +422,11 @@
                                 <TextBox x:Name="tbVFOVFrom"
                                          Grid.Row="3"
                                          Margin="3,3,0,0"
+                                         Style="{StaticResource textboxStyle}"
                                          Text="{Binding BottomVerticalFOV,
                                                         UpdateSourceTrigger=PropertyChanged,
                                                         ValidatesOnExceptions=True}"
-                                         Validation.ErrorTemplate="{StaticResource errorTemplate}"
-                                         Style="{StaticResource textboxStyle}">
+                                         Validation.ErrorTemplate="{StaticResource errorTemplate}">
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
                                     </TextBox.InputBindings>
@@ -443,11 +442,11 @@
                                          Grid.Row="3"
                                          Grid.Column="2"
                                          Margin="3,3,0,0"
+                                         Style="{StaticResource textboxStyle}"
                                          Text="{Binding TopVerticalFOV,
                                                         UpdateSourceTrigger=PropertyChanged,
                                                         ValidatesOnExceptions=True}"
-                                         Validation.ErrorTemplate="{StaticResource errorTemplate}"
-                                         Style="{StaticResource textboxStyle}">
+                                         Validation.ErrorTemplate="{StaticResource errorTemplate}">
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
                                     </TextBox.InputBindings>
@@ -460,8 +459,7 @@
                                           Margin="3,3,0,0"
                                           ItemsSource="{Binding Source={StaticResource angularDistanceData}}"
                                           SelectedItem="{Binding Path=AngularUnitType,
-                                                                 Mode=TwoWay}">
-                                </ComboBox>
+                                                                 Mode=TwoWay}" />
                             </Grid>
                         </GroupBox>
                     </Grid>
