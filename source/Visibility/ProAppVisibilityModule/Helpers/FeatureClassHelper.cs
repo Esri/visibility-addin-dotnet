@@ -326,7 +326,7 @@ namespace ProAppVisibilityModule.Helpers
             {
                 string message = String.Empty;
                 bool creationResult = false;
-                await ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(async () =>
+                await QueuedTask.Run(async () =>
                 {
                     using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
                     using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(featureClassName))
@@ -385,7 +385,7 @@ namespace ProAppVisibilityModule.Helpers
             {
                 string message = String.Empty;
                 bool creationResult = false;
-                await ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(async () =>
+                await QueuedTask.Run(async () =>
                 {
                     using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
                     using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(featureClassName))
@@ -471,16 +471,12 @@ namespace ProAppVisibilityModule.Helpers
                                         using (Feature feature = (Feature)rowCursor.Current)
                                         {
                                             context.Invalidate(feature);
-                                            //var mp = (MapPoint)feature[shapeFieldName];
                                             var gridcode = (int)feature[gridcodeFieldIndex];
-                                            //if (gridcode == 0)
-                                            {
-                                                feature[gridcodeFieldIndex] = add ? ++gridcode : --gridcode;
+                                            feature[gridcodeFieldIndex] = add ? ++gridcode : --gridcode;
 
-                                                feature.Store();
+                                            feature.Store();
 
-                                                context.Invalidate(feature);
-                                            }
+                                            context.Invalidate(feature);
                                         }
                                     }
                                 }
