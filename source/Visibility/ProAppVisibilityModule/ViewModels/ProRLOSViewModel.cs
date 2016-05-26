@@ -43,38 +43,38 @@ namespace ProAppVisibilityModule.ViewModels
         public bool ShowNonVisibleData { get; set; }
         public int RunCount { get; set; }
 
-        private bool isCancelEnabled;
-        public bool IsCancelEnabled
-        {
-            get { return isCancelEnabled; }
-            set
-            {
-                isCancelEnabled = value;
-                RaisePropertyChanged(() => IsCancelEnabled);
-            }
-        }
+        //private bool isCancelEnabled;
+        //public bool IsCancelEnabled
+        //{
+        //    get { return isCancelEnabled; }
+        //    set
+        //    {
+        //        isCancelEnabled = value;
+        //        RaisePropertyChanged(() => IsCancelEnabled);
+        //    }
+        //}
 
-        private bool isOkEnabled = false;
-        public bool IsOkEnabled
-        {
-            get { return isOkEnabled; }
-            set
-            {
-                isOkEnabled = value;
-                RaisePropertyChanged(() => IsOkEnabled);
-            }
-        }
+        //private bool isOkEnabled = false;
+        //public bool IsOkEnabled
+        //{
+        //    get { return isOkEnabled; }
+        //    set
+        //    {
+        //        isOkEnabled = value;
+        //        RaisePropertyChanged(() => IsOkEnabled);
+        //    }
+        //}
 
-        private bool isClearEnabled = false;
-        public bool IsClearEnabled
-        {
-            get { return isClearEnabled; }
-            set
-            {
-                isClearEnabled = value;
-                RaisePropertyChanged(() => IsClearEnabled);
-            }
-        }
+        //private bool isClearEnabled = false;
+        //public bool IsClearEnabled
+        //{
+        //    get { return isClearEnabled; }
+        //    set
+        //    {
+        //        isClearEnabled = value;
+        //        RaisePropertyChanged(() => IsClearEnabled);
+        //    }
+        //}
 
         private Visibility _displayProgressBar = Visibility.Collapsed;
         public Visibility DisplayProgressBar
@@ -131,9 +131,9 @@ namespace ProAppVisibilityModule.ViewModels
             TopVerticalFOV = 90.0;
             ShowNonVisibleData = false;
             RunCount = 1;
-            IsClearEnabled = false;
-            IsOkEnabled = false;
-            IsCancelEnabled = false;
+            //IsClearEnabled = false;
+            //IsOkEnabled = false;
+            //IsCancelEnabled = false;
             DisplayProgressBar = Visibility.Hidden;
 
             // commands
@@ -147,15 +147,11 @@ namespace ProAppVisibilityModule.ViewModels
         internal override void OnDeletePointCommand(object obj)
         {
             base.OnDeletePointCommand(obj);
-
-            EnableOkCancelClearBtns(ObserverAddInPoints.Any());
         }
 
         internal override void OnDeleteAllPointsCommand(object obj)
         {
             base.OnDeleteAllPointsCommand(obj);
-
-            EnableOkCancelClearBtns(ObserverAddInPoints.Any());
         }
 
         public override bool CanCreateElement
@@ -178,6 +174,8 @@ namespace ProAppVisibilityModule.ViewModels
 
                 if (!CanCreateElement || MapView.Active == null || MapView.Active.Map == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
                     return;
+
+                DeactivateTool("ProAppVisibilityModule_MapTool");
 
                 await ExecuteVisibilityRLOS();
 
@@ -299,7 +297,7 @@ namespace ProAppVisibilityModule.ViewModels
         /// </summary>
         /// <param name="maskFeatureClassName"></param>
         /// <param name="bufferDistance"></param>
-        /// <returns></returns>
+        /// <returns>Task</returns>
         private async Task CreateMask(string maskFeatureClassName, double bufferDistance, SpatialReference surfaceSR)
         {
             // create new
@@ -362,36 +360,33 @@ namespace ProAppVisibilityModule.ViewModels
             }
         }
 
-        internal override async Task Reset(bool toolReset)
-        {
-            await base.Reset(toolReset);
+        //internal override async Task Reset(bool toolReset)
+        //{
+        //    await base.Reset(toolReset);
 
-            if (MapView.Active == null)
-                return;
-
-            //// Disable buttons
-            //EnableOkCancelClearBtns(false);
-        }
+        //    if (MapView.Active == null)
+        //        return;
+        //}
 
         /// <summary>
         /// Override this event to collect observer points based on tool mode
         /// Setting the observer point to blue since the output is green / red
         /// </summary>
         /// <param name="obj"></param>
-        internal override void OnNewMapPointEvent(object obj)
-        {
-            base.OnNewMapPointEvent(obj);
+        //internal override void OnNewMapPointEvent(object obj)
+        //{
+        //    base.OnNewMapPointEvent(obj);
 
-            if (!IsActiveTab)
-                return;
+        //    if (!IsActiveTab)
+        //        return;
 
-            var point = obj as MapPoint;
+        //    var point = obj as MapPoint;
 
-            if (point == null)
-                return;
+        //    if (point == null)
+        //        return;
 
-            EnableOkCancelClearBtns(ObserverAddInPoints.Any());
-        }
+        //    //EnableOkCancelClearBtns(ObserverAddInPoints.Any());
+        //}
 
         #endregion
 
@@ -400,17 +395,6 @@ namespace ProAppVisibilityModule.ViewModels
         #endregion public
 
         #region private
-
-        /// <summary>
-        /// Enable or disable the form buttons
-        /// </summary>
-        /// <param name="enable">true to enable</param>
-        private void EnableOkCancelClearBtns(bool enable)
-        {
-            IsOkEnabled = enable;
-            IsCancelEnabled = enable;
-            IsClearEnabled = enable;
-        }
 
         /// <summary>
         /// Method to convert to/from different types of angular units

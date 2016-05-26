@@ -66,6 +66,16 @@
                                 </StackPanel>
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
+                        <ComboBox.Style>
+                            <Style TargetType="ComboBox">
+                                <Setter Property="IsEnabled" Value="True" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                        <Setter Property="IsEnabled" Value="False" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ComboBox.Style>
                     </ComboBox>
                     <Button Grid.Column="1"
                             Margin="3,3,0,0"
@@ -88,6 +98,16 @@
                                     Command="{Binding EnterKeyCommand}"
                                     CommandParameter="{x:Static prop:Resources.ToolModeObserver}" />
                     </TextBox.InputBindings>
+                    <TextBox.Style>
+                        <Style TargetType="TextBox">
+                            <Setter Property="IsEnabled" Value="True" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                    <Setter Property="IsEnabled" Value="False" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
                 </TextBox>
 
                 <Button Grid.Row="3"
@@ -102,6 +122,16 @@
                            Height="16"
                            HorizontalAlignment="Right"
                            Source="/VisibilityLibrary;component/Images/Add_Point32_d.png" />
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="IsEnabled" Value="True" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                    <Setter Property="IsEnabled" Value="False" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
                 </Button>
                 <ListBox x:Name="listBoxObservers"
                          Grid.Row="4"
@@ -129,6 +159,22 @@
                                       Header="{x:Static prop:Resources.MenuLabelDeleteAll}" />
                         </ContextMenu>
                     </ListBox.ContextMenu>
+                    <ListBox.InputBindings>
+                        <KeyBinding Key="Delete"
+                                    Command="{Binding DeletePointCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}},
+                                                               Path=SelectedItems}" />
+                    </ListBox.InputBindings>
+                    <ListBox.Style>
+                        <Style TargetType="ListBox">
+                            <Setter Property="IsEnabled" Value="True" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                    <Setter Property="IsEnabled" Value="False" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ListBox.Style>
                 </ListBox>
 
                 <CheckBox Grid.Row="5"
@@ -138,7 +184,18 @@
                           VerticalAlignment="Top"
                           Content="{x:Static prop:Resources.LabelNonVisible}"
                           IsChecked="{Binding ShowNonVisibleData}"
-                          ToolTip="{x:Static prop:Resources.LabelNonVisible}" />
+                          ToolTip="{x:Static prop:Resources.LabelNonVisible}">
+                    <CheckBox.Style>
+                        <Style TargetType="CheckBox">
+                            <Setter Property="IsEnabled" Value="True" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                    <Setter Property="IsEnabled" Value="False" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </CheckBox.Style>
+                </CheckBox>
                 <StackPanel Grid.Row="6"
                             Grid.ColumnSpan="3"
                             HorizontalAlignment="Right"
@@ -146,8 +203,25 @@
                     <Button Margin="3,20,0,0"
                             Command="{Binding CancelCommand}"
                             Content="{x:Static prop:Resources.LabelCancel}"
-                            IsEnabled="{Binding IsCancelEnabled}"
-                            ToolTip="{x:Static prop:Resources.LabelCancel}" />
+                            ToolTip="{x:Static prop:Resources.LabelCancel}">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="IsEnabled" Value="False" />
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding ElementName=listBoxObservers, Path=HasItems}" Value="True" />
+                                            <Condition Binding="{Binding IsRunning}" Value="False" />
+                                        </MultiDataTrigger.Conditions>
+                                        <MultiDataTrigger.Setters>
+                                            <Setter Property="IsEnabled" Value="True" />
+                                        </MultiDataTrigger.Setters>
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+
+                    </Button>
                     <Button Margin="3,20,0,0"
                             Command="{Binding SubmitCommand}"
                             Content="{x:Static prop:Resources.LabelOK}"
@@ -167,6 +241,7 @@
                                             <Condition Binding="{Binding ElementName=tbHFOVTo, Path=(Validation.HasError)}" Value="False" />
                                             <Condition Binding="{Binding ElementName=tbVFOVFrom, Path=(Validation.HasError)}" Value="False" />
                                             <Condition Binding="{Binding ElementName=tbVFOVTo, Path=(Validation.HasError)}" Value="False" />
+                                            <Condition Binding="{Binding IsRunning}" Value="False" />
                                         </MultiDataTrigger.Conditions>
                                         <MultiDataTrigger.Setters>
                                             <Setter Property="IsEnabled" Value="True" />
@@ -179,8 +254,18 @@
                     <Button Margin="3,20,0,0"
                             Command="{Binding ClearGraphicsCommand}"
                             Content="{x:Static prop:Resources.LabelClearGraphics}"
-                            IsEnabled="{Binding IsClearEnabled}"
-                            ToolTip="{x:Static prop:Resources.LabelClearGraphics}" />
+                            ToolTip="{x:Static prop:Resources.LabelClearGraphics}">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="IsEnabled" Value="False" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasMapGraphics}" Value="True">
+                                        <Setter Property="IsEnabled" Value="True" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
                 </StackPanel>
 
                 <Expander Grid.Row="7"
@@ -229,6 +314,16 @@
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
                                     </TextBox.InputBindings>
+                                    <TextBox.Style>
+                                        <Style TargetType="TextBox">
+                                            <Setter Property="IsEnabled" Value="True" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                                    <Setter Property="IsEnabled" Value="False" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBox.Style>
                                 </TextBox>
 
                                 <TextBlock Grid.ColumnSpan="4"
@@ -243,6 +338,16 @@
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
                                     </TextBox.InputBindings>
+                                    <TextBox.Style>
+                                        <Style TargetType="TextBox">
+                                            <Setter Property="IsEnabled" Value="True" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                                    <Setter Property="IsEnabled" Value="False" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBox.Style>
                                 </TextBox>
                                 <ComboBox x:Name="cmbOffsetUnitType"
                                           Width="Auto"
@@ -250,7 +355,18 @@
                                           Margin="3,3,0,0"
                                           ItemsSource="{Binding Source={StaticResource lineDistanceData}}"
                                           SelectedItem="{Binding Path=OffsetUnitType,
-                                                                 Mode=TwoWay}" />
+                                                                 Mode=TwoWay}">
+                                    <ComboBox.Style>
+                                        <Style TargetType="ComboBox">
+                                            <Setter Property="IsEnabled" Value="True" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                                    <Setter Property="IsEnabled" Value="False" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </ComboBox.Style>
+                                </ComboBox>
                             </StackPanel>
                         </GroupBox>
                         <GroupBox Grid.Row="5"
@@ -273,6 +389,16 @@
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
                                     </TextBox.InputBindings>
+                                    <TextBox.Style>
+                                        <Style TargetType="TextBox">
+                                            <Setter Property="IsEnabled" Value="True" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                                    <Setter Property="IsEnabled" Value="False" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBox.Style>
                                 </TextBox>
                                 <TextBlock Grid.Column="1"
                                            Margin="3,3,0,0"
@@ -290,6 +416,16 @@
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
                                     </TextBox.InputBindings>
+                                    <TextBox.Style>
+                                        <Style TargetType="TextBox">
+                                            <Setter Property="IsEnabled" Value="True" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                                    <Setter Property="IsEnabled" Value="False" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBox.Style>
                                 </TextBox>
                             </Grid>
                         </GroupBox>
@@ -323,6 +459,16 @@
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
                                     </TextBox.InputBindings>
+                                    <TextBox.Style>
+                                        <Style TargetType="TextBox">
+                                            <Setter Property="IsEnabled" Value="True" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                                    <Setter Property="IsEnabled" Value="False" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBox.Style>
                                 </TextBox>
                                 <TextBlock Grid.Row="1"
                                            Grid.Column="1"
@@ -341,6 +487,16 @@
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
                                     </TextBox.InputBindings>
+                                    <TextBox.Style>
+                                        <Style TargetType="TextBox">
+                                            <Setter Property="IsEnabled" Value="True" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                                    <Setter Property="IsEnabled" Value="False" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBox.Style>
                                 </TextBox>
 
                                 <TextBlock Grid.Row="2"
@@ -357,6 +513,16 @@
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
                                     </TextBox.InputBindings>
+                                    <TextBox.Style>
+                                        <Style TargetType="TextBox">
+                                            <Setter Property="IsEnabled" Value="True" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                                    <Setter Property="IsEnabled" Value="False" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBox.Style>
                                 </TextBox>
 
                                 <TextBlock Grid.Row="3"
@@ -376,6 +542,16 @@
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
                                     </TextBox.InputBindings>
+                                    <TextBox.Style>
+                                        <Style TargetType="TextBox">
+                                            <Setter Property="IsEnabled" Value="True" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                                    <Setter Property="IsEnabled" Value="False" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBox.Style>
                                 </TextBox>
                                 <ComboBox x:Name="cmbDegreeDistanceType"
                                           Grid.Row="4"
@@ -385,7 +561,18 @@
                                           Margin="3,3,0,0"
                                           ItemsSource="{Binding Source={StaticResource angularDistanceData}}"
                                           SelectedItem="{Binding Path=AngularUnitType,
-                                                                 Mode=TwoWay}" />
+                                                                 Mode=TwoWay}">
+                                    <ComboBox.Style>
+                                        <Style TargetType="ComboBox">
+                                            <Setter Property="IsEnabled" Value="True" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                                    <Setter Property="IsEnabled" Value="False" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </ComboBox.Style>
+                                </ComboBox>
                             </Grid>
                         </GroupBox>
                     </Grid>

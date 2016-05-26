@@ -50,5 +50,11 @@
         </Setter>
         <Setter Property="Command" Value="{Binding EditPropertiesDialogCommand}" />
         <Setter Property="ToolTip" Value="{x:Static prop:Resources.TooltipEditProperties}" />
+        <Setter Property="IsEnabled" Value="True" />
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                <Setter Property="IsEnabled" Value="False" />
+            </DataTrigger>
+        </Style.Triggers>
     </Style>
 </ResourceDictionary>

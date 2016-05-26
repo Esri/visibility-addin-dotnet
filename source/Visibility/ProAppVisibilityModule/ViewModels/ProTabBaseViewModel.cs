@@ -543,7 +543,7 @@ namespace ProAppVisibilityModule.ViewModels
         /// <summary>
         /// Method used to deactivate tool
         /// </summary>
-        private void DeactivateTool(string toolname)
+        internal void DeactivateTool(string toolname)
         {
             if (FrameworkApplication.CurrentTool != null &&
                 FrameworkApplication.CurrentTool.Equals(toolname))

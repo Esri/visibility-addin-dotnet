@@ -51,38 +51,38 @@ namespace ArcMapAddinVisibility.ViewModels
         public bool ShowNonVisibleData { get; set; }
         public int RunCount { get; set; }
 
-        private bool isCancelEnabled;
-        public bool IsCancelEnabled
-        {
-            get { return isCancelEnabled; }
-            set
-            {
-                isCancelEnabled = value;
-                RaisePropertyChanged(() => IsCancelEnabled);
-            }
-        }
+        //private bool isCancelEnabled;
+        //public bool IsCancelEnabled
+        //{
+        //    get { return isCancelEnabled; }
+        //    set
+        //    {
+        //        isCancelEnabled = value;
+        //        RaisePropertyChanged(() => IsCancelEnabled);
+        //    }
+        //}
 
-        private bool isOkEnabled;
-        public bool IsOkEnabled
-        {
-            get { return isOkEnabled; }
-            set
-            {
-                isOkEnabled = value;
-                RaisePropertyChanged(() => IsOkEnabled);
-            }
-        }
+        //private bool isOkEnabled;
+        //public bool IsOkEnabled
+        //{
+        //    get { return isOkEnabled; }
+        //    set
+        //    {
+        //        isOkEnabled = value;
+        //        RaisePropertyChanged(() => IsOkEnabled);
+        //    }
+        //}
 
-        private bool isClearEnabled;
-        public bool IsClearEnabled
-        {
-            get { return isClearEnabled; }
-            set
-            {
-                isClearEnabled = value;
-                RaisePropertyChanged(() => IsClearEnabled);
-            }
-        }
+        //private bool isClearEnabled;
+        //public bool IsClearEnabled
+        //{
+        //    get { return isClearEnabled; }
+        //    set
+        //    {
+        //        isClearEnabled = value;
+        //        RaisePropertyChanged(() => IsClearEnabled);
+        //    }
+        //}
 
         private Visibility _displayProgressBar;
         public Visibility DisplayProgressBar
@@ -139,9 +139,9 @@ namespace ArcMapAddinVisibility.ViewModels
             TopVerticalFOV = 90.0;
             ShowNonVisibleData = false;
             RunCount = 1;
-            IsClearEnabled = false;
-            IsOkEnabled = false;
-            IsCancelEnabled = false;
+            //IsClearEnabled = false;
+            //IsOkEnabled = false;
+            //IsCancelEnabled = false;
             DisplayProgressBar = Visibility.Hidden;
 
             // commands
@@ -155,15 +155,11 @@ namespace ArcMapAddinVisibility.ViewModels
         internal override void OnDeletePointCommand(object obj)
         {
             base.OnDeletePointCommand(obj);
-
-            EnableOkCancelClearBtns(ObserverAddInPoints.Any());
         }
 
         internal override void OnDeleteAllPointsCommand(object obj)
         {
             base.OnDeleteAllPointsCommand(obj);
-
-            EnableOkCancelClearBtns(ObserverAddInPoints.Any());
         }
 
         public override bool CanCreateElement
@@ -353,36 +349,36 @@ namespace ArcMapAddinVisibility.ViewModels
             }
         }
 
-        internal override void Reset(bool toolReset)
-        {
-            base.Reset(toolReset);
+        //internal override void Reset(bool toolReset)
+        //{
+        //    base.Reset(toolReset);
 
-            if (ArcMap.Document == null || ArcMap.Document.FocusMap == null)
-                return;
+        //    if (ArcMap.Document == null || ArcMap.Document.FocusMap == null)
+        //        return;
 
-            // Disable buttons
-            EnableOkCancelClearBtns(false);
-        }
+        //    // Disable buttons
+        //    //EnableOkCancelClearBtns(false);
+        //}
 
         /// <summary>
         /// Override this event to collect observer points based on tool mode
         /// Setting the observer point to blue since the output is green / red
         /// </summary>
         /// <param name="obj"></param>
-        internal override void OnNewMapPointEvent(object obj)
-        {
-            base.OnNewMapPointEvent(obj);
+        //internal override void OnNewMapPointEvent(object obj)
+        //{
+        //    base.OnNewMapPointEvent(obj);
 
-            if (!IsActiveTab)
-                return;
+        //    if (!IsActiveTab)
+        //        return;
 
-            var point = obj as IPoint;
+        //    var point = obj as IPoint;
 
-            if (point == null)
-                return;
+        //    if (point == null)
+        //        return;
 
-            EnableOkCancelClearBtns(ObserverAddInPoints.Any());
-        }
+        //    //EnableOkCancelClearBtns(ObserverAddInPoints.Any());
+        //}
 
         #endregion
 
@@ -682,17 +678,6 @@ namespace ArcMapAddinVisibility.ViewModels
         #endregion
 
         #region private
-
-        /// <summary>
-        /// Enable or disable the form buttons
-        /// </summary>
-        /// <param name="enable">true to enable</param>
-        private void EnableOkCancelClearBtns(bool enable)
-        {
-            IsOkEnabled = enable;
-            IsCancelEnabled = enable;
-            IsClearEnabled = enable;
-        }
 
         /// <summary>
         /// Run RasterToPoly tool to convert input raster to poly's.  Then run Intersect if input geomList has features
