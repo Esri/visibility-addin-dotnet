@@ -76,7 +76,7 @@ namespace ProAppVisibilityModule.ViewModels
                         {
                             await CreateMapElement();
 
-                            await Reset(true);
+                            //await Reset(true);
                         }
                         catch(Exception ex)
                         {
@@ -232,9 +232,11 @@ namespace ProAppVisibilityModule.ViewModels
                 if (!CanCreateElement || MapView.Active == null || MapView.Active.Map == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
                     return;
 
+                DeactivateTool("ProAppVisibilityModule_MapTool");
+
                 await ExecuteVisibilityLLOS();
 
-                await base.CreateMapElement();
+                //await base.CreateMapElement();
             }
             catch(Exception ex)
             {
@@ -281,8 +283,8 @@ namespace ProAppVisibilityModule.ViewModels
                 await FeatureClassHelper.UpdateShapeWithZ(VisibilityLibrary.Properties.Resources.ObserversLayerName, VisibilityLibrary.Properties.Resources.ZFieldName, ObserverOffset.Value);
                 await FeatureClassHelper.UpdateShapeWithZ(VisibilityLibrary.Properties.Resources.TargetsLayerName, VisibilityLibrary.Properties.Resources.ZFieldName, TargetOffset.Value);
 
-                await FeatureClassHelper.Delete(CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.SightLinesLayerName);
-                await FeatureClassHelper.Delete(CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.LOSOutputLayerName);
+                //await FeatureClassHelper.Delete(CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.SightLinesLayerName);
+                //await FeatureClassHelper.Delete(CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.LOSOutputLayerName);
 
                 // create sight lines
 
@@ -298,7 +300,7 @@ namespace ProAppVisibilityModule.ViewModels
                     VisibilityLibrary.Properties.Resources.SightLinesLayerName,
                     CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.LOSOutputLayerName);
 
-                await Reset(true);
+                //await Reset(true);
             }
             catch(Exception ex)
             {

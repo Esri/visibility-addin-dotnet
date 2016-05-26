@@ -124,7 +124,10 @@ namespace ProAppVisibilityModule.Helpers
             arguments.Add("1");
             // output_the_direction (Optional) bool
             arguments.Add("");
-            IGPResult result = await Geoprocessing.ExecuteToolAsync("ConstructSightLines_3d", Geoprocessing.MakeValueArray(arguments.ToArray()), flags: GPExecuteToolFlags.Default);
+
+            var environments = Geoprocessing.MakeEnvironmentArray(overwriteoutput: true);
+
+            IGPResult result = await Geoprocessing.ExecuteToolAsync("ConstructSightLines_3d", Geoprocessing.MakeValueArray(arguments.ToArray()), environments, flags: GPExecuteToolFlags.Default);
 
             if (result.IsFailed)
             {
@@ -176,7 +179,9 @@ namespace ProAppVisibilityModule.Helpers
             //// in_features (optional) multipatch features
             //arguments.Add("");
 
-            IGPResult result = await Geoprocessing.ExecuteToolAsync("LineOfSight_3d", Geoprocessing.MakeValueArray(arguments.ToArray()), flags: GPExecuteToolFlags.Default);
+            var environments = Geoprocessing.MakeEnvironmentArray(overwriteoutput: true);
+
+            IGPResult result = await Geoprocessing.ExecuteToolAsync("LineOfSight_3d", Geoprocessing.MakeValueArray(arguments.ToArray()), environments, flags: GPExecuteToolFlags.Default);
 
             if(result.IsFailed)
             {

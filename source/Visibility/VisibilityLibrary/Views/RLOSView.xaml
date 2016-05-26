@@ -66,16 +66,6 @@
                                 </StackPanel>
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
-                        <ComboBox.Style>
-                            <Style TargetType="ComboBox">
-                                <Setter Property="IsEnabled" Value="True" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsRunning}" Value="True">
-                                        <Setter Property="IsEnabled" Value="False" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ComboBox.Style>
                     </ComboBox>
                     <Button Grid.Column="1"
                             Margin="3,3,0,0"
@@ -92,22 +82,13 @@
                          Text="{Binding Path=Point1Formatted,
                                         UpdateSourceTrigger=PropertyChanged,
                                         ValidatesOnExceptions=True}"
-                         Validation.ErrorTemplate="{StaticResource errorTemplate}">
+                         Validation.ErrorTemplate="{StaticResource errorTemplate}"
+                         Style="{StaticResource textboxStyle}">
                     <TextBox.InputBindings>
                         <KeyBinding Key="Enter"
                                     Command="{Binding EnterKeyCommand}"
                                     CommandParameter="{x:Static prop:Resources.ToolModeObserver}" />
                     </TextBox.InputBindings>
-                    <TextBox.Style>
-                        <Style TargetType="TextBox">
-                            <Setter Property="IsEnabled" Value="True" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
-                                    <Setter Property="IsEnabled" Value="False" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBox.Style>
                 </TextBox>
 
                 <Button Grid.Row="3"
@@ -310,20 +291,11 @@
                                          Text="{Binding ObserverOffset,
                                                         UpdateSourceTrigger=PropertyChanged,
                                                         ValidatesOnExceptions=True}"
-                                         Validation.ErrorTemplate="{StaticResource errorTemplate}">
+                                         Validation.ErrorTemplate="{StaticResource errorTemplate}"
+                                         Style="{StaticResource textboxStyle}">
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
                                     </TextBox.InputBindings>
-                                    <TextBox.Style>
-                                        <Style TargetType="TextBox">
-                                            <Setter Property="IsEnabled" Value="True" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
-                                                    <Setter Property="IsEnabled" Value="False" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBox.Style>
                                 </TextBox>
 
                                 <TextBlock Grid.ColumnSpan="4"
@@ -334,20 +306,11 @@
                                          Text="{Binding SurfaceOffset,
                                                         UpdateSourceTrigger=PropertyChanged,
                                                         ValidatesOnExceptions=True}"
-                                         Validation.ErrorTemplate="{StaticResource errorTemplate}">
+                                         Validation.ErrorTemplate="{StaticResource errorTemplate}"
+                                         Style="{StaticResource textboxStyle}">
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
                                     </TextBox.InputBindings>
-                                    <TextBox.Style>
-                                        <Style TargetType="TextBox">
-                                            <Setter Property="IsEnabled" Value="True" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
-                                                    <Setter Property="IsEnabled" Value="False" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBox.Style>
                                 </TextBox>
                                 <ComboBox x:Name="cmbOffsetUnitType"
                                           Width="Auto"
@@ -356,16 +319,6 @@
                                           ItemsSource="{Binding Source={StaticResource lineDistanceData}}"
                                           SelectedItem="{Binding Path=OffsetUnitType,
                                                                  Mode=TwoWay}">
-                                    <ComboBox.Style>
-                                        <Style TargetType="ComboBox">
-                                            <Setter Property="IsEnabled" Value="True" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
-                                                    <Setter Property="IsEnabled" Value="False" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </ComboBox.Style>
                                 </ComboBox>
                             </StackPanel>
                         </GroupBox>
@@ -385,20 +338,11 @@
                                          Text="{Binding MinDistance,
                                                         UpdateSourceTrigger=PropertyChanged,
                                                         ValidatesOnExceptions=True}"
-                                         Validation.ErrorTemplate="{StaticResource errorTemplate}">
+                                         Validation.ErrorTemplate="{StaticResource errorTemplate}"
+                                         Style="{StaticResource textboxStyle}">
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
                                     </TextBox.InputBindings>
-                                    <TextBox.Style>
-                                        <Style TargetType="TextBox">
-                                            <Setter Property="IsEnabled" Value="True" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
-                                                    <Setter Property="IsEnabled" Value="False" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBox.Style>
                                 </TextBox>
                                 <TextBlock Grid.Column="1"
                                            Margin="3,3,0,0"
@@ -412,20 +356,11 @@
                                          Text="{Binding MaxDistance,
                                                         UpdateSourceTrigger=PropertyChanged,
                                                         ValidatesOnExceptions=True}"
-                                         Validation.ErrorTemplate="{StaticResource errorTemplate}">
+                                         Validation.ErrorTemplate="{StaticResource errorTemplate}"
+                                         Style="{StaticResource textboxStyle}">
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
                                     </TextBox.InputBindings>
-                                    <TextBox.Style>
-                                        <Style TargetType="TextBox">
-                                            <Setter Property="IsEnabled" Value="True" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
-                                                    <Setter Property="IsEnabled" Value="False" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBox.Style>
                                 </TextBox>
                             </Grid>
                         </GroupBox>
@@ -455,20 +390,11 @@
                                          Text="{Binding LeftHorizontalFOV,
                                                         UpdateSourceTrigger=PropertyChanged,
                                                         ValidatesOnExceptions=True}"
-                                         Validation.ErrorTemplate="{StaticResource errorTemplate}">
+                                         Validation.ErrorTemplate="{StaticResource errorTemplate}"
+                                         Style="{StaticResource textboxStyle}">
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
                                     </TextBox.InputBindings>
-                                    <TextBox.Style>
-                                        <Style TargetType="TextBox">
-                                            <Setter Property="IsEnabled" Value="True" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
-                                                    <Setter Property="IsEnabled" Value="False" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBox.Style>
                                 </TextBox>
                                 <TextBlock Grid.Row="1"
                                            Grid.Column="1"
@@ -483,20 +409,11 @@
                                          Text="{Binding RightHorizontalFOV,
                                                         UpdateSourceTrigger=PropertyChanged,
                                                         ValidatesOnExceptions=True}"
-                                         Validation.ErrorTemplate="{StaticResource errorTemplate}">
+                                         Validation.ErrorTemplate="{StaticResource errorTemplate}"
+                                         Style="{StaticResource textboxStyle}">
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
                                     </TextBox.InputBindings>
-                                    <TextBox.Style>
-                                        <Style TargetType="TextBox">
-                                            <Setter Property="IsEnabled" Value="True" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
-                                                    <Setter Property="IsEnabled" Value="False" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBox.Style>
                                 </TextBox>
 
                                 <TextBlock Grid.Row="2"
@@ -509,20 +426,11 @@
                                          Text="{Binding BottomVerticalFOV,
                                                         UpdateSourceTrigger=PropertyChanged,
                                                         ValidatesOnExceptions=True}"
-                                         Validation.ErrorTemplate="{StaticResource errorTemplate}">
+                                         Validation.ErrorTemplate="{StaticResource errorTemplate}"
+                                         Style="{StaticResource textboxStyle}">
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
                                     </TextBox.InputBindings>
-                                    <TextBox.Style>
-                                        <Style TargetType="TextBox">
-                                            <Setter Property="IsEnabled" Value="True" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
-                                                    <Setter Property="IsEnabled" Value="False" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBox.Style>
                                 </TextBox>
 
                                 <TextBlock Grid.Row="3"
@@ -538,20 +446,11 @@
                                          Text="{Binding TopVerticalFOV,
                                                         UpdateSourceTrigger=PropertyChanged,
                                                         ValidatesOnExceptions=True}"
-                                         Validation.ErrorTemplate="{StaticResource errorTemplate}">
+                                         Validation.ErrorTemplate="{StaticResource errorTemplate}"
+                                         Style="{StaticResource textboxStyle}">
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
                                     </TextBox.InputBindings>
-                                    <TextBox.Style>
-                                        <Style TargetType="TextBox">
-                                            <Setter Property="IsEnabled" Value="True" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
-                                                    <Setter Property="IsEnabled" Value="False" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBox.Style>
                                 </TextBox>
                                 <ComboBox x:Name="cmbDegreeDistanceType"
                                           Grid.Row="4"
@@ -562,16 +461,6 @@
                                           ItemsSource="{Binding Source={StaticResource angularDistanceData}}"
                                           SelectedItem="{Binding Path=AngularUnitType,
                                                                  Mode=TwoWay}">
-                                    <ComboBox.Style>
-                                        <Style TargetType="ComboBox">
-                                            <Setter Property="IsEnabled" Value="True" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
-                                                    <Setter Property="IsEnabled" Value="False" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </ComboBox.Style>
                                 </ComboBox>
                             </Grid>
                         </GroupBox>
