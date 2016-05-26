@@ -51,39 +51,6 @@ namespace ArcMapAddinVisibility.ViewModels
         public bool ShowNonVisibleData { get; set; }
         public int RunCount { get; set; }
 
-        //private bool isCancelEnabled;
-        //public bool IsCancelEnabled
-        //{
-        //    get { return isCancelEnabled; }
-        //    set
-        //    {
-        //        isCancelEnabled = value;
-        //        RaisePropertyChanged(() => IsCancelEnabled);
-        //    }
-        //}
-
-        //private bool isOkEnabled;
-        //public bool IsOkEnabled
-        //{
-        //    get { return isOkEnabled; }
-        //    set
-        //    {
-        //        isOkEnabled = value;
-        //        RaisePropertyChanged(() => IsOkEnabled);
-        //    }
-        //}
-
-        //private bool isClearEnabled;
-        //public bool IsClearEnabled
-        //{
-        //    get { return isClearEnabled; }
-        //    set
-        //    {
-        //        isClearEnabled = value;
-        //        RaisePropertyChanged(() => IsClearEnabled);
-        //    }
-        //}
-
         private Visibility _displayProgressBar;
         public Visibility DisplayProgressBar
         {
@@ -139,9 +106,6 @@ namespace ArcMapAddinVisibility.ViewModels
             TopVerticalFOV = 90.0;
             ShowNonVisibleData = false;
             RunCount = 1;
-            //IsClearEnabled = false;
-            //IsOkEnabled = false;
-            //IsCancelEnabled = false;
             DisplayProgressBar = Visibility.Hidden;
 
             // commands
@@ -362,37 +326,6 @@ namespace ArcMapAddinVisibility.ViewModels
                 IsRunning = false;
             }
         }
-
-        //internal override void Reset(bool toolReset)
-        //{
-        //    base.Reset(toolReset);
-
-        //    if (ArcMap.Document == null || ArcMap.Document.FocusMap == null)
-        //        return;
-
-        //    // Disable buttons
-        //    //EnableOkCancelClearBtns(false);
-        //}
-
-        /// <summary>
-        /// Override this event to collect observer points based on tool mode
-        /// Setting the observer point to blue since the output is green / red
-        /// </summary>
-        /// <param name="obj"></param>
-        //internal override void OnNewMapPointEvent(object obj)
-        //{
-        //    base.OnNewMapPointEvent(obj);
-
-        //    if (!IsActiveTab)
-        //        return;
-
-        //    var point = obj as IPoint;
-
-        //    if (point == null)
-        //        return;
-
-        //    //EnableOkCancelClearBtns(ObserverAddInPoints.Any());
-        //}
 
         #endregion
 
