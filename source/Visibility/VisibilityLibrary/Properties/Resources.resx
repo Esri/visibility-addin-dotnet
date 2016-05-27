@@ -351,4 +351,22 @@
   <data name="RLOSConvertedPolygonsLayerName" xml:space="preserve">
     <value>vis_rlos_conv_polygons</value>
   </data>
+  <data name="AENumMustBeGreater" xml:space="preserve">
+    <value>The number must be greater than min</value>
+  </data>
+  <data name="AENumMustBeLess" xml:space="preserve">
+    <value>The number must be less than max</value>
+  </data>
+  <data name="AENumRange" xml:space="preserve">
+    <value>The number must be between {0} and {1}</value>
+  </data>
+  <data name="TooltipBottomFOVValidRange" xml:space="preserve">
+    <value>Valid range -90 to 0</value>
+  </data>
+  <data name="TooltipHFOVValidRange" xml:space="preserve">
+    <value>Valid range 0 to 360</value>
+  </data>
+  <data name="TooltipTopFOVValidRange" xml:space="preserve">
+    <value>Valid range 0 to 90</value>
+  </data>
 </root>

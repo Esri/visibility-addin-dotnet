@@ -390,6 +390,7 @@
                                          Text="{Binding LeftHorizontalFOV,
                                                         UpdateSourceTrigger=PropertyChanged,
                                                         ValidatesOnExceptions=True}"
+                                         ToolTip="{x:Static prop:Resources.TooltipHFOVValidRange}"
                                          Validation.ErrorTemplate="{StaticResource errorTemplate}">
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
@@ -409,6 +410,7 @@
                                          Text="{Binding RightHorizontalFOV,
                                                         UpdateSourceTrigger=PropertyChanged,
                                                         ValidatesOnExceptions=True}"
+                                         ToolTip="{x:Static prop:Resources.TooltipHFOVValidRange}"
                                          Validation.ErrorTemplate="{StaticResource errorTemplate}">
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
@@ -426,6 +428,7 @@
                                          Text="{Binding BottomVerticalFOV,
                                                         UpdateSourceTrigger=PropertyChanged,
                                                         ValidatesOnExceptions=True}"
+                                         ToolTip="{x:Static prop:Resources.TooltipBottomFOVValidRange}"
                                          Validation.ErrorTemplate="{StaticResource errorTemplate}">
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
@@ -446,6 +449,7 @@
                                          Text="{Binding TopVerticalFOV,
                                                         UpdateSourceTrigger=PropertyChanged,
                                                         ValidatesOnExceptions=True}"
+                                         ToolTip="{x:Static prop:Resources.TooltipTopFOVValidRange}"
                                          Validation.ErrorTemplate="{StaticResource errorTemplate}">
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />

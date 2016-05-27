@@ -33,13 +33,108 @@ namespace ProAppVisibilityModule.ViewModels
     {
         #region Properties
 
-        public double SurfaceOffset { get; set; }
-        public double MinDistance { get; set; }
-        public double MaxDistance { get; set; }
-        public double LeftHorizontalFOV { get; set; }
-        public double RightHorizontalFOV { get; set; }
-        public double BottomVerticalFOV { get; set; }
-        public double TopVerticalFOV { get; set; }
+        private double _SurfaceOffset = 0.0;
+        public double SurfaceOffset 
+        {
+            get { return _SurfaceOffset; }
+            set
+            {
+                if(value < 0.0)
+                    throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEMustBePositive);
+
+                _SurfaceOffset = value;
+                RaisePropertyChanged(() => SurfaceOffset);
+            }
+        }
+
+        private double _MinDistance = 0.0;
+        public double MinDistance 
+        {
+            get { return _MinDistance; }
+            set
+            {
+                if(value < 0.0)
+                    throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEMustBePositive);
+
+                if(value > MaxDistance)
+                    throw new ArgumentException(VisibilityLibrary.Properties.Resources.AENumMustBeLess);
+
+                _MinDistance = value;
+                RaisePropertyChanged(() => MinDistance);
+            }
+        }
+
+        private double _MaxDistance = 1000.0;
+        public double MaxDistance 
+        {
+            get { return _MaxDistance; }
+            set
+            {
+                if(value < 0.0)
+                    throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEMustBePositive);
+
+                if (value < MinDistance)
+                    throw new ArgumentException(VisibilityLibrary.Properties.Resources.AENumMustBeGreater);
+
+                _MaxDistance = value;
+                RaisePropertyChanged(() => MaxDistance);
+            }
+        }
+
+        private double _LeftHorizontalFOV = 0.0;
+        public double LeftHorizontalFOV
+        { 
+            get { return _LeftHorizontalFOV; }
+            set
+            {
+                if(value < 0.0 || value > 360.0)
+                    throw new ArgumentException(string.Format(VisibilityLibrary.Properties.Resources.AENumRange, 0, 360));
+
+                _LeftHorizontalFOV = value;
+                RaisePropertyChanged(() => LeftHorizontalFOV);
+            }
+        }
+        private double _RightHorizontalFOV = 360.0;
+        public double RightHorizontalFOV 
+        {
+            get { return _RightHorizontalFOV; }
+            set
+            {
+                if (value < 0.0 || value > 360.0)
+                    throw new ArgumentException(string.Format(VisibilityLibrary.Properties.Resources.AENumRange, 0, 360));
+
+                _RightHorizontalFOV = value;
+                RaisePropertyChanged(() => RightHorizontalFOV);
+            }
+        }
+        private double _BottomVerticalFOV = -90.0;
+        public double BottomVerticalFOV
+        {
+            get { return _BottomVerticalFOV; }
+            set
+            {
+                if (value < -90.0 || value > 0.0)
+                    throw new ArgumentException(string.Format(VisibilityLibrary.Properties.Resources.AENumRange, -90.0, 0.0));
+
+                _BottomVerticalFOV = value;
+                RaisePropertyChanged(() => BottomVerticalFOV);
+            }
+        }
+
+        private double _TopVerticalFOV = 90.0;
+        public double TopVerticalFOV 
+        {
+            get { return _TopVerticalFOV; }
+            set
+            {
+                if (value < 0.0 || value > 90.0)
+                    throw new ArgumentException(string.Format(VisibilityLibrary.Properties.Resources.AENumRange, 0.0, 90.0));
+
+                _TopVerticalFOV = value;
+                RaisePropertyChanged(() => TopVerticalFOV);
+            }
+        }
+
         public bool ShowNonVisibleData { get; set; }
         public int RunCount { get; set; }
 
@@ -89,13 +184,6 @@ namespace ProAppVisibilityModule.ViewModels
         /// </summary>
         public ProRLOSViewModel()
         {
-            SurfaceOffset = 0.0;
-            MinDistance = 0.0;
-            MaxDistance = 1000;
-            LeftHorizontalFOV = 0.0;
-            RightHorizontalFOV = 360.0;
-            BottomVerticalFOV = -90.0;
-            TopVerticalFOV = 90.0;
             ShowNonVisibleData = false;
             RunCount = 1;
             DisplayProgressBar = Visibility.Hidden;
