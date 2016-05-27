@@ -278,20 +278,20 @@ namespace ProAppVisibilityModule.Helpers
         /// <summary>
         /// Method to run Visibility
         /// </summary>
-        /// <param name="surfaceName"></param>
-        /// <param name="observerFeatureClassName"></param>
-        /// <param name="outRLOSFeatureClass"></param>
-        /// <param name="observerOffset"></param>
-        /// <param name="surfaceOffset"></param>
-        /// <param name="minDistance"></param>
-        /// <param name="maxDistance"></param>
-        /// <param name="horizontalStartAngle"></param>
-        /// <param name="horizontalEndAngle"></param>
-        /// <param name="verticalUpperAngle"></param>
-        /// <param name="verticalLowerAngle"></param>
-        /// <param name="showNonVisibleData"></param>
-        /// <param name="environments"></param>
-        /// <param name="addToMap"></param>
+        /// <param name="surfaceName">projected surface name</param>
+        /// <param name="observerFeatureClassName">observer feature class name</param>
+        /// <param name="outRLOSFeatureClass">output feature class</param>
+        /// <param name="observerOffset">observer offset in map z units</param>
+        /// <param name="surfaceOffset">surface offset in map z units</param>
+        /// <param name="minDistance">Minimum distance in map linear units</param>
+        /// <param name="maxDistance">Maximum distance in map linear units</param>
+        /// <param name="horizontalStartAngle">start angle in degrees, 0 to 360, 0 at north</param>
+        /// <param name="horizontalEndAngle">end angle in degrees, 0 to 360, 0 at north</param>
+        /// <param name="verticalUpperAngle">upper angle in degrees, 0 to 90</param>
+        /// <param name="verticalLowerAngle">lower angle in degrees, -90 to 0</param>
+        /// <param name="showNonVisibleData">true or false, if true, renders as Red, if false, renders as transparent</param>
+        /// <param name="environments">geoprocessing environments</param>
+        /// <param name="addToMap">add to map or not</param>
         /// <returns></returns>
         public static async Task CreateVisibility(string surfaceName, string observerFeatureClassName, string outRLOSFeatureClass, 
                                                     double observerOffset, double surfaceOffset, 
@@ -392,11 +392,11 @@ namespace ProAppVisibilityModule.Helpers
         /// <summary>
         /// Method used to create point features from AddInPoints
         /// </summary>
-        /// <param name="featureClassName"></param>
-        /// <param name="collection"></param>
-        /// <param name="offset"></param>
+        /// <param name="featureClassName">feature class name to update</param>
+        /// <param name="collection">AddInPoints collection</param>
+        /// <param name="offset">offset in z units</param>
         /// <returns></returns>
-        public static async Task CreatingFeatures(string featureClassName, ObservableCollection<AddInPoint> collection, double offset)
+        public static async Task CreatingFeatures(string featureClassName, ObservableCollection<AddInPoint> collection, double offsetInZUnits)
         {
             try
             {
@@ -420,7 +420,7 @@ namespace ProAppVisibilityModule.Helpers
                                     using (var rowBuffer = enterpriseFeatureClass.CreateRowBuffer())
                                     {
                                         // Either the field index or the field name can be used in the indexer.
-                                        rowBuffer[VisibilityLibrary.Properties.Resources.OffsetFieldName] = offset;
+                                        rowBuffer[VisibilityLibrary.Properties.Resources.OffsetFieldName] = offsetInZUnits;
                                         var point = MapPointBuilder.CreateMapPoint(item.Point.X, item.Point.Y, 0.0, item.Point.SpatialReference);
                                         rowBuffer[shapeFieldName] = point;
 
@@ -457,12 +457,13 @@ namespace ProAppVisibilityModule.Helpers
 
         /// <summary>
         /// Method used to update point geometry Z data with offset
+        /// also updates the 'Z' field
         /// </summary>
-        /// <param name="featureClassName"></param>
-        /// <param name="zFieldName"></param>
-        /// <param name="offsetInMeters"></param>
+        /// <param name="featureClassName">feature class name</param>
+        /// <param name="zFieldName">'Z' field name</param>
+        /// <param name="offsetInMapZUnits">double of offset in map z units</param>
         /// <returns></returns>
-        public static async Task UpdateShapeWithZ(string featureClassName, string zFieldName, double offsetInMeters)
+        public static async Task UpdateShapeWithZ(string featureClassName, string zFieldName, double offsetInMapZUnits)
         {
             try
             {
@@ -491,7 +492,7 @@ namespace ProAppVisibilityModule.Helpers
                                         {
                                             context.Invalidate(feature);
                                             var mp = (MapPoint)feature[shapeFieldName];
-                                            var z = (Double)feature[zFieldIndex] + offsetInMeters;
+                                            var z = (Double)feature[zFieldIndex] + offsetInMapZUnits;
                                             feature[VisibilityLibrary.Properties.Resources.OffsetWithZFieldName] = z;
                                             feature.SetShape(MapPointBuilder.CreateMapPoint(mp.X, mp.Y, z, mp.SpatialReference));
 

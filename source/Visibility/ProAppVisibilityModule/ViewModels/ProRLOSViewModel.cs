@@ -267,13 +267,11 @@ namespace ProAppVisibilityModule.ViewModels
 
                 // add observer points to feature layer
 
-                await FeatureClassHelper.CreatingFeatures(VisibilityLibrary.Properties.Resources.ObserversLayerName, ObserverAddInPoints, ConvertFromTo(OffsetUnitType, VisibilityLibrary.DistanceTypes.Meters, ObserverOffset.Value));
+                await FeatureClassHelper.CreatingFeatures(VisibilityLibrary.Properties.Resources.ObserversLayerName, ObserverAddInPoints, GetAsMapZUnits(surfaceSR, ObserverOffset.Value));
 
                 // update with surface information
 
                 await FeatureClassHelper.AddSurfaceInformation(VisibilityLibrary.Properties.Resources.ObserversLayerName, SelectedSurfaceName, VisibilityLibrary.Properties.Resources.ZFieldName);
-
-                await FeatureClassHelper.UpdateShapeWithZ(VisibilityLibrary.Properties.Resources.ObserversLayerName, VisibilityLibrary.Properties.Resources.ZFieldName, ObserverOffset.Value);
 
                 // Visibility
 
@@ -286,6 +284,8 @@ namespace ProAppVisibilityModule.ViewModels
                 var verticalUpperAngleInDegrees = GetAngularDistanceFromTo(AngularUnitType, AngularTypes.DEGREES, TopVerticalFOV);
                 var verticalLowerAngleInDegrees = GetAngularDistanceFromTo(AngularUnitType, AngularTypes.DEGREES, BottomVerticalFOV);
 
+                await FeatureClassHelper.UpdateShapeWithZ(VisibilityLibrary.Properties.Resources.ObserversLayerName, VisibilityLibrary.Properties.Resources.ZFieldName, observerOffsetInMapZUnits);
+                
                 string maskFeatureClassName = CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.RLOSMaskLayerName;
 
                 await CreateMask(VisibilityLibrary.Properties.Resources.RLOSMaskLayerName, maxDistanceInMapUnits, surfaceSR);
@@ -321,29 +321,6 @@ namespace ProAppVisibilityModule.ViewModels
             {
                 Debug.Print(ex.Message);
             }
-        }
-
-        /// <summary>
-        /// Method to get spatial reference from a feature class
-        /// </summary>
-        /// <param name="fcName">name of layer</param>
-        /// <returns>SpatialReference</returns>
-        private async Task<SpatialReference> GetSpatialReferenceFromLayer(string layerName)
-        {
-            try
-            {
-                return await ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(() =>
-                {
-                    var layer = GetLayerFromMapByName(layerName);
-
-                    return layer.GetSpatialReference();
-                });
-            }
-            catch (Exception ex)
-            {
-                Debug.Print(ex.Message);
-            }
-            return null;
         }
 
         /// <summary>

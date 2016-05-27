@@ -382,6 +382,29 @@ namespace ProAppVisibilityModule.ViewModels
         }
 
         /// <summary>
+        /// Method to get spatial reference from a feature class
+        /// </summary>
+        /// <param name="fcName">name of layer</param>
+        /// <returns>SpatialReference</returns>
+        internal async Task<SpatialReference> GetSpatialReferenceFromLayer(string layerName)
+        {
+            try
+            {
+                return await ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(() =>
+                {
+                    var layer = GetLayerFromMapByName(layerName);
+
+                    return layer.GetSpatialReference();
+                });
+            }
+            catch (Exception ex)
+            {
+                Debug.Print(ex.Message);
+            }
+            return null;
+        }
+
+        /// <summary>
         /// Override to add aditional items in the class to reset tool
         /// </summary>
         /// <param name="toolReset"></param>
@@ -465,23 +488,36 @@ namespace ProAppVisibilityModule.ViewModels
             RaisePropertyChanged(() => HasMapGraphics);
         }
 
+        /// <summary>
+        /// Method used to convert offset value to surface z units
+        /// </summary>
+        /// <param name="sr">spatial reference of z unit</param>
+        /// <param name="value">value to be converted into z units</param>
+        /// <returns>value is z units</returns>
         internal double GetAsMapZUnits(SpatialReference sr, double value)
         {
             double result = value;
 
             Unit unit = null;
-            // get map Z unit
+            // try to get map Z unit
             try
             {
                 unit = sr.ZUnit;
             }
-            catch { }
+            catch 
+            {
+                // do nothing
+                // catching this since accessing the ZUnit crashes when not set
+            }
 
+            // default to map linear unit
             if (unit == null)
                 unit = sr.Unit;
 
+            // get linear unit of selected offset unit type
             var offsetLinearUnit = GetLinearUnit(OffsetUnitType);
 
+            // convert to map z unit
             result = offsetLinearUnit.ConvertTo(value, unit as LinearUnit);
 
             return result;
@@ -529,19 +565,19 @@ namespace ProAppVisibilityModule.ViewModels
         }
 
 
-        internal double ConvertFromTo(DistanceTypes fromType, DistanceTypes toType, double input)
-        {
-            double result = 0.0;
+        //internal double ConvertFromTo(DistanceTypes fromType, DistanceTypes toType, double input)
+        //{
+        //    double result = 0.0;
 
-            var linearUnitFrom = GetLinearUnit(fromType);
-            var linearUnitTo = GetLinearUnit(toType);
+        //    var linearUnitFrom = GetLinearUnit(fromType);
+        //    var linearUnitTo = GetLinearUnit(toType);
 
-            var unit = LinearUnit.CreateLinearUnit(linearUnitFrom.FactoryCode);
+        //    var unit = LinearUnit.CreateLinearUnit(linearUnitFrom.FactoryCode);
 
-            result = unit.ConvertTo(input, linearUnitTo);
+        //    result = unit.ConvertTo(input, linearUnitTo);
 
-            return result;
-        }
+        //    return result;
+        //}
 
         internal LinearUnit GetLinearUnit(DistanceTypes dtype)
         {
