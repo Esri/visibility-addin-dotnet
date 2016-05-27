@@ -175,8 +175,6 @@ namespace ProAppVisibilityModule.ViewModels
             await Reset(true);
         }
 
-
-
         #endregion
 
         /// <summary>
@@ -194,7 +192,7 @@ namespace ProAppVisibilityModule.ViewModels
             CancelCommand = new RelayCommand(OnCancelCommand);
         }
 
-        #region override
+        #region overrides
 
         internal override void OnDeletePointCommand(object obj)
         {
@@ -244,6 +242,10 @@ namespace ProAppVisibilityModule.ViewModels
             }
         }
 
+        #endregion overrides
+
+        #region Private
+
         private async Task ExecuteVisibilityRLOS()
         {
             try
@@ -284,8 +286,6 @@ namespace ProAppVisibilityModule.ViewModels
                 var verticalUpperAngleInDegrees = GetAngularDistanceFromTo(AngularUnitType, AngularTypes.DEGREES, TopVerticalFOV);
                 var verticalLowerAngleInDegrees = GetAngularDistanceFromTo(AngularUnitType, AngularTypes.DEGREES, BottomVerticalFOV);
 
-                // TODO clamp angle values
-
                 string maskFeatureClassName = CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.RLOSMaskLayerName;
 
                 await CreateMask(VisibilityLibrary.Properties.Resources.RLOSMaskLayerName, maxDistanceInMapUnits, surfaceSR);
@@ -307,12 +307,14 @@ namespace ProAppVisibilityModule.ViewModels
 
                 await FeatureClassHelper.IntersectOutput(rlosOutputLayer, rlosConvertedPolygonsLayer, false, "Value");
 
+                // workaround to get unique value renderer to function when we have vis or non vis data
                 await FeatureClassHelper.UpdateFieldWithValue(VisibilityLibrary.Properties.Resources.RLOSConvertedPolygonsLayerName, true);
 
                 await FeatureClassHelper.CreateUniqueValueRenderer(GetLayerFromMapByName(VisibilityLibrary.Properties.Resources.RLOSConvertedPolygonsLayerName) as FeatureLayer, ShowNonVisibleData);
 
                 await FeatureClassHelper.UpdateFieldWithValue(VisibilityLibrary.Properties.Resources.RLOSConvertedPolygonsLayerName, false);
 
+                // for now we are not resetting after a run of the tool
                 //await Reset(true);
             }
             catch (Exception ex)
@@ -346,6 +348,7 @@ namespace ProAppVisibilityModule.ViewModels
 
         /// <summary>
         /// Method used to create a mask for geoprocessing environment
+        /// Will buffer around each observer at the max distance to create mask
         /// </summary>
         /// <param name="maskFeatureClassName"></param>
         /// <param name="bufferDistance"></param>
@@ -377,6 +380,7 @@ namespace ProAppVisibilityModule.ViewModels
                                     using (var rowBuffer = enterpriseFeatureClass.CreateRowBuffer())
                                     {
                                         // Either the field index or the field name can be used in the indexer.
+                                        // project the point here or the buffer tool may use an angular unit and run forever
                                         var point = GeometryEngine.Project(observer.Point, surfaceSR);
                                         var polygon = GeometryEngine.Buffer(point, bufferDistance);
                                         rowBuffer[shapeFieldName] = polygon;
@@ -412,14 +416,6 @@ namespace ProAppVisibilityModule.ViewModels
             }
         }
 
-        #endregion
-
-        #region public
-
-        #endregion public
-
-        #region private
-
         /// <summary>
         /// Method to convert to/from different types of angular units
         /// </summary>
@@ -451,8 +447,8 @@ namespace ProAppVisibilityModule.ViewModels
             }
 
             return angularDistance;
-        }  
+        }
 
-        #endregion
+        #endregion Private
     }
 }

@@ -74,6 +74,13 @@ namespace ProAppVisibilityModule.Helpers
                 addToMap ? GPExecuteToolFlags.Default : GPExecuteToolFlags.None);
         }
 
+        /// <summary>
+        /// Add a field to a layer
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <param name="fieldName"></param>
+        /// <param name="fieldType"></param>
+        /// <returns></returns>
         public static async Task AddFieldToLayer(string tableName, string fieldName, string fieldType)
         {
             List<object> arguments = new List<object>();
@@ -101,6 +108,15 @@ namespace ProAppVisibilityModule.Helpers
             IGPResult result = await Geoprocessing.ExecuteToolAsync("AddField_management", Geoprocessing.MakeValueArray(arguments.ToArray()));
         }
 
+        /// <summary>
+        /// Create sight lines
+        /// </summary>
+        /// <param name="observersFeatureLayer"></param>
+        /// <param name="targetsFeatureLayer"></param>
+        /// <param name="outLineFeatureLayer"></param>
+        /// <param name="observerOffsetFieldName"></param>
+        /// <param name="targetOffsetFieldName"></param>
+        /// <returns></returns>
         public static async Task CreateSightLines(string observersFeatureLayer, 
                                                     string targetsFeatureLayer, 
                                                     string outLineFeatureLayer, 
@@ -135,6 +151,14 @@ namespace ProAppVisibilityModule.Helpers
                     Debug.Print(msg.Text);
             }
         }
+
+        /// <summary>
+        /// Add surface information to feature class
+        /// </summary>
+        /// <param name="featureClass"></param>
+        /// <param name="surface"></param>
+        /// <param name="outProperty"></param>
+        /// <returns></returns>
         public static async Task AddSurfaceInformation(string featureClass, string surface, string outProperty)
         {
             //AddSurfaceInformation_3d
@@ -155,6 +179,13 @@ namespace ProAppVisibilityModule.Helpers
             }
         }
 
+        /// <summary>
+        /// Create LOS 
+        /// </summary>
+        /// <param name="surfaceName"></param>
+        /// <param name="lineFeatureClassName"></param>
+        /// <param name="outLOSFeatureClass"></param>
+        /// <returns></returns>
         public static async Task CreateLOS(string surfaceName, 
                                             string lineFeatureClassName, 
                                             string outLOSFeatureClass)
@@ -190,6 +221,11 @@ namespace ProAppVisibilityModule.Helpers
             }
         }
 
+        /// <summary>
+        /// Method used to delete tables, layers, etc
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public static async Task Delete(string name)
         {
             List<object> arguments = new List<object>();
@@ -207,6 +243,14 @@ namespace ProAppVisibilityModule.Helpers
             }
         }
 
+        /// <summary>
+        /// Method to run Raster to polygon
+        /// </summary>
+        /// <param name="inputRasterLayer"></param>
+        /// <param name="outputPolygonLayer"></param>
+        /// <param name="simplify"></param>
+        /// <param name="rasterField"></param>
+        /// <returns></returns>
         public static async Task IntersectOutput(string inputRasterLayer, string outputPolygonLayer, bool simplify, string rasterField)
         {
             //RasterToPolygon_conversion (in_raster, out_polygon_features, {simplify}, {raster_field})
@@ -231,6 +275,24 @@ namespace ProAppVisibilityModule.Helpers
             }
         }
 
+        /// <summary>
+        /// Method to run Visibility
+        /// </summary>
+        /// <param name="surfaceName"></param>
+        /// <param name="observerFeatureClassName"></param>
+        /// <param name="outRLOSFeatureClass"></param>
+        /// <param name="observerOffset"></param>
+        /// <param name="surfaceOffset"></param>
+        /// <param name="minDistance"></param>
+        /// <param name="maxDistance"></param>
+        /// <param name="horizontalStartAngle"></param>
+        /// <param name="horizontalEndAngle"></param>
+        /// <param name="verticalUpperAngle"></param>
+        /// <param name="verticalLowerAngle"></param>
+        /// <param name="showNonVisibleData"></param>
+        /// <param name="environments"></param>
+        /// <param name="addToMap"></param>
+        /// <returns></returns>
         public static async Task CreateVisibility(string surfaceName, string observerFeatureClassName, string outRLOSFeatureClass, 
                                                     double observerOffset, double surfaceOffset, 
                                                     double minDistance, double maxDistance,
@@ -290,6 +352,13 @@ namespace ProAppVisibilityModule.Helpers
                     Debug.Print(msg.Text);
             }
         }
+
+        /// <summary>
+        /// Method used to create a unique value renderer for a feature layer
+        /// </summary>
+        /// <param name="featureLayer"></param>
+        /// <param name="showNonVisData">flag to show non visible data as RED or transparent</param>
+        /// <returns></returns>
         public static async Task CreateUniqueValueRenderer(FeatureLayer featureLayer, bool showNonVisData)
         {
             await QueuedTask.Run(() =>
@@ -320,6 +389,13 @@ namespace ProAppVisibilityModule.Helpers
                 });
         }
 
+        /// <summary>
+        /// Method used to create point features from AddInPoints
+        /// </summary>
+        /// <param name="featureClassName"></param>
+        /// <param name="collection"></param>
+        /// <param name="offset"></param>
+        /// <returns></returns>
         public static async Task CreatingFeatures(string featureClassName, ObservableCollection<AddInPoint> collection, double offset)
         {
             try
@@ -379,6 +455,13 @@ namespace ProAppVisibilityModule.Helpers
             }
         }
 
+        /// <summary>
+        /// Method used to update point geometry Z data with offset
+        /// </summary>
+        /// <param name="featureClassName"></param>
+        /// <param name="zFieldName"></param>
+        /// <param name="offsetInMeters"></param>
+        /// <returns></returns>
         public static async Task UpdateShapeWithZ(string featureClassName, string zFieldName, double offsetInMeters)
         {
             try
@@ -442,7 +525,14 @@ namespace ProAppVisibilityModule.Helpers
             }
         }
 
-
+        /// <summary>
+        /// Method used to update the gridcode field
+        /// This is a workaround for getting a work unique value renderer
+        /// that works with the flag ShowNonVisData
+        /// </summary>
+        /// <param name="rlosConvertedPolygonsLayer"></param>
+        /// <param name="add"></param>
+        /// <returns></returns>
         internal static async Task UpdateFieldWithValue(string rlosConvertedPolygonsLayer, bool add)
         {
             try
@@ -462,8 +552,6 @@ namespace ProAppVisibilityModule.Helpers
                         {
                             try
                             {
-                                //var shapeFieldName = fcDefinition.GetShapeField();
-
                                 using (RowCursor rowCursor = enterpriseFeatureClass.Search(null, false))
                                 {
                                     while (rowCursor.MoveNext())
