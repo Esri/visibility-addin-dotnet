@@ -79,6 +79,7 @@
                          Grid.ColumnSpan="2"
                          Margin="3,3,0,0"
                          VerticalContentAlignment="Center"
+                         Style="{StaticResource textboxStyle}"
                          Text="{Binding Path=Point1Formatted,
                                         UpdateSourceTrigger=PropertyChanged,
                                         ValidatesOnExceptions=True}"
@@ -102,6 +103,16 @@
                            Height="16"
                            HorizontalAlignment="Right"
                            Source="/VisibilityLibrary;component/Images/Add_Point32_d.png" />
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="IsEnabled" Value="True" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                    <Setter Property="IsEnabled" Value="False" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
                 </Button>
                 <ListBox x:Name="listBoxObservers"
                          Grid.Row="4"
@@ -129,6 +140,22 @@
                                       Header="{x:Static prop:Resources.MenuLabelDeleteAll}" />
                         </ContextMenu>
                     </ListBox.ContextMenu>
+                    <ListBox.InputBindings>
+                        <KeyBinding Key="Delete"
+                                    Command="{Binding DeletePointCommand}"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}},
+                                                               Path=SelectedItems}" />
+                    </ListBox.InputBindings>
+                    <ListBox.Style>
+                        <Style TargetType="ListBox">
+                            <Setter Property="IsEnabled" Value="True" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                    <Setter Property="IsEnabled" Value="False" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ListBox.Style>
                 </ListBox>
 
                 <CheckBox Grid.Row="5"
@@ -138,7 +165,18 @@
                           VerticalAlignment="Top"
                           Content="{x:Static prop:Resources.LabelNonVisible}"
                           IsChecked="{Binding ShowNonVisibleData}"
-                          ToolTip="{x:Static prop:Resources.LabelNonVisible}" />
+                          ToolTip="{x:Static prop:Resources.LabelNonVisible}">
+                    <CheckBox.Style>
+                        <Style TargetType="CheckBox">
+                            <Setter Property="IsEnabled" Value="True" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                    <Setter Property="IsEnabled" Value="False" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </CheckBox.Style>
+                </CheckBox>
                 <StackPanel Grid.Row="6"
                             Grid.ColumnSpan="3"
                             HorizontalAlignment="Right"
@@ -146,8 +184,25 @@
                     <Button Margin="3,20,0,0"
                             Command="{Binding CancelCommand}"
                             Content="{x:Static prop:Resources.LabelCancel}"
-                            IsEnabled="{Binding IsCancelEnabled}"
-                            ToolTip="{x:Static prop:Resources.LabelCancel}" />
+                            ToolTip="{x:Static prop:Resources.LabelCancel}">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="IsEnabled" Value="False" />
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding ElementName=listBoxObservers, Path=HasItems}" Value="True" />
+                                            <Condition Binding="{Binding IsRunning}" Value="False" />
+                                        </MultiDataTrigger.Conditions>
+                                        <MultiDataTrigger.Setters>
+                                            <Setter Property="IsEnabled" Value="True" />
+                                        </MultiDataTrigger.Setters>
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+
+                    </Button>
                     <Button Margin="3,20,0,0"
                             Command="{Binding SubmitCommand}"
                             Content="{x:Static prop:Resources.LabelOK}"
@@ -167,6 +222,7 @@
                                             <Condition Binding="{Binding ElementName=tbHFOVTo, Path=(Validation.HasError)}" Value="False" />
                                             <Condition Binding="{Binding ElementName=tbVFOVFrom, Path=(Validation.HasError)}" Value="False" />
                                             <Condition Binding="{Binding ElementName=tbVFOVTo, Path=(Validation.HasError)}" Value="False" />
+                                            <Condition Binding="{Binding IsRunning}" Value="False" />
                                         </MultiDataTrigger.Conditions>
                                         <MultiDataTrigger.Setters>
                                             <Setter Property="IsEnabled" Value="True" />
@@ -179,8 +235,18 @@
                     <Button Margin="3,20,0,0"
                             Command="{Binding ClearGraphicsCommand}"
                             Content="{x:Static prop:Resources.LabelClearGraphics}"
-                            IsEnabled="{Binding IsClearEnabled}"
-                            ToolTip="{x:Static prop:Resources.LabelClearGraphics}" />
+                            ToolTip="{x:Static prop:Resources.LabelClearGraphics}">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="IsEnabled" Value="False" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasMapGraphics}" Value="True">
+                                        <Setter Property="IsEnabled" Value="True" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
                 </StackPanel>
 
                 <Expander Grid.Row="7"
@@ -222,6 +288,7 @@
                                            Text="{x:Static prop:Resources.LabelObserverOffset}" />
                                 <TextBox x:Name="tbObserverOffset"
                                          Margin="3,3,0,0"
+                                         Style="{StaticResource textboxStyle}"
                                          Text="{Binding ObserverOffset,
                                                         UpdateSourceTrigger=PropertyChanged,
                                                         ValidatesOnExceptions=True}"
@@ -236,6 +303,7 @@
                                            Text="{x:Static prop:Resources.LabelSurfaceOffset}" />
                                 <TextBox x:Name="tbSurfaceOffset"
                                          Margin="3,3,0,0"
+                                         Style="{StaticResource textboxStyle}"
                                          Text="{Binding SurfaceOffset,
                                                         UpdateSourceTrigger=PropertyChanged,
                                                         ValidatesOnExceptions=True}"
@@ -266,6 +334,7 @@
                                          Grid.Column="0"
                                          Margin="3,3,0,0"
                                          HorizontalAlignment="Stretch"
+                                         Style="{StaticResource textboxStyle}"
                                          Text="{Binding MinDistance,
                                                         UpdateSourceTrigger=PropertyChanged,
                                                         ValidatesOnExceptions=True}"
@@ -283,6 +352,7 @@
                                          Grid.Column="2"
                                          Margin="3,3,0,0"
                                          HorizontalAlignment="Stretch"
+                                         Style="{StaticResource textboxStyle}"
                                          Text="{Binding MaxDistance,
                                                         UpdateSourceTrigger=PropertyChanged,
                                                         ValidatesOnExceptions=True}"
@@ -316,9 +386,11 @@
                                 <TextBox x:Name="tbHFOVFrom"
                                          Grid.Row="1"
                                          Margin="3,3,0,0"
+                                         Style="{StaticResource textboxStyle}"
                                          Text="{Binding LeftHorizontalFOV,
                                                         UpdateSourceTrigger=PropertyChanged,
                                                         ValidatesOnExceptions=True}"
+                                         ToolTip="{x:Static prop:Resources.TooltipHFOVValidRange}"
                                          Validation.ErrorTemplate="{StaticResource errorTemplate}">
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
@@ -334,9 +406,11 @@
                                          Grid.Row="1"
                                          Grid.Column="2"
                                          Margin="3,3,0,0"
+                                         Style="{StaticResource textboxStyle}"
                                          Text="{Binding RightHorizontalFOV,
                                                         UpdateSourceTrigger=PropertyChanged,
                                                         ValidatesOnExceptions=True}"
+                                         ToolTip="{x:Static prop:Resources.TooltipHFOVValidRange}"
                                          Validation.ErrorTemplate="{StaticResource errorTemplate}">
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
@@ -350,9 +424,11 @@
                                 <TextBox x:Name="tbVFOVFrom"
                                          Grid.Row="3"
                                          Margin="3,3,0,0"
+                                         Style="{StaticResource textboxStyle}"
                                          Text="{Binding BottomVerticalFOV,
                                                         UpdateSourceTrigger=PropertyChanged,
                                                         ValidatesOnExceptions=True}"
+                                         ToolTip="{x:Static prop:Resources.TooltipBottomFOVValidRange}"
                                          Validation.ErrorTemplate="{StaticResource errorTemplate}">
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
@@ -369,9 +445,11 @@
                                          Grid.Row="3"
                                          Grid.Column="2"
                                          Margin="3,3,0,0"
+                                         Style="{StaticResource textboxStyle}"
                                          Text="{Binding TopVerticalFOV,
                                                         UpdateSourceTrigger=PropertyChanged,
                                                         ValidatesOnExceptions=True}"
+                                         ToolTip="{x:Static prop:Resources.TooltipTopFOVValidRange}"
                                          Validation.ErrorTemplate="{StaticResource errorTemplate}">
                                     <TextBox.InputBindings>
                                         <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />

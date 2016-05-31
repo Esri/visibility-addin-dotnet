@@ -88,6 +88,33 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The number must be greater than min.
+        /// </summary>
+        public static string AENumMustBeGreater {
+            get {
+                return ResourceManager.GetString("AENumMustBeGreater", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The number must be less than max.
+        /// </summary>
+        public static string AENumMustBeLess {
+            get {
+                return ResourceManager.GetString("AENumMustBeLess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The number must be between {0} and {1}.
+        /// </summary>
+        public static string AENumRange {
+            get {
+                return ResourceManager.GetString("AENumRange", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cancel.
         /// </summary>
         public static string ButtonCancel {
@@ -610,6 +637,33 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to vis_rlos_conv_polygons.
+        /// </summary>
+        public static string RLOSConvertedPolygonsLayerName {
+            get {
+                return ResourceManager.GetString("RLOSConvertedPolygonsLayerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to vis_rlos_mask.
+        /// </summary>
+        public static string RLOSMaskLayerName {
+            get {
+                return ResourceManager.GetString("RLOSMaskLayerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to vis_rlos_output.
+        /// </summary>
+        public static string RLOSOutputLayerName {
+            get {
+                return ResourceManager.GetString("RLOSOutputLayerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The selected surface has not been projected.  Please project your data and try again..
         /// </summary>
         public static string RLOSUserPrompt {
@@ -673,11 +727,29 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Valid range -90 to 0.
+        /// </summary>
+        public static string TooltipBottomFOVValidRange {
+            get {
+                return ResourceManager.GetString("TooltipBottomFOVValidRange", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Edit Properties.
         /// </summary>
         public static string TooltipEditProperties {
             get {
                 return ResourceManager.GetString("TooltipEditProperties", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Valid range 0 to 360.
+        /// </summary>
+        public static string TooltipHFOVValidRange {
+            get {
+                return ResourceManager.GetString("TooltipHFOVValidRange", resourceCulture);
             }
         }
         
@@ -723,6 +795,15 @@ namespace VisibilityLibrary.Properties {
         public static string TooltipTargetMapPointTool {
             get {
                 return ResourceManager.GetString("TooltipTargetMapPointTool", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Valid range 0 to 90.
+        /// </summary>
+        public static string TooltipTopFOVValidRange {
+            get {
+                return ResourceManager.GetString("TooltipTopFOVValidRange", resourceCulture);
             }
         }
         

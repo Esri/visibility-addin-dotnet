@@ -72,6 +72,7 @@
                          Grid.ColumnSpan="2"
                          Margin="3,3,0,0"
                          VerticalContentAlignment="Center"
+                         Style="{StaticResource textboxStyle}"
                          Text="{Binding Path=Point1Formatted,
                                         UpdateSourceTrigger=PropertyChanged,
                                         ValidatesOnExceptions=True}"
@@ -93,6 +94,16 @@
                     <Image Width="16"
                            Height="16"
                            Source="/VisibilityLibrary;component/Images/Add_Point32_d.png" />
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="IsEnabled" Value="True" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                    <Setter Property="IsEnabled" Value="False" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
                 </Button>
                 <ListBox x:Name="listBoxObservers"
                          Grid.Row="4"
@@ -102,7 +113,8 @@
                          ItemsSource="{Binding ObserverAddInPoints}"
                          PreviewMouseRightButtonDown="ListBox_PreviewMouseRightButtonDown"
                          ScrollViewer.VerticalScrollBarVisibility="Visible"
-                         SelectionMode="Multiple">
+                         SelectionMode="Multiple"
+                         Style="{StaticResource listboxStyle}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
@@ -135,6 +147,7 @@
                          Grid.ColumnSpan="2"
                          Margin="3,3,0,0"
                          VerticalContentAlignment="Center"
+                         Style="{StaticResource textboxStyle}"
                          Text="{Binding Path=Point2Formatted,
                                         UpdateSourceTrigger=PropertyChanged,
                                         ValidatesOnExceptions=True}"
@@ -156,6 +169,16 @@
                     <Image Width="16"
                            Height="16"
                            Source="/VisibilityLibrary;component/Images/Add_Point32_d.png" />
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="IsEnabled" Value="True" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                    <Setter Property="IsEnabled" Value="False" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
                 </Button>
                 <ListBox x:Name="listBoxTargets"
                          Grid.Row="7"
@@ -165,7 +188,8 @@
                          ItemsSource="{Binding TargetAddInPoints}"
                          PreviewMouseRightButtonDown="ListBox_PreviewMouseRightButtonDown"
                          ScrollViewer.VerticalScrollBarVisibility="Visible"
-                         SelectionMode="Multiple">
+                         SelectionMode="Multiple"
+                         Style="{StaticResource listboxStyle}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
@@ -198,6 +222,7 @@
                         <TextBlock Margin="3,3,0,0" Text="{x:Static prop:Resources.LabelObserverOffset}" />
                         <TextBox x:Name="tbObserverOffset"
                                  Margin="3,3,0,0"
+                                 Style="{StaticResource textboxStyle}"
                                  Text="{Binding ObserverOffset,
                                                 UpdateSourceTrigger=PropertyChanged,
                                                 ValidatesOnExceptions=True}"
@@ -205,6 +230,7 @@
                         <TextBlock Margin="3,3,0,0" Text="{x:Static prop:Resources.LabelTargetOffset}" />
                         <TextBox x:Name="tbTargetOffset"
                                  Margin="3,3,0,0"
+                                 Style="{StaticResource textboxStyle}"
                                  Text="{Binding TargetOffset,
                                                 UpdateSourceTrigger=PropertyChanged,
                                                 ValidatesOnExceptions=True}"
