@@ -64,7 +64,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
             CreateMapElement();
 
-            Reset(true);
+            //Reset(true);
 
             System.Windows.Forms.Cursor.Current = savedCursor;
         }
@@ -175,7 +175,7 @@ namespace ArcMapAddinVisibility.ViewModels
                 if (!CanCreateElement || ArcMap.Document == null || ArcMap.Document.FocusMap == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
                     return;
 
-                base.CreateMapElement();
+                //base.CreateMapElement();
 
                 // take your observer and target points and get lines of sight
 
