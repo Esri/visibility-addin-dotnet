@@ -445,27 +445,30 @@ namespace ProAppVisibilityModule.ViewModels
                 // do nothing
             }
 
-            coordinate = coordinate.Trim();
-
-            Regex regexMercator = new Regex(@"^(?<latitude>\-?\d+\.?\d*)[+,;:\s]*(?<longitude>\-?\d+\.?\d*)");
-
-            var matchMercator = regexMercator.Match(coordinate);
-
-            if (matchMercator.Success && matchMercator.Length == coordinate.Length)
+            if (point == null)
             {
-                try
+                coordinate = coordinate.Trim();
+
+                Regex regexMercator = new Regex(@"^(?<latitude>\-?\d+\.?\d*)[+,;:\s]*(?<longitude>\-?\d+\.?\d*)");
+
+                var matchMercator = regexMercator.Match(coordinate);
+
+                if (matchMercator.Success && matchMercator.Length == coordinate.Length)
                 {
-                    var Lat = Double.Parse(matchMercator.Groups["latitude"].Value);
-                    var Lon = Double.Parse(matchMercator.Groups["longitude"].Value);
-                    point = QueuedTask.Run(() =>
-                        {
-                            return MapPointBuilder.CreateMapPoint(Lon, Lat);
-                        }).Result;
-                    return point;
-                }
-                catch(Exception ex)
-                {
-                    return null;
+                    try
+                    {
+                        var Lat = Double.Parse(matchMercator.Groups["latitude"].Value);
+                        var Lon = Double.Parse(matchMercator.Groups["longitude"].Value);
+                        point = QueuedTask.Run(() =>
+                            {
+                                return MapPointBuilder.CreateMapPoint(Lon, Lat);
+                            }).Result;
+                        return point;
+                    }
+                    catch (Exception ex)
+                    {
+                        return null;
+                    }
                 }
             }
 
