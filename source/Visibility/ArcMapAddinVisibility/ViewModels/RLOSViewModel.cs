@@ -78,17 +78,10 @@ namespace ArcMapAddinVisibility.ViewModels
             DisplayProgressBar = Visibility.Hidden;
         }
 
-        private void OnCancelCommand(object obj)
-        {
-            Reset(true);
-        }
-
         private void OnClearCommand(object obj)
         {
             Reset(true);
         }
-
-
 
         #endregion
 
