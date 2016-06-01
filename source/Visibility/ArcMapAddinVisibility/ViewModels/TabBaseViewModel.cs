@@ -245,9 +245,22 @@ namespace ArcMapAddinVisibility.ViewModels
         public RelayCommand EnterKeyCommand { get; set; }
         public RelayCommand CancelCommand { get; set; }
 
-        private void OnCancelCommand(object obj)
+        internal void OnCancelCommand(object obj)
         {
             Reset(true);
+        }
+        /// <summary>
+        /// Method to refresh the active view
+        /// </summary>
+        private static void RefreshActiveView()
+        {
+            var mxdoc = ArcMap.Application.Document as IMxDocument;
+            if (mxdoc == null)
+                return;
+            var av = mxdoc.FocusMap as IActiveView;
+            if (av == null)
+                return;
+            av.Refresh();
         }
 
         #endregion
@@ -492,6 +505,8 @@ namespace ArcMapAddinVisibility.ViewModels
             Point2 = null;
             Point1Formatted = string.Empty;
             Point2Formatted = string.Empty;
+
+            RefreshActiveView();
         }
 
         /// <summary>
