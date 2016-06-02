@@ -7,7 +7,7 @@
     <ControlTemplate x:Key="errorTemplate">
         <Grid ClipToBounds="False">
             <Image HorizontalAlignment="Right" VerticalAlignment="Center"
-                                   Source="/VisibilityLibrary;component/Images/GenericErrorStop32_d.png" 
+                                   Source="/VisibilityLibrary;component/Images/GenericErrorStop16.png" 
                                    Width="16" Height="16" Margin="0,0,3,0"
                                    ToolTip="{Binding [0].ErrorContent}" />
             <Border BorderBrush="Red" BorderThickness="1" Margin="-1">
@@ -52,7 +52,7 @@
     <Style x:Key="buttonProperties" TargetType="Button">
         <Setter Property="Content">
             <Setter.Value>
-                <Image Source="/VisibilityLibrary;component/Images/GeoprocessingEnvironmentSettings32_d.png" Width="16" Height="16" />
+                <Image Source="/VisibilityLibrary;component/Images/GeoprocessingEnvironmentSettings16.png" Width="16" Height="16" />
             </Setter.Value>
         </Setter>
         <Setter Property="Command" Value="{Binding EditPropertiesDialogCommand}" />

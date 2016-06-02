@@ -93,7 +93,7 @@
                         ToolTip="{x:Static prop:Resources.TooltipObserverMapPointTool}">
                     <Image Width="16"
                            Height="16"
-                           Source="/VisibilityLibrary;component/Images/Add_Point32_d.png" />
+                           Source="/VisibilityLibrary;component/Images/Add_Point.png" />
                     <Button.Style>
                         <Style TargetType="Button">
                             <Setter Property="IsEnabled" Value="True" />
@@ -168,7 +168,7 @@
                         ToolTip="{x:Static prop:Resources.TooltipTargetMapPointTool}">
                     <Image Width="16"
                            Height="16"
-                           Source="/VisibilityLibrary;component/Images/Add_Point32_d.png" />
+                           Source="/VisibilityLibrary;component/Images/Add_Point.png" />
                     <Button.Style>
                         <Style TargetType="Button">
                             <Setter Property="IsEnabled" Value="True" />
