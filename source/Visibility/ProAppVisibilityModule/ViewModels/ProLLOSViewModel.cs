@@ -308,6 +308,8 @@ namespace ProAppVisibilityModule.ViewModels
                 var visStats = await FeatureClassHelper.GetVisibilityStats(sourceOIDs);
 
                 await FeatureClassHelper.UpdateLayersWithVisibilityStats(visStats);
+
+                await FeatureClassHelper.CreateObserversRenderer(GetLayerFromMapByName(VisibilityLibrary.Properties.Resources.ObserversLayerName) as FeatureLayer);
                 //await Reset(true);
             }
             catch(Exception ex)
