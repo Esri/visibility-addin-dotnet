@@ -610,6 +610,15 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to NumOfObservers.
+        /// </summary>
+        public static string NumOfObserversFieldName {
+            get {
+                return ResourceManager.GetString("NumOfObserversFieldName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to vis_observers.
         /// </summary>
         public static string ObserversLayerName {
@@ -696,6 +705,15 @@ namespace VisibilityLibrary.Properties {
         public static string TargetsLayerName {
             get {
                 return ResourceManager.GetString("TargetsLayerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to TarIsVis.
+        /// </summary>
+        public static string TarIsVisFieldName {
+            get {
+                return ResourceManager.GetString("TarIsVisFieldName", resourceCulture);
             }
         }
         

@@ -592,5 +592,213 @@ namespace ProAppVisibilityModule.Helpers
                 Debug.Print(ex.Message);
             }
         }
+
+        internal static async Task<List<int>> GetSourceOIDs()
+        {
+            var sourceOIDs = new List<int>();
+            try
+            {
+                await ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(() =>
+                {
+                    using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
+                    using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(VisibilityLibrary.Properties.Resources.LOSOutputLayerName))
+                    {
+                        var filter = new QueryFilter();
+                        filter.WhereClause = "TarIsVis = 1 AND VisCode = 1";
+
+                        var cursor = enterpriseFeatureClass.Search(filter, true);
+
+                        while (cursor.MoveNext())
+                        {
+                            var sourceOID = (int)cursor.Current["SourceOID"];
+                            if (!sourceOIDs.Contains(sourceOID))
+                                sourceOIDs.Add(sourceOID);
+                        }
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                // do nothing
+            }
+
+            return sourceOIDs;
+        }
+
+        internal static async Task<VisibilityStats> GetVisibilityStats(List<int> sourceOIDs)
+        {
+            var visibilityStats = new VisibilityStats();
+
+            try
+            {
+                await ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(() =>
+                {
+                    using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
+                    using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(VisibilityLibrary.Properties.Resources.SightLinesLayerName))
+                    {
+                        var filter = new QueryFilter();
+                        filter.WhereClause = string.Format("OID IN ({0})", string.Join(",", sourceOIDs));
+
+                        var cursor = enterpriseFeatureClass.Search(filter, true);
+
+                        while (cursor.MoveNext())
+                        {
+                            var observerOID = (int)cursor.Current["OID_OBSERV"];
+                            var targetOID = (int)cursor.Current["OID_TARGET"];
+
+                            if (!visibilityStats.ObserverOIDs.Contains(observerOID))
+                                visibilityStats.ObserverOIDs.Add(observerOID);
+
+                            if(visibilityStats.TargetOIDVisCounts.ContainsKey(targetOID))
+                            {
+                                visibilityStats.TargetOIDVisCounts[targetOID]++;
+                            }
+                            else
+                            {
+                                visibilityStats.TargetOIDVisCounts.Add(targetOID, 1);
+                            }
+                        }
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                // do nothing
+            }
+
+            return visibilityStats;
+        }
+
+        internal static async Task UpdateLayersWithVisibilityStats(VisibilityStats visStats)
+        {
+            try
+            {
+                string message = String.Empty;
+                bool creationResult = false;
+                await ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(async () =>
+                {
+                    using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
+                    {
+                        // do the observers layer
+                        using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(VisibilityLibrary.Properties.Resources.ObserversLayerName))
+                        using (FeatureClassDefinition fcDefinition = enterpriseFeatureClass.GetDefinition())
+                        {
+                            int tarIsVisFieldIndex = fcDefinition.FindField(VisibilityLibrary.Properties.Resources.TarIsVisFieldName);
+                            int oidFieldIndex = fcDefinition.FindField(fcDefinition.GetObjectIDField());
+
+                            EditOperation editOperation = new EditOperation();
+                            editOperation.Callback(context =>
+                            {
+                                try
+                                {
+                                    using (RowCursor rowCursor = enterpriseFeatureClass.Search(null, false))
+                                    {
+                                        while (rowCursor.MoveNext())
+                                        {
+                                            using (Feature feature = (Feature)rowCursor.Current)
+                                            {
+                                                context.Invalidate(feature);
+
+                                                var oid = (int)feature[oidFieldIndex];
+                                                if (visStats.ObserverOIDs.Contains(oid))
+                                                    feature[tarIsVisFieldIndex] = 1;
+                                                else
+                                                    feature[tarIsVisFieldIndex] = 0;
+
+                                                feature.Store();
+
+                                                context.Invalidate(feature);
+                                            }
+                                        }
+                                    }
+                                }
+                                catch (GeodatabaseException exObj)
+                                {
+                                    message = exObj.Message;
+                                }
+                            }, enterpriseFeatureClass);
+
+                            creationResult = await editOperation.ExecuteAsync();
+                            if (!creationResult)
+                                message = editOperation.ErrorMessage;
+
+                            await Project.Current.SaveEditsAsync();
+                        }
+                        // do the targets layer
+                        using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(VisibilityLibrary.Properties.Resources.TargetsLayerName))
+                        using (FeatureClassDefinition fcDefinition = enterpriseFeatureClass.GetDefinition())
+                        {
+                            int numOfObserversFieldIndex = fcDefinition.FindField(VisibilityLibrary.Properties.Resources.NumOfObserversFieldName);
+                            int oidFieldIndex = fcDefinition.FindField(fcDefinition.GetObjectIDField());
+
+                            EditOperation editOperation = new EditOperation();
+                            editOperation.Callback(context =>
+                            {
+                                try
+                                {
+                                    using (RowCursor rowCursor = enterpriseFeatureClass.Search(null, false))
+                                    {
+                                        while (rowCursor.MoveNext())
+                                        {
+                                            using (Feature feature = (Feature)rowCursor.Current)
+                                            {
+                                                context.Invalidate(feature);
+
+                                                var oid = (int)feature[oidFieldIndex];
+                                                if (visStats.TargetOIDVisCounts.ContainsKey(oid))
+                                                    feature[numOfObserversFieldIndex] = visStats.TargetOIDVisCounts[oid];
+                                                else
+                                                    feature[numOfObserversFieldIndex] = 0;
+
+                                                feature.Store();
+
+                                                context.Invalidate(feature);
+                                            }
+                                        }
+                                    }
+                                }
+                                catch (GeodatabaseException exObj)
+                                {
+                                    message = exObj.Message;
+                                }
+                            }, enterpriseFeatureClass);
+
+                            creationResult = await editOperation.ExecuteAsync();
+                            if (!creationResult)
+                                message = editOperation.ErrorMessage;
+
+                            await Project.Current.SaveEditsAsync();
+                        }
+
+                    }
+                });
+                if (!creationResult)
+                    MessageBox.Show(message);
+
+            }
+            catch (Exception ex)
+            {
+                Debug.Print(ex.Message);
+            }
+        }
     }
+
+    public class VisibilityStats
+    {
+        public VisibilityStats()
+        { }
+
+        private List<int> _ObserverOIDs = new List<int>();
+        public List<int> ObserverOIDs
+        {
+            get { return _ObserverOIDs; }
+        }
+
+        private Dictionary<int, int> _TargetOIDVisCounts = new Dictionary<int, int>();
+        public Dictionary<int, int> TargetOIDVisCounts
+        {
+            get { return _TargetOIDVisCounts; }
+        }
+    }
+
 }

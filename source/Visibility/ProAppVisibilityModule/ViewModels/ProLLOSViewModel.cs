@@ -261,6 +261,7 @@ namespace ProAppVisibilityModule.ViewModels
 
                 await FeatureClassHelper.AddFieldToLayer(VisibilityLibrary.Properties.Resources.ObserversLayerName, VisibilityLibrary.Properties.Resources.OffsetFieldName, "DOUBLE");
                 await FeatureClassHelper.AddFieldToLayer(VisibilityLibrary.Properties.Resources.ObserversLayerName, VisibilityLibrary.Properties.Resources.OffsetWithZFieldName, "DOUBLE");
+                await FeatureClassHelper.AddFieldToLayer(VisibilityLibrary.Properties.Resources.ObserversLayerName, VisibilityLibrary.Properties.Resources.TarIsVisFieldName, "SHORT");
 
                 await FeatureClassHelper.CreateLayer(VisibilityLibrary.Properties.Resources.TargetsLayerName, "POINT", true, true);
 
@@ -268,6 +269,7 @@ namespace ProAppVisibilityModule.ViewModels
 
                 await FeatureClassHelper.AddFieldToLayer(VisibilityLibrary.Properties.Resources.TargetsLayerName, VisibilityLibrary.Properties.Resources.OffsetFieldName, "DOUBLE");
                 await FeatureClassHelper.AddFieldToLayer(VisibilityLibrary.Properties.Resources.TargetsLayerName, VisibilityLibrary.Properties.Resources.OffsetWithZFieldName, "DOUBLE");
+                await FeatureClassHelper.AddFieldToLayer(VisibilityLibrary.Properties.Resources.TargetsLayerName, VisibilityLibrary.Properties.Resources.NumOfObserversFieldName, "SHORT");
 
                 // add observer points to feature layer
 
@@ -299,6 +301,13 @@ namespace ProAppVisibilityModule.ViewModels
                     VisibilityLibrary.Properties.Resources.SightLinesLayerName,
                     CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.LOSOutputLayerName);
 
+
+                // gather results for updating observer and target layers
+                var sourceOIDs = await FeatureClassHelper.GetSourceOIDs();
+
+                var visStats = await FeatureClassHelper.GetVisibilityStats(sourceOIDs);
+
+                await FeatureClassHelper.UpdateLayersWithVisibilityStats(visStats);
                 //await Reset(true);
             }
             catch(Exception ex)

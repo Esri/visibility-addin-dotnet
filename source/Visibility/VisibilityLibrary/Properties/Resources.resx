@@ -369,4 +369,10 @@
   <data name="TooltipTopFOVValidRange" xml:space="preserve">
     <value>Valid range 0 to 90</value>
   </data>
+  <data name="NumOfObserversFieldName" xml:space="preserve">
+    <value>NumOfObservers</value>
+  </data>
+  <data name="TarIsVisFieldName" xml:space="preserve">
+    <value>TarIsVis</value>
+  </data>
 </root>
