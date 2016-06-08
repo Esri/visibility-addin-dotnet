@@ -794,18 +794,16 @@ namespace ProAppVisibilityModule.Helpers
 
                 List<CIMUniqueValueClass> classes = new List<CIMUniqueValueClass>();
 
-                // Alabama
                 List<CIMUniqueValue> noVisValues = new List<CIMUniqueValue>();
                 CIMUniqueValue noVisValue = new CIMUniqueValue();
                 noVisValue.FieldValues = new string[] { "0" };
                 noVisValues.Add(noVisValue);
 
-                //var redColor = CIMColor.CreateRGBColor(255, 0, 0);
-                var tempSymbol = SymbolFactory.ConstructPointSymbol();
+                var noVisSymbol = SymbolFactory.ConstructPointSymbol();
                 var s1 = SymbolFactory.ConstructMarker(CIMColor.CreateRGBColor(255, 0, 0), 5, SimpleMarkerStyle.Circle);
                 var s2 = SymbolFactory.ConstructMarker(CIMColor.CreateRGBColor(0, 0, 255), 12, SimpleMarkerStyle.Circle);
 
-                tempSymbol.SymbolLayers = new CIMSymbolLayer[2] { s1, s2 };
+                noVisSymbol.SymbolLayers = new CIMSymbolLayer[2] { s1, s2 };
 
                 var noVis = new CIMUniqueValueClass()
                 {
@@ -813,7 +811,7 @@ namespace ProAppVisibilityModule.Helpers
                     Label = "No Visible Targets",
                     Visible = true,
                     Editable = true,
-                    Symbol = new CIMSymbolReference() { Symbol = tempSymbol }
+                    Symbol = new CIMSymbolReference() { Symbol = noVisSymbol }
                 };
 
                 classes.Add(noVis);
@@ -824,14 +822,11 @@ namespace ProAppVisibilityModule.Helpers
                 visTarValue.FieldValues = new string[] { "1" };
                 visTarValues.Add(visTarValue);
 
-                //var visTarColor = CIMColor.CreateRGBColor(0, 255, 0);
-
                 var visSymbol = SymbolFactory.ConstructPointSymbol();
                 var vis1 = SymbolFactory.ConstructMarker(CIMColor.CreateRGBColor(0, 255, 0), 5, SimpleMarkerStyle.Circle);
                 var vis2 = SymbolFactory.ConstructMarker(CIMColor.CreateRGBColor(0, 0, 255), 12, SimpleMarkerStyle.Circle);
 
                 visSymbol.SymbolLayers = new CIMSymbolLayer[2] { vis1, vis2 };
-
 
                 var visTar = new CIMUniqueValueClass()
                 {
@@ -860,11 +855,86 @@ namespace ProAppVisibilityModule.Helpers
                     Symbol = SymbolFactory.ConstructPointSymbol(defaultColor)
                 };
 
+                //var renderer = featureLayer.CreateRenderer(uniqueValueRenderer);
+                featureLayer.SetRenderer(uniqueValueRenderer);
+            });
+        }
+
+        public static async Task CreateTargetsRenderer(FeatureLayer featureLayer)
+        {
+            await QueuedTask.Run(() =>
+            {
+                //Create the Unique Value Renderer
+                CIMUniqueValueRenderer uniqueValueRenderer = new CIMUniqueValueRenderer();
+
+                // set the value field
+                uniqueValueRenderer.Fields = new string[] { VisibilityLibrary.Properties.Resources.NumOfObserversFieldName };
+
+                List<CIMUniqueValueClass> classes = new List<CIMUniqueValueClass>();
+
+                List<CIMUniqueValue> noVisValues = new List<CIMUniqueValue>();
+                CIMUniqueValue noVisValue = new CIMUniqueValue();
+                noVisValue.FieldValues = new string[] { "0" };
+                noVisValues.Add(noVisValue);
+
+                var noVisSymbol = SymbolFactory.ConstructPointSymbol(CIMColor.CreateRGBColor(255, 0, 0), 12, SimpleMarkerStyle.Circle);
+
+                var noVis = new CIMUniqueValueClass()
+                {
+                    Values = noVisValues.ToArray(),
+                    Label = "Not visible",
+                    Visible = true,
+                    Editable = true,
+                    Symbol = new CIMSymbolReference() { Symbol = noVisSymbol }
+                };
+
+                classes.Add(noVis);
+
+                CIMUniqueValueGroup groupOne = new CIMUniqueValueGroup();
+                groupOne.Heading = "Targets";
+                groupOne.Classes = classes.ToArray();
+
+                uniqueValueRenderer.Groups = new CIMUniqueValueGroup[] { groupOne };
+
+                //Draw the rest with the default symbol
+                uniqueValueRenderer.UseDefaultSymbol = true;
+                uniqueValueRenderer.DefaultLabel = "Can be seen";
+
+                uniqueValueRenderer.DefaultSymbol = new CIMSymbolReference()
+                {
+                    Symbol = SymbolFactory.ConstructPointSymbol(CIMColor.CreateRGBColor(0, 255, 0), 12, SimpleMarkerStyle.Circle)
+                };
 
                 //var renderer = featureLayer.CreateRenderer(uniqueValueRenderer);
                 featureLayer.SetRenderer(uniqueValueRenderer);
 
                 //featureLayer.SetTransparency(50.0);
+            });
+        }
+        public static async Task CreateTargetLayerLabels(FeatureLayer featureLayer)
+        {
+            await QueuedTask.Run(() =>
+            {
+                var lc = featureLayer.LabelClasses[0];
+                //lc.SetExpression(string.Format("[{0}]", VisibilityLibrary.Properties.Resources.NumOfObserversFieldName));
+                string expression = @"Function FindLabel ( [NumOfObservers] )
+If (CInt([NumOfObservers])>0) Then
+FindLabel = [NumOfObservers]
+else
+FindLabel = """"
+End If
+End Function";
+                lc.SetExpression(expression);
+                if (MapView.Active.Map.GetLabelEngine() == LabelEngine.Standard)
+                {
+                    lc.SetStandardLabelPlacementProperties(new CIMStandardLabelPlacementProperties() { PointPlacementMethod = StandardPointPlacementMethod.OnTopPoint });
+                }
+                else
+                {
+                    lc.SetMaplexLabelPlacementProperties(new CIMMaplexLabelPlacementProperties() { PointPlacementMethod = MaplexPointPlacementMethod.CenteredOnPoint });
+                }
+
+                featureLayer.SetLabelVisibility(true);
             });
         }
     }
