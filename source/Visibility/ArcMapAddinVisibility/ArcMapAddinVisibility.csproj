@@ -125,6 +125,7 @@
   <ItemGroup>
     <AddInContent Include="Config.esriaddinx">
       <Generator>ArcGISAddInHostGenerator</Generator>
+      <LastGenOutput>Config1.Designer.cs</LastGenOutput>
     </AddInContent>
   </ItemGroup>
   <ItemGroup>
@@ -190,7 +191,9 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <AddInContent Include="Images\visibility-16.png" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\VisibilityLibrary\VisibilityLibrary.csproj">
       <Project>{d743cd02-174d-44cb-ae88-93c01d21f89e}</Project>
