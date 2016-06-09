@@ -30,7 +30,7 @@
       </groups>
       <controls>
         <!-- add your controls here -->
-        <button id="ProAppVisibilityModule_VisibilityDockpane_ShowButton" caption="Visibility" className="VisibilityDockpane_ShowButton" loadOnClick="true" smallImage="Images\VisibilityButton16.png" largeImage="Images\VisibilityButton32.png">
+        <button id="ProAppVisibilityModule_VisibilityDockpane_ShowButton" caption="Visibility" className="VisibilityDockpane_ShowButton" loadOnClick="true" smallImage="Images\visibility-16.png" largeImage="Images\visibility-32.png">
           <tooltip heading="Show Visibility">Show Visibility Dockpane<disabledText /></tooltip>
         </button>
         <button id="ProAppVisibilityModule_PropertiesButton" caption="Properties" className="PropertiesButton" loadOnClick="true" smallImage="Images\GenericButtonBlue16.png" largeImage="Images\GenericButtonBlue32.png">
