@@ -592,5 +592,369 @@ namespace ProAppVisibilityModule.Helpers
                 Debug.Print(ex.Message);
             }
         }
+
+        internal static async Task<List<int>> GetSourceOIDs()
+        {
+            var sourceOIDs = new List<int>();
+            try
+            {
+                await ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(() =>
+                {
+                    using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
+                    using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(VisibilityLibrary.Properties.Resources.LOSOutputLayerName))
+                    {
+                        var filter = new QueryFilter();
+                        filter.WhereClause = "TarIsVis = 1 AND VisCode = 1";
+
+                        var cursor = enterpriseFeatureClass.Search(filter, true);
+
+                        while (cursor.MoveNext())
+                        {
+                            var sourceOID = (int)cursor.Current["SourceOID"];
+                            if (!sourceOIDs.Contains(sourceOID))
+                                sourceOIDs.Add(sourceOID);
+                        }
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                // do nothing
+            }
+
+            return sourceOIDs;
+        }
+
+        internal static async Task<VisibilityStats> GetVisibilityStats(List<int> sourceOIDs)
+        {
+            var visibilityStats = new VisibilityStats();
+
+            try
+            {
+                await ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(() =>
+                {
+                    using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
+                    using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(VisibilityLibrary.Properties.Resources.SightLinesLayerName))
+                    {
+                        var filter = new QueryFilter();
+                        filter.WhereClause = string.Format("OID IN ({0})", string.Join(",", sourceOIDs));
+
+                        var cursor = enterpriseFeatureClass.Search(filter, true);
+
+                        while (cursor.MoveNext())
+                        {
+                            var observerOID = (int)cursor.Current["OID_OBSERV"];
+                            var targetOID = (int)cursor.Current["OID_TARGET"];
+
+                            if (!visibilityStats.ObserverOIDs.Contains(observerOID))
+                                visibilityStats.ObserverOIDs.Add(observerOID);
+
+                            if(visibilityStats.TargetOIDVisCounts.ContainsKey(targetOID))
+                            {
+                                visibilityStats.TargetOIDVisCounts[targetOID]++;
+                            }
+                            else
+                            {
+                                visibilityStats.TargetOIDVisCounts.Add(targetOID, 1);
+                            }
+                        }
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                // do nothing
+            }
+
+            return visibilityStats;
+        }
+
+        internal static async Task UpdateLayersWithVisibilityStats(VisibilityStats visStats)
+        {
+            try
+            {
+                string message = String.Empty;
+                bool creationResult = false;
+                await ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(async () =>
+                {
+                    using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
+                    {
+                        // do the observers layer
+                        using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(VisibilityLibrary.Properties.Resources.ObserversLayerName))
+                        using (FeatureClassDefinition fcDefinition = enterpriseFeatureClass.GetDefinition())
+                        {
+                            int tarIsVisFieldIndex = fcDefinition.FindField(VisibilityLibrary.Properties.Resources.TarIsVisFieldName);
+                            int oidFieldIndex = fcDefinition.FindField(fcDefinition.GetObjectIDField());
+
+                            EditOperation editOperation = new EditOperation();
+                            editOperation.Callback(context =>
+                            {
+                                try
+                                {
+                                    using (RowCursor rowCursor = enterpriseFeatureClass.Search(null, false))
+                                    {
+                                        while (rowCursor.MoveNext())
+                                        {
+                                            using (Feature feature = (Feature)rowCursor.Current)
+                                            {
+                                                context.Invalidate(feature);
+
+                                                var oid = (int)feature[oidFieldIndex];
+                                                if (visStats.ObserverOIDs.Contains(oid))
+                                                    feature[tarIsVisFieldIndex] = 1;
+                                                else
+                                                    feature[tarIsVisFieldIndex] = 0;
+
+                                                feature.Store();
+
+                                                context.Invalidate(feature);
+                                            }
+                                        }
+                                    }
+                                }
+                                catch (GeodatabaseException exObj)
+                                {
+                                    message = exObj.Message;
+                                }
+                            }, enterpriseFeatureClass);
+
+                            creationResult = await editOperation.ExecuteAsync();
+                            if (!creationResult)
+                                message = editOperation.ErrorMessage;
+
+                            await Project.Current.SaveEditsAsync();
+                        }
+                        // do the targets layer
+                        using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(VisibilityLibrary.Properties.Resources.TargetsLayerName))
+                        using (FeatureClassDefinition fcDefinition = enterpriseFeatureClass.GetDefinition())
+                        {
+                            int numOfObserversFieldIndex = fcDefinition.FindField(VisibilityLibrary.Properties.Resources.NumOfObserversFieldName);
+                            int oidFieldIndex = fcDefinition.FindField(fcDefinition.GetObjectIDField());
+
+                            EditOperation editOperation = new EditOperation();
+                            editOperation.Callback(context =>
+                            {
+                                try
+                                {
+                                    using (RowCursor rowCursor = enterpriseFeatureClass.Search(null, false))
+                                    {
+                                        while (rowCursor.MoveNext())
+                                        {
+                                            using (Feature feature = (Feature)rowCursor.Current)
+                                            {
+                                                context.Invalidate(feature);
+
+                                                var oid = (int)feature[oidFieldIndex];
+                                                if (visStats.TargetOIDVisCounts.ContainsKey(oid))
+                                                    feature[numOfObserversFieldIndex] = visStats.TargetOIDVisCounts[oid];
+                                                else
+                                                    feature[numOfObserversFieldIndex] = 0;
+
+                                                feature.Store();
+
+                                                context.Invalidate(feature);
+                                            }
+                                        }
+                                    }
+                                }
+                                catch (GeodatabaseException exObj)
+                                {
+                                    message = exObj.Message;
+                                }
+                            }, enterpriseFeatureClass);
+
+                            creationResult = await editOperation.ExecuteAsync();
+                            if (!creationResult)
+                                message = editOperation.ErrorMessage;
+
+                            await Project.Current.SaveEditsAsync();
+                        }
+
+                    }
+                });
+                if (!creationResult)
+                    MessageBox.Show(message);
+
+            }
+            catch (Exception ex)
+            {
+                Debug.Print(ex.Message);
+            }
+        }
+
+        public static async Task CreateObserversRenderer(FeatureLayer featureLayer)
+        {
+            await QueuedTask.Run(() =>
+            {
+                //Create the Unique Value Renderer
+                CIMUniqueValueRenderer uniqueValueRenderer = new CIMUniqueValueRenderer();
+
+                // set the value field
+                uniqueValueRenderer.Fields = new string[] { VisibilityLibrary.Properties.Resources.TarIsVisFieldName };
+
+                List<CIMUniqueValueClass> classes = new List<CIMUniqueValueClass>();
+
+                List<CIMUniqueValue> noVisValues = new List<CIMUniqueValue>();
+                CIMUniqueValue noVisValue = new CIMUniqueValue();
+                noVisValue.FieldValues = new string[] { "0" };
+                noVisValues.Add(noVisValue);
+
+                var noVisSymbol = SymbolFactory.ConstructPointSymbol();
+                var s1 = SymbolFactory.ConstructMarker(CIMColor.CreateRGBColor(255, 0, 0), 5, SimpleMarkerStyle.Circle);
+                var s2 = SymbolFactory.ConstructMarker(CIMColor.CreateRGBColor(0, 0, 255), 12, SimpleMarkerStyle.Circle);
+
+                noVisSymbol.SymbolLayers = new CIMSymbolLayer[2] { s1, s2 };
+
+                var noVis = new CIMUniqueValueClass()
+                {
+                    Values = noVisValues.ToArray(),
+                    Label = "No Visible Targets",
+                    Visible = true,
+                    Editable = true,
+                    Symbol = new CIMSymbolReference() { Symbol = noVisSymbol }
+                };
+
+                classes.Add(noVis);
+
+                // visTar
+                List<CIMUniqueValue> visTarValues = new List<CIMUniqueValue>();
+                CIMUniqueValue visTarValue = new CIMUniqueValue();
+                visTarValue.FieldValues = new string[] { "1" };
+                visTarValues.Add(visTarValue);
+
+                var visSymbol = SymbolFactory.ConstructPointSymbol();
+                var vis1 = SymbolFactory.ConstructMarker(CIMColor.CreateRGBColor(0, 255, 0), 5, SimpleMarkerStyle.Circle);
+                var vis2 = SymbolFactory.ConstructMarker(CIMColor.CreateRGBColor(0, 0, 255), 12, SimpleMarkerStyle.Circle);
+
+                visSymbol.SymbolLayers = new CIMSymbolLayer[2] { vis1, vis2 };
+
+                var visTar = new CIMUniqueValueClass()
+                {
+                    Values = visTarValues.ToArray(),
+                    Label = "Has Visible Targets",
+                    Visible = true,
+                    Editable = true,
+                    Symbol = new CIMSymbolReference() { Symbol = visSymbol }
+                };
+
+                classes.Add(visTar);
+
+                CIMUniqueValueGroup groupOne = new CIMUniqueValueGroup();
+                groupOne.Heading = "Observers";
+                groupOne.Classes = classes.ToArray();
+
+                uniqueValueRenderer.Groups = new CIMUniqueValueGroup[] { groupOne };
+
+                //Draw the rest with the default symbol
+                uniqueValueRenderer.UseDefaultSymbol = true;
+                uniqueValueRenderer.DefaultLabel = "All other values";
+
+                var defaultColor = CIMColor.CreateRGBColor(215, 215, 215);
+                uniqueValueRenderer.DefaultSymbol = new CIMSymbolReference()
+                {
+                    Symbol = SymbolFactory.ConstructPointSymbol(defaultColor)
+                };
+
+                //var renderer = featureLayer.CreateRenderer(uniqueValueRenderer);
+                featureLayer.SetRenderer(uniqueValueRenderer);
+            });
+        }
+
+        public static async Task CreateTargetsRenderer(FeatureLayer featureLayer)
+        {
+            await QueuedTask.Run(() =>
+            {
+                //Create the Unique Value Renderer
+                CIMUniqueValueRenderer uniqueValueRenderer = new CIMUniqueValueRenderer();
+
+                // set the value field
+                uniqueValueRenderer.Fields = new string[] { VisibilityLibrary.Properties.Resources.NumOfObserversFieldName };
+
+                List<CIMUniqueValueClass> classes = new List<CIMUniqueValueClass>();
+
+                List<CIMUniqueValue> noVisValues = new List<CIMUniqueValue>();
+                CIMUniqueValue noVisValue = new CIMUniqueValue();
+                noVisValue.FieldValues = new string[] { "0" };
+                noVisValues.Add(noVisValue);
+
+                var noVisSymbol = SymbolFactory.ConstructPointSymbol(CIMColor.CreateRGBColor(255, 0, 0), 12, SimpleMarkerStyle.Circle);
+
+                var noVis = new CIMUniqueValueClass()
+                {
+                    Values = noVisValues.ToArray(),
+                    Label = "Not visible",
+                    Visible = true,
+                    Editable = true,
+                    Symbol = new CIMSymbolReference() { Symbol = noVisSymbol }
+                };
+
+                classes.Add(noVis);
+
+                CIMUniqueValueGroup groupOne = new CIMUniqueValueGroup();
+                groupOne.Heading = "Targets";
+                groupOne.Classes = classes.ToArray();
+
+                uniqueValueRenderer.Groups = new CIMUniqueValueGroup[] { groupOne };
+
+                //Draw the rest with the default symbol
+                uniqueValueRenderer.UseDefaultSymbol = true;
+                uniqueValueRenderer.DefaultLabel = "Can be seen";
+
+                uniqueValueRenderer.DefaultSymbol = new CIMSymbolReference()
+                {
+                    Symbol = SymbolFactory.ConstructPointSymbol(CIMColor.CreateRGBColor(0, 255, 0), 12, SimpleMarkerStyle.Circle)
+                };
+
+                //var renderer = featureLayer.CreateRenderer(uniqueValueRenderer);
+                featureLayer.SetRenderer(uniqueValueRenderer);
+
+                //featureLayer.SetTransparency(50.0);
+            });
+        }
+        public static async Task CreateTargetLayerLabels(FeatureLayer featureLayer)
+        {
+            await QueuedTask.Run(() =>
+            {
+                var lc = featureLayer.LabelClasses[0];
+                //lc.SetExpression(string.Format("[{0}]", VisibilityLibrary.Properties.Resources.NumOfObserversFieldName));
+                string expression = @"Function FindLabel ( [NumOfObservers] )
+If (CInt([NumOfObservers])>0) Then
+FindLabel = [NumOfObservers]
+else
+FindLabel = """"
+End If
+End Function";
+                lc.SetExpression(expression);
+                if (MapView.Active.Map.GetLabelEngine() == LabelEngine.Standard)
+                {
+                    lc.SetStandardLabelPlacementProperties(new CIMStandardLabelPlacementProperties() { PointPlacementMethod = StandardPointPlacementMethod.OnTopPoint });
+                }
+                else
+                {
+                    lc.SetMaplexLabelPlacementProperties(new CIMMaplexLabelPlacementProperties() { PointPlacementMethod = MaplexPointPlacementMethod.CenteredOnPoint });
+                }
+
+                featureLayer.SetLabelVisibility(true);
+            });
+        }
     }
+
+    public class VisibilityStats
+    {
+        public VisibilityStats()
+        { }
+
+        private List<int> _ObserverOIDs = new List<int>();
+        public List<int> ObserverOIDs
+        {
+            get { return _ObserverOIDs; }
+        }
+
+        private Dictionary<int, int> _TargetOIDVisCounts = new Dictionary<int, int>();
+        public Dictionary<int, int> TargetOIDVisCounts
+        {
+            get { return _TargetOIDVisCounts; }
+        }
+    }
+
 }
