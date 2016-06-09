@@ -346,12 +346,16 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <returns>ISurface</returns>
         public ISurface GetSurfaceFromMapByName(IMap map, string name)
         {
-            for (int x = 0; x < map.LayerCount; x++)
-            {
-                var layer = map.get_Layer(x);
+            var layers = map.get_Layers();
+            var layer = layers.Next();
 
-                if (layer == null || layer.Name != name)
+            while (layer != null)
+            {
+                if (layer.Name != name)
+                {
+                    layer = layers.Next();
                     continue;
+                }
 
                 var tin = layer as ITinLayer;
                 if (tin != null)
@@ -390,14 +394,15 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <returns></returns>
         public ILayer GetLayerFromMapByName(IMap map, string name)
         {
-            for (int x = 0; x < map.LayerCount; x++)
+            var layers = map.get_Layers();
+            var layer = layers.Next();
+
+            while (layer != null)
             {
-                var layer = map.get_Layer(x);
+                if (layer.Name == name)
+                    return layer;
 
-                if (layer == null || layer.Name != name)
-                    continue;
-
-                return layer;
+                layer = layers.Next();
             }
 
             return null;
@@ -413,22 +418,20 @@ namespace ArcMapAddinVisibility.ViewModels
         {
             var list = new List<string>();
 
-            for (int x = 0; x < map.LayerCount; x++)
+            var layers = map.get_Layers();
+            var layer = layers.Next();
+
+            while(layer != null)
             {
                 try
                 {
-                    var layer = map.get_Layer(x);
-
-                    if (layer == null)
-                        continue;
-
                     var tin = layer as ITinLayer;
 
                     if (tin != null)
                     {
                         if (IncludeTinLayers)
                             list.Add(layer.Name);
-
+                        layer = layers.Next();
                         continue;
                     }
 
@@ -447,6 +450,7 @@ namespace ArcMapAddinVisibility.ViewModels
                             if (surface != null)
                                 list.Add(layer.Name);
                         }
+                        layer = layers.Next();
                         continue;
                     }
 
@@ -458,6 +462,7 @@ namespace ArcMapAddinVisibility.ViewModels
                         surface = rasterSurface as ISurface;
                         if (surface != null)
                             list.Add(layer.Name);
+                        layer = layers.Next();
                         continue;
                     }
                 }
@@ -465,6 +470,8 @@ namespace ArcMapAddinVisibility.ViewModels
                 {
                     Console.WriteLine(ex);
                 }
+
+                layer = layers.Next();
             }
 
             return list;
