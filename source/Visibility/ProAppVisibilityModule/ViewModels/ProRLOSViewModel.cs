@@ -307,12 +307,7 @@ namespace ProAppVisibilityModule.ViewModels
 
                 await FeatureClassHelper.IntersectOutput(rlosOutputLayer, rlosConvertedPolygonsLayer, false, "Value");
 
-                // workaround to get unique value renderer to function when we have vis or non vis data
-                await FeatureClassHelper.UpdateFieldWithValue(VisibilityLibrary.Properties.Resources.RLOSConvertedPolygonsLayerName, true);
-
                 await FeatureClassHelper.CreateUniqueValueRenderer(GetLayerFromMapByName(VisibilityLibrary.Properties.Resources.RLOSConvertedPolygonsLayerName) as FeatureLayer, ShowNonVisibleData);
-
-                await FeatureClassHelper.UpdateFieldWithValue(VisibilityLibrary.Properties.Resources.RLOSConvertedPolygonsLayerName, false);
 
                 // for now we are not resetting after a run of the tool
                 //await Reset(true);
