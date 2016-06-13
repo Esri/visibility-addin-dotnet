@@ -362,33 +362,104 @@ namespace ProAppVisibilityModule.Helpers
         public static async Task CreateUniqueValueRenderer(FeatureLayer featureLayer, bool showNonVisData)
         {
             await QueuedTask.Run(() =>
+            {
+                var gridcodeUniqueList = new List<int>();
+
+                using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
+                using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(VisibilityLibrary.Properties.Resources.RLOSConvertedPolygonsLayerName))
                 {
-                    // color ramp
-                    CIMICCColorSpace colorSpace = new CIMICCColorSpace()
+                    var filter = new QueryFilter();
+                    filter.WhereClause = "1=1";
+                    filter.SubFields = "gridcode";
+
+                    var cursor = enterpriseFeatureClass.Search(filter, true);
+
+                    while (cursor.MoveNext())
                     {
-                        URL = "Default RGB"
+                        var gc = (int)cursor.Current["gridcode"];
+
+                        if (!gridcodeUniqueList.Contains(gc))
+                            gridcodeUniqueList.Add(gc);
+                    }
+                }
+
+                gridcodeUniqueList.Sort();
+
+                if (gridcodeUniqueList.Contains(0))
+                    gridcodeUniqueList.Remove(0);
+
+                // create classes for each unique 'gridcode' value
+
+                int gcCount = gridcodeUniqueList.Count;
+
+                var colors = GetGradients(System.Windows.Media.Color.FromRgb(0, 255, 0), System.Windows.Media.Color.FromRgb(128, 0, 128), gcCount).GetEnumerator();
+
+                //Create the Unique Value Renderer
+                CIMUniqueValueRenderer uniqueValueRenderer = new CIMUniqueValueRenderer();
+
+                // set the value field
+                uniqueValueRenderer.Fields = new string[] { "gridcode" };
+
+                List<CIMUniqueValueClass> classes = new List<CIMUniqueValueClass>();
+
+                foreach (var gc in gridcodeUniqueList)
+                {
+                    colors.MoveNext();
+
+                    List<CIMUniqueValue> visValues = new List<CIMUniqueValue>();
+                    CIMUniqueValue visValue = new CIMUniqueValue();
+                    visValue.FieldValues = new string[] { gc.ToString() };
+                    visValues.Add(visValue);
+
+                    var visSymbol = SymbolFactory.ConstructPolygonSymbol(CIMColor.CreateRGBColor(colors.Current.R, colors.Current.G, colors.Current.B));
+
+                    var visClass = new CIMUniqueValueClass()
+                    {
+                        Values = visValues.ToArray(),
+                        Label = gc.ToString(),
+                        Visible = true,
+                        Editable = true,
+                        Symbol = new CIMSymbolReference() { Symbol = visSymbol }
                     };
 
-                    CIMContinuousColorRamp continuousColorRamp = new CIMLinearContinuousColorRamp();
-                    continuousColorRamp.FromColor = CIMColor.CreateRGBColor(0, 255, 0); // green
-                    continuousColorRamp.ToColor = CIMColor.CreateRGBColor(160, 32, 240);// purple
-                    continuousColorRamp.ColorSpace = colorSpace;
+                    classes.Add(visClass);
+                    
+                }
 
-                    UniqueValueRendererDefinition uvRendererDef = new UniqueValueRendererDefinition()
-                    {
-                        ColorRamp = continuousColorRamp,
-                        UseDefaultSymbol = true,
-                        ValueFields = new string[] { "gridcode" },
-                        DefaultSymbol = showNonVisData ? new CIMSymbolReference() { Symbol = SymbolFactory.ConstructPolygonSymbol(ColorFactory.Red) } : 
-                                                         new CIMSymbolReference() { Symbol = SymbolFactory.ConstructPolygonSymbol(ColorFactory.CreateRGBColor(0,0,0,0)) }
-                    };
-                    var renderer = featureLayer.CreateRenderer(uvRendererDef);
-                    featureLayer.SetRenderer(renderer);
+                CIMUniqueValueGroup groupOne = new CIMUniqueValueGroup();
+                groupOne.Heading = "gridcode";
+                groupOne.Classes = classes.ToArray();
 
-                    featureLayer.SetTransparency(50.0);
-                });
+                uniqueValueRenderer.Groups = new CIMUniqueValueGroup[] { groupOne };
+
+                //Draw the rest with the default symbol
+                uniqueValueRenderer.UseDefaultSymbol = true;
+                uniqueValueRenderer.DefaultLabel = "non visible data";
+
+                uniqueValueRenderer.DefaultSymbol = showNonVisData ? new CIMSymbolReference() { Symbol = SymbolFactory.ConstructPolygonSymbol(ColorFactory.RedRGB) } :
+                                                                     new CIMSymbolReference() { Symbol = SymbolFactory.ConstructPolygonSymbol(ColorFactory.CreateRGBColor(0, 0, 0, 0)) };
+
+                featureLayer.SetRenderer(uniqueValueRenderer);
+
+                featureLayer.SetTransparency(50.0);
+            });
         }
 
+        public static IEnumerable<System.Windows.Media.Color> GetGradients(System.Windows.Media.Color start, System.Windows.Media.Color end, int steps)
+        {
+            int stepA = ((end.A - start.A) / (steps - 1));
+            int stepR = ((end.R - start.R) / (steps - 1));
+            int stepG = ((end.G - start.G) / (steps - 1));
+            int stepB = ((end.B - start.B) / (steps - 1));
+
+            for (int i = 0; i < steps; i++)
+            {
+                yield return System.Windows.Media.Color.FromArgb((byte)(start.A + (stepA * i)),
+                                            (byte)(start.R + (stepR * i)),
+                                            (byte)(start.G + (stepG * i)),
+                                            (byte)(start.B + (stepB * i)));
+            }
+        }
         /// <summary>
         /// Method used to create point features from AddInPoints
         /// </summary>
@@ -526,72 +597,6 @@ namespace ProAppVisibilityModule.Helpers
             }
         }
 
-        /// <summary>
-        /// Method used to update the gridcode field
-        /// This is a workaround for getting a work unique value renderer
-        /// that works with the flag ShowNonVisData
-        /// </summary>
-        /// <param name="rlosConvertedPolygonsLayer"></param>
-        /// <param name="add"></param>
-        /// <returns></returns>
-        internal static async Task UpdateFieldWithValue(string rlosConvertedPolygonsLayer, bool add)
-        {
-            try
-            {
-                string message = String.Empty;
-                bool creationResult = false;
-                await ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(async () =>
-                {
-                    using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
-                    using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(rlosConvertedPolygonsLayer))
-                    using (FeatureClassDefinition fcDefinition = enterpriseFeatureClass.GetDefinition())
-                    {
-                        int gridcodeFieldIndex = fcDefinition.FindField("gridcode");
-
-                        EditOperation editOperation = new EditOperation();
-                        editOperation.Callback(context =>
-                        {
-                            try
-                            {
-                                using (RowCursor rowCursor = enterpriseFeatureClass.Search(null, false))
-                                {
-                                    while (rowCursor.MoveNext())
-                                    {
-                                        using (Feature feature = (Feature)rowCursor.Current)
-                                        {
-                                            context.Invalidate(feature);
-                                            var gridcode = (int)feature[gridcodeFieldIndex];
-                                            feature[gridcodeFieldIndex] = add ? ++gridcode : --gridcode;
-
-                                            feature.Store();
-
-                                            context.Invalidate(feature);
-                                        }
-                                    }
-                                }
-                            }
-                            catch (GeodatabaseException exObj)
-                            {
-                                message = exObj.Message;
-                            }
-                        }, enterpriseFeatureClass);
-
-                        creationResult = await editOperation.ExecuteAsync();
-                        if (!creationResult)
-                            message = editOperation.ErrorMessage;
-
-                        await Project.Current.SaveEditsAsync();
-                    }
-                });
-                if (!creationResult)
-                    MessageBox.Show(message);
-
-            }
-            catch (Exception ex)
-            {
-                Debug.Print(ex.Message);
-            }
-        }
 
         internal static async Task<List<int>> GetSourceOIDs()
         {
