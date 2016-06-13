@@ -39,11 +39,8 @@ namespace ProAppVisibilityModule
         {
             try
             {
-                QueuedTask.Run(() =>
-                {
-                    var mp = geometry as MapPoint;
-                    Mediator.NotifyColleagues(VisibilityLibrary.Constants.NEW_MAP_POINT, mp);
-                });
+                var mp = geometry as MapPoint;
+                Mediator.NotifyColleagues(VisibilityLibrary.Constants.NEW_MAP_POINT, mp);
             }
             catch (Exception ex)
             {
