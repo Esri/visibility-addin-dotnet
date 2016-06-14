@@ -17,41 +17,37 @@ using System.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using VisibilityLibrary.Helpers;
+using ArcGIS.Core.Geometry;
 
 namespace ProAppVisibilityModule
 {
     internal class VisibilityMapTool : MapTool
     {
+        public VisibilityMapTool()
+        {
+            IsSketchTool = true;
+            SketchType = SketchGeometryType.Point;
+            UseSnapping = true;
+        }
+
         protected override Task OnToolActivateAsync(bool active)
         {
             return base.OnToolActivateAsync(active);
         }
 
-        /// <summary>
-        /// Method to capture tool mouse down event
-        /// We only want to handle the left mouse down
-        /// Get MapPoint from ClientPoint and notify
-        /// </summary>
-        /// <param name="e">MapViewMouseButtonEventArgs</param>
-        protected override void OnToolMouseDown(MapViewMouseButtonEventArgs e)
+        protected override Task<bool> OnSketchCompleteAsync(ArcGIS.Core.Geometry.Geometry geometry)
         {
-            if (e.ChangedButton != System.Windows.Input.MouseButton.Left)
-                return;
-
             try
             {
-                QueuedTask.Run(() =>
-                {
-                    var mp = MapView.Active.ClientToMap(e.ClientPoint);
-                    Mediator.NotifyColleagues(VisibilityLibrary.Constants.NEW_MAP_POINT, mp);
-                });
+                var mp = geometry as MapPoint;
+                Mediator.NotifyColleagues(VisibilityLibrary.Constants.NEW_MAP_POINT, mp);
             }
             catch (Exception ex)
             {
                 // do nothing
             }
 
-            base.OnToolMouseDown(e);
+            return base.OnSketchCompleteAsync(geometry);
         }
 
         /// <summary>
