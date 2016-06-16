@@ -53,7 +53,7 @@ namespace ArcMapAddinVisibility
                 //Try to snap the current position
                 snapResult = m_Snapper.Snap(point);
                 m_SnappingFeedback.Update(null, 0);
-                if (snapResult != null)
+                if (snapResult != null && snapResult.Location != null)
                     point = snapResult.Location;
 
                 Mediator.NotifyColleagues(Constants.NEW_MAP_POINT, point);
@@ -70,7 +70,7 @@ namespace ArcMapAddinVisibility
             //Try to snap the current position
             snapResult = m_Snapper.Snap(point);
             m_SnappingFeedback.Update(snapResult, 0);
-            if (snapResult != null)
+            if (snapResult != null && snapResult.Location != null)
                 point = snapResult.Location;
 
             Mediator.NotifyColleagues(Constants.MOUSE_MOVE_POINT, point);
