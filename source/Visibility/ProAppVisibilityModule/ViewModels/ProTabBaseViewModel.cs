@@ -48,6 +48,43 @@ namespace ProAppVisibilityModule.ViewModels
             Mediator.Register(VisibilityLibrary.Constants.NEW_MAP_POINT, OnNewMapPointEvent);
             Mediator.Register(VisibilityLibrary.Constants.MOUSE_MOVE_POINT, OnMouseMoveEvent);
             Mediator.Register(VisibilityLibrary.Constants.TAB_ITEM_SELECTED, OnTabItemSelected);
+
+            Mediator.Register(VisibilityLibrary.Constants.MAP_POINT_TOOL_ACTIVATED, OnMapPointToolActivated);
+            Mediator.Register(VisibilityLibrary.Constants.MAP_POINT_TOOL_DEACTIVATED, OnMapPointToolDeactivated);
+        }
+
+        private void OnMapPointToolDeactivated(object obj)
+        {
+            foreach (var item in ProGraphicsList)
+            {
+                if (item.Disposable != null && item.IsTemp == true)
+                {
+                    item.Disposable.Dispose();
+                    item.Disposable = null;
+                }
+            }
+        }
+
+        private async void OnMapPointToolActivated(object obj)
+        {
+            foreach(var item in ProGraphicsList)
+            {
+                if (item.Disposable != null || item.IsTemp == false)
+                    continue;
+
+                // re-add graphic to map overlay
+                SimpleMarkerStyle ms = SimpleMarkerStyle.Circle;
+                CIMColor color = ColorFactory.BlueRGB;
+
+                if (item.Tag == "target")
+                {
+                    ms = SimpleMarkerStyle.Square;
+                    color = ColorFactory.RedRGB;
+                }
+
+                var guid = await AddGraphicToMap(item.Geometry, color, true, 5.0, markerStyle: ms);
+                item.GUID = guid;
+            }
         }
 
         #region Properties
@@ -481,7 +518,7 @@ namespace ProAppVisibilityModule.ViewModels
             return await AddGraphicToMap(geom, ColorFactory.Red, IsTempGraphic, size);
         }
 
-        internal async Task<string> AddGraphicToMap(Geometry geom, CIMColor color, bool IsTempGraphic = false, double size = 1.0, string text = "", SimpleMarkerStyle markerStyle = SimpleMarkerStyle.Circle)
+        internal async Task<string> AddGraphicToMap(Geometry geom, CIMColor color, bool IsTempGraphic = false, double size = 1.0, string text = "", SimpleMarkerStyle markerStyle = SimpleMarkerStyle.Circle, string tag = "")
         {
             if (geom == null || MapView.Active == null)
                 return string.Empty;
@@ -526,7 +563,7 @@ namespace ProAppVisibilityModule.ViewModels
             {
                 var disposable = MapView.Active.AddOverlay(geom, symbol);
                 var guid = Guid.NewGuid().ToString();
-                ProGraphicsList.Add(new ProGraphic(disposable, guid, geom, IsTempGraphic));
+                ProGraphicsList.Add(new ProGraphic(disposable, guid, geom, IsTempGraphic, tag));
                 return guid;
             });
 

@@ -19,12 +19,13 @@ namespace ProAppVisibilityModule.Models
 {
     public class ProGraphic
     {
-        public ProGraphic(IDisposable _disposable, string guid, Geometry _geometry, bool _isTemp = false)
+        public ProGraphic(IDisposable _disposable, string guid, Geometry _geometry, bool _isTemp = false, string tag = "")
         {
             Disposable = _disposable;
             GUID = guid;
             Geometry = _geometry;
             IsTemp = _isTemp;
+            Tag = tag;
         }
 
         // properties   
@@ -50,6 +51,11 @@ namespace ProAppVisibilityModule.Models
         /// Property to determine if graphic is temporary or not
         /// </summary>
         public bool IsTemp { get; set; }
+
+        /// <summary>
+        /// optional tag property
+        /// </summary>
+        public string Tag { get; set; }
 
     }
 }

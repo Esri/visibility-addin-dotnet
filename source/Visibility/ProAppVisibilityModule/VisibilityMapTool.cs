@@ -32,7 +32,16 @@ namespace ProAppVisibilityModule
 
         protected override Task OnToolActivateAsync(bool active)
         {
+            Mediator.NotifyColleagues(VisibilityLibrary.Constants.MAP_POINT_TOOL_ACTIVATED, active);
+
             return base.OnToolActivateAsync(active);
+        }
+
+        protected override Task OnToolDeactivateAsync(bool hasMapViewChanged)
+        {
+            Mediator.NotifyColleagues(VisibilityLibrary.Constants.MAP_POINT_TOOL_DEACTIVATED, hasMapViewChanged);
+
+            return base.OnToolDeactivateAsync(hasMapViewChanged);
         }
 
         protected override Task<bool> OnSketchCompleteAsync(ArcGIS.Core.Geometry.Geometry geometry)
