@@ -232,9 +232,9 @@ namespace ProAppVisibilityModule.ViewModels
                 if (!CanCreateElement || MapView.Active == null || MapView.Active.Map == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
                     return;
 
-                DeactivateTool("ProAppVisibilityModule_MapTool");
-
                 await ExecuteVisibilityLLOS();
+
+                DeactivateTool("ProAppVisibilityModule_MapTool");
 
                 //await base.CreateMapElement();
             }

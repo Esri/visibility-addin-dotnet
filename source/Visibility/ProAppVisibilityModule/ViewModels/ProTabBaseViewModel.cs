@@ -59,14 +59,30 @@ namespace ProAppVisibilityModule.ViewModels
             {
                 if (item.Disposable != null && item.IsTemp == true)
                 {
-                    item.Disposable.Dispose();
+                    if (item.Disposable != null)
+                        item.Disposable.Dispose();
                     item.Disposable = null;
                 }
             }
         }
 
+        private class tempProGraphic
+        {
+            public tempProGraphic() { }
+
+            public string GUID { get; set; }
+            public Geometry Geometry { get; set; }
+            public CIMColor Color { get; set; }
+            public bool IsTemp { get; set; }
+            public double Size { get; set; }
+            public SimpleMarkerStyle MarkerStyle { get; set; }
+        }
+
         private async void OnMapPointToolActivated(object obj)
         {
+            var addList = new List<tempProGraphic>();
+            var removeList = new List<ProGraphic>();
+
             foreach(var item in ProGraphicsList)
             {
                 if (item.Disposable != null || item.IsTemp == false)
@@ -81,10 +97,30 @@ namespace ProAppVisibilityModule.ViewModels
                     ms = SimpleMarkerStyle.Square;
                     color = ColorFactory.RedRGB;
                 }
-
-                var guid = await AddGraphicToMap(item.Geometry, color, true, 5.0, markerStyle: ms);
-                item.GUID = guid;
+                addList.Add(new tempProGraphic()
+                {
+                    GUID = item.GUID,
+                    Geometry = item.Geometry,
+                    Color = color,
+                    IsTemp = true,
+                    Size = 5.0,
+                    MarkerStyle = ms
+                });
             }
+
+            foreach(var temp in addList)
+            {
+                var pgOLD = ProGraphicsList.FirstOrDefault(g => g.GUID == temp.GUID);
+
+                var guid = await AddGraphicToMap(temp.Geometry, temp.Color, temp.IsTemp, temp.Size, markerStyle: temp.MarkerStyle, tag: pgOLD.Tag);
+
+                var pgNew = ProGraphicsList.FirstOrDefault(g => g.GUID == guid);
+                pgNew.GUID = pgOLD.GUID;
+                removeList.Add(pgOLD);
+            }
+
+            foreach (var pg in removeList)
+                ProGraphicsList.Remove(pg);
         }
 
         #region Properties
@@ -293,7 +329,8 @@ namespace ProAppVisibilityModule.ViewModels
 
                 foreach (var item in ProGraphicsList)
                 {
-                    item.Disposable.Dispose();
+                    if (item.Disposable != null)
+                        item.Disposable.Dispose();
                 }
 
                 ProGraphicsList.Clear();
@@ -372,7 +409,8 @@ namespace ProAppVisibilityModule.ViewModels
             var list = ProGraphicsList.Where(g => guidList.Contains(g.GUID)).ToList();
             foreach (var graphic in list)
             {
-                graphic.Disposable.Dispose();
+                if(graphic.Disposable != null)
+                    graphic.Disposable.Dispose();
                 ProGraphicsList.Remove(graphic);
             }
 
@@ -400,7 +438,8 @@ namespace ProAppVisibilityModule.ViewModels
 
             foreach (var item in list)
             {
-                item.Disposable.Dispose();
+                if (item.Disposable != null)
+                    item.Disposable.Dispose();
                 Application.Current.Dispatcher.Invoke(() =>
                     {
                         ProGraphicsList.Remove(item);
