@@ -236,6 +236,10 @@ namespace ProAppVisibilityModule.ViewModels
 
                 DeactivateTool("ProAppVisibilityModule_MapTool");
 
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+
                 //await base.CreateMapElement();
             }
             catch(Exception ex)
@@ -288,6 +292,9 @@ namespace ProAppVisibilityModule.ViewModels
                 await FeatureClassHelper.UpdateShapeWithZ(VisibilityLibrary.Properties.Resources.TargetsLayerName, VisibilityLibrary.Properties.Resources.ZFieldName,  GetAsMapZUnits(surfaceSR, TargetOffset.Value));
 
                 // create sight lines
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
 
                 await FeatureClassHelper.CreateSightLines(VisibilityLibrary.Properties.Resources.ObserversLayerName, 
                     VisibilityLibrary.Properties.Resources.TargetsLayerName,
@@ -296,11 +303,17 @@ namespace ProAppVisibilityModule.ViewModels
                     VisibilityLibrary.Properties.Resources.OffsetWithZFieldName);
 
                 // LOS
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
 
                 await FeatureClassHelper.CreateLOS(SelectedSurfaceName, 
                     VisibilityLibrary.Properties.Resources.SightLinesLayerName,
                     CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.LOSOutputLayerName);
 
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
 
                 // gather results for updating observer and target layers
                 var sourceOIDs = await FeatureClassHelper.GetSourceOIDs();
