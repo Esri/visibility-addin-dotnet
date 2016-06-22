@@ -107,7 +107,22 @@ namespace ProAppVisibilityModule.Helpers
 
             IGPResult result = await Geoprocessing.ExecuteToolAsync("AddField_management", Geoprocessing.MakeValueArray(arguments.ToArray()));
         }
+        public static async Task JoinField(string inData, string inField, string joinTable, string joinField, string [] fields)
+        {
+            List<object> arguments = new List<object>();
+            // in_data
+            arguments.Add(inData);
+            // in_field
+            arguments.Add(inField);
+            // join_table
+            arguments.Add(joinTable);
+            // join_field
+            arguments.Add(joinField);
+            // fields
+            arguments.Add(fields);
 
+            IGPResult result = await Geoprocessing.ExecuteToolAsync("JoinField_management", Geoprocessing.MakeValueArray(arguments.ToArray()));
+        }
         /// <summary>
         /// Create sight lines
         /// </summary>
@@ -942,6 +957,151 @@ End Function";
                 featureLayer.SetLabelVisibility(true);
             });
         }
+
+        public static async Task CreateSightLinesRenderer(FeatureLayer featureLayer)
+        {
+            await QueuedTask.Run(() =>
+            {
+                //Create the Unique Value Renderer
+                CIMUniqueValueRenderer uniqueValueRenderer = new CIMUniqueValueRenderer();
+
+                // set the value field
+                uniqueValueRenderer.Fields = new string[] { VisibilityLibrary.Properties.Resources.TarIsVisFieldName };
+
+                List<CIMUniqueValueClass> classes = new List<CIMUniqueValueClass>();
+
+                List<CIMUniqueValue> noVisValues = new List<CIMUniqueValue>();
+                CIMUniqueValue noVisValue = new CIMUniqueValue();
+                noVisValue.FieldValues = new string[] { "0" };
+                noVisValues.Add(noVisValue);
+
+                var ss = new CIMSolidStroke();
+                ss.Color = ColorFactory.BlackRGB;
+                ss.Width = 6.0;
+                ss.Enable = true;
+                ss.LineStyle3D = Simple3DLineStyle.Tube;
+                //var noVisSymbol = SymbolFactory.ConstructLineSymbol(CIMColor.CreateRGBColor(0, 0, 0), 6.0, SimpleLineStyle.Solid);
+                var noVisSymbol = SymbolFactory.ConstructLineSymbol(ss);
+
+                var noVis = new CIMUniqueValueClass()
+                {
+                    Values = noVisValues.ToArray(),
+                    Label = "Not visible",
+                    Visible = true,
+                    Editable = true,
+                    Symbol = new CIMSymbolReference() { Symbol = noVisSymbol }
+                };
+
+                classes.Add(noVis);
+
+                List<CIMUniqueValue> hasVisValues = new List<CIMUniqueValue>();
+                CIMUniqueValue hasVisValue = new CIMUniqueValue();
+                hasVisValue.FieldValues = new string[] { "1" };
+                hasVisValues.Add(hasVisValue);
+
+                //var hasVisSymbol = SymbolFactory.ConstructLineSymbol(CIMColor.CreateRGBColor(255, 255, 255), 6, SimpleLineStyle.Solid);
+                var ss2 = new CIMSolidStroke();
+                ss2.Color = ColorFactory.WhiteRGB;
+                ss2.Width = 6.0;
+                ss2.Enable = true;
+                ss2.LineStyle3D = Simple3DLineStyle.Tube;
+                var hasVisSymbol = SymbolFactory.ConstructLineSymbol(ss2);
+
+                var hasVis = new CIMUniqueValueClass()
+                {
+                    Values = hasVisValues.ToArray(),
+                    Label = "Visible",
+                    Visible = true,
+                    Editable = true,
+                    Symbol = new CIMSymbolReference() { Symbol = hasVisSymbol }
+                };
+
+                classes.Add(hasVis);
+
+                CIMUniqueValueGroup groupOne = new CIMUniqueValueGroup();
+                groupOne.Heading = "Sight Lines";
+                groupOne.Classes = classes.ToArray();
+
+                uniqueValueRenderer.Groups = new CIMUniqueValueGroup[] { groupOne };
+
+                //Draw the rest with the default symbol
+                uniqueValueRenderer.UseDefaultSymbol = false;
+                featureLayer.SetRenderer(uniqueValueRenderer);
+            });
+        }
+        public static async Task CreateVisCodeRenderer(FeatureLayer featureLayer, string visField, 
+                                                        int visCodeVisible, int visCodeNotVisible, 
+                                                        CIMColor visibleColor, CIMColor notVisibleColor,
+                                                        double visibleSize, double notVisibleSize)
+        {
+            await QueuedTask.Run(() =>
+            {
+                //Create the Unique Value Renderer
+                CIMUniqueValueRenderer uniqueValueRenderer = new CIMUniqueValueRenderer();
+
+                // set the value field
+                uniqueValueRenderer.Fields = new string[] { visField };
+
+                List<CIMUniqueValueClass> classes = new List<CIMUniqueValueClass>();
+
+                List<CIMUniqueValue> noVisValues = new List<CIMUniqueValue>();
+                CIMUniqueValue noVisValue = new CIMUniqueValue();
+                noVisValue.FieldValues = new string[] { visCodeNotVisible.ToString() };
+                noVisValues.Add(noVisValue);
+
+                var ss = new CIMSolidStroke();
+                ss.Color = notVisibleColor;
+                ss.Width = notVisibleSize;
+                ss.Enable = true;
+                ss.LineStyle3D = Simple3DLineStyle.Tube;
+                var noVisSymbol = SymbolFactory.ConstructLineSymbol(ss);
+
+                var noVis = new CIMUniqueValueClass()
+                {
+                    Values = noVisValues.ToArray(),
+                    Label = "Not visible",
+                    Visible = true,
+                    Editable = true,
+                    Symbol = new CIMSymbolReference() { Symbol = noVisSymbol }
+                };
+
+
+                List<CIMUniqueValue> hasVisValues = new List<CIMUniqueValue>();
+                CIMUniqueValue hasVisValue = new CIMUniqueValue();
+                hasVisValue.FieldValues = new string[] { visCodeVisible.ToString() };
+                hasVisValues.Add(hasVisValue);
+
+                var ss2 = new CIMSolidStroke();
+                ss2.Color = visibleColor;
+                ss2.Width = visibleSize;
+                ss2.Enable = true;
+                ss2.LineStyle3D = Simple3DLineStyle.Tube;
+                var hasVisSymbol = SymbolFactory.ConstructLineSymbol(ss2);
+
+                var hasVis = new CIMUniqueValueClass()
+                {
+                    Values = hasVisValues.ToArray(),
+                    Label = "Visible",
+                    Visible = true,
+                    Editable = true,
+                    Symbol = new CIMSymbolReference() { Symbol = hasVisSymbol }
+                };
+
+                classes.Add(hasVis);
+                classes.Add(noVis);
+
+                CIMUniqueValueGroup groupOne = new CIMUniqueValueGroup();
+                groupOne.Heading = visField;
+                groupOne.Classes = classes.ToArray();
+
+                uniqueValueRenderer.Groups = new CIMUniqueValueGroup[] { groupOne };
+
+                //Draw the rest with the default symbol
+                uniqueValueRenderer.UseDefaultSymbol = false;
+                featureLayer.SetRenderer(uniqueValueRenderer);
+            });
+        }
+
     }
 
     public class VisibilityStats

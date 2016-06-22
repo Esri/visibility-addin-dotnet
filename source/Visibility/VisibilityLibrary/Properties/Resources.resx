@@ -375,4 +375,7 @@
   <data name="TarIsVisFieldName" xml:space="preserve">
     <value>TarIsVis</value>
   </data>
+  <data name="VisCodeFieldName" xml:space="preserve">
+    <value>VisCode</value>
+  </data>
 </root>
