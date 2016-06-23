@@ -315,6 +315,14 @@ namespace ProAppVisibilityModule.ViewModels
                 GC.WaitForPendingFinalizers();
                 GC.Collect();
 
+                // join fields with sight lines
+
+                await FeatureClassHelper.JoinField(CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.SightLinesLayerName,
+                                                    "OID",
+                                                    CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.LOSOutputLayerName,
+                                                    "SourceOID",
+                                                    new string[] { "TarIsVis" });
+
                 // gather results for updating observer and target layers
                 var sourceOIDs = await FeatureClassHelper.GetSourceOIDs();
 
@@ -327,6 +335,24 @@ namespace ProAppVisibilityModule.ViewModels
                 await FeatureClassHelper.CreateTargetsRenderer(GetLayerFromMapByName(VisibilityLibrary.Properties.Resources.TargetsLayerName) as FeatureLayer);
 
                 await FeatureClassHelper.CreateTargetLayerLabels(GetLayerFromMapByName(VisibilityLibrary.Properties.Resources.TargetsLayerName) as FeatureLayer);
+
+                await FeatureClassHelper.CreateVisCodeRenderer(GetLayerFromMapByName(VisibilityLibrary.Properties.Resources.SightLinesLayerName) as FeatureLayer,
+                                                               VisibilityLibrary.Properties.Resources.TarIsVisFieldName,
+                                                               1,
+                                                               0,
+                                                               ColorFactory.WhiteRGB,
+                                                               ColorFactory.BlackRGB,
+                                                               6.0,
+                                                               6.0);
+
+                await FeatureClassHelper.CreateVisCodeRenderer(GetLayerFromMapByName(VisibilityLibrary.Properties.Resources.LOSOutputLayerName) as FeatureLayer,
+                                                               VisibilityLibrary.Properties.Resources.VisCodeFieldName,
+                                                               1,
+                                                               2,
+                                                               ColorFactory.GreenRGB,
+                                                               ColorFactory.RedRGB,
+                                                               5.0,
+                                                               3.0);
                 //await Reset(true);
             }
             catch(Exception ex)

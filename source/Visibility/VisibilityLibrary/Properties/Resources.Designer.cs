@@ -826,6 +826,15 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to VisCode.
+        /// </summary>
+        public static string VisCodeFieldName {
+            get {
+                return ResourceManager.GetString("VisCodeFieldName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Z.
         /// </summary>
         public static string ZFieldName {
