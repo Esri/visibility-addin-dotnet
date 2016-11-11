@@ -451,7 +451,7 @@ namespace ProAppVisibilityModule.Helpers
                 uniqueValueRenderer.UseDefaultSymbol = true;
                 uniqueValueRenderer.DefaultLabel = "non visible data";
 
-                uniqueValueRenderer.DefaultSymbol = showNonVisData ? new CIMSymbolReference() { Symbol = SymbolFactory.ConstructPolygonSymbol(ColorFactory.RedRGB) } :
+                uniqueValueRenderer.DefaultSymbol = showNonVisData ? new CIMSymbolReference() { Symbol = SymbolFactory.ConstructPolygonSymbol(ColorFactory.Red) } :
                                                                      new CIMSymbolReference() { Symbol = SymbolFactory.ConstructPolygonSymbol(ColorFactory.CreateRGBColor(0, 0, 0, 0)) };
 
                 featureLayer.SetRenderer(uniqueValueRenderer);
@@ -648,6 +648,8 @@ namespace ProAppVisibilityModule.Helpers
         internal static async Task<VisibilityStats> GetVisibilityStats(List<int> sourceOIDs)
         {
             var visibilityStats = new VisibilityStats();
+            if (sourceOIDs.Count == 0)
+                return visibilityStats;
 
             try
             {
@@ -660,7 +662,7 @@ namespace ProAppVisibilityModule.Helpers
                         filter.WhereClause = string.Format("OID IN ({0})", string.Join(",", sourceOIDs));
 
                         var cursor = enterpriseFeatureClass.Search(filter, true);
-
+                        
                         while (cursor.MoveNext())
                         {
                             var observerOID = (int)cursor.Current["OID_OBSERV"];
@@ -976,7 +978,7 @@ End Function";
                 noVisValues.Add(noVisValue);
 
                 var ss = new CIMSolidStroke();
-                ss.Color = ColorFactory.BlackRGB;
+                ss.Color = ColorFactory.Black;
                 ss.Width = 6.0;
                 ss.Enable = true;
                 ss.LineStyle3D = Simple3DLineStyle.Tube;
@@ -1001,7 +1003,7 @@ End Function";
 
                 //var hasVisSymbol = SymbolFactory.ConstructLineSymbol(CIMColor.CreateRGBColor(255, 255, 255), 6, SimpleLineStyle.Solid);
                 var ss2 = new CIMSolidStroke();
-                ss2.Color = ColorFactory.WhiteRGB;
+                ss2.Color = ColorFactory.White;
                 ss2.Width = 6.0;
                 ss2.Enable = true;
                 ss2.LineStyle3D = Simple3DLineStyle.Tube;
