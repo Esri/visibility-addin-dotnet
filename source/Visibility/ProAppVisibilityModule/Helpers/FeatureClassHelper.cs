@@ -453,6 +453,7 @@ namespace ProAppVisibilityModule.Helpers
 
                 uniqueValueRenderer.DefaultSymbol = showNonVisData ? new CIMSymbolReference() { Symbol = SymbolFactory.ConstructPolygonSymbol(ColorFactory.Red) } :
                                                                      new CIMSymbolReference() { Symbol = SymbolFactory.ConstructPolygonSymbol(ColorFactory.CreateRGBColor(0, 0, 0, 0)) };
+                                                                     
 
                 featureLayer.SetRenderer(uniqueValueRenderer);
 
@@ -462,12 +463,16 @@ namespace ProAppVisibilityModule.Helpers
 
         public static IEnumerable<System.Windows.Media.Color> GetGradients(System.Windows.Media.Color start, System.Windows.Media.Color end, int steps)
         {
+            if (steps < 2)
+            {
+                yield return System.Windows.Media.Color.FromArgb((byte)(start.A), (byte)0, (byte)255, (byte)0);
+            }
             int stepA = ((end.A - start.A) / (steps - 1));
             int stepR = ((end.R - start.R) / (steps - 1));
             int stepG = ((end.G - start.G) / (steps - 1));
             int stepB = ((end.B - start.B) / (steps - 1));
 
-            for (int i = 0; i < steps; i++)
+            for (int i = 1; i < steps; i++)
             {
                 yield return System.Windows.Media.Color.FromArgb((byte)(start.A + (stepA * i)),
                                             (byte)(start.R + (stepR * i)),

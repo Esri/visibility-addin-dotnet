@@ -259,6 +259,12 @@ namespace ProAppVisibilityModule.ViewModels
             {
                 var surfaceSR = await GetSpatialReferenceFromLayer(SelectedSurfaceName);
 
+                if (surfaceSR == null || !surfaceSR.IsProjected)
+                {
+                    MessageBox.Show(VisibilityLibrary.Properties.Resources.RLOSUserPrompt, VisibilityLibrary.Properties.Resources.RLOSUserPromptCaption);
+                    return;
+                }
+
                 await FeatureClassHelper.CreateLayer(VisibilityLibrary.Properties.Resources.ObserversLayerName, "POINT", true, true);
 
                 // add fields for observer offset
