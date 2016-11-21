@@ -259,6 +259,12 @@ namespace ProAppVisibilityModule.ViewModels
             {
                 var surfaceSR = await GetSpatialReferenceFromLayer(SelectedSurfaceName);
 
+                if (surfaceSR == null || !surfaceSR.IsProjected)
+                {
+                    MessageBox.Show(VisibilityLibrary.Properties.Resources.RLOSUserPrompt, VisibilityLibrary.Properties.Resources.RLOSUserPromptCaption);
+                    return;
+                }
+
                 await FeatureClassHelper.CreateLayer(VisibilityLibrary.Properties.Resources.ObserversLayerName, "POINT", true, true);
 
                 // add fields for observer offset
@@ -327,7 +333,7 @@ namespace ProAppVisibilityModule.ViewModels
                 var sourceOIDs = await FeatureClassHelper.GetSourceOIDs();
 
                 var visStats = await FeatureClassHelper.GetVisibilityStats(sourceOIDs);
-
+                
                 await FeatureClassHelper.UpdateLayersWithVisibilityStats(visStats);
 
                 await FeatureClassHelper.CreateObserversRenderer(GetLayerFromMapByName(VisibilityLibrary.Properties.Resources.ObserversLayerName) as FeatureLayer);
@@ -340,8 +346,8 @@ namespace ProAppVisibilityModule.ViewModels
                                                                VisibilityLibrary.Properties.Resources.TarIsVisFieldName,
                                                                1,
                                                                0,
-                                                               ColorFactory.WhiteRGB,
-                                                               ColorFactory.BlackRGB,
+                                                               ColorFactory.White,
+                                                               ColorFactory.Black,
                                                                6.0,
                                                                6.0);
 
@@ -349,8 +355,8 @@ namespace ProAppVisibilityModule.ViewModels
                                                                VisibilityLibrary.Properties.Resources.VisCodeFieldName,
                                                                1,
                                                                2,
-                                                               ColorFactory.GreenRGB,
-                                                               ColorFactory.RedRGB,
+                                                               ColorFactory.Green,
+                                                               ColorFactory.Red,
                                                                5.0,
                                                                3.0);
                 //await Reset(true);

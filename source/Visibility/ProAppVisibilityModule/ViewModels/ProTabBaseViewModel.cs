@@ -90,12 +90,12 @@ namespace ProAppVisibilityModule.ViewModels
 
                 // re-add graphic to map overlay
                 SimpleMarkerStyle ms = SimpleMarkerStyle.Circle;
-                CIMColor color = ColorFactory.BlueRGB;
+                CIMColor color = ColorFactory.Blue;
 
                 if (item.Tag == "target")
                 {
                     ms = SimpleMarkerStyle.Square;
-                    color = ColorFactory.RedRGB;
+                    color = ColorFactory.Red;
                 }
                 addList.Add(new tempProGraphic()
                 {

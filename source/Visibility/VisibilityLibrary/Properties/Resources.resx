@@ -322,10 +322,10 @@
     <value>Error</value>
   </data>
   <data name="LOSOutputLayerName" xml:space="preserve">
-    <value>vis_los_output</value>
+    <value>LLOS_Visibility</value>
   </data>
   <data name="ObserversLayerName" xml:space="preserve">
-    <value>vis_observers</value>
+    <value>LLOS_Observers</value>
   </data>
   <data name="OffsetFieldName" xml:space="preserve">
     <value>offset</value>
@@ -334,22 +334,22 @@
     <value>offsetWithZ</value>
   </data>
   <data name="SightLinesLayerName" xml:space="preserve">
-    <value>vis_sight_lines</value>
+    <value>LLOS_Sight_Lines</value>
   </data>
   <data name="TargetsLayerName" xml:space="preserve">
-    <value>vis_targets</value>
+    <value>LLOS_Targets</value>
   </data>
   <data name="ZFieldName" xml:space="preserve">
     <value>Z</value>
   </data>
   <data name="RLOSOutputLayerName" xml:space="preserve">
-    <value>vis_rlos_output</value>
+    <value>RLOS_Results</value>
   </data>
   <data name="RLOSMaskLayerName" xml:space="preserve">
     <value>vis_rlos_mask</value>
   </data>
   <data name="RLOSConvertedPolygonsLayerName" xml:space="preserve">
-    <value>vis_rlos_conv_polygons</value>
+    <value>RLOS_Polygons</value>
   </data>
   <data name="AENumMustBeGreater" xml:space="preserve">
     <value>The number must be greater than min</value>
@@ -377,5 +377,11 @@
   </data>
   <data name="VisCodeFieldName" xml:space="preserve">
     <value>VisCode</value>
+  </data>
+  <data name="LLOSObserversLayerName" xml:space="preserve">
+    <value>LLOS_Observers</value>
+  </data>
+  <data name="RLOSObserversLayerName" xml:space="preserve">
+    <value>RLOS_Observers</value>
   </data>
 </root>
