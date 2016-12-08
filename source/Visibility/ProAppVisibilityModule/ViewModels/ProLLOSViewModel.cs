@@ -48,6 +48,7 @@ namespace ProAppVisibilityModule.ViewModels
                     Debug.Print(ex.Message);
                 }
             });
+
         }
 
         #region Properties
@@ -258,6 +259,22 @@ namespace ProAppVisibilityModule.ViewModels
             try
             {
                 var surfaceSR = await GetSpatialReferenceFromLayer(SelectedSurfaceName);
+
+                if (surfaceSR == null || !surfaceSR.IsProjected)
+                {
+                    MessageBox.Show(VisibilityLibrary.Properties.Resources.RLOSUserPrompt, VisibilityLibrary.Properties.Resources.RLOSUserPromptCaption);
+                    
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        TargetAddInPoints.Clear();
+                        ObserverAddInPoints.Clear();
+                        ClearTempGraphics();
+                    });
+
+                    await Reset(true);
+                    
+                    return;
+                }
 
                 await FeatureClassHelper.CreateLayer(VisibilityLibrary.Properties.Resources.ObserversLayerName, "POINT", true, true);
 
