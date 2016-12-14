@@ -938,13 +938,14 @@ namespace ProAppVisibilityModule.Helpers
                 var lc = featureLayer.LabelClasses[0];
                 //lc.SetExpression(string.Format("[{0}]", VisibilityLibrary.Properties.Resources.NumOfObserversFieldName));
                 string expression = @"Function FindLabel ( [NumOfObservers] )
-If (CInt([NumOfObservers])>0) Then
-FindLabel = [NumOfObservers]
-else
-FindLabel = """"
-End If
-End Function";
+                                    If (CInt([NumOfObservers])>0) Then
+                                        FindLabel = [NumOfObservers]
+                                    else
+                                        FindLabel = """"
+                                    End If
+                                    End Function";
                 lc.SetExpression(expression);
+                lc.SetExpressionEngine(LabelExpressionEngine.VBScript);
                 if (MapView.Active.Map.GetLabelEngine() == LabelEngine.Standard)
                 {
                     lc.SetStandardLabelPlacementProperties(new CIMStandardLabelPlacementProperties() { PointPlacementMethod = StandardPointPlacementMethod.OnTopPoint });
