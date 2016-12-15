@@ -781,7 +781,7 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Map Point Tool.
+        ///   Looks up a localized string similar to Observer Map Point Tool.
         /// </summary>
         public static string TooltipMapPointTool {
             get {

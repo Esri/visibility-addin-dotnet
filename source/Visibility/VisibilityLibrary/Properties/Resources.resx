@@ -289,7 +289,7 @@
     <value>Linear Line of Sight</value>
   </data>
   <data name="TooltipMapPointTool" xml:space="preserve">
-    <value>Map Point Tool</value>
+    <value>Observer Map Point Tool</value>
   </data>
   <data name="TooltipObserverMapPointTool" xml:space="preserve">
     <value>Observer Map Point Tool</value>
