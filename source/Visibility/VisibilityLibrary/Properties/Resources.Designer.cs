@@ -538,7 +538,7 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to llos_observers.
+        ///   Looks up a localized string similar to LLOS_Observers.
         /// </summary>
         public static string LLOSObserversLayerName {
             get {
@@ -565,7 +565,7 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to llos_output.
+        ///   Looks up a localized string similar to LLOS_Output.
         /// </summary>
         public static string LOSOutputLayerName {
             get {
@@ -646,7 +646,7 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to rlos_conv_polygons.
+        ///   Looks up a localized string similar to RLOS_Conv_Polygons.
         /// </summary>
         public static string RLOSConvertedPolygonsLayerName {
             get {
@@ -655,7 +655,7 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to rlos_mask.
+        ///   Looks up a localized string similar to RLOS_Mask.
         /// </summary>
         public static string RLOSMaskLayerName {
             get {
@@ -664,7 +664,7 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to rlos_observers.
+        ///   Looks up a localized string similar to RLOS_Observers.
         /// </summary>
         public static string RLOSObserversLayerName {
             get {
@@ -673,7 +673,7 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to rlos_output.
+        ///   Looks up a localized string similar to RLOS_Output.
         /// </summary>
         public static string RLOSOutputLayerName {
             get {
@@ -700,7 +700,7 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to llos_sight_lines.
+        ///   Looks up a localized string similar to LLOS_Sight_Lines.
         /// </summary>
         public static string SightLinesLayerName {
             get {
@@ -709,7 +709,7 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to llos_targets.
+        ///   Looks up a localized string similar to LLOS_Targets.
         /// </summary>
         public static string TargetsLayerName {
             get {
