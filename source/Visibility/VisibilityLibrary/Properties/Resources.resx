@@ -322,10 +322,13 @@
     <value>Error</value>
   </data>
   <data name="LOSOutputLayerName" xml:space="preserve">
-    <value>vis_los_output</value>
+    <value>llos_output</value>
   </data>
-  <data name="ObserversLayerName" xml:space="preserve">
-    <value>vis_observers</value>
+  <data name="LLOSObserversLayerName" xml:space="preserve">
+    <value>llos_observers</value>
+  </data>
+  <data name="RLOSObserversLayerName" xml:space="preserve">
+    <value>rlos_observers</value>
   </data>
   <data name="OffsetFieldName" xml:space="preserve">
     <value>offset</value>
@@ -334,22 +337,22 @@
     <value>offsetWithZ</value>
   </data>
   <data name="SightLinesLayerName" xml:space="preserve">
-    <value>vis_sight_lines</value>
+    <value>llos_sight_lines</value>
   </data>
   <data name="TargetsLayerName" xml:space="preserve">
-    <value>vis_targets</value>
+    <value>llos_targets</value>
   </data>
   <data name="ZFieldName" xml:space="preserve">
     <value>Z</value>
   </data>
   <data name="RLOSOutputLayerName" xml:space="preserve">
-    <value>vis_rlos_output</value>
+    <value>rlos_output</value>
   </data>
   <data name="RLOSMaskLayerName" xml:space="preserve">
-    <value>vis_rlos_mask</value>
+    <value>rlos_mask</value>
   </data>
   <data name="RLOSConvertedPolygonsLayerName" xml:space="preserve">
-    <value>vis_rlos_conv_polygons</value>
+    <value>rlos_conv_polygons</value>
   </data>
   <data name="AENumMustBeGreater" xml:space="preserve">
     <value>The number must be greater than min</value>

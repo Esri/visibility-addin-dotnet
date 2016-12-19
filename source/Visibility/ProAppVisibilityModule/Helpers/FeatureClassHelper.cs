@@ -376,6 +376,9 @@ namespace ProAppVisibilityModule.Helpers
         /// <returns></returns>
         public static async Task CreateUniqueValueRenderer(FeatureLayer featureLayer, bool showNonVisData)
         {
+            if (featureLayer == null)
+                return;
+
             await QueuedTask.Run(() =>
             {
                 var gridcodeUniqueList = new List<int>();
@@ -462,6 +465,9 @@ namespace ProAppVisibilityModule.Helpers
 
         public static IEnumerable<System.Windows.Media.Color> GetGradients(System.Windows.Media.Color start, System.Windows.Media.Color end, int steps)
         {
+            if (steps <= 1)
+                yield return System.Windows.Media.Color.FromArgb((byte)(start.A), (byte)(start.R), (byte)(start.G), (byte)(start.B));
+
             int stepA = ((end.A - start.A) / (steps - 1));
             int stepR = ((end.R - start.R) / (steps - 1));
             int stepG = ((end.G - start.G) / (steps - 1));
@@ -700,7 +706,7 @@ namespace ProAppVisibilityModule.Helpers
                     using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
                     {
                         // do the observers layer
-                        using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(VisibilityLibrary.Properties.Resources.ObserversLayerName))
+                        using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(VisibilityLibrary.Properties.Resources.LLOSObserversLayerName))
                         using (FeatureClassDefinition fcDefinition = enterpriseFeatureClass.GetDefinition())
                         {
                             int tarIsVisFieldIndex = fcDefinition.FindField(VisibilityLibrary.Properties.Resources.TarIsVisFieldName);
@@ -948,14 +954,54 @@ namespace ProAppVisibilityModule.Helpers
                 lc.SetExpressionEngine(LabelExpressionEngine.VBScript);
                 if (MapView.Active.Map.GetLabelEngine() == LabelEngine.Standard)
                 {
-                    lc.SetStandardLabelPlacementProperties(new CIMStandardLabelPlacementProperties() { PointPlacementMethod = StandardPointPlacementMethod.OnTopPoint });
+                    lc.SetStandardLabelPlacementProperties(new CIMStandardLabelPlacementProperties() 
+                    { 
+                        PointPlacementMethod = StandardPointPlacementMethod.OnTopPoint, FeatureType = LabelFeatureType.Point
+                    });
                 }
                 else
                 {
-                    lc.SetMaplexLabelPlacementProperties(new CIMMaplexLabelPlacementProperties() { PointPlacementMethod = MaplexPointPlacementMethod.CenteredOnPoint });
+                    lc.SetMaplexLabelPlacementProperties(new CIMMaplexLabelPlacementProperties()
+                    {
+                        PointPlacementMethod = MaplexPointPlacementMethod.CenteredOnPoint, FeatureType = LabelFeatureType.Point
+                    });
                 }
 
                 featureLayer.SetLabelVisibility(true);
+            });
+        }
+
+        public static async Task CreateGroupLayer(List<Layer> layerList, string groupLayerName)
+        {
+            await QueuedTask.Run(() =>
+            {
+                GroupLayer groupLayer = LayerFactory.CreateGroupLayer(MapView.Active.Map, 0, groupLayerName);
+
+                var grpLayerDef = groupLayer.GetDefinition() as CIMGroupLayer;
+                List<string> layerIds = new List<string>();
+                
+                foreach (Layer layer in layerList)
+                {
+                    var layerToAddDef = layer.GetDefinition();
+                    layerIds.Add(layerToAddDef.URI);
+                }
+
+                grpLayerDef.Layers = layerIds.ToArray();
+                groupLayer.SetDefinition(grpLayerDef);
+
+                CIMMap mapDef = MapView.Active.Map.GetDefinition();
+                List<string> maplayerIds = new List<string>();
+
+                foreach (Layer layer in MapView.Active.Map.Layers)
+                {
+                    if (!layerIds.Contains(layer.GetDefinition().URI))
+                    {
+                        maplayerIds.Add(layer.GetDefinition().URI);
+                    }
+                }
+
+                mapDef.Layers = maplayerIds.ToArray();
+                MapView.Active.Map.SetDefinition(mapDef);   
             });
         }
 

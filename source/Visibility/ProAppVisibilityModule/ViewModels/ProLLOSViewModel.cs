@@ -276,13 +276,13 @@ namespace ProAppVisibilityModule.ViewModels
                     return;
                 }
 
-                await FeatureClassHelper.CreateLayer(VisibilityLibrary.Properties.Resources.ObserversLayerName, "POINT", true, true);
+                await FeatureClassHelper.CreateLayer(VisibilityLibrary.Properties.Resources.LLOSObserversLayerName, "POINT", true, true);
 
                 // add fields for observer offset
 
-                await FeatureClassHelper.AddFieldToLayer(VisibilityLibrary.Properties.Resources.ObserversLayerName, VisibilityLibrary.Properties.Resources.OffsetFieldName, "DOUBLE");
-                await FeatureClassHelper.AddFieldToLayer(VisibilityLibrary.Properties.Resources.ObserversLayerName, VisibilityLibrary.Properties.Resources.OffsetWithZFieldName, "DOUBLE");
-                await FeatureClassHelper.AddFieldToLayer(VisibilityLibrary.Properties.Resources.ObserversLayerName, VisibilityLibrary.Properties.Resources.TarIsVisFieldName, "SHORT");
+                await FeatureClassHelper.AddFieldToLayer(VisibilityLibrary.Properties.Resources.LLOSObserversLayerName, VisibilityLibrary.Properties.Resources.OffsetFieldName, "DOUBLE");
+                await FeatureClassHelper.AddFieldToLayer(VisibilityLibrary.Properties.Resources.LLOSObserversLayerName, VisibilityLibrary.Properties.Resources.OffsetWithZFieldName, "DOUBLE");
+                await FeatureClassHelper.AddFieldToLayer(VisibilityLibrary.Properties.Resources.LLOSObserversLayerName, VisibilityLibrary.Properties.Resources.TarIsVisFieldName, "SHORT");
 
                 await FeatureClassHelper.CreateLayer(VisibilityLibrary.Properties.Resources.TargetsLayerName, "POINT", true, true);
 
@@ -294,7 +294,7 @@ namespace ProAppVisibilityModule.ViewModels
 
                 // add observer points to feature layer
 
-                await FeatureClassHelper.CreatingFeatures(VisibilityLibrary.Properties.Resources.ObserversLayerName, ObserverAddInPoints, GetAsMapZUnits(surfaceSR, ObserverOffset.Value));
+                await FeatureClassHelper.CreatingFeatures(VisibilityLibrary.Properties.Resources.LLOSObserversLayerName, ObserverAddInPoints, GetAsMapZUnits(surfaceSR, ObserverOffset.Value));
 
                 // add target points to feature layer
 
@@ -302,10 +302,10 @@ namespace ProAppVisibilityModule.ViewModels
 
                 // update with surface information
 
-                await FeatureClassHelper.AddSurfaceInformation(VisibilityLibrary.Properties.Resources.ObserversLayerName, SelectedSurfaceName, VisibilityLibrary.Properties.Resources.ZFieldName);
+                await FeatureClassHelper.AddSurfaceInformation(VisibilityLibrary.Properties.Resources.LLOSObserversLayerName, SelectedSurfaceName, VisibilityLibrary.Properties.Resources.ZFieldName);
                 await FeatureClassHelper.AddSurfaceInformation(VisibilityLibrary.Properties.Resources.TargetsLayerName, SelectedSurfaceName, VisibilityLibrary.Properties.Resources.ZFieldName);
 
-                await FeatureClassHelper.UpdateShapeWithZ(VisibilityLibrary.Properties.Resources.ObserversLayerName, VisibilityLibrary.Properties.Resources.ZFieldName, GetAsMapZUnits(surfaceSR, ObserverOffset.Value));
+                await FeatureClassHelper.UpdateShapeWithZ(VisibilityLibrary.Properties.Resources.LLOSObserversLayerName, VisibilityLibrary.Properties.Resources.ZFieldName, GetAsMapZUnits(surfaceSR, ObserverOffset.Value));
                 await FeatureClassHelper.UpdateShapeWithZ(VisibilityLibrary.Properties.Resources.TargetsLayerName, VisibilityLibrary.Properties.Resources.ZFieldName,  GetAsMapZUnits(surfaceSR, TargetOffset.Value));
 
                 // create sight lines
@@ -313,7 +313,7 @@ namespace ProAppVisibilityModule.ViewModels
                 GC.WaitForPendingFinalizers();
                 GC.Collect();
 
-                await FeatureClassHelper.CreateSightLines(VisibilityLibrary.Properties.Resources.ObserversLayerName, 
+                await FeatureClassHelper.CreateSightLines(VisibilityLibrary.Properties.Resources.LLOSObserversLayerName, 
                     VisibilityLibrary.Properties.Resources.TargetsLayerName,
                     CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.SightLinesLayerName, 
                     VisibilityLibrary.Properties.Resources.OffsetWithZFieldName, 
@@ -347,7 +347,7 @@ namespace ProAppVisibilityModule.ViewModels
 
                 await FeatureClassHelper.UpdateLayersWithVisibilityStats(visStats);
 
-                await FeatureClassHelper.CreateObserversRenderer(GetLayerFromMapByName(VisibilityLibrary.Properties.Resources.ObserversLayerName) as FeatureLayer);
+                await FeatureClassHelper.CreateObserversRenderer(GetLayerFromMapByName(VisibilityLibrary.Properties.Resources.LLOSObserversLayerName) as FeatureLayer);
 
                 await FeatureClassHelper.CreateTargetsRenderer(GetLayerFromMapByName(VisibilityLibrary.Properties.Resources.TargetsLayerName) as FeatureLayer);
 
