@@ -538,6 +538,15 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to LLOS_Observers.
+        /// </summary>
+        public static string LLOSObserversLayerName {
+            get {
+                return ResourceManager.GetString("LLOSObserversLayerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Spatial Reference of Data Frame and surface must match.  Please change the Spatial Reference of the Data Frame and try again..
         /// </summary>
         public static string LLOSUserPrompt {
@@ -556,7 +565,7 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to vis_los_output.
+        ///   Looks up a localized string similar to LLOS_Output.
         /// </summary>
         public static string LOSOutputLayerName {
             get {
@@ -619,15 +628,6 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to vis_observers.
-        /// </summary>
-        public static string ObserversLayerName {
-            get {
-                return ResourceManager.GetString("ObserversLayerName", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to offset.
         /// </summary>
         public static string OffsetFieldName {
@@ -646,7 +646,7 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to vis_rlos_conv_polygons.
+        ///   Looks up a localized string similar to RLOS_Conv_Polygons.
         /// </summary>
         public static string RLOSConvertedPolygonsLayerName {
             get {
@@ -655,7 +655,7 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to vis_rlos_mask.
+        ///   Looks up a localized string similar to RLOS_Mask.
         /// </summary>
         public static string RLOSMaskLayerName {
             get {
@@ -664,7 +664,16 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to vis_rlos_output.
+        ///   Looks up a localized string similar to RLOS_Observers.
+        /// </summary>
+        public static string RLOSObserversLayerName {
+            get {
+                return ResourceManager.GetString("RLOSObserversLayerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to RLOS_Output.
         /// </summary>
         public static string RLOSOutputLayerName {
             get {
@@ -691,7 +700,7 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to vis_sight_lines.
+        ///   Looks up a localized string similar to LLOS_Sight_Lines.
         /// </summary>
         public static string SightLinesLayerName {
             get {
@@ -700,7 +709,7 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to vis_targets.
+        ///   Looks up a localized string similar to LLOS_Targets.
         /// </summary>
         public static string TargetsLayerName {
             get {

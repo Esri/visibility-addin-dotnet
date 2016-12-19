@@ -17,6 +17,7 @@ using System.Linq;
 using System.Windows;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using System.Collections.Generic;
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Core;
@@ -32,6 +33,35 @@ namespace ProAppVisibilityModule.ViewModels
     public class ProRLOSViewModel : ProLOSBaseViewModel
     {
         #region Properties
+
+        private int executionCounter = 0;
+        private string _ObserversLayerName = VisibilityLibrary.Properties.Resources.RLOSObserversLayerName;
+        public string ObserversLayerName
+        {
+            get 
+            {
+                if (executionCounter > 0)
+                {
+                    _ObserversLayerName = string.Format("{0}_{1}", VisibilityLibrary.Properties.Resources.RLOSObserversLayerName, executionCounter);
+                }
+                return _ObserversLayerName;
+            }
+            set {}
+        }
+
+        private string _RLOSConvertedPolygonsLayerName = VisibilityLibrary.Properties.Resources.RLOSConvertedPolygonsLayerName;
+        public string RLOSConvertedPolygonsLayerName
+        {
+             get 
+            {
+                if (executionCounter > 0)
+                {
+                    _RLOSConvertedPolygonsLayerName = string.Format("{0}_{1}", VisibilityLibrary.Properties.Resources.RLOSConvertedPolygonsLayerName, executionCounter);
+                }
+                return _RLOSConvertedPolygonsLayerName;
+            }
+            set {}
+        }
 
         private double _SurfaceOffset = 0.0;
         public double SurfaceOffset 
@@ -258,20 +288,20 @@ namespace ProAppVisibilityModule.ViewModels
                     return;
                 }
 
-                await FeatureClassHelper.CreateLayer(VisibilityLibrary.Properties.Resources.ObserversLayerName, "POINT", true, true);
+                await FeatureClassHelper.CreateLayer(ObserversLayerName, "POINT", true, true);
 
                 // add fields for observer offset
 
-                await FeatureClassHelper.AddFieldToLayer(VisibilityLibrary.Properties.Resources.ObserversLayerName, VisibilityLibrary.Properties.Resources.OffsetFieldName, "DOUBLE");
-                await FeatureClassHelper.AddFieldToLayer(VisibilityLibrary.Properties.Resources.ObserversLayerName, VisibilityLibrary.Properties.Resources.OffsetWithZFieldName, "DOUBLE");
+                await FeatureClassHelper.AddFieldToLayer(ObserversLayerName, VisibilityLibrary.Properties.Resources.OffsetFieldName, "DOUBLE");
+                await FeatureClassHelper.AddFieldToLayer(ObserversLayerName, VisibilityLibrary.Properties.Resources.OffsetWithZFieldName, "DOUBLE");
 
                 // add observer points to feature layer
 
-                await FeatureClassHelper.CreatingFeatures(VisibilityLibrary.Properties.Resources.ObserversLayerName, ObserverAddInPoints, GetAsMapZUnits(surfaceSR, ObserverOffset.Value));
+                await FeatureClassHelper.CreatingFeatures(ObserversLayerName, ObserverAddInPoints, GetAsMapZUnits(surfaceSR, ObserverOffset.Value));
 
                 // update with surface information
 
-                await FeatureClassHelper.AddSurfaceInformation(VisibilityLibrary.Properties.Resources.ObserversLayerName, SelectedSurfaceName, VisibilityLibrary.Properties.Resources.ZFieldName);
+                await FeatureClassHelper.AddSurfaceInformation(ObserversLayerName, SelectedSurfaceName, VisibilityLibrary.Properties.Resources.ZFieldName);
 
                 // Visibility
 
@@ -284,7 +314,7 @@ namespace ProAppVisibilityModule.ViewModels
                 var verticalUpperAngleInDegrees = GetAngularDistanceFromTo(AngularUnitType, AngularTypes.DEGREES, TopVerticalFOV);
                 var verticalLowerAngleInDegrees = GetAngularDistanceFromTo(AngularUnitType, AngularTypes.DEGREES, BottomVerticalFOV);
 
-                await FeatureClassHelper.UpdateShapeWithZ(VisibilityLibrary.Properties.Resources.ObserversLayerName, VisibilityLibrary.Properties.Resources.ZFieldName, observerOffsetInMapZUnits);
+                await FeatureClassHelper.UpdateShapeWithZ(ObserversLayerName, VisibilityLibrary.Properties.Resources.ZFieldName, observerOffsetInMapZUnits);
                 
                 string maskFeatureClassName = CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.RLOSMaskLayerName;
 
@@ -293,7 +323,7 @@ namespace ProAppVisibilityModule.ViewModels
                 var environments = Geoprocessing.MakeEnvironmentArray(mask: maskFeatureClassName, overwriteoutput: true);
                 var rlosOutputLayer = CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.RLOSOutputLayerName;
 
-                await FeatureClassHelper.CreateVisibility(SelectedSurfaceName, VisibilityLibrary.Properties.Resources.ObserversLayerName,
+                await FeatureClassHelper.CreateVisibility(SelectedSurfaceName, ObserversLayerName,
                     rlosOutputLayer,
                     observerOffsetInMapZUnits, surfaceOffsetInMapZUnits,
                     minDistanceInMapUnits, maxDistanceInMapUnits,
@@ -303,14 +333,29 @@ namespace ProAppVisibilityModule.ViewModels
                     environments,
                     false);
 
-                var rlosConvertedPolygonsLayer = CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.RLOSConvertedPolygonsLayerName;
+                var rlosConvertedPolygonsLayer = CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + RLOSConvertedPolygonsLayerName;
 
                 await FeatureClassHelper.IntersectOutput(rlosOutputLayer, rlosConvertedPolygonsLayer, false, "Value");
 
-                await FeatureClassHelper.CreateUniqueValueRenderer(GetLayerFromMapByName(VisibilityLibrary.Properties.Resources.RLOSConvertedPolygonsLayerName) as FeatureLayer, ShowNonVisibleData);
+                await FeatureClassHelper.CreateUniqueValueRenderer(GetLayerFromMapByName(RLOSConvertedPolygonsLayerName) as FeatureLayer, ShowNonVisibleData);
+
+                // Eventually we will add the new layers to a new group layer for each run
+                // Currently not working in current release of Pro.  
+                // From Roshan Herbert - I just spoke with the Dev who wrote the MoveLayer method. Apparently this a known issue. 
+                //                       We have bug to fix this and plan to fix it in the next release.
+                List<Layer> layerList = new List<Layer>();
+                layerList.Add(GetLayerFromMapByName(ObserversLayerName));
+                //layerList.Add(GetLayerFromMapByName(RLOSConvertedPolygonsLayerName));
+                
+                string groupName = "RLOS Group";
+                if (executionCounter > 0)
+                    groupName = string.Format("{0} {1}", groupName, executionCounter.ToString());
+
+                await FeatureClassHelper.CreateGroupLayer(layerList, groupName);
 
                 // for now we are not resetting after a run of the tool
                 //await Reset(true);
+                executionCounter++;
             }
             catch (Exception ex)
             {
