@@ -547,6 +547,33 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to LLOS_Output.
+        /// </summary>
+        public static string LLOSOutputLayerName {
+            get {
+                return ResourceManager.GetString("LLOSOutputLayerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to LLOS_Sight_Lines.
+        /// </summary>
+        public static string LLOSSightLinesLayerName {
+            get {
+                return ResourceManager.GetString("LLOSSightLinesLayerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to LLOS_Targets.
+        /// </summary>
+        public static string LLOSTargetsLayerName {
+            get {
+                return ResourceManager.GetString("LLOSTargetsLayerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Spatial Reference of Data Frame and surface must match.  Please change the Spatial Reference of the Data Frame and try again..
         /// </summary>
         public static string LLOSUserPrompt {
@@ -561,15 +588,6 @@ namespace VisibilityLibrary.Properties {
         public static string LLOSUserPromptCaption {
             get {
                 return ResourceManager.GetString("LLOSUserPromptCaption", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to LLOS_Output.
-        /// </summary>
-        public static string LOSOutputLayerName {
-            get {
-                return ResourceManager.GetString("LOSOutputLayerName", resourceCulture);
             }
         }
         
@@ -696,24 +714,6 @@ namespace VisibilityLibrary.Properties {
         public static string RLOSUserPromptCaption {
             get {
                 return ResourceManager.GetString("RLOSUserPromptCaption", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to LLOS_Sight_Lines.
-        /// </summary>
-        public static string SightLinesLayerName {
-            get {
-                return ResourceManager.GetString("SightLinesLayerName", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to LLOS_Targets.
-        /// </summary>
-        public static string TargetsLayerName {
-            get {
-                return ResourceManager.GetString("TargetsLayerName", resourceCulture);
             }
         }
         

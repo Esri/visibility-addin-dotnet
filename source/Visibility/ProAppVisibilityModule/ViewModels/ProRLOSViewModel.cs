@@ -63,6 +63,34 @@ namespace ProAppVisibilityModule.ViewModels
             set {}
         }
 
+        private string _RLOSOutputLayerName = VisibilityLibrary.Properties.Resources.RLOSOutputLayerName;
+        public string RLOSOutputLayerName
+        {
+            get
+            {
+                if (executionCounter > 0)
+                {
+                    _RLOSOutputLayerName = string.Format("{0}_{1}", VisibilityLibrary.Properties.Resources.RLOSOutputLayerName, executionCounter);
+                }
+                return _RLOSOutputLayerName;
+            }
+            set { }
+        }
+
+        private string _RLOSMaskLayerName = VisibilityLibrary.Properties.Resources.RLOSMaskLayerName;
+        public string RLOSMaskLayerName
+        {
+            get
+            {
+                if (executionCounter > 0)
+                {
+                    _RLOSMaskLayerName = string.Format("{0}_{1}", VisibilityLibrary.Properties.Resources.RLOSMaskLayerName, executionCounter);
+                }
+                return _RLOSMaskLayerName;
+            }
+            set { }
+        }
+
         private double _SurfaceOffset = 0.0;
         public double SurfaceOffset 
         {
@@ -316,12 +344,12 @@ namespace ProAppVisibilityModule.ViewModels
 
                 await FeatureClassHelper.UpdateShapeWithZ(ObserversLayerName, VisibilityLibrary.Properties.Resources.ZFieldName, observerOffsetInMapZUnits);
                 
-                string maskFeatureClassName = CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.RLOSMaskLayerName;
+                string maskFeatureClassName = CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + RLOSMaskLayerName;
 
-                await CreateMask(VisibilityLibrary.Properties.Resources.RLOSMaskLayerName, maxDistanceInMapUnits, surfaceSR);
+                await CreateMask(RLOSMaskLayerName, maxDistanceInMapUnits, surfaceSR);
 
                 var environments = Geoprocessing.MakeEnvironmentArray(mask: maskFeatureClassName, overwriteoutput: true);
-                var rlosOutputLayer = CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.RLOSOutputLayerName;
+                var rlosOutputLayer = CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + RLOSOutputLayerName;
 
                 await FeatureClassHelper.CreateVisibility(SelectedSurfaceName, ObserversLayerName,
                     rlosOutputLayer,
@@ -347,11 +375,11 @@ namespace ProAppVisibilityModule.ViewModels
                 layerList.Add(GetLayerFromMapByName(ObserversLayerName));
                 //layerList.Add(GetLayerFromMapByName(RLOSConvertedPolygonsLayerName));
                 
-                string groupName = "RLOS Group";
-                if (executionCounter > 0)
-                    groupName = string.Format("{0} {1}", groupName, executionCounter.ToString());
+                //string groupName = "RLOS Group";
+                //if (executionCounter > 0)
+                //    groupName = string.Format("{0}_{1}", groupName, executionCounter.ToString());
 
-                await FeatureClassHelper.CreateGroupLayer(layerList, groupName);
+                //await FeatureClassHelper.CreateGroupLayer(layerList, groupName);
 
                 // for now we are not resetting after a run of the tool
                 //await Reset(true);

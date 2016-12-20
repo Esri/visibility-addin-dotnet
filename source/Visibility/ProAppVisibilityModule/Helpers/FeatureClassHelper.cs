@@ -72,6 +72,18 @@ namespace ProAppVisibilityModule.Helpers
                 null,
                 null,
                 addToMap ? GPExecuteToolFlags.Default : GPExecuteToolFlags.None);
+
+            if (result.IsFailed)
+            {
+                foreach (var msg in result.Messages)
+                    Debug.Print(msg.Text);
+
+                // If the tool failed, try to remove the table that was created so execution will run next time
+                //List<object> args = new List<object>();
+                //args.Add(outLineFeatureLayer);
+                //IGPResult result2 = await Geoprocessing.ExecuteToolAsync("Delete_management", Geoprocessing.MakeValueArray(args.ToArray()), environments, flags: GPExecuteToolFlags.Default);
+
+            }
         }
 
         /// <summary>
@@ -164,6 +176,12 @@ namespace ProAppVisibilityModule.Helpers
             {
                 foreach (var msg in result.Messages)
                     Debug.Print(msg.Text);
+
+                // If the tool failed, try to remove the table that was created so execution will run next time
+                List<object> args = new List<object>();
+                args.Add(outLineFeatureLayer);
+                IGPResult result2 = await Geoprocessing.ExecuteToolAsync("Delete_management", Geoprocessing.MakeValueArray(args.ToArray()), environments, flags: GPExecuteToolFlags.Default);
+
             }
         }
 
@@ -233,6 +251,12 @@ namespace ProAppVisibilityModule.Helpers
             {
                 foreach (var msg in result.Messages)
                     Debug.Print(msg.Text);
+
+                // If the tool failed, try to remove the table that was created so execution will run next time
+                List<object> args = new List<object>();
+                args.Add(outLOSFeatureClass);
+                IGPResult result2 = await Geoprocessing.ExecuteToolAsync("Delete_management", Geoprocessing.MakeValueArray(args.ToArray()), environments, flags: GPExecuteToolFlags.Default);
+
             }
         }
 
@@ -619,7 +643,7 @@ namespace ProAppVisibilityModule.Helpers
         }
 
 
-        internal static async Task<List<int>> GetSourceOIDs()
+        internal static async Task<List<int>> GetSourceOIDs(string layerName)
         {
             var sourceOIDs = new List<int>();
             try
@@ -627,7 +651,7 @@ namespace ProAppVisibilityModule.Helpers
                 await ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(() =>
                 {
                     using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
-                    using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(VisibilityLibrary.Properties.Resources.LOSOutputLayerName))
+                    using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(layerName))
                     {
                         var filter = new QueryFilter();
                         filter.WhereClause = "TarIsVis = 1 AND VisCode = 1";
@@ -651,7 +675,7 @@ namespace ProAppVisibilityModule.Helpers
             return sourceOIDs;
         }
 
-        internal static async Task<VisibilityStats> GetVisibilityStats(List<int> sourceOIDs)
+        internal static async Task<VisibilityStats> GetVisibilityStats(List<int> sourceOIDs, string layerName)
         {
             var visibilityStats = new VisibilityStats();
 
@@ -660,10 +684,13 @@ namespace ProAppVisibilityModule.Helpers
                 await ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(() =>
                 {
                     using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
-                    using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(VisibilityLibrary.Properties.Resources.SightLinesLayerName))
+                    using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(layerName))
                     {
                         var filter = new QueryFilter();
-                        filter.WhereClause = string.Format("OID IN ({0})", string.Join(",", sourceOIDs));
+                       // if (sourceOIDs.Count > 0)
+                            filter.WhereClause = string.Format("OID IN ({0})", string.Join(",", sourceOIDs));
+                       // else
+                       //     filter.WhereClause = "";
 
                         var cursor = enterpriseFeatureClass.Search(filter, true);
 
@@ -695,7 +722,7 @@ namespace ProAppVisibilityModule.Helpers
             return visibilityStats;
         }
 
-        internal static async Task UpdateLayersWithVisibilityStats(VisibilityStats visStats)
+        internal static async Task UpdateLayersWithVisibilityStats(VisibilityStats visStats, string observersLayerName, string targetsLayerName)
         {
             try
             {
@@ -706,7 +733,7 @@ namespace ProAppVisibilityModule.Helpers
                     using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
                     {
                         // do the observers layer
-                        using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(VisibilityLibrary.Properties.Resources.LLOSObserversLayerName))
+                        using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(observersLayerName))
                         using (FeatureClassDefinition fcDefinition = enterpriseFeatureClass.GetDefinition())
                         {
                             int tarIsVisFieldIndex = fcDefinition.FindField(VisibilityLibrary.Properties.Resources.TarIsVisFieldName);
@@ -751,7 +778,7 @@ namespace ProAppVisibilityModule.Helpers
                             await Project.Current.SaveEditsAsync();
                         }
                         // do the targets layer
-                        using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(VisibilityLibrary.Properties.Resources.TargetsLayerName))
+                        using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(targetsLayerName))
                         using (FeatureClassDefinition fcDefinition = enterpriseFeatureClass.GetDefinition())
                         {
                             int numOfObserversFieldIndex = fcDefinition.FindField(VisibilityLibrary.Properties.Resources.NumOfObserversFieldName);

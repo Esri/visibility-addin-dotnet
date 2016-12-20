@@ -55,6 +55,64 @@ namespace ProAppVisibilityModule.ViewModels
 
         public ObservableCollection<AddInPoint> TargetAddInPoints { get; set; }
 
+        private int executionCounter = 0;
+        
+        private string _ObserversLayerName = VisibilityLibrary.Properties.Resources.LLOSObserversLayerName;
+        public string ObserversLayerName
+        {
+            get
+            {
+                if (executionCounter > 0)
+                {
+                    _ObserversLayerName = string.Format("{0}_{1}", VisibilityLibrary.Properties.Resources.LLOSObserversLayerName, executionCounter);
+                }
+                return _ObserversLayerName;
+            }
+            set { }
+        }
+
+        private string _TargetsLayerName = VisibilityLibrary.Properties.Resources.LLOSTargetsLayerName;
+        public string TargetsLayerName
+        {
+            get
+            {
+                if (executionCounter > 0)
+                {
+                    _TargetsLayerName = string.Format("{0}_{1}", VisibilityLibrary.Properties.Resources.LLOSTargetsLayerName, executionCounter);
+                }
+                return _TargetsLayerName;
+            }
+            set { }
+        }
+
+        private string _OutputLayerName = VisibilityLibrary.Properties.Resources.LLOSOutputLayerName;
+        public string OutputLayerName
+        {
+            get
+            {
+                if (executionCounter > 0)
+                {
+                    _OutputLayerName = string.Format("{0}_{1}", VisibilityLibrary.Properties.Resources.LLOSOutputLayerName, executionCounter);
+                }
+                return _OutputLayerName;
+            }
+            set { }
+        }
+
+        private string _SightLinesLayerName = VisibilityLibrary.Properties.Resources.LLOSSightLinesLayerName;
+        public string SightLinesLayerName
+        {
+            get
+            {
+                if (executionCounter > 0)
+                {
+                    _SightLinesLayerName = string.Format("{0}_{1}", VisibilityLibrary.Properties.Resources.LLOSSightLinesLayerName, executionCounter);
+                }
+                return _SightLinesLayerName;
+            }
+            set { }
+        }
+
         #endregion
 
         #region Commands
@@ -276,46 +334,46 @@ namespace ProAppVisibilityModule.ViewModels
                     return;
                 }
 
-                await FeatureClassHelper.CreateLayer(VisibilityLibrary.Properties.Resources.LLOSObserversLayerName, "POINT", true, true);
+                await FeatureClassHelper.CreateLayer(ObserversLayerName, "POINT", true, true);
 
                 // add fields for observer offset
 
-                await FeatureClassHelper.AddFieldToLayer(VisibilityLibrary.Properties.Resources.LLOSObserversLayerName, VisibilityLibrary.Properties.Resources.OffsetFieldName, "DOUBLE");
-                await FeatureClassHelper.AddFieldToLayer(VisibilityLibrary.Properties.Resources.LLOSObserversLayerName, VisibilityLibrary.Properties.Resources.OffsetWithZFieldName, "DOUBLE");
-                await FeatureClassHelper.AddFieldToLayer(VisibilityLibrary.Properties.Resources.LLOSObserversLayerName, VisibilityLibrary.Properties.Resources.TarIsVisFieldName, "SHORT");
+                await FeatureClassHelper.AddFieldToLayer(ObserversLayerName, VisibilityLibrary.Properties.Resources.OffsetFieldName, "DOUBLE");
+                await FeatureClassHelper.AddFieldToLayer(ObserversLayerName, VisibilityLibrary.Properties.Resources.OffsetWithZFieldName, "DOUBLE");
+                await FeatureClassHelper.AddFieldToLayer(ObserversLayerName, VisibilityLibrary.Properties.Resources.TarIsVisFieldName, "SHORT");
 
-                await FeatureClassHelper.CreateLayer(VisibilityLibrary.Properties.Resources.TargetsLayerName, "POINT", true, true);
+                await FeatureClassHelper.CreateLayer(TargetsLayerName, "POINT", true, true);
 
                 // add fields for target offset
 
-                await FeatureClassHelper.AddFieldToLayer(VisibilityLibrary.Properties.Resources.TargetsLayerName, VisibilityLibrary.Properties.Resources.OffsetFieldName, "DOUBLE");
-                await FeatureClassHelper.AddFieldToLayer(VisibilityLibrary.Properties.Resources.TargetsLayerName, VisibilityLibrary.Properties.Resources.OffsetWithZFieldName, "DOUBLE");
-                await FeatureClassHelper.AddFieldToLayer(VisibilityLibrary.Properties.Resources.TargetsLayerName, VisibilityLibrary.Properties.Resources.NumOfObserversFieldName, "SHORT");
+                await FeatureClassHelper.AddFieldToLayer(TargetsLayerName, VisibilityLibrary.Properties.Resources.OffsetFieldName, "DOUBLE");
+                await FeatureClassHelper.AddFieldToLayer(TargetsLayerName, VisibilityLibrary.Properties.Resources.OffsetWithZFieldName, "DOUBLE");
+                await FeatureClassHelper.AddFieldToLayer(TargetsLayerName, VisibilityLibrary.Properties.Resources.NumOfObserversFieldName, "SHORT");
 
                 // add observer points to feature layer
 
-                await FeatureClassHelper.CreatingFeatures(VisibilityLibrary.Properties.Resources.LLOSObserversLayerName, ObserverAddInPoints, GetAsMapZUnits(surfaceSR, ObserverOffset.Value));
+                await FeatureClassHelper.CreatingFeatures(ObserversLayerName, ObserverAddInPoints, GetAsMapZUnits(surfaceSR, ObserverOffset.Value));
 
                 // add target points to feature layer
 
-                await FeatureClassHelper.CreatingFeatures(VisibilityLibrary.Properties.Resources.TargetsLayerName, TargetAddInPoints, GetAsMapZUnits(surfaceSR, TargetOffset.Value));
+                await FeatureClassHelper.CreatingFeatures(TargetsLayerName, TargetAddInPoints, GetAsMapZUnits(surfaceSR, TargetOffset.Value));
 
                 // update with surface information
 
-                await FeatureClassHelper.AddSurfaceInformation(VisibilityLibrary.Properties.Resources.LLOSObserversLayerName, SelectedSurfaceName, VisibilityLibrary.Properties.Resources.ZFieldName);
-                await FeatureClassHelper.AddSurfaceInformation(VisibilityLibrary.Properties.Resources.TargetsLayerName, SelectedSurfaceName, VisibilityLibrary.Properties.Resources.ZFieldName);
+                await FeatureClassHelper.AddSurfaceInformation(ObserversLayerName, SelectedSurfaceName, VisibilityLibrary.Properties.Resources.ZFieldName);
+                await FeatureClassHelper.AddSurfaceInformation(TargetsLayerName, SelectedSurfaceName, VisibilityLibrary.Properties.Resources.ZFieldName);
 
-                await FeatureClassHelper.UpdateShapeWithZ(VisibilityLibrary.Properties.Resources.LLOSObserversLayerName, VisibilityLibrary.Properties.Resources.ZFieldName, GetAsMapZUnits(surfaceSR, ObserverOffset.Value));
-                await FeatureClassHelper.UpdateShapeWithZ(VisibilityLibrary.Properties.Resources.TargetsLayerName, VisibilityLibrary.Properties.Resources.ZFieldName,  GetAsMapZUnits(surfaceSR, TargetOffset.Value));
+                await FeatureClassHelper.UpdateShapeWithZ(ObserversLayerName, VisibilityLibrary.Properties.Resources.ZFieldName, GetAsMapZUnits(surfaceSR, ObserverOffset.Value));
+                await FeatureClassHelper.UpdateShapeWithZ(TargetsLayerName, VisibilityLibrary.Properties.Resources.ZFieldName, GetAsMapZUnits(surfaceSR, TargetOffset.Value));
 
                 // create sight lines
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
                 GC.Collect();
 
-                await FeatureClassHelper.CreateSightLines(VisibilityLibrary.Properties.Resources.LLOSObserversLayerName, 
-                    VisibilityLibrary.Properties.Resources.TargetsLayerName,
-                    CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.SightLinesLayerName, 
+                await FeatureClassHelper.CreateSightLines(ObserversLayerName,
+                    TargetsLayerName,
+                    CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + SightLinesLayerName, 
                     VisibilityLibrary.Properties.Resources.OffsetWithZFieldName, 
                     VisibilityLibrary.Properties.Resources.OffsetWithZFieldName);
 
@@ -324,9 +382,9 @@ namespace ProAppVisibilityModule.ViewModels
                 GC.WaitForPendingFinalizers();
                 GC.Collect();
 
-                await FeatureClassHelper.CreateLOS(SelectedSurfaceName, 
-                    VisibilityLibrary.Properties.Resources.SightLinesLayerName,
-                    CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.LOSOutputLayerName);
+                await FeatureClassHelper.CreateLOS(SelectedSurfaceName,
+                    CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + SightLinesLayerName,
+                    CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + OutputLayerName);
 
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
@@ -334,43 +392,70 @@ namespace ProAppVisibilityModule.ViewModels
 
                 // join fields with sight lines
 
-                await FeatureClassHelper.JoinField(CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.SightLinesLayerName,
+                await FeatureClassHelper.JoinField(CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + SightLinesLayerName,
                                                     "OID",
-                                                    CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + VisibilityLibrary.Properties.Resources.LOSOutputLayerName,
+                                                    CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + OutputLayerName,
                                                     "SourceOID",
                                                     new string[] { "TarIsVis" });
 
                 // gather results for updating observer and target layers
-                var sourceOIDs = await FeatureClassHelper.GetSourceOIDs();
+                var sourceOIDs = await FeatureClassHelper.GetSourceOIDs(OutputLayerName);
 
-                var visStats = await FeatureClassHelper.GetVisibilityStats(sourceOIDs);
+                //if (sourceOIDs.Count > 0)
+                //{
+                    var visStats = await FeatureClassHelper.GetVisibilityStats(sourceOIDs, SightLinesLayerName);
 
-                await FeatureClassHelper.UpdateLayersWithVisibilityStats(visStats);
+                    await FeatureClassHelper.UpdateLayersWithVisibilityStats(visStats, ObserversLayerName, TargetsLayerName);
 
-                await FeatureClassHelper.CreateObserversRenderer(GetLayerFromMapByName(VisibilityLibrary.Properties.Resources.LLOSObserversLayerName) as FeatureLayer);
+                //}
 
-                await FeatureClassHelper.CreateTargetsRenderer(GetLayerFromMapByName(VisibilityLibrary.Properties.Resources.TargetsLayerName) as FeatureLayer);
+                var observersLayer = GetLayerFromMapByName(ObserversLayerName) as FeatureLayer;
+                var targetsLayer = GetLayerFromMapByName(TargetsLayerName) as FeatureLayer;
+                var sightLinesLayer = GetLayerFromMapByName(SightLinesLayerName) as FeatureLayer;
+                var outputLayer = GetLayerFromMapByName(OutputLayerName) as FeatureLayer;
 
-                await FeatureClassHelper.CreateTargetLayerLabels(GetLayerFromMapByName(VisibilityLibrary.Properties.Resources.TargetsLayerName) as FeatureLayer);
+                if (observersLayer != null && targetsLayer != null && sightLinesLayer != null && outputLayer != null)
+                {
+                    await FeatureClassHelper.CreateObserversRenderer(GetLayerFromMapByName(ObserversLayerName) as FeatureLayer);
 
-                await FeatureClassHelper.CreateVisCodeRenderer(GetLayerFromMapByName(VisibilityLibrary.Properties.Resources.SightLinesLayerName) as FeatureLayer,
-                                                               VisibilityLibrary.Properties.Resources.TarIsVisFieldName,
-                                                               1,
-                                                               0,
-                                                               ColorFactory.WhiteRGB,
-                                                               ColorFactory.BlackRGB,
-                                                               6.0,
-                                                               6.0);
+                    await FeatureClassHelper.CreateTargetsRenderer(GetLayerFromMapByName(TargetsLayerName) as FeatureLayer);
 
-                await FeatureClassHelper.CreateVisCodeRenderer(GetLayerFromMapByName(VisibilityLibrary.Properties.Resources.LOSOutputLayerName) as FeatureLayer,
-                                                               VisibilityLibrary.Properties.Resources.VisCodeFieldName,
-                                                               1,
-                                                               2,
-                                                               ColorFactory.GreenRGB,
-                                                               ColorFactory.RedRGB,
-                                                               5.0,
-                                                               3.0);
-                //await Reset(true);
+                    await FeatureClassHelper.CreateTargetLayerLabels(GetLayerFromMapByName(TargetsLayerName) as FeatureLayer);
+
+                    await FeatureClassHelper.CreateVisCodeRenderer(GetLayerFromMapByName(SightLinesLayerName) as FeatureLayer,
+                                                                   VisibilityLibrary.Properties.Resources.TarIsVisFieldName,
+                                                                   1,
+                                                                   0,
+                                                                   ColorFactory.WhiteRGB,
+                                                                   ColorFactory.BlackRGB,
+                                                                   6.0,
+                                                                   6.0);
+
+                    await FeatureClassHelper.CreateVisCodeRenderer(GetLayerFromMapByName(OutputLayerName) as FeatureLayer,
+                                                                   VisibilityLibrary.Properties.Resources.VisCodeFieldName,
+                                                                   1,
+                                                                   2,
+                                                                   ColorFactory.GreenRGB,
+                                                                   ColorFactory.RedRGB,
+                                                                   5.0,
+                                                                   3.0);
+                    //await Reset(true);
+
+                    //string groupName = "LLOS Group";
+                    //if (executionCounter > 0)
+                    //    groupName = string.Format("{0}_{1}", groupName, executionCounter.ToString());
+
+                    //await FeatureClassHelper.CreateGroupLayer(layerList, groupName);
+
+                    // for now we are not resetting after a run of the tool
+                    //await Reset(true);
+                    executionCounter++;
+                }
+                else
+                {
+                    MessageBox.Show("LLOS computations did not complete correctly.  Please try again by selecting the 'OK' button.");
+                }
+                
             }
             catch(Exception ex)
             {

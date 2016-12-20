@@ -321,7 +321,7 @@
   <data name="CaptionError" xml:space="preserve">
     <value>Error</value>
   </data>
-  <data name="LOSOutputLayerName" xml:space="preserve">
+  <data name="LLOSOutputLayerName" xml:space="preserve">
     <value>LLOS_Output</value>
   </data>
   <data name="LLOSObserversLayerName" xml:space="preserve">
@@ -336,10 +336,10 @@
   <data name="OffsetWithZFieldName" xml:space="preserve">
     <value>offsetWithZ</value>
   </data>
-  <data name="SightLinesLayerName" xml:space="preserve">
+  <data name="LLOSSightLinesLayerName" xml:space="preserve">
     <value>LLOS_Sight_Lines</value>
   </data>
-  <data name="TargetsLayerName" xml:space="preserve">
+  <data name="LLOSTargetsLayerName" xml:space="preserve">
     <value>LLOS_Targets</value>
   </data>
   <data name="ZFieldName" xml:space="preserve">
