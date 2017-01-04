@@ -574,7 +574,7 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Spatial Reference of Data Frame and surface must match.  Please change the Spatial Reference of the Data Frame and try again..
+        ///   Looks up a localized string similar to The selected surface has not been projected.  Please project your data and try again..
         /// </summary>
         public static string LLOSUserPrompt {
             get {
@@ -583,7 +583,7 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unmatched Spatial References.
+        ///   Looks up a localized string similar to Surface Projection.
         /// </summary>
         public static string LLOSUserPromptCaption {
             get {

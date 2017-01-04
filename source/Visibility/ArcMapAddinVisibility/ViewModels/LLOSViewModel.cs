@@ -184,10 +184,12 @@ namespace ArcMapAddinVisibility.ViewModels
                 if (surface == null)
                     return;
 
-                // Set Spatial Reference of selected surface
+                // Determine if selected surface is projected or geographic
                 ILayer surfaceLayer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
                 var geoDataset = surfaceLayer as IGeoDataset;
-                if (geoDataset != null && ArcMap.Document.FocusMap.SpatialReference.FactoryCode != geoDataset.SpatialReference.FactoryCode)
+                SelectedSurfaceSpatialRef = geoDataset.SpatialReference;
+
+                if (SelectedSurfaceSpatialRef is IGeographicCoordinateSystem)
                 {
                     MessageBox.Show(VisibilityLibrary.Properties.Resources.LLOSUserPrompt, VisibilityLibrary.Properties.Resources.LLOSUserPromptCaption);
                     return;
