@@ -13,7 +13,6 @@
   <AddIn language="CLR4.5" library="Visibility.dll" namespace="ArcMapAddinVisibility">
     <ArcMap>
       <Commands>
-        <Button id="Esri_ArcMapAddinVisibility_VisibilityButton" class="VisibilityButton" message="Add-in command to show the Visibility window." caption="Show Visibility" tip="Show Visibility" category="Add-In Controls" image="Images\visibility-16.png" />
         <Tool id="Esri_ArcMapAddinVisibility_MapPointTool" class="MapPointTool" message="Add-in command to active a map point tool." caption="Map Point" tip="Map Point Tool" category="Add-In Controls" image="Images\MapPointTool.png" />
       </Commands>
       <DockableWindows>

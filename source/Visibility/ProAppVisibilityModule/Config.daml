@@ -31,7 +31,8 @@
       <controls>
         <!-- add your controls here -->
         <button id="ProAppVisibilityModule_VisibilityDockpane_ShowButton" caption="Visibility" className="VisibilityDockpane_ShowButton" loadOnClick="true" smallImage="Images\visibility-16.png" largeImage="Images\visibility-32.png">
-          <tooltip heading="Show Visibility">Show Visibility Dockpane<disabledText /></tooltip>
+          <tooltip heading="Visibility">
+            Perform Linear (LLOS) and Radial (RLOS) line of sight analysis. LLOS determines if a target(s) is observable from an observer(s) location. RLOS determines what is visible from observer(s) location based on a given distance and a field of view.<disabledText /></tooltip>
         </button>
         <button id="ProAppVisibilityModule_PropertiesButton" caption="Properties" className="PropertiesButton" loadOnClick="true" smallImage="Images\GenericButtonBlue16.png" largeImage="Images\GenericButtonBlue32.png">
           <tooltip heading="Edit Properties">Edit Properties<disabledText /></tooltip>
