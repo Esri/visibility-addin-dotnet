@@ -627,6 +627,24 @@ namespace ProAppVisibilityModule.ViewModels
             // do nothing
         }
 
+        internal async Task ZoomToExtent(Envelope env)
+        {
+            if (env == null || MapView.Active == null || MapView.Active.Map == null)
+                return;
+
+            double extentPercent = (env.XMax - env.XMin) > (env.YMax - env.YMin) ? (env.XMax - env.XMin) * .3 : (env.YMax - env.YMin) * .3;
+            double xmax = env.XMax + extentPercent;
+            double xmin = env.XMin - extentPercent;
+            double ymax = env.YMax + extentPercent;
+            double ymin = env.YMin - extentPercent;
+
+            //Create the envelope
+            var envelope = await QueuedTask.Run(() => ArcGIS.Core.Geometry.EnvelopeBuilder.CreateEnvelope(xmin, ymin, xmax, ymax, MapView.Active.Map.SpatialReference));
+
+            //Zoom the view to a given extent.
+            await MapView.Active.ZoomToAsync(envelope, TimeSpan.FromSeconds(0.5));
+        }
+
         #endregion Internal Methods
 
         #region Private Methods

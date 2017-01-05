@@ -26,6 +26,7 @@ using ArcGIS.Desktop.Core;
 using VisibilityLibrary.Helpers;
 using ProAppVisibilityModule.Helpers;
 using ProAppVisibilityModule.Models;
+using ArcGIS.Desktop.Framework.Threading.Tasks;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -449,6 +450,8 @@ namespace ProAppVisibilityModule.ViewModels
 
                     // for now we are not resetting after a run of the tool
                     //await Reset(true);
+                    var envelope = await QueuedTask.Run(() => outputLayer.QueryExtent());
+                    await ZoomToExtent(envelope);
                     executionCounter++;
                 }
                 else
