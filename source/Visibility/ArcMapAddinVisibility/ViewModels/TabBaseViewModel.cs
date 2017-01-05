@@ -758,6 +758,26 @@ namespace ArcMapAddinVisibility.ViewModels
             // do nothing
         }
 
+        internal void ZoomToExtent(IGeometry geom)
+        {
+            if (geom == null || ArcMap.Application.Document == null)
+                return;
+
+            var mxdoc = ArcMap.Application.Document as IMxDocument;
+            var av = mxdoc.FocusMap as IActiveView;
+
+            IEnvelope env = geom.Envelope;
+
+            double extentPercent = (env.XMax - env.XMin) > (env.YMax - env.YMin) ? (env.XMax - env.XMin) * .3 : (env.YMax - env.YMin) * .3;
+            env.XMax = env.XMax + extentPercent;
+            env.XMin = env.XMin - extentPercent;
+            env.YMax = env.YMax + extentPercent;
+            env.YMin = env.YMin - extentPercent;
+
+            av.Extent = env;
+            av.Refresh();
+        }
+
         /// <summary>
         /// Method used to convert a string to a known coordinate
         /// Assumes WGS84 for now

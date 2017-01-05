@@ -171,6 +171,7 @@ namespace ArcMapAddinVisibility.ViewModels
             try
             {
                 IsRunning = true;
+                IPolyline longestLine = new PolylineClass();
 
                 if (!CanCreateElement || ArcMap.Document == null || ArcMap.Document.FocusMap == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
                     return;
@@ -241,6 +242,13 @@ namespace ArcMapAddinVisibility.ViewModels
                         geoBridge.GetLineOfSight(surface, fromPoint, toPoint,
                             out pointObstruction, out polyVisible, out polyInvisible, out targetIsVisible, false, false);
 
+                        var pcol = new PolylineClass() as IPointCollection;
+                        pcol.AddPoint(fromPoint);
+                        pcol.AddPoint(toPoint);
+                        IPolyline pcolPolyline = pcol as IPolyline;
+
+                        longestLine = (longestLine != null && longestLine.Length < pcolPolyline.Length) ? pcolPolyline : longestLine;
+
                         // set the flag if we can see at least one target
                         if (targetIsVisible)
                         {
@@ -261,11 +269,7 @@ namespace ArcMapAddinVisibility.ViewModels
                         }
 
                         if (polyVisible == null && polyInvisible == null)
-                        {
-                            var pcol = new PolylineClass() as IPointCollection;
-                            pcol.AddPoint(fromPoint);
-                            pcol.AddPoint(toPoint);
-
+                        {                           
                             if (targetIsVisible)
                                 AddGraphicToMap(pcol as IPolyline, new RgbColorClass() { Green = 255 });
                             else
@@ -291,6 +295,7 @@ namespace ArcMapAddinVisibility.ViewModels
                 }
 
                 VisualizeTargets(DictionaryTargetObserverCount);
+                ZoomToExtent(longestLine);
             }
             catch(Exception ex)
             {

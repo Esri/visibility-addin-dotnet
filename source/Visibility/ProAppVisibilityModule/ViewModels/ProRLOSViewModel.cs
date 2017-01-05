@@ -27,6 +27,7 @@ using ProAppVisibilityModule.Helpers;
 using ArcGIS.Desktop.Core.Geoprocessing;
 using ArcGIS.Core.Data;
 using ArcGIS.Desktop.Editing;
+using ArcGIS.Desktop.Framework.Threading.Tasks;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -383,6 +384,15 @@ namespace ProAppVisibilityModule.ViewModels
 
                 // for now we are not resetting after a run of the tool
                 //await Reset(true);
+
+                // Get the extent of the output layer and zoom to extent
+                var layer = GetLayerFromMapByName(RLOSConvertedPolygonsLayerName);
+                if (layer != null)
+                {
+                    var envelope = await QueuedTask.Run(() => layer.QueryExtent());
+                    await ZoomToExtent(envelope);
+                }
+
                 executionCounter++;
             }
             catch (Exception ex)
