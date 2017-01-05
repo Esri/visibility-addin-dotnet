@@ -296,6 +296,9 @@ namespace ArcMapAddinVisibility.ViewModels
 
                             ESRI.ArcGIS.Carto.IMap map = ArcMap.Document.FocusMap;
                             map.AddLayer((ILayer)outputFeatureLayer);
+
+                            IEnvelope envelope = outputFeatureLayer.AreaOfInterest.Envelope;
+                            ZoomToExtent(envelope);
                         }
 
                         RunCount += 1;
