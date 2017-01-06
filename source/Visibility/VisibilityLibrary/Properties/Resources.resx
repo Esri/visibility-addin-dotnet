@@ -352,7 +352,7 @@
     <value>RLOS_Mask</value>
   </data>
   <data name="RLOSConvertedPolygonsLayerName" xml:space="preserve">
-    <value>RLOS_Conv_Polygons</value>
+    <value>RLOS_Visibility</value>
   </data>
   <data name="AENumMustBeGreater" xml:space="preserve">
     <value>The number must be greater than min</value>
