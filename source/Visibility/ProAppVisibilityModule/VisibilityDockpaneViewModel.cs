@@ -19,6 +19,7 @@ using VisibilityLibrary.Helpers;
 using VisibilityLibrary.Views;
 using VisibilityLibrary.Models;
 using ProAppVisibilityModule.ViewModels;
+using System.Threading.Tasks;
 
 namespace ProAppVisibilityModule
 {
@@ -73,6 +74,21 @@ namespace ProAppVisibilityModule
                 return;
 
             pane.Activate();
+        }
+
+        protected override void OnShow(bool isVisible)
+        {
+            if (isVisible)
+            {
+                if (((ProLLOSViewModel)LLOSView.DataContext).ToolMode == ProLOSBaseViewModel.MapPointToolMode.Observer)
+                    ((ProLLOSViewModel)LLOSView.DataContext).OnActivateToolCommand(VisibilityLibrary.Properties.Resources.ToolModeObserver);
+                else if (((ProLLOSViewModel)LLOSView.DataContext).ToolMode == ProLOSBaseViewModel.MapPointToolMode.Target)
+                    ((ProLLOSViewModel)LLOSView.DataContext).OnActivateToolCommand(VisibilityLibrary.Properties.Resources.ToolModeTarget);
+                else if (((ProRLOSViewModel)RLOSView.DataContext).ToolMode == ProLOSBaseViewModel.MapPointToolMode.Observer)
+                    ((ProRLOSViewModel)RLOSView.DataContext).OnActivateToolCommand(VisibilityLibrary.Properties.Resources.ToolModeObserver);
+            }
+            
+            base.OnShow(isVisible);
         }
 
         /// <summary>
