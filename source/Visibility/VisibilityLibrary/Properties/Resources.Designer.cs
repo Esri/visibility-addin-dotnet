@@ -664,7 +664,7 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to RLOS_Conv_Polygons.
+        ///   Looks up a localized string similar to RLOS_Visibility.
         /// </summary>
         public static string RLOSConvertedPolygonsLayerName {
             get {
