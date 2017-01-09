@@ -556,6 +556,15 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Please verify that all Observer and Target Points are within the extents of the selected Surface.
+        /// </summary>
+        public static string LLOSPointsOutsideOfSurfaceExtent {
+            get {
+                return ResourceManager.GetString("LLOSPointsOutsideOfSurfaceExtent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to LLOS_Sight_Lines.
         /// </summary>
         public static string LLOSSightLinesLayerName {
@@ -588,6 +597,24 @@ namespace VisibilityLibrary.Properties {
         public static string LLOSUserPromptCaption {
             get {
                 return ResourceManager.GetString("LLOSUserPromptCaption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Spatial Reference of Data Frame and surface must match. Please change the Spatial Reference of the Data Frame and try again..
+        /// </summary>
+        public static string LOSDataFrameMatch {
+            get {
+                return ResourceManager.GetString("LOSDataFrameMatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Spatial Reference .
+        /// </summary>
+        public static string LOSSpatialReferenceCaption {
+            get {
+                return ResourceManager.GetString("LOSSpatialReferenceCaption", resourceCulture);
             }
         }
         
@@ -696,6 +723,15 @@ namespace VisibilityLibrary.Properties {
         public static string RLOSOutputLayerName {
             get {
                 return ResourceManager.GetString("RLOSOutputLayerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please verify that all Observer Points are within the extents of the selected Surface.
+        /// </summary>
+        public static string RLOSPointsOutsideOfSurfaceExtent {
+            get {
+                return ResourceManager.GetString("RLOSPointsOutsideOfSurfaceExtent", resourceCulture);
             }
         }
         

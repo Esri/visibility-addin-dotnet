@@ -158,6 +158,12 @@ namespace ArcMapAddinVisibility.ViewModels
                     return;
                 }
 
+                if (geoDataset != null && ArcMap.Document.FocusMap.SpatialReference.FactoryCode != geoDataset.SpatialReference.FactoryCode)
+                {
+                    MessageBox.Show(VisibilityLibrary.Properties.Resources.LOSDataFrameMatch, VisibilityLibrary.Properties.Resources.LOSSpatialReferenceCaption);
+                    return;
+                }
+
                 using (ComReleaser oComReleaser = new ComReleaser())
                 {
 
@@ -216,6 +222,12 @@ namespace ArcMapAddinVisibility.ViewModels
                         // Set the field values for the feature
                         SetFieldValues(finalObserverOffset, finalSurfaceOffset, finalMinDistance, finalMaxDistance, finalLeftHorizontalFOV,
                             finalRightHorizontalFOV, finalBottomVerticalFOV, finalTopVerticalFOV, ipFeature);
+
+                        if (double.IsNaN(z1))
+                        {
+                            System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.RLOSPointsOutsideOfSurfaceExtent, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+                            return;
+                        }
 
                         //Create shape 
                         IPoint point = new PointClass() { Z = z1, X = observerPoint.Point.X, Y = observerPoint.Point.Y, ZAware = true };
@@ -305,7 +317,6 @@ namespace ArcMapAddinVisibility.ViewModels
                     }
                     catch (Exception ex)
                     {
-                        string exception = ex.ToString();
                         System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
                     }
 
@@ -314,8 +325,7 @@ namespace ArcMapAddinVisibility.ViewModels
             }
             catch(Exception ex)
             {
-                System.Windows.Forms.MessageBox.Show(VisibilityLibrary.Properties.Resources.ExceptionSomethingWentWrong,
-                                                     VisibilityLibrary.Properties.Resources.CaptionError);
+                System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
             }
             finally
             {
