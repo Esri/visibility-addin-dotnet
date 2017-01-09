@@ -108,7 +108,7 @@ namespace ProAppVisibilityModule.ViewModels
                     throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEInvalidInput);
             }
         }
-        internal MapPointToolMode ToolMode { get; set; }
+        public MapPointToolMode ToolMode { get; set; }
         public ObservableCollection<AddInPoint> ObserverAddInPoints { get; set; }
         public ObservableCollection<string> SurfaceLayerNames { get; set; }
         public string SelectedSurfaceName { get; set; }
@@ -316,7 +316,7 @@ namespace ProAppVisibilityModule.ViewModels
         /// <summary>
         /// Enumeration used for the different tool modes
         /// </summary>
-        internal enum MapPointToolMode : int
+        public enum MapPointToolMode : int
         {
             Unknown = 0,
             Observer = 1,
