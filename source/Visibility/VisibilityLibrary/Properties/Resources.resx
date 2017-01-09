@@ -381,4 +381,16 @@
   <data name="VisCodeFieldName" xml:space="preserve">
     <value>VisCode</value>
   </data>
+  <data name="LLOSPointsOutsideOfSurfaceExtent" xml:space="preserve">
+    <value>Please verify that all Observer and Target Points are within the extents of the selected Surface</value>
+  </data>
+  <data name="LOSDataFrameMatch" xml:space="preserve">
+    <value>Spatial Reference of Data Frame and surface must match. Please change the Spatial Reference of the Data Frame and try again.</value>
+  </data>
+  <data name="LOSSpatialReferenceCaption" xml:space="preserve">
+    <value>Spatial Reference </value>
+  </data>
+  <data name="RLOSPointsOutsideOfSurfaceExtent" xml:space="preserve">
+    <value>Please verify that all Observer Points are within the extents of the selected Surface</value>
+  </data>
 </root>

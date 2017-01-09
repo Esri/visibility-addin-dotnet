@@ -196,6 +196,12 @@ namespace ArcMapAddinVisibility.ViewModels
                     return;
                 }
 
+                if (geoDataset != null && ArcMap.Document.FocusMap.SpatialReference.FactoryCode != geoDataset.SpatialReference.FactoryCode)
+                {
+                    MessageBox.Show(VisibilityLibrary.Properties.Resources.LOSDataFrameMatch, VisibilityLibrary.Properties.Resources.LOSSpatialReferenceCaption);
+                    return;
+                }
+
                 SelectedSurfaceSpatialRef = geoDataset.SpatialReference;
 
                 var geoBridge = new GeoDatabaseHelperClass() as IGeoDatabaseBridge2;
