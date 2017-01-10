@@ -398,7 +398,7 @@ namespace ProAppVisibilityModule.Helpers
         /// <param name="featureLayer"></param>
         /// <param name="showNonVisData">flag to show non visible data as RED or transparent</param>
         /// <returns></returns>
-        public static async Task CreateUniqueValueRenderer(FeatureLayer featureLayer, bool showNonVisData)
+        public static async Task CreateUniqueValueRenderer(FeatureLayer featureLayer, bool showNonVisData, string outputLayerName)
         {
             if (featureLayer == null)
                 return;
@@ -408,7 +408,7 @@ namespace ProAppVisibilityModule.Helpers
                 var gridcodeUniqueList = new List<int>();
 
                 using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
-                using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(VisibilityLibrary.Properties.Resources.RLOSConvertedPolygonsLayerName))
+                using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(outputLayerName))
                 {
                     var filter = new QueryFilter();
                     filter.WhereClause = "1=1";
@@ -469,7 +469,7 @@ namespace ProAppVisibilityModule.Helpers
                 }
 
                 CIMUniqueValueGroup groupOne = new CIMUniqueValueGroup();
-                groupOne.Heading = "gridcode";
+                groupOne.Heading = "";
                 groupOne.Classes = classes.ToArray();
 
                 uniqueValueRenderer.Groups = new CIMUniqueValueGroup[] { groupOne };
