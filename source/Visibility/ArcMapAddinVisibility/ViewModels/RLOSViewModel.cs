@@ -298,7 +298,7 @@ namespace ArcMapAddinVisibility.ViewModels
                             IFeatureRenderer featRend = UniqueValueRenderer(workspace, finalFc);
                             IGeoFeatureLayer geoLayer = outputFeatureLayer as IGeoFeatureLayer;
                             geoLayer.Renderer = featRend;
-                            geoLayer.Name = "VisibilityLayer_" + RunCount.ToString();
+                            geoLayer.Name = "RLOS_Visibility_" + RunCount.ToString();
 
                             // Set the layer transparency
                             IDisplayFilterManager filterManager = (IDisplayFilterManager)outputFeatureLayer;

@@ -35,16 +35,13 @@ namespace ProAppVisibilityModule.ViewModels
     {
         #region Properties
 
-        private int executionCounter = 0;
+        private int executionCounter = 1;
         private string _ObserversLayerName = VisibilityLibrary.Properties.Resources.RLOSObserversLayerName;
         public string ObserversLayerName
         {
             get 
             {
-                if (executionCounter > 0)
-                {
-                    _ObserversLayerName = string.Format("{0}_{1}", VisibilityLibrary.Properties.Resources.RLOSObserversLayerName, executionCounter);
-                }
+                _ObserversLayerName = string.Format("{0}_{1}", VisibilityLibrary.Properties.Resources.RLOSObserversLayerName, executionCounter);
                 return _ObserversLayerName;
             }
             set {}
@@ -55,10 +52,7 @@ namespace ProAppVisibilityModule.ViewModels
         {
              get 
             {
-                if (executionCounter > 0)
-                {
-                    _RLOSConvertedPolygonsLayerName = string.Format("{0}_{1}", VisibilityLibrary.Properties.Resources.RLOSConvertedPolygonsLayerName, executionCounter);
-                }
+                _RLOSConvertedPolygonsLayerName = string.Format("{0}_{1}", VisibilityLibrary.Properties.Resources.RLOSConvertedPolygonsLayerName, executionCounter);
                 return _RLOSConvertedPolygonsLayerName;
             }
             set {}
@@ -69,10 +63,7 @@ namespace ProAppVisibilityModule.ViewModels
         {
             get
             {
-                if (executionCounter > 0)
-                {
-                    _RLOSOutputLayerName = string.Format("{0}_{1}", VisibilityLibrary.Properties.Resources.RLOSOutputLayerName, executionCounter);
-                }
+                _RLOSOutputLayerName = string.Format("{0}_{1}", VisibilityLibrary.Properties.Resources.RLOSOutputLayerName, executionCounter);
                 return _RLOSOutputLayerName;
             }
             set { }
@@ -83,10 +74,7 @@ namespace ProAppVisibilityModule.ViewModels
         {
             get
             {
-                if (executionCounter > 0)
-                {
-                    _RLOSMaskLayerName = string.Format("{0}_{1}", VisibilityLibrary.Properties.Resources.RLOSMaskLayerName, executionCounter);
-                }
+                _RLOSMaskLayerName = string.Format("{0}_{1}", VisibilityLibrary.Properties.Resources.RLOSMaskLayerName, executionCounter);
                 return _RLOSMaskLayerName;
             }
             set { }

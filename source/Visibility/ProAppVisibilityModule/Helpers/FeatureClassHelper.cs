@@ -434,7 +434,7 @@ namespace ProAppVisibilityModule.Helpers
 
                 int gcCount = gridcodeUniqueList.Count;
 
-                var colors = GetGradients(System.Windows.Media.Color.FromRgb(0, 255, 0), System.Windows.Media.Color.FromRgb(128, 0, 128), gcCount).GetEnumerator();
+                var colors = GetGradients(gcCount).GetEnumerator();
 
                 //Create the Unique Value Renderer
                 CIMUniqueValueRenderer uniqueValueRenderer = new CIMUniqueValueRenderer();
@@ -444,8 +444,9 @@ namespace ProAppVisibilityModule.Helpers
 
                 List<CIMUniqueValueClass> classes = new List<CIMUniqueValueClass>();
 
+                int cnt = 1;
                 foreach (var gc in gridcodeUniqueList)
-                {
+                {    
                     colors.MoveNext();
 
                     List<CIMUniqueValue> visValues = new List<CIMUniqueValue>();
@@ -454,18 +455,19 @@ namespace ProAppVisibilityModule.Helpers
                     visValues.Add(visValue);
 
                     var visSymbol = SymbolFactory.ConstructPolygonSymbol(CIMColor.CreateRGBColor(colors.Current.R, colors.Current.G, colors.Current.B));
-
+                    string observerString = cnt == 1 ? " Observer" : " Observers";
+                    string label = "Visible by " + cnt.ToString() + observerString;
                     var visClass = new CIMUniqueValueClass()
                     {
-                        Values = visValues.ToArray(),
-                        Label = gc.ToString(),
+                        Values = visValues.ToArray(),               
+                        Label = label,
                         Visible = true,
                         Editable = true,
                         Symbol = new CIMSymbolReference() { Symbol = visSymbol }
                     };
 
                     classes.Add(visClass);
-                    
+                    cnt++;
                 }
 
                 CIMUniqueValueGroup groupOne = new CIMUniqueValueGroup();
@@ -487,23 +489,20 @@ namespace ProAppVisibilityModule.Helpers
             });
         }
 
-        public static IEnumerable<System.Windows.Media.Color> GetGradients(System.Windows.Media.Color start, System.Windows.Media.Color end, int steps)
+        public static IEnumerable<System.Windows.Media.Color> GetGradients(int steps)
         {
-            if (steps <= 1)
-                yield return System.Windows.Media.Color.FromArgb((byte)(start.A), (byte)(start.R), (byte)(start.G), (byte)(start.B));
-
-            int stepA = ((end.A - start.A) / (steps - 1));
-            int stepR = ((end.R - start.R) / (steps - 1));
-            int stepG = ((end.G - start.G) / (steps - 1));
-            int stepB = ((end.B - start.B) / (steps - 1));
-
+            Random randonGen = new Random();
             for (int i = 0; i < steps; i++)
             {
-                yield return System.Windows.Media.Color.FromArgb((byte)(start.A + (stepA * i)),
-                                            (byte)(start.R + (stepR * i)),
-                                            (byte)(start.G + (stepG * i)),
-                                            (byte)(start.B + (stepB * i)));
+                System.Windows.Media.Color randomColor =
+                    System.Windows.Media.Color.FromArgb(
+                    (byte)randonGen.Next(255),
+                    (byte)randonGen.Next(255),
+                    (byte)randonGen.Next(255),
+                    (byte)randonGen.Next(255));
+                yield return randomColor;
             }
+
         }
         /// <summary>
         /// Method used to create point features from AddInPoints
