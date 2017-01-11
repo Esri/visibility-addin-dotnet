@@ -259,6 +259,13 @@ namespace ArcMapAddinVisibility.ViewModels
                         parameters.Add(outPath);
 
                         esriLicenseStatus status = GetSpatialAnalystLicense();
+                        if (status == esriLicenseStatus.esriLicenseUnavailable || status == esriLicenseStatus.esriLicenseFailure ||
+                            status == esriLicenseStatus.esriLicenseNotInitialized || status == esriLicenseStatus.esriLicenseNotLicensed ||
+                            status == esriLicenseStatus.esriLicenseUnavailable)
+                        {
+                            System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.RLOSPointsOutsideOfSurfaceExtent, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+                            return;
+                        }
 
                         IGeoProcessor2 gp = new GeoProcessorClass();
 

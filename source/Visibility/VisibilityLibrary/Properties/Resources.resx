@@ -354,6 +354,9 @@
   <data name="RLOSConvertedPolygonsLayerName" xml:space="preserve">
     <value>RLOS_Visibility</value>
   </data>
+  <data name="LOSSpatialAnalystLicenseInvalid" xml:space="preserve">
+    <value>Verify that the Spatial Analyst extension is available and authorized for use.</value>
+  </data>
   <data name="AENumMustBeGreater" xml:space="preserve">
     <value>The number must be greater than min</value>
   </data>
