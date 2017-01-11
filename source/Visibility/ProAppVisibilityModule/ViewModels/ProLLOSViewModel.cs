@@ -352,15 +352,12 @@ namespace ProAppVisibilityModule.ViewModels
                 await FeatureClassHelper.AddFieldToLayer(TargetsLayerName, VisibilityLibrary.Properties.Resources.NumOfObserversFieldName, "SHORT");
 
                 // add observer points to feature layer
-
                 await FeatureClassHelper.CreatingFeatures(ObserversLayerName, ObserverAddInPoints, GetAsMapZUnits(surfaceSR, ObserverOffset.Value));
 
                 // add target points to feature layer
-
                 await FeatureClassHelper.CreatingFeatures(TargetsLayerName, TargetAddInPoints, GetAsMapZUnits(surfaceSR, TargetOffset.Value));
 
                 // update with surface information
-
                 await FeatureClassHelper.AddSurfaceInformation(ObserversLayerName, SelectedSurfaceName, VisibilityLibrary.Properties.Resources.ZFieldName);
                 await FeatureClassHelper.AddSurfaceInformation(TargetsLayerName, SelectedSurfaceName, VisibilityLibrary.Properties.Resources.ZFieldName);
 

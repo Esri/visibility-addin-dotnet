@@ -226,20 +226,20 @@ namespace ArcMapAddinVisibility.ViewModels
 
                     var z1 = surface.GetElevation(observerPoint.Point) + finalObserverOffset;
 
-                    if (surface.IsVoidZ(z1))
+                    if (double.IsNaN(z1))
                     {
-                        if (double.IsNaN(z1))
-                            z1 = 0.000001;
+                        System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.LLOSPointsOutsideOfSurfaceExtent, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+                        return;
                     }
-
+                    
                     foreach (var targetPoint in TargetAddInPoints)
                     {
                         var z2 = surface.GetElevation(targetPoint.Point) + finalTargetOffset;
 
-                        if (surface.IsVoidZ(z2))
+                        if (double.IsNaN(z2))
                         {
-                            if (double.IsNaN(z2))
-                                z2 = 0.000001;
+                            System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.LLOSPointsOutsideOfSurfaceExtent, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+                            return;
                         }
 
                         var fromPoint = new PointClass() { Z = z1, X = observerPoint.Point.X, Y = observerPoint.Point.Y, ZAware = true } as IPoint;
