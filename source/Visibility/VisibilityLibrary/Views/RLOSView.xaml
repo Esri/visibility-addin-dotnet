@@ -66,6 +66,11 @@
                                 </StackPanel>
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
+                        <ComboBox.ItemContainerStyle>
+                            <Style TargetType="ComboBoxItem">
+                                <Setter Property="Foreground" Value="Black" />
+                            </Style>
+                        </ComboBox.ItemContainerStyle>
                     </ComboBox>
                     <Button Grid.Column="1"
                             Margin="3,3,0,0"
@@ -318,7 +323,13 @@
                                           Margin="3,3,0,0"
                                           ItemsSource="{Binding Source={StaticResource lineDistanceData}}"
                                           SelectedItem="{Binding Path=OffsetUnitType,
-                                                                 Mode=TwoWay}" />
+                                                                 Mode=TwoWay}" >
+                                    <ComboBox.ItemContainerStyle>
+                                        <Style TargetType="ComboBoxItem">
+                                            <Setter Property="Foreground" Value="Black" />
+                                        </Style>
+                                    </ComboBox.ItemContainerStyle>
+                                </ComboBox>
                             </StackPanel>
                         </GroupBox>
                         <GroupBox Grid.Row="5"
