@@ -263,7 +263,7 @@ namespace ArcMapAddinVisibility.ViewModels
                             status == esriLicenseStatus.esriLicenseNotInitialized || status == esriLicenseStatus.esriLicenseNotLicensed ||
                             status == esriLicenseStatus.esriLicenseUnavailable)
                         {
-                            System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.RLOSPointsOutsideOfSurfaceExtent, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+                            System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.LOSSpatialAnalystLicenseInvalid, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
                             return;
                         }
 
