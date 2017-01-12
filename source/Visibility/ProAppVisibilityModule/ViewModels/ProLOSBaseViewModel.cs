@@ -59,6 +59,7 @@ namespace ProAppVisibilityModule.ViewModels
             LayersAddedEvent.Subscribe(OnLayersAdded);
             LayersRemovedEvent.Subscribe(OnLayersAdded);
             MapPropertyChangedEvent.Subscribe(OnMapPropertyChanged);
+            MapMemberPropertiesChangedEvent.Subscribe(OnMapMemberPropertyChanged);
         }
 
         ~ProLOSBaseViewModel()
@@ -562,6 +563,13 @@ namespace ProAppVisibilityModule.ViewModels
         private async void OnMapPropertyChanged(MapPropertyChangedEventArgs obj)
         {
             await ResetSurfaceNames();
+        }
+
+        private async void OnMapMemberPropertyChanged(MapMemberPropertiesChangedEventArgs obj)
+        {
+            IEnumerable<MapMemberEventHint> mapMemberHint = obj.EventHints;
+            if (mapMemberHint.ElementAt(0).ToString() == "Name")
+                await ResetSurfaceNames();
         }
 
 
