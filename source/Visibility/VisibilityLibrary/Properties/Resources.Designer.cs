@@ -610,6 +610,15 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Verify that the Spatial Analyst extension is available and authorized for use..
+        /// </summary>
+        public static string LOSSpatialAnalystLicenseInvalid {
+            get {
+                return ResourceManager.GetString("LOSSpatialAnalystLicenseInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Spatial Reference .
         /// </summary>
         public static string LOSSpatialReferenceCaption {
