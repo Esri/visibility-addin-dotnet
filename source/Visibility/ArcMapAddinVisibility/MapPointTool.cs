@@ -8,6 +8,7 @@ using ESRI.ArcGIS.Geometry;
 using ESRI.ArcGIS.Controls;
 using VisibilityLibrary.Helpers;
 using VisibilityLibrary;
+using System.Windows.Forms;
 
 namespace ArcMapAddinVisibility
 {
@@ -30,6 +31,8 @@ namespace ArcMapAddinVisibility
         {
 			//Get the snap environment and initialize the feedback
 			UID snapUID = new UID();
+
+            this.Cursor = Cursors.Cross;
 
 			snapUID.Value = "{E07B4C52-C894-4558-B8D4-D4050018D1DA}";
 			m_SnappingEnv = ArcMap.Application.FindExtensionByCLSID(snapUID) as ISnappingEnvironment;
