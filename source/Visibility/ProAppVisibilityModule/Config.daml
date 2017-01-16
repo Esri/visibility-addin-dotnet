@@ -24,8 +24,8 @@
         <group id="ProAppVisibilityModule_Group1" caption="Visibility" appearsOnAddInTab="true">
           <!-- host controls within groups -->
           <button refID="ProAppVisibilityModule_VisibilityDockpane_ShowButton" size="large" />
-          <button refID="ProAppVisibilityModule_PropertiesButton" size="large" />
-          <tool refID="ProAppVisibilityModule_MapTool" size="large" />
+          <!--<button refID="ProAppVisibilityModule_PropertiesButton" size="large" />
+          <tool refID="ProAppVisibilityModule_MapTool" size="large" />-->
         </group>
       </groups>
       <controls>
