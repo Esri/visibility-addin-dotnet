@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("ProAppVisibilityModule")]
+[assembly: AssemblyTitle("ProAppVisibilityModule.Tests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Esri")]
-[assembly: AssemblyProduct("ProAppVisibilityModule")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("ProAppVisibilityModule.Tests")]
 [assembly: AssemblyCopyright("Copyright © Esri 2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("cdeb79cb-8161-4f77-8771-9cf422c47f17")]
+[assembly: Guid("5aa4ae81-50fc-41b6-bf67-94449c09f5cc")]
 
 // Version information for an assembly consists of the following four values:
 //

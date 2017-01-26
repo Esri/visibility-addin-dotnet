@@ -12,15 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// System
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections.ObjectModel;
+using System.Collections;
+using System.Windows;
+
+// Esri
 using ESRI.ArcGIS.Geodatabase;
 using ESRI.ArcGIS.Geometry;
 using ESRI.ArcGIS.Display;
+using ESRI.ArcGIS.Carto;
+
+// Solution
 using VisibilityLibrary.Helpers;
-using System.Collections;
 using ArcMapAddinVisibility.Models;
 
 namespace ArcMapAddinVisibility.ViewModels
@@ -54,12 +61,10 @@ namespace ArcMapAddinVisibility.ViewModels
             var savedCursor = System.Windows.Forms.Cursor.Current;
             System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
             System.Windows.Forms.Application.DoEvents();
-            // promote temp graphics
-            //MoveTempGraphicsToMapGraphics();
 
             CreateMapElement();
 
-            Reset(true);
+            //Reset(true);
 
             System.Windows.Forms.Cursor.Current = savedCursor;
         }
@@ -78,7 +83,6 @@ namespace ArcMapAddinVisibility.ViewModels
 
             DeleteTargetPoints(targets);
         }
-
 
         private void DeleteTargetPoints(List<AddInPoint> targets)
         {
@@ -167,11 +171,12 @@ namespace ArcMapAddinVisibility.ViewModels
             try
             {
                 IsRunning = true;
+                IPolyline longestLine = new PolylineClass();
 
                 if (!CanCreateElement || ArcMap.Document == null || ArcMap.Document.FocusMap == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
                     return;
 
-                base.CreateMapElement();
+                //base.CreateMapElement();
 
                 // take your observer and target points and get lines of sight
 
@@ -179,6 +184,25 @@ namespace ArcMapAddinVisibility.ViewModels
 
                 if (surface == null)
                     return;
+
+                // Determine if selected surface is projected or geographic
+                ILayer surfaceLayer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
+                var geoDataset = surfaceLayer as IGeoDataset;
+                SelectedSurfaceSpatialRef = geoDataset.SpatialReference;
+
+                if (SelectedSurfaceSpatialRef is IGeographicCoordinateSystem)
+                {
+                    MessageBox.Show(VisibilityLibrary.Properties.Resources.LLOSUserPrompt, VisibilityLibrary.Properties.Resources.LLOSUserPromptCaption);
+                    return;
+                }
+
+                if (geoDataset != null && ArcMap.Document.FocusMap.SpatialReference.FactoryCode != geoDataset.SpatialReference.FactoryCode)
+                {
+                    MessageBox.Show(VisibilityLibrary.Properties.Resources.LOSDataFrameMatch, VisibilityLibrary.Properties.Resources.LOSSpatialReferenceCaption);
+                    return;
+                }
+
+                SelectedSurfaceSpatialRef = geoDataset.SpatialReference;
 
                 var geoBridge = new GeoDatabaseHelperClass() as IGeoDatabaseBridge2;
 
@@ -190,8 +214,8 @@ namespace ArcMapAddinVisibility.ViewModels
                 IPolyline polyInvisible = null;
                 bool targetIsVisible = false;
 
-                double finalObserverOffset = GetOffsetInZUnits(ArcMap.Document.FocusMap, ObserverOffset.Value, surface.ZFactor, OffsetUnitType);
-                double finalTargetOffset = GetOffsetInZUnits(ArcMap.Document.FocusMap, TargetOffset.Value, surface.ZFactor, OffsetUnitType);
+                double finalObserverOffset = GetOffsetInZUnits(ObserverOffset.Value, surface.ZFactor, OffsetUnitType);
+                double finalTargetOffset = GetOffsetInZUnits(TargetOffset.Value, surface.ZFactor, OffsetUnitType);
 
                 var DictionaryTargetObserverCount = new Dictionary<IPoint, int>();
 
@@ -202,20 +226,20 @@ namespace ArcMapAddinVisibility.ViewModels
 
                     var z1 = surface.GetElevation(observerPoint.Point) + finalObserverOffset;
 
-                    if (surface.IsVoidZ(z1))
+                    if (double.IsNaN(z1))
                     {
-                        if (double.IsNaN(z1))
-                            z1 = 0.000001;
+                        System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.LLOSPointsOutsideOfSurfaceExtent, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+                        return;
                     }
-
+                    
                     foreach (var targetPoint in TargetAddInPoints)
                     {
                         var z2 = surface.GetElevation(targetPoint.Point) + finalTargetOffset;
 
-                        if (surface.IsVoidZ(z2))
+                        if (double.IsNaN(z2))
                         {
-                            if (double.IsNaN(z2))
-                                z2 = 0.000001;
+                            System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.LLOSPointsOutsideOfSurfaceExtent, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+                            return;
                         }
 
                         var fromPoint = new PointClass() { Z = z1, X = observerPoint.Point.X, Y = observerPoint.Point.Y, ZAware = true } as IPoint;
@@ -223,6 +247,13 @@ namespace ArcMapAddinVisibility.ViewModels
 
                         geoBridge.GetLineOfSight(surface, fromPoint, toPoint,
                             out pointObstruction, out polyVisible, out polyInvisible, out targetIsVisible, false, false);
+
+                        var pcol = new PolylineClass() as IPointCollection;
+                        pcol.AddPoint(fromPoint);
+                        pcol.AddPoint(toPoint);
+                        IPolyline pcolPolyline = pcol as IPolyline;
+
+                        longestLine = (longestLine != null && longestLine.Length < pcolPolyline.Length) ? pcolPolyline : longestLine;
 
                         // set the flag if we can see at least one target
                         if (targetIsVisible)
@@ -244,11 +275,7 @@ namespace ArcMapAddinVisibility.ViewModels
                         }
 
                         if (polyVisible == null && polyInvisible == null)
-                        {
-                            var pcol = new PolylineClass() as IPointCollection;
-                            pcol.AddPoint(fromPoint);
-                            pcol.AddPoint(toPoint);
-
+                        {                           
                             if (targetIsVisible)
                                 AddGraphicToMap(pcol as IPolyline, new RgbColorClass() { Green = 255 });
                             else
@@ -274,10 +301,12 @@ namespace ArcMapAddinVisibility.ViewModels
                 }
 
                 VisualizeTargets(DictionaryTargetObserverCount);
+                ZoomToExtent(longestLine);
             }
             catch(Exception ex)
             {
-                System.Windows.Forms.MessageBox.Show(VisibilityLibrary.Properties.Resources.ExceptionSomethingWentWrong);
+                System.Windows.Forms.MessageBox.Show(VisibilityLibrary.Properties.Resources.ExceptionSomethingWentWrong,
+                                                     VisibilityLibrary.Properties.Resources.CaptionError);
             }
             finally
             {

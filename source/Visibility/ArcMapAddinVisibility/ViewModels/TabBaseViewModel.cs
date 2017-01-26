@@ -23,6 +23,8 @@ using ESRI.ArcGIS.Display;
 using VisibilityLibrary.Helpers;
 using VisibilityLibrary;
 using VisibilityLibrary.ViewModels;
+using VisibilityLibrary.Models;
+using ArcMapAddinVisibility.Models;
 
 namespace ArcMapAddinVisibility.ViewModels
 {
@@ -33,10 +35,6 @@ namespace ArcMapAddinVisibility.ViewModels
     {
         public TabBaseViewModel()
         {
-            //properties
-            LineType = LineTypes.Geodesic;
-            LineDistanceType = DistanceTypes.Meters;
-
             //commands
             ClearGraphicsCommand = new RelayCommand(OnClearGraphics);
             ActivateToolCommand = new RelayCommand(OnActivateTool);
@@ -52,18 +50,14 @@ namespace ArcMapAddinVisibility.ViewModels
         #region Properties
 
         // lists to store GUIDs of graphics, temp feedback and map graphics
-        private static List<string> TempGraphicsList = new List<string>();
-        private static List<string> MapGraphicsList = new List<string>();
-
-        internal bool HasPoint1 = false;
-        internal bool HasPoint2 = false;
-        internal INewLineFeedback feedback = null;
+        private static List<AMGraphic> GraphicsList = new List<AMGraphic>();
 
         public bool HasMapGraphics
         {
             get
             {
-                return MapGraphicsList.Any();
+                // only non temp graphics please
+                return GraphicsList.Any(g => g.IsTemp == false);
             }
         }
 
@@ -120,7 +114,7 @@ namespace ArcMapAddinVisibility.ViewModels
                         return string.Empty;
 
                     // only format if the Point1 data was generated from a mouse click
-                    return string.Format("{0:0.0#####} {1:0.0#####}", Point1.Y, Point1.X);
+                    return GetFormattedPoint(Point1);
                 }
                 else
                 {
@@ -141,29 +135,16 @@ namespace ArcMapAddinVisibility.ViewModels
                 var point = GetPointFromString(value);
                 if (point != null)
                 {
-                    // clear temp graphics
-                    ClearTempGraphics();
                     point1Formatted = value;
-                    HasPoint1 = true;
                     Point1 = point;
-                    AddGraphicToMap(Point1, true);
-                    // lets try feedback
+                    //AddGraphicToMap(Point1, true);
                     var mxdoc = ArcMap.Application.Document as IMxDocument;
-                    var av = mxdoc.FocusMap as IActiveView;
                     point.Project(mxdoc.FocusMap.SpatialReference);
-                    CreateFeedback(point, av);
-                    feedback.Start(point);
-                    if (Point2 != null)
-                    {
-                        UpdateDistance(GetPolylineFromFeedback(Point1, Point2));
-                        FeedbackMoveTo(Point2);
-                    }
                 }
                 else
                 {
                     // invalid coordinate, reset and throw exception
                     Point1 = null;
-                    HasPoint1 = false;
                     throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEInvalidCoordinate);
                 }
             }
@@ -186,7 +167,7 @@ namespace ArcMapAddinVisibility.ViewModels
                         return string.Empty;
 
                     // only format if the Point2 data was generated from a mouse click
-                    return string.Format("{0:0.0#####} {1:0.0#####}", Point2.Y, Point2.X);
+                    return GetFormattedPoint(Point2);
                 }
                 else
                 {
@@ -207,33 +188,15 @@ namespace ArcMapAddinVisibility.ViewModels
                 if (point != null)
                 {
                     point2Formatted = value;
-                    //HasPoint2 = true;
                     Point2 = point;
+                    //AddGraphicToMap(Point2, true);
                     var mxdoc = ArcMap.Application.Document as IMxDocument;
-                    var av = mxdoc.FocusMap as IActiveView;
                     Point2.Project(mxdoc.FocusMap.SpatialReference);
-
-                    //if (feedback != null)
-                    //{
-                    //    // I have to create a new point here, otherwise "MoveTo" will change the spatial reference to world mercator
-                    //    FeedbackMoveTo(point);
-                    //}
-                    if (HasPoint1)
-                    {
-                        // lets try feedback
-                        CreateFeedback(Point1, av);
-                        feedback.Start(Point1);
-                        UpdateDistance(GetPolylineFromFeedback(Point1, Point2));
-                        // I have to create a new point here, otherwise "MoveTo" will change the spatial reference to world mercator
-                        FeedbackMoveTo(point);
-                    }
-
                 }
                 else
                 {
                     // invalid coordinate, reset and throw exception
                     Point2 = null;
-                    HasPoint2 = false;
                     throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEInvalidCoordinate);
                 }
             }
@@ -257,76 +220,6 @@ namespace ArcMapAddinVisibility.ViewModels
             }
         }
 
-        DistanceTypes lineDistanceType = DistanceTypes.Meters;
-        /// <summary>
-        /// Property for the distance type
-        /// </summary>
-        public DistanceTypes LineDistanceType
-        {
-            get { return lineDistanceType; }
-            set
-            {
-                var before = lineDistanceType;
-                lineDistanceType = value;
-                UpdateDistanceFromTo(before, value);
-            }
-        }
-
-        double distance = 0.0;
-        /// <summary>
-        /// Property for the distance/length
-        /// </summary>
-        public virtual double Distance
-        {
-            get { return distance; }
-            set
-            {
-                if (value < 0.0)
-                    throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEMustBePositive);
-
-                distance = value;
-                DistanceString = distance.ToString("N"); // use current culture number format
-                RaisePropertyChanged(() => Distance);
-                RaisePropertyChanged(() => DistanceString);
-            }
-        }
-
-        string distanceString = String.Empty;
-        /// <summary>
-        /// Distance property as a string
-        /// </summary>
-        public virtual string DistanceString
-        {
-            get
-            {
-                return Distance.ToString("N"); // use current culture number format
-            }
-            set
-            {
-                // lets avoid an infinite loop here
-                if (string.Equals(distanceString, value))
-                    return;
-
-                distanceString = value;
-
-                // update distance
-                double d = 0.0;
-                if (double.TryParse(distanceString, out d))
-                {
-                    Distance = d;
-                }
-                else
-                {
-                    throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEInvalidInput);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Property for the type of geodesy line
-        /// </summary>
-        public LineTypes LineType { get; set; }
-
         /// <summary>
         /// Property used to test if there is enough info to create a line map element
         /// </summary>
@@ -338,6 +231,11 @@ namespace ArcMapAddinVisibility.ViewModels
             }
         }
 
+        /// <summary>
+        /// Property used to set / get the spatial reference of the selected surface
+        /// </summary>
+        public ISpatialReference SelectedSurfaceSpatialRef { get; set; }
+
         #endregion
 
         #region Commands
@@ -347,9 +245,22 @@ namespace ArcMapAddinVisibility.ViewModels
         public RelayCommand EnterKeyCommand { get; set; }
         public RelayCommand CancelCommand { get; set; }
 
-        private void OnCancelCommand(object obj)
+        internal void OnCancelCommand(object obj)
         {
             Reset(true);
+        }
+        /// <summary>
+        /// Method to refresh the active view
+        /// </summary>
+        private static void RefreshActiveView()
+        {
+            var mxdoc = ArcMap.Application.Document as IMxDocument;
+            if (mxdoc == null)
+                return;
+            var av = mxdoc.FocusMap as IActiveView;
+            if (av == null)
+                return;
+            av.Refresh();
         }
 
         #endregion
@@ -366,9 +277,9 @@ namespace ArcMapAddinVisibility.ViewModels
         #region Private Event Functions
 
         /// <summary>
-        /// Clears all the graphics from the maps graphic container
-        /// Inlucdes temp and map graphics
-        /// Only removes temp and map graphics that were created by this add-in
+        /// Clears all the graphics from the maps graphic container except temp graphics
+        /// Inlucdes map graphics only
+        /// Only removes map graphics that were created by this add-in
         /// </summary>
         /// <param name="obj"></param>
         private void OnClearGraphics(object obj)
@@ -383,7 +294,7 @@ namespace ArcMapAddinVisibility.ViewModels
             if (gc == null)
                 return;
 
-            RemoveGraphics(gc, MapGraphicsList);
+            RemoveGraphics(gc, GraphicsList.Where(g => g.IsTemp == false).ToList());
 
             //av.PartialRefresh(esriViewDrawPhase.esriViewGraphics, null, null);
             av.Refresh(); // sometimes a partial refresh is not working
@@ -404,7 +315,7 @@ namespace ArcMapAddinVisibility.ViewModels
             if (gc == null)
                 return;
 
-            RemoveGraphics(gc, TempGraphicsList);
+            RemoveGraphics(gc, GraphicsList.Where(g => g.IsTemp == true).ToList());
 
             av.PartialRefresh(esriViewDrawPhase.esriViewGraphics, null, null);
         }
@@ -414,7 +325,7 @@ namespace ArcMapAddinVisibility.ViewModels
         /// </summary>
         /// <param name="gc">map graphics container</param>
         /// <param name="list">list of GUIDs to remove</param>
-        internal void RemoveGraphics(IGraphicsContainer gc, List<string> list)
+        internal void RemoveGraphics(IGraphicsContainer gc, List<AMGraphic> list)
         {
             if (gc == null || !list.Any())
                 return;
@@ -425,7 +336,7 @@ namespace ArcMapAddinVisibility.ViewModels
             while (element != null)
             {
                 var eleProps = element as IElementProperties;
-                if (list.Contains(eleProps.Name))
+                if(list.Any(g => g.UniqueId == eleProps.Name))
                 {
                     elementList.Add(element);
                 }
@@ -437,7 +348,12 @@ namespace ArcMapAddinVisibility.ViewModels
                 gc.DeleteElement(ele);
             }
 
-            list.Clear();
+            // remove from master graphics list
+            foreach(var graphic in list)
+            {
+                if (GraphicsList.Contains(graphic))
+                    GraphicsList.Remove(graphic);
+            }
             elementList.Clear();
             
             RaisePropertyChanged(() => HasMapGraphics);
@@ -458,21 +374,10 @@ namespace ArcMapAddinVisibility.ViewModels
             if (gc == null)
                 return;
 
-            RemoveGraphics(gc, guidList);
+            var graphics = GraphicsList.Where(g => guidList.Contains(g.UniqueId)).ToList();
+            RemoveGraphics(gc, graphics);
 
             av.Refresh();
-        }
-
-        /// <summary>
-        /// Method used to move temp graphics to map graphics
-        /// Tools use this to make temp graphics permanent on completion
-        /// otherwise temp graphics get cleared on reset/cancel
-        /// </summary>
-        internal void MoveTempGraphicsToMapGraphics()
-        {
-            MapGraphicsList.AddRange(TempGraphicsList);
-            TempGraphicsList.Clear();
-            RaisePropertyChanged(() => HasMapGraphics);
         }
 
         /// <summary>
@@ -504,41 +409,12 @@ namespace ArcMapAddinVisibility.ViewModels
             if (!IsActiveTab)
                 return;
 
-            var mxdoc = ArcMap.Application.Document as IMxDocument;
-            var av = mxdoc.FocusMap as IActiveView;
             var point = obj as IPoint;
 
             if (point == null)
                 return;
 
-            if (!HasPoint1)
-            {
-                // clear temp graphics
-                ClearTempGraphics();
-                Point1 = point;
-                HasPoint1 = true;
-                Point1Formatted = string.Empty;
-
-                AddGraphicToMap(Point1, true);
-
-                // lets try feedback
-                CreateFeedback(point, av);
-                feedback.Start(point);
-            }
-            else if (!HasPoint2)
-            {
-                ResetFeedback();
-                Point2 = point;
-                HasPoint2 = true;
-                point2Formatted = string.Empty;
-                RaisePropertyChanged(() => Point2Formatted);
-            }
-
-            if (HasPoint1 && HasPoint2)
-            {
-                CreateMapElement();
-                ResetPoints();
-            }
+            // do nothing
         }
 
         #endregion
@@ -573,6 +449,47 @@ namespace ArcMapAddinVisibility.ViewModels
         #endregion
         #region Private Functions
         /// <summary>
+        /// Method will return a formatted point as a string based on the configuration settings for display coordinate type
+        /// </summary>
+        /// <param name="point">IPoint that is to be formatted</param>
+        /// <returns>String that is formatted based on addin config display coordinate type</returns>
+        private string GetFormattedPoint(IPoint point)
+        {
+            var result = string.Format("{0:0.0} {1:0.0}", point.Y, point.X);
+            var cn = point as IConversionNotation;
+            if (cn != null)
+            {
+                switch (VisibilityConfig.AddInConfig.DisplayCoordinateType)
+                {
+                    case CoordinateTypes.DD:
+                        result = cn.GetDDFromCoords(6);
+                        break;
+                    case CoordinateTypes.DDM:
+                        result = cn.GetDDMFromCoords(4);
+                        break;
+                    case CoordinateTypes.DMS:
+                        result = cn.GetDMSFromCoords(2);
+                        break;
+                    //case CoordinateTypes.GARS:
+                    //    result = cn.GetGARSFromCoords();
+                    //    break;
+                    case CoordinateTypes.MGRS:
+                        result = cn.CreateMGRS(5, true, esriMGRSModeEnum.esriMGRSMode_Automatic);
+                        break;
+                    case CoordinateTypes.USNG:
+                        result = cn.GetUSNGFromCoords(5, true, true);
+                        break;
+                    case CoordinateTypes.UTM:
+                        result = cn.GetUTMFromCoords(esriUTMConversionOptionsEnum.esriUTMAddSpaces | esriUTMConversionOptionsEnum.esriUTMUseNS);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Method used to totally reset the tool
         /// reset points, feedback
         /// clear out textboxes
@@ -584,34 +501,12 @@ namespace ArcMapAddinVisibility.ViewModels
                 DeactivateTool("Esri_ArcMapAddinVisibility_MapPointTool");
             }
 
-            ResetPoints();
             Point1 = null;
             Point2 = null;
             Point1Formatted = string.Empty;
             Point2Formatted = string.Empty;
 
-            ResetFeedback();
-
-            Distance = 0.0;
-        }
-        /// <summary>
-        /// Resets Points 1 and 2
-        /// </summary>
-        internal virtual void ResetPoints()
-        {
-            HasPoint1 = HasPoint2 = false;
-        }
-
-        /// <summary>
-        /// Resets feedback aka cancels feedback
-        /// </summary>
-        internal void ResetFeedback()
-        {
-            if (feedback == null)
-                return;
-
-            feedback.Stop();
-            feedback = null;
+            RefreshActiveView();
         }
 
         /// <summary>
@@ -664,10 +559,7 @@ namespace ArcMapAddinVisibility.ViewModels
             var eprop = element as IElementProperties;
             eprop.Name = Guid.NewGuid().ToString();
 
-            if (IsTempGraphic)
-                TempGraphicsList.Add(eprop.Name);
-            else
-                MapGraphicsList.Add(eprop.Name);
+            GraphicsList.Add(new AMGraphic(eprop.Name, geom, IsTempGraphic));
 
             gc.AddElement(element, 0);
 
@@ -750,10 +642,7 @@ namespace ArcMapAddinVisibility.ViewModels
             var eprop = element as IElementProperties;
             eprop.Name = Guid.NewGuid().ToString();
 
-            if (IsTempGraphic)
-                TempGraphicsList.Add(eprop.Name);
-            else
-                MapGraphicsList.Add(eprop.Name);
+            GraphicsList.Add(new AMGraphic(eprop.Name, geom, IsTempGraphic)); 
 
             gc.AddElement(element, 0);
 
@@ -799,63 +688,12 @@ namespace ArcMapAddinVisibility.ViewModels
                 case (int)esriSRUnitType.esriSRUnit_NauticalMile:
                     distanceType = DistanceTypes.NauticalMile;
                     break;
-                case (int)esriSRUnitType.esriSRUnit_SurveyFoot:
-                    distanceType = DistanceTypes.SurveyFoot;
-                    break;
                 default:
                     distanceType = DistanceTypes.Meters;
                     break;
             }
 
             return distanceType;
-        }
-
-        internal ISpatialReferenceFactory3 srf3 = null;
-        internal ILinearUnit GetLinearUnit()
-        {
-            return GetLinearUnit(LineDistanceType);
-        }
-        /// <summary>
-        /// Gets the linear unit from the esri constants for linear units
-        /// </summary>
-        /// <returns>ILinearUnit</returns>
-        internal ILinearUnit GetLinearUnit(DistanceTypes distanceType)
-        {
-            int unitType = (int)esriSRUnitType.esriSRUnit_Meter;
-            if (srf3 == null)
-            {
-                Type srType = Type.GetTypeFromProgID("esriGeometry.SpatialReferenceEnvironment");
-                srf3 = Activator.CreateInstance(srType) as ISpatialReferenceFactory3;
-            }
-
-            switch (distanceType)
-            {
-                case DistanceTypes.Feet:
-                    unitType = (int)esriSRUnitType.esriSRUnit_Foot;
-                    break;
-                case DistanceTypes.Kilometers:
-                    unitType = (int)esriSRUnitType.esriSRUnit_Kilometer;
-                    break;
-                case DistanceTypes.Meters:
-                    unitType = (int)esriSRUnitType.esriSRUnit_Meter;
-                    break;
-                case DistanceTypes.NauticalMile:
-                    unitType = (int)esriSRUnitType.esriSRUnit_NauticalMile;
-                    break;
-                case DistanceTypes.SurveyFoot:
-                    unitType = (int)esriSRUnitType.esriSRUnit_SurveyFoot;
-                    break;
-                default:
-                    unitType = (int)esriSRUnitType.esriSRUnit_Meter;
-                    break;
-            }
-
-            return srf3.CreateUnit(unitType) as ILinearUnit;
-        }
-
-        private void UpdateDistanceFromTo(DistanceTypes fromType, DistanceTypes toType)
-        {
-            Distance = GetDistanceFromTo(fromType, toType, Distance);
         }
 
         /// <summary>
@@ -873,42 +711,26 @@ namespace ArcMapAddinVisibility.ViewModels
                     length /= 1000.0;
                 else if (fromType == DistanceTypes.Meters && toType == DistanceTypes.Feet)
                     length *= 3.28084;
-                else if (fromType == DistanceTypes.Meters && toType == DistanceTypes.SurveyFoot)
-                    length *= 3.280833333;
                 else if (fromType == DistanceTypes.Meters && toType == DistanceTypes.NauticalMile)
                     length *= 0.000539957;
                 else if (fromType == DistanceTypes.Kilometers && toType == DistanceTypes.Meters)
                     length *= 1000.0;
                 else if (fromType == DistanceTypes.Kilometers && toType == DistanceTypes.Feet)
                     length *= 3280.84;
-                else if (fromType == DistanceTypes.Kilometers && toType == DistanceTypes.SurveyFoot)
-                    length *= 3280.833333;
                 else if (fromType == DistanceTypes.Kilometers && toType == DistanceTypes.NauticalMile)
                     length *= 0.539957;
                 else if (fromType == DistanceTypes.Feet && toType == DistanceTypes.Kilometers)
                     length *= 0.0003048;
                 else if (fromType == DistanceTypes.Feet && toType == DistanceTypes.Meters)
                     length *= 0.3048;
-                else if (fromType == DistanceTypes.Feet && toType == DistanceTypes.SurveyFoot)
-                    length *= 0.999998000004;
                 else if (fromType == DistanceTypes.Feet && toType == DistanceTypes.NauticalMile)
                     length *= 0.000164579;
-                else if (fromType == DistanceTypes.SurveyFoot && toType == DistanceTypes.Kilometers)
-                    length *= 0.0003048006096;
-                else if (fromType == DistanceTypes.SurveyFoot && toType == DistanceTypes.Meters)
-                    length *= 0.3048006096;
-                else if (fromType == DistanceTypes.SurveyFoot && toType == DistanceTypes.Feet)
-                    length *= 1.000002;
-                else if (fromType == DistanceTypes.SurveyFoot && toType == DistanceTypes.NauticalMile)
-                    length *= 0.00016457916285097;
                 else if (fromType == DistanceTypes.NauticalMile && toType == DistanceTypes.Kilometers)
                     length *= 1.852001376036;
                 else if (fromType == DistanceTypes.NauticalMile && toType == DistanceTypes.Meters)
                     length *= 1852.001376036;
                 else if (fromType == DistanceTypes.NauticalMile && toType == DistanceTypes.Feet)
                     length *= 6076.1154855643;
-                else if (fromType == DistanceTypes.NauticalMile && toType == DistanceTypes.SurveyFoot)
-                    length *= 6076.1033333576;
             }
             catch (Exception ex)
             {
@@ -918,58 +740,6 @@ namespace ArcMapAddinVisibility.ViewModels
             return length;
         }
 
-        /// <summary>
-        /// Get the currently selected geodetic type
-        /// </summary>
-        /// <returns>esriGeodeticType</returns>
-        internal esriGeodeticType GetEsriGeodeticType()
-        {
-            esriGeodeticType type = esriGeodeticType.esriGeodeticTypeGeodesic;
-
-            switch (LineType)
-            {
-                case LineTypes.Geodesic:
-                    type = esriGeodeticType.esriGeodeticTypeGeodesic;
-                    break;
-                case LineTypes.GreatElliptic:
-                    type = esriGeodeticType.esriGeodeticTypeGreatElliptic;
-                    break;
-                case LineTypes.Loxodrome:
-                    type = esriGeodeticType.esriGeodeticTypeLoxodrome;
-                    break;
-                default:
-                    type = esriGeodeticType.esriGeodeticTypeGeodesic;
-                    break;
-            }
-
-            return type;
-        }
-        internal double GetGeodeticLengthFromPolyline(IPolyline polyline)
-        {
-            if (polyline == null)
-                return 0.0;
-
-            var polycurvegeo = polyline as IPolycurveGeodetic;
-
-            var geodeticType = GetEsriGeodeticType();
-            var linearUnit = GetLinearUnit();
-            var geodeticLength = polycurvegeo.get_LengthGeodetic(geodeticType, linearUnit);
-
-            return geodeticLength;
-        }
-        /// <summary>
-        /// Gets the distance/lenght of a polyline
-        /// </summary>
-        /// <param name="geometry">IGeometry</param>
-        internal void UpdateDistance(IGeometry geometry)
-        {
-            var polyline = geometry as IPolyline;
-
-            if (polyline == null)
-                return;
-
-            Distance = GetGeodeticLengthFromPolyline(polyline);
-        }
         /// <summary>
         /// Handler for the mouse move event
         /// When the mouse moves accross the map, IPoints are returned to aid in updating feedback to user
@@ -985,62 +755,29 @@ namespace ArcMapAddinVisibility.ViewModels
             if (point == null)
                 return;
 
-            // dynamically update start point if not set yet
-            if (!HasPoint1)
-            {
-                Point1 = point;
-            }
-            else if (HasPoint1 && !HasPoint2)
-            {
-                Point2Formatted = string.Empty;
-                Point2 = point;
-                // get distance from feedback
-                var polyline = GetPolylineFromFeedback(Point1, point);
-                UpdateDistance(polyline);
-            }
-
-            // update feedback
-            if (HasPoint1 && !HasPoint2)
-            {
-                FeedbackMoveTo(point);
-            }
+            // do nothing
         }
-        /// <summary>
-        /// Gets a polyline from the feedback object
-        /// startPoint is where it will restart from
-        /// endPoint is where you want it to end for the return of the polyline
-        /// </summary>
-        /// <param name="startPoint">startPoint is where it will restart from</param>
-        /// <param name="endPoint">endPoint is where you want it to end for the return of the polyline</param>
-        /// <returns></returns>
-        internal IPolyline GetPolylineFromFeedback(IPoint startPoint, IPoint endPoint)
+
+        internal void ZoomToExtent(IGeometry geom)
         {
-            if (feedback == null)
-                return null;
+            if (geom == null || ArcMap.Application.Document == null)
+                return;
 
-            feedback.AddPoint(endPoint);
-            var polyline = feedback.Stop();
-            // restart feedback
-            feedback.Start(startPoint);
-            return polyline;
+            var mxdoc = ArcMap.Application.Document as IMxDocument;
+            var av = mxdoc.FocusMap as IActiveView;
+
+            IEnvelope env = geom.Envelope;
+
+            double extentPercent = (env.XMax - env.XMin) > (env.YMax - env.YMin) ? (env.XMax - env.XMin) * .3 : (env.YMax - env.YMin) * .3;
+            env.XMax = env.XMax + extentPercent;
+            env.XMin = env.XMin - extentPercent;
+            env.YMax = env.YMax + extentPercent;
+            env.YMin = env.YMin - extentPercent;
+
+            av.Extent = env;
+            av.Refresh();
         }
 
-        /// <summary>
-        /// Creates a new geodetic line feedback to visualize the line to the user
-        /// </summary>
-        /// <param name="point">IPoint, start point</param>
-        /// <param name="av">The current active view</param>
-        internal void CreateFeedback(IPoint point, IActiveView av)
-        {
-            ResetFeedback();
-            feedback = new NewLineFeedback();
-            var geoFeedback = feedback as IGeodeticLineFeedback;
-            geoFeedback.GeodeticConstructionMethod = GetEsriGeodeticType();
-            geoFeedback.UseGeodeticConstruction = true;
-            geoFeedback.SpatialReference = point.SpatialReference;
-            var displayFB = feedback as IDisplayFeedback;
-            displayFB.Display = av.ScreenDisplay;
-        }
         /// <summary>
         /// Method used to convert a string to a known coordinate
         /// Assumes WGS84 for now
@@ -1139,19 +876,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
             return null;
         }
-        /// <summary>
-        /// Method to use when you need to move a feedback line to a point
-        /// This forces a new point to be used, sometimes this method projects the point to a different spatial reference
-        /// </summary>
-        /// <param name="point"></param>
-        internal void FeedbackMoveTo(IPoint point)
-        {
-            if (feedback == null || point == null)
-                return;
 
-            feedback.MoveTo(new Point() { X = point.X, Y = point.Y, SpatialReference = point.SpatialReference });
-        }
         #endregion Private Functions
-
     }
 }

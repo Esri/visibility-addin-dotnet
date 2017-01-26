@@ -289,7 +289,7 @@
     <value>Linear Line of Sight</value>
   </data>
   <data name="TooltipMapPointTool" xml:space="preserve">
-    <value>Map Point Tool</value>
+    <value>Observer Map Point Tool</value>
   </data>
   <data name="TooltipObserverMapPointTool" xml:space="preserve">
     <value>Observer Map Point Tool</value>
@@ -299,5 +299,101 @@
   </data>
   <data name="TooltipTargetMapPointTool" xml:space="preserve">
     <value>Target Map Point Tool</value>
+  </data>
+  <data name="LLOSUserPrompt" xml:space="preserve">
+    <value>The selected surface has not been projected.  Please project your data and try again.</value>
+  </data>
+  <data name="LLOSUserPromptCaption" xml:space="preserve">
+    <value>Surface Projection</value>
+  </data>
+  <data name="RLOSUserPrompt" xml:space="preserve">
+    <value>The selected surface has not been projected.  Please project your data and try again.</value>
+  </data>
+  <data name="RLOSUserPromptCaption" xml:space="preserve">
+    <value>Surface Projection</value>
+  </data>
+  <data name="EnumMiles" xml:space="preserve">
+    <value>Miles</value>
+  </data>
+  <data name="EnumYards" xml:space="preserve">
+    <value>Yards</value>
+  </data>
+  <data name="CaptionError" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="LLOSOutputLayerName" xml:space="preserve">
+    <value>LLOS_Output</value>
+  </data>
+  <data name="LLOSObserversLayerName" xml:space="preserve">
+    <value>LLOS_Observers</value>
+  </data>
+  <data name="RLOSObserversLayerName" xml:space="preserve">
+    <value>RLOS_Observers</value>
+  </data>
+  <data name="OffsetFieldName" xml:space="preserve">
+    <value>offset</value>
+  </data>
+  <data name="OffsetWithZFieldName" xml:space="preserve">
+    <value>offsetWithZ</value>
+  </data>
+  <data name="LLOSSightLinesLayerName" xml:space="preserve">
+    <value>LLOS_Sight_Lines</value>
+  </data>
+  <data name="LLOSTargetsLayerName" xml:space="preserve">
+    <value>LLOS_Targets</value>
+  </data>
+  <data name="ZFieldName" xml:space="preserve">
+    <value>Z</value>
+  </data>
+  <data name="RLOSOutputLayerName" xml:space="preserve">
+    <value>RLOS_Output</value>
+  </data>
+  <data name="RLOSMaskLayerName" xml:space="preserve">
+    <value>RLOS_Mask</value>
+  </data>
+  <data name="RLOSConvertedPolygonsLayerName" xml:space="preserve">
+    <value>RLOS_Visibility</value>
+  </data>
+  <data name="LOSSpatialAnalystLicenseInvalid" xml:space="preserve">
+    <value>Verify that the Spatial Analyst extension is available and authorized for use.</value>
+  </data>
+  <data name="AENumMustBeGreater" xml:space="preserve">
+    <value>The number must be greater than min</value>
+  </data>
+  <data name="AENumMustBeLess" xml:space="preserve">
+    <value>The number must be less than max</value>
+  </data>
+  <data name="AENumRange" xml:space="preserve">
+    <value>The number must be between {0} and {1}</value>
+  </data>
+  <data name="TooltipBottomFOVValidRange" xml:space="preserve">
+    <value>Valid range -90 to 0</value>
+  </data>
+  <data name="TooltipHFOVValidRange" xml:space="preserve">
+    <value>Valid range 0 to 360</value>
+  </data>
+  <data name="TooltipTopFOVValidRange" xml:space="preserve">
+    <value>Valid range 0 to 90</value>
+  </data>
+  <data name="NumOfObserversFieldName" xml:space="preserve">
+    <value>NumOfObservers</value>
+  </data>
+  <data name="TarIsVisFieldName" xml:space="preserve">
+    <value>TarIsVis</value>
+  </data>
+  <data name="VisCodeFieldName" xml:space="preserve">
+    <value>VisCode</value>
+  </data>
+  <data name="LLOSPointsOutsideOfSurfaceExtent" xml:space="preserve">
+    <value>Please verify that all Observer and Target Points are within the extents of the selected Surface</value>
+  </data>
+  <data name="LOSDataFrameMatch" xml:space="preserve">
+    <value>Spatial Reference of Data Frame and surface must match. Please change the Spatial Reference of the Data Frame and try again.</value>
+  </data>
+  <data name="LOSSpatialReferenceCaption" xml:space="preserve">
+    <value>Spatial Reference </value>
+  </data>
+  <data name="RLOSPointsOutsideOfSurfaceExtent" xml:space="preserve">
+    <value>Please verify that all Observer Points are within the extents of the selected Surface</value>
   </data>
 </root>

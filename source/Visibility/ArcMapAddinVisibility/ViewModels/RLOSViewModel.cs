@@ -12,7 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using VisibilityLibrary.Helpers;
+// System
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows;
+
+// Esri
 using ESRI.ArcGIS.ADF;
 using ESRI.ArcGIS.Carto;
 using ESRI.ArcGIS.DataSourcesGDB;
@@ -22,10 +28,9 @@ using ESRI.ArcGIS.GeoAnalyst;
 using ESRI.ArcGIS.Geodatabase;
 using ESRI.ArcGIS.Geometry;
 using ESRI.ArcGIS.Geoprocessing;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows;
+
+// Solution
+using VisibilityLibrary.Helpers;
 using VisibilityLibrary;
 
 namespace ArcMapAddinVisibility.ViewModels
@@ -45,39 +50,6 @@ namespace ArcMapAddinVisibility.ViewModels
         public double TopVerticalFOV { get; set; }
         public bool ShowNonVisibleData { get; set; }
         public int RunCount { get; set; }
-
-        private bool isCancelEnabled;
-        public bool IsCancelEnabled
-        {
-            get { return isCancelEnabled; }
-            set
-            {
-                isCancelEnabled = value;
-                RaisePropertyChanged(() => IsCancelEnabled);
-            }
-        }
-
-        private bool isOkEnabled;
-        public bool IsOkEnabled
-        {
-            get { return isOkEnabled; }
-            set
-            {
-                isOkEnabled = value;
-                RaisePropertyChanged(() => IsOkEnabled);
-            }
-        }
-
-        private bool isClearEnabled;
-        public bool IsClearEnabled
-        {
-            get { return isClearEnabled; }
-            set
-            {
-                isClearEnabled = value;
-                RaisePropertyChanged(() => IsClearEnabled);
-            }
-        }
 
         private Visibility _displayProgressBar;
         public Visibility DisplayProgressBar
@@ -106,17 +78,10 @@ namespace ArcMapAddinVisibility.ViewModels
             DisplayProgressBar = Visibility.Hidden;
         }
 
-        private void OnCancelCommand(object obj)
-        {
-            Reset(true);
-        }
-
         private void OnClearCommand(object obj)
         {
             Reset(true);
         }
-
-
 
         #endregion
 
@@ -134,9 +99,6 @@ namespace ArcMapAddinVisibility.ViewModels
             TopVerticalFOV = 90.0;
             ShowNonVisibleData = false;
             RunCount = 1;
-            IsClearEnabled = false;
-            IsOkEnabled = false;
-            IsCancelEnabled = false;
             DisplayProgressBar = Visibility.Hidden;
 
             // commands
@@ -150,15 +112,11 @@ namespace ArcMapAddinVisibility.ViewModels
         internal override void OnDeletePointCommand(object obj)
         {
             base.OnDeletePointCommand(obj);
-
-            EnableOkCancelClearBtns(ObserverAddInPoints.Any());
         }
 
         internal override void OnDeleteAllPointsCommand(object obj)
         {
             base.OnDeleteAllPointsCommand(obj);
-
-            EnableOkCancelClearBtns(ObserverAddInPoints.Any());
         }
 
         public override bool CanCreateElement
@@ -175,204 +133,218 @@ namespace ArcMapAddinVisibility.ViewModels
         /// </summary>
         internal override void CreateMapElement()
         {
-            if (!CanCreateElement || ArcMap.Document == null || ArcMap.Document.FocusMap == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
-                return;
-
-            //base.CreateMapElement();
-
-            var surface = GetSurfaceFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
-
-            if (surface == null)
-                return;
-
-            using (ComReleaser oComReleaser = new ComReleaser())
+            try
             {
+                IsRunning = true;
 
-                // Create feature workspace
-                IFeatureWorkspace workspace = CreateFeatureWorkspace("tempWorkspace");
+                if (!CanCreateElement || ArcMap.Document == null || ArcMap.Document.FocusMap == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
+                    return;
 
-                StartEditOperation((IWorkspace)workspace);
+                //base.CreateMapElement();
 
-                // Create feature class
-                IFeatureClass pointFc = CreateObserversFeatureClass(workspace, "Output" + RunCount.ToString());
+                var surface = GetSurfaceFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
 
-                double finalObserverOffset = GetOffsetInZUnits(ArcMap.Document.FocusMap, ObserverOffset.Value, surface.ZFactor, OffsetUnitType);
-                double finalSurfaceOffset = GetOffsetInZUnits(ArcMap.Document.FocusMap, SurfaceOffset, surface.ZFactor, OffsetUnitType);
+                if (surface == null)
+                    return;
 
-                double conversionFactor = GetConversionFactor(ArcMap.Document.FocusMap.SpatialReference);
-                double convertedMinDistance = MinDistance * conversionFactor;
-                double convertedMaxDistance = MaxDistance * conversionFactor;
-                double finalMinDistance = GetLinearDistance(ArcMap.Document.FocusMap, convertedMinDistance, OffsetUnitType);
-                double finalMaxDistance = GetLinearDistance(ArcMap.Document.FocusMap, convertedMaxDistance, OffsetUnitType);
+                // Determine if selected surface is projected or geographic
+                ILayer surfaceLayer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
+                var geoDataset = surfaceLayer as IGeoDataset;
+                SelectedSurfaceSpatialRef = geoDataset.SpatialReference;
 
-                double finalLeftHorizontalFOV = GetAngularDistance(ArcMap.Document.FocusMap, LeftHorizontalFOV, AngularUnitType);
-                double finalRightHorizontalFOV = GetAngularDistance(ArcMap.Document.FocusMap, RightHorizontalFOV, AngularUnitType);
-                double finalBottomVerticalFOV = GetAngularDistance(ArcMap.Document.FocusMap, BottomVerticalFOV, AngularUnitType);
-                double finalTopVerticalFOV = GetAngularDistance(ArcMap.Document.FocusMap, TopVerticalFOV, AngularUnitType);
-
-                // Out radius geometries
-                List<IGeometry> radius2GeomList = new List<IGeometry>();
-                List<IGeometry> radius1_2GeomList = new List<IGeometry>();
-                List<IGeometry> donutGeomList = new List<IGeometry>();
-
-                foreach (var observerPoint in ObserverAddInPoints)
+                if (SelectedSurfaceSpatialRef is IGeographicCoordinateSystem)
                 {
-                    // Create buffer geometries for final Min/Max distance
-                    ITopologicalOperator topologicalOperator = observerPoint.Point as ITopologicalOperator;
-                    IGeometry geom = topologicalOperator.Buffer(finalMaxDistance);
-                    radius2GeomList.Add(geom);
-                    radius1_2GeomList.Add(geom);
-                    if (finalMinDistance > 0)
+                    MessageBox.Show(VisibilityLibrary.Properties.Resources.RLOSUserPrompt, VisibilityLibrary.Properties.Resources.RLOSUserPromptCaption);
+                    return;
+                }
+
+                if (geoDataset != null && ArcMap.Document.FocusMap.SpatialReference.FactoryCode != geoDataset.SpatialReference.FactoryCode)
+                {
+                    MessageBox.Show(VisibilityLibrary.Properties.Resources.LOSDataFrameMatch, VisibilityLibrary.Properties.Resources.LOSSpatialReferenceCaption);
+                    return;
+                }
+
+                using (ComReleaser oComReleaser = new ComReleaser())
+                {
+
+                    // Create feature workspace
+                    IFeatureWorkspace workspace = CreateFeatureWorkspace("tempWorkspace");
+
+                    StartEditOperation((IWorkspace)workspace);
+
+                    // Create feature class
+                    IFeatureClass pointFc = CreateObserversFeatureClass(workspace, SelectedSurfaceSpatialRef, "Output" + RunCount.ToString());
+
+                    double finalObserverOffset = GetOffsetInZUnits(ObserverOffset.Value, surface.ZFactor, OffsetUnitType);
+                    double finalSurfaceOffset = GetOffsetInZUnits(SurfaceOffset, surface.ZFactor, OffsetUnitType);
+
+                    double conversionFactor = GetConversionFactor(SelectedSurfaceSpatialRef);
+                    double convertedMinDistance = MinDistance * conversionFactor;
+                    double convertedMaxDistance = MaxDistance * conversionFactor;
+                    double finalMinDistance = GetLinearDistance(ArcMap.Document.FocusMap, convertedMinDistance, OffsetUnitType);
+                    double finalMaxDistance = GetLinearDistance(ArcMap.Document.FocusMap, convertedMaxDistance, OffsetUnitType);
+
+                    double finalLeftHorizontalFOV = GetAngularDistance(ArcMap.Document.FocusMap, LeftHorizontalFOV, AngularUnitType);
+                    double finalRightHorizontalFOV = GetAngularDistance(ArcMap.Document.FocusMap, RightHorizontalFOV, AngularUnitType);
+                    double finalBottomVerticalFOV = GetAngularDistance(ArcMap.Document.FocusMap, BottomVerticalFOV, AngularUnitType);
+                    double finalTopVerticalFOV = GetAngularDistance(ArcMap.Document.FocusMap, TopVerticalFOV, AngularUnitType);
+
+                    // Out radius geometries
+                    List<IGeometry> radius2GeomList = new List<IGeometry>();
+                    List<IGeometry> radius1_2GeomList = new List<IGeometry>();
+                    List<IGeometry> donutGeomList = new List<IGeometry>();
+
+                    foreach (var observerPoint in ObserverAddInPoints)
                     {
-                        IGeometry geom2 = topologicalOperator.Buffer(finalMinDistance);
-                        
-                        ITopologicalOperator eraseTopo = geom as ITopologicalOperator;
-                        IGeometry erasedGeom = eraseTopo.Difference(geom2);
-                        donutGeomList.Add(erasedGeom);
-                    }    
-                    else
-                    {
+                        // Create buffer geometries for final Min/Max distance
+                        ITopologicalOperator topologicalOperator = observerPoint.Point as ITopologicalOperator;
+                        IGeometry geom = topologicalOperator.Buffer(finalMaxDistance);
+                        radius2GeomList.Add(geom);
                         radius1_2GeomList.Add(geom);
+                        if (finalMinDistance > 0)
+                        {
+                            IGeometry geom2 = topologicalOperator.Buffer(finalMinDistance);
+
+                            ITopologicalOperator eraseTopo = geom as ITopologicalOperator;
+                            IGeometry erasedGeom = eraseTopo.Difference(geom2);
+                            donutGeomList.Add(erasedGeom);
+                        }
+                        else
+                        {
+                            radius1_2GeomList.Add(geom);
+                        }
+
+                        double z1 = surface.GetElevation(observerPoint.Point) + finalObserverOffset;
+
+                        //create a new point feature
+                        IFeature ipFeature = pointFc.CreateFeature();
+
+                        // Set the field values for the feature
+                        SetFieldValues(finalObserverOffset, finalSurfaceOffset, finalMinDistance, finalMaxDistance, finalLeftHorizontalFOV,
+                            finalRightHorizontalFOV, finalBottomVerticalFOV, finalTopVerticalFOV, ipFeature);
+
+                        if (double.IsNaN(z1))
+                        {
+                            System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.RLOSPointsOutsideOfSurfaceExtent, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+                            return;
+                        }
+
+                        //Create shape 
+                        IPoint point = new PointClass() { Z = z1, X = observerPoint.Point.X, Y = observerPoint.Point.Y, ZAware = true };
+                        ipFeature.Shape = point;
+                        ipFeature.Store();
                     }
 
-                    double z1 = surface.GetElevation(observerPoint.Point) + finalObserverOffset;
+                    IFeatureClassDescriptor fd = new FeatureClassDescriptorClass();
+                    fd.Create(pointFc, null, "OBJECTID");
 
-                    //create a new point feature
-                    IFeature ipFeature = pointFc.CreateFeature();
+                    StopEditOperation((IWorkspace)workspace);
 
-                    // Set the field values for the feature
-                    SetFieldValues(finalObserverOffset, finalSurfaceOffset, finalMinDistance, finalMaxDistance, finalLeftHorizontalFOV, 
-                        finalRightHorizontalFOV, finalBottomVerticalFOV, finalTopVerticalFOV, ipFeature);
-
-                    //Create shape 
-                    IPoint point = new PointClass() { Z = z1, X = observerPoint.Point.X, Y = observerPoint.Point.Y, ZAware = true };
-                    ipFeature.Shape = point;
-                    ipFeature.Store();
-                }
-
-                IFeatureClassDescriptor fd = new FeatureClassDescriptorClass();
-                fd.Create(pointFc, null, "OBJECTID");
-
-                StopEditOperation((IWorkspace)workspace);
-
-                try
-                {
-                    ILayer layer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
-                    string layerPath = GetLayerPath(layer);
-
-                IFeatureLayer ipFeatureLayer = new FeatureLayerClass();
-                ipFeatureLayer.FeatureClass = pointFc;
-
-                IDataset ipDataset = (IDataset)pointFc;
-                string outputFcName = ipDataset.BrowseName + "_output";
-                string strPath = ipDataset.Workspace.PathName + "\\" + ipDataset.BrowseName;
-                string outPath = ipDataset.Workspace.PathName + "\\" + outputFcName;
-
-                IVariantArray parameters = new VarArrayClass();
-                    parameters.Add(layerPath);
-                parameters.Add(strPath);
-                parameters.Add(outPath);
-
-                    esriLicenseStatus status = GetSpatialAnalystLicense();
-
-                    IGeoProcessor2 gp = new GeoProcessorClass();
-
-                    gp.AddOutputsToMap = false;
-
-                    // Add a mask to buffer the output to selected distance
-                    SetGPMask(workspace, radius2GeomList, gp, "radiusMask");
-
-                    object oResult = gp.Execute("Visibility_sa", parameters, null);
-                    IGeoProcessorResult ipResult = (IGeoProcessorResult)oResult;
-
-                    ComReleaser.ReleaseCOMObject(gp);
-                    gp = null;
-                    GC.Collect();
-
-                    // Add buffer geometries to the map
-                    foreach (IGeometry geom in radius1_2GeomList)
+                    try
                     {
-                        var color = new RgbColorClass() { Blue = 255 } as IColor;
-                        AddGraphicToMap(geom, color, true);
+                        ILayer layer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
+                        string layerPath = GetLayerPath(layer);
+
+                        IFeatureLayer ipFeatureLayer = new FeatureLayerClass();
+                        ipFeatureLayer.FeatureClass = pointFc;
+
+                        IDataset ipDataset = (IDataset)pointFc;
+                        string outputFcName = ipDataset.BrowseName + "_output";
+                        string strPath = ipDataset.Workspace.PathName + "\\" + ipDataset.BrowseName;
+                        string outPath = ipDataset.Workspace.PathName + "\\" + outputFcName;
+
+                        IVariantArray parameters = new VarArrayClass();
+                        parameters.Add(layerPath);
+                        parameters.Add(strPath);
+                        parameters.Add(outPath);
+
+                        esriLicenseStatus status = GetSpatialAnalystLicense();
+                        if (status == esriLicenseStatus.esriLicenseUnavailable || status == esriLicenseStatus.esriLicenseFailure ||
+                            status == esriLicenseStatus.esriLicenseNotInitialized || status == esriLicenseStatus.esriLicenseNotLicensed ||
+                            status == esriLicenseStatus.esriLicenseUnavailable)
+                        {
+                            System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.LOSSpatialAnalystLicenseInvalid, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+                            return;
+                        }
+
+                        IGeoProcessor2 gp = new GeoProcessorClass();
+
+                        gp.AddOutputsToMap = false;
+
+                        // Add a mask to buffer the output to selected distance
+                        SetGPMask(workspace, radius2GeomList, gp, "radiusMask");
+
+                        object oResult = gp.Execute("Visibility_sa", parameters, null);
+                        IGeoProcessorResult ipResult = (IGeoProcessorResult)oResult;
+
+                        ComReleaser.ReleaseCOMObject(gp);
+                        gp = null;
+                        GC.Collect();
+
+                        // Add buffer geometries to the map
+                        foreach (IGeometry geom in radius1_2GeomList)
+                        {
+                            var color = new RgbColorClass() { Blue = 255 } as IColor;
+                            AddGraphicToMap(geom, color, true);
+                        }
+
+                        IRasterLayer outputRasterLayer = new RasterLayerClass();
+                        outputRasterLayer.CreateFromFilePath(outPath);
+
+                        string fcName = IntersectOutput(outputRasterLayer, ipDataset, workspace, donutGeomList);
+
+                        IFeatureClass finalFc = workspace.OpenFeatureClass(fcName);
+
+                        IFeatureLayer outputFeatureLayer = new FeatureLayerClass();
+                        outputFeatureLayer.FeatureClass = finalFc;
+
+                        //Add it to a map if the layer is valid.
+                        if (outputFeatureLayer != null)
+                        {
+                            // set the renderer
+                            IFeatureRenderer featRend = UniqueValueRenderer(workspace, finalFc);
+                            IGeoFeatureLayer geoLayer = outputFeatureLayer as IGeoFeatureLayer;
+                            geoLayer.Renderer = featRend;
+                            geoLayer.Name = "RLOS_Visibility_" + RunCount.ToString();
+
+                            // Set the layer transparency
+                            IDisplayFilterManager filterManager = (IDisplayFilterManager)outputFeatureLayer;
+                            ITransparencyDisplayFilter filter = new TransparencyDisplayFilter();
+                            filter.Transparency = 80;
+                            filterManager.DisplayFilter = filter;
+
+                            ESRI.ArcGIS.Carto.IMap map = ArcMap.Document.FocusMap;
+                            map.AddLayer((ILayer)outputFeatureLayer);
+
+                            IEnvelope envelope = outputFeatureLayer.AreaOfInterest.Envelope;
+                            ZoomToExtent(envelope);
+                        }
+
+                        RunCount += 1;
                     }
-
-                    IRasterLayer outputRasterLayer = new RasterLayerClass();
-                    outputRasterLayer.CreateFromFilePath(outPath);
-
-                    string fcName = IntersectOutput(outputRasterLayer, ipDataset, workspace, donutGeomList);
-          
-                    IFeatureClass finalFc = workspace.OpenFeatureClass(fcName);
-
-                    IFeatureLayer outputFeatureLayer = new FeatureLayerClass();
-                    outputFeatureLayer.FeatureClass = finalFc;
-
-                    //Add it to a map if the layer is valid.
-                    if (outputFeatureLayer != null)
+                    catch (Exception ex)
                     {
-                        // set the renderer
-                        IFeatureRenderer featRend = UnqueValueRenderer(workspace, finalFc);
-                        IGeoFeatureLayer geoLayer = outputFeatureLayer as IGeoFeatureLayer;
-                        geoLayer.Renderer = featRend;
-                        geoLayer.Name = "VisibilityLayer_" + RunCount.ToString();
-
-                        // Set the layer transparency
-                        IDisplayFilterManager filterManager = (IDisplayFilterManager)outputFeatureLayer;
-                        ITransparencyDisplayFilter filter = new TransparencyDisplayFilter(); 
- 			            filter.Transparency = 80; 
- 			            filterManager.DisplayFilter = filter; 
-
-                        ESRI.ArcGIS.Carto.IMap map = ArcMap.Document.FocusMap;
-                        map.AddLayer((ILayer)outputFeatureLayer);
+                        System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
                     }
 
-                    RunCount += 1;
+                    //Reset(true);
                 }
-                catch (Exception ex)
-                {
-                    string exception = ex.ToString();
-                    System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
-                }
-
-                //Reset(true);
             }
-        }
-
-        internal override void Reset(bool toolReset)
-        {
-            base.Reset(toolReset);
-
-            if (ArcMap.Document == null || ArcMap.Document.FocusMap == null)
-                return;
-
-            // Disable buttons
-            EnableOkCancelClearBtns(false);
-        }
-
-        /// <summary>
-        /// Override this event to collect observer points based on tool mode
-        /// Setting the observer point to blue since the output is green / red
-        /// </summary>
-        /// <param name="obj"></param>
-        internal override void OnNewMapPointEvent(object obj)
-        {
-            base.OnNewMapPointEvent(obj);
-
-            if (!IsActiveTab)
-                return;
-
-            var point = obj as IPoint;
-
-            if (point == null)
-                return;
-
-            EnableOkCancelClearBtns(ObserverAddInPoints.Any());
+            catch(Exception ex)
+            {
+                System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+            }
+            finally
+            {
+                IsRunning = false;
+            }
         }
 
         #endregion
 
         #region public
 
-        public IFeatureRenderer UnqueValueRenderer(IFeatureWorkspace workspace, IFeatureClass fc)
+        public IFeatureRenderer UniqueValueRenderer(IFeatureWorkspace workspace, IFeatureClass fc)
         {
             try
             {
@@ -412,13 +384,20 @@ namespace ArcMapAddinVisibility.ViewModels
 
                 ISimpleFillSymbol fillSymbol = new SimpleFillSymbolClass();
                 ISimpleFillSymbol fillSymbol2 = new SimpleFillSymbolClass();
+
+                ISimpleLineSymbol outlineSymbol = new SimpleLineSymbolClass();
+                outlineSymbol.Color = new RgbColorClass() { NullColor = true } as IColor;
+                outlineSymbol.Style = esriSimpleLineStyle.esriSLSSolid;
+
                 if (ShowNonVisibleData == true)
                 {                  
                     fillSymbol.Color = new RgbColorClass() { Red = 255 } as IColor;
+                    fillSymbol.Outline = outlineSymbol;
                     uvRenderer.AddValue("0", "", fillSymbol as ISymbol);
-                    uvRenderer.set_Label("0", "Non-Visible");                
+                    uvRenderer.set_Label("0", "Non-Visible");    
                 }
                     fillSymbol2.Color = new RgbColorClass() { Green = 255 } as IColor;
+                    fillSymbol2.Outline = outlineSymbol;
                     uvRenderer.AddValue("1", "", fillSymbol2 as ISymbol);
                     uvRenderer.set_Label("1", "Visible by 1 Observer");
 
@@ -429,6 +408,7 @@ namespace ArcMapAddinVisibility.ViewModels
                     {
                         ISimpleFillSymbol newFillSymbol = new SimpleFillSymbolClass();
                         newFillSymbol.Color = colorRamp.get_Color(i);
+                        newFillSymbol.Outline = outlineSymbol;
                         uvRenderer.AddValue(i.ToString(), "", newFillSymbol as ISymbol);
                         string label = "Visible by " + i.ToString() + " Observers";
                         uvRenderer.set_Label(i.ToString(), label);
@@ -482,18 +462,26 @@ namespace ArcMapAddinVisibility.ViewModels
         /// Start Editing operation
         /// </summary>
         /// <param name="ipWorkspace">IWorkspace</param>
-        public static void StartEditOperation(IWorkspace ipWorkspace)
+        public static bool StartEditOperation(IWorkspace ipWorkspace)
         {
+            bool blnWasSuccessful = false;
             IWorkspaceEdit ipWsEdit = ipWorkspace as IWorkspaceEdit;
-            try
+
+            if (ipWsEdit != null)
             {
-                ipWsEdit.StartEditOperation();
+                try
+                {
+                    ipWsEdit.StartEditOperation();
+                    blnWasSuccessful = true;
+                }
+                catch (Exception ex)
+                {
+                    ipWsEdit.AbortEditOperation();
+                    throw (ex);
+                }
             }
-            catch (Exception ex)
-            {
-                ipWsEdit.AbortEditOperation();
-                throw (ex);
-            }
+            
+            return blnWasSuccessful;
         }
 
         /// <summary>
@@ -505,15 +493,18 @@ namespace ArcMapAddinVisibility.ViewModels
         {
             bool blnWasSuccessful = false;
             IWorkspaceEdit ipWsEdit = ipWorkspace as IWorkspaceEdit;
-
-            try
+            if (ipWsEdit != null)
             {
-                ipWsEdit.StopEditOperation();
-                blnWasSuccessful = true;
-            }
-            catch (Exception ex)
-            {
-                ipWsEdit.AbortEditOperation();
+                try
+                {
+                    ipWsEdit.StopEditOperation();
+                    blnWasSuccessful = true;
+                }
+                catch (Exception ex)
+                {
+                    ipWsEdit.AbortEditOperation();
+                    throw (ex);
+                }
             }
 
             return blnWasSuccessful;
@@ -563,9 +554,10 @@ namespace ArcMapAddinVisibility.ViewModels
         /// Create the point feature class for observer locations
         /// </summary> 
         /// <param name="featWorkspace"></param> 
+        /// <param name="spatialRef">Spatial Reference of the surface</param>
         /// <param name="name"></param> 
         /// <returns></returns> 
-        public static IFeatureClass CreateObserversFeatureClass(IFeatureWorkspace featWorkspace, string name)
+        public static IFeatureClass CreateObserversFeatureClass(IFeatureWorkspace featWorkspace, ISpatialReference spatialRef, string name)
         {
 
             IFieldsEdit pFldsEdt = new FieldsClass();
@@ -580,7 +572,7 @@ namespace ArcMapAddinVisibility.ViewModels
             IGeometryDefEdit pGeoDef;
             pGeoDef = new GeometryDefClass();
             pGeoDef.GeometryType_2 = esriGeometryType.esriGeometryPoint;
-            pGeoDef.SpatialReference_2 = ArcMap.Document.FocusMap.SpatialReference;
+            pGeoDef.SpatialReference_2 = spatialRef;
             pGeoDef.HasZ_2 = true;
 
             pFldEdt = new FieldClass();
@@ -646,17 +638,6 @@ namespace ArcMapAddinVisibility.ViewModels
         #endregion
 
         #region private
-
-        /// <summary>
-        /// Enable or disable the form buttons
-        /// </summary>
-        /// <param name="enable">true to enable</param>
-        private void EnableOkCancelClearBtns(bool enable)
-        {
-            IsOkEnabled = enable;
-            IsCancelEnabled = enable;
-            IsClearEnabled = enable;
-        }
 
         /// <summary>
         /// Run RasterToPoly tool to convert input raster to poly's.  Then run Intersect if input geomList has features
@@ -726,9 +707,10 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <param name="workspace">IFeatureWorkspace</param>
         /// <param name="geomList">List of geometries to create the mask</param>
         /// <param name="gp">IGeoProcessor2</param>
+        /// <param name="fcName">Name of feature class</param>
         private string SetGPMask(IFeatureWorkspace workspace, List<IGeometry> geomList, IGeoProcessor2 gp, string fcName)
         {
-            IFeatureClass maskFc = CreateMaskFeatureClass(workspace, fcName + "_" + RunCount.ToString());
+            IFeatureClass maskFc = CreateMaskFeatureClass(workspace, SelectedSurfaceSpatialRef, fcName + "_" + RunCount.ToString());
 
             foreach (IGeometry geom in geomList)
             {
@@ -825,12 +807,12 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <returns></returns>
         private double GetLinearDistance(IMap map, double inputDistance, DistanceTypes distanceType)
         {
-            if (map.SpatialReference == null)
+            if (SelectedSurfaceSpatialRef == null)
                 return inputDistance;
 
             DistanceTypes distanceTo = DistanceTypes.Meters; // default to meters
 
-            var pcs = map.SpatialReference as IProjectedCoordinateSystem;
+            var pcs = SelectedSurfaceSpatialRef as IProjectedCoordinateSystem;
 
             if (pcs != null)
             {
@@ -839,7 +821,7 @@ namespace ArcMapAddinVisibility.ViewModels
             }
             else
             {
-                var gcs = map.SpatialReference as IGeographicCoordinateSystem;
+                var gcs = SelectedSurfaceSpatialRef as IGeographicCoordinateSystem;
                 if (gcs != null)
                 {
                     distanceTo = GetDistanceType(gcs.CoordinateUnit.FactoryCode);
@@ -856,9 +838,10 @@ namespace ArcMapAddinVisibility.ViewModels
         /// Create a polygon feature class used to store buffer geometries for observer points
         /// </summary>
         /// <param name="featWorkspace">IFeatureWorkspace</param>
+        /// <param name="spatialRef">ISpatialReference of selected surface</param>
         /// <param name="name">Name of the feature class</param>
         /// <returns>IFeatureClass</returns>
-        private static IFeatureClass CreateMaskFeatureClass(IFeatureWorkspace featWorkspace, string name)
+        private static IFeatureClass CreateMaskFeatureClass(IFeatureWorkspace featWorkspace, ISpatialReference spatialRef, string name)
         {
 
             IFieldsEdit pFldsEdt = new FieldsClass();
@@ -873,7 +856,7 @@ namespace ArcMapAddinVisibility.ViewModels
             IGeometryDefEdit pGeoDef;
             pGeoDef = new GeometryDefClass();
             pGeoDef.GeometryType_2 = esriGeometryType.esriGeometryPolygon;
-            pGeoDef.SpatialReference_2 = ArcMap.Document.FocusMap.SpatialReference;
+            pGeoDef.SpatialReference_2 = spatialRef;
 
             pFldEdt = new FieldClass();
             pFldEdt.Name_2 = "SHAPE";
@@ -946,12 +929,12 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <returns></returns>
         private double GetAngularDistance(IMap map, double inputDistance, AngularTypes angularType)
         {
-            if (map.SpatialReference == null)
+            if (SelectedSurfaceSpatialRef == null)
                 return inputDistance;
 
             AngularTypes angularDistanceTo = AngularTypes.DEGREES; // default to degrees
 
-            var gcs = map.SpatialReference as IGeographicCoordinateSystem;
+            var gcs = SelectedSurfaceSpatialRef as IGeographicCoordinateSystem;
 
             if (gcs != null)
             {

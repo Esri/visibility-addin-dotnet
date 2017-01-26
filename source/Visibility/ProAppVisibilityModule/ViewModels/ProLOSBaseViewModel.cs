@@ -17,14 +17,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Collections.ObjectModel;
 using System.Collections;
+using System.Windows;
+using System.Threading.Tasks;
+using System.Diagnostics;
+using ArcGIS.Core.Geometry;
+using ArcGIS.Desktop.Mapping;
+using ArcGIS.Desktop.Framework.Threading.Tasks;
+using ArcGIS.Desktop.Mapping.Events;
 using VisibilityLibrary;
 using VisibilityLibrary.Helpers;
 using VisibilityLibrary.Views;
 using VisibilityLibrary.ViewModels;
-using ArcGIS.Core.Geometry;
-using ArcMapAddinVisibility.Models;
-using ArcGIS.Desktop.Mapping;
-using System.Windows;
+using ProAppVisibilityModule.Models;
+using ArcGIS.Core.CIM;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -43,14 +48,26 @@ namespace ProAppVisibilityModule.ViewModels
             SurfaceLayerNames = new ObservableCollection<string>();
             SelectedSurfaceName = string.Empty;
 
-            //TODO update for Pro
-            //Mediator.Register(Constants.MAP_TOC_UPDATED, OnMapTocUpdated);
             Mediator.Register(VisibilityLibrary.Constants.DISPLAY_COORDINATE_TYPE_CHANGED, OnDisplayCoordinateTypeChanged);
 
             DeletePointCommand = new RelayCommand(OnDeletePointCommand);
             DeleteAllPointsCommand = new RelayCommand(OnDeleteAllPointsCommand);
             EditPropertiesDialogCommand = new RelayCommand(OnEditPropertiesDialogCommand);
 
+            // subscribe to some mapping events
+            ActiveMapViewChangedEvent.Subscribe(OnActiveMapViewChanged);
+            LayersAddedEvent.Subscribe(OnLayersAdded);
+            LayersRemovedEvent.Subscribe(OnLayersAdded);
+            MapPropertyChangedEvent.Subscribe(OnMapPropertyChanged);
+            MapMemberPropertiesChangedEvent.Subscribe(OnMapMemberPropertyChanged);
+        }
+
+        ~ProLOSBaseViewModel()
+        {
+            ActiveMapViewChangedEvent.Unsubscribe(OnActiveMapViewChanged);
+            LayersAddedEvent.Unsubscribe(OnLayersAdded);
+            LayersRemovedEvent.Unsubscribe(OnLayersAdded);
+            MapPropertyChangedEvent.Unsubscribe(OnMapPropertyChanged);
         }
 
         #region Properties
@@ -92,7 +109,7 @@ namespace ProAppVisibilityModule.ViewModels
                     throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEInvalidInput);
             }
         }
-        internal MapPointToolMode ToolMode { get; set; }
+        public MapPointToolMode ToolMode { get; set; }
         public ObservableCollection<AddInPoint> ObserverAddInPoints { get; set; }
         public ObservableCollection<string> SurfaceLayerNames { get; set; }
         public string SelectedSurfaceName { get; set; }
@@ -110,7 +127,7 @@ namespace ProAppVisibilityModule.ViewModels
         /// <summary>
         /// Command method to delete points
         /// </summary>
-        /// <param name="obj"></param>
+        /// <param name="obj">List of AddInPoint</param>
         internal virtual void OnDeletePointCommand(object obj)
         {
             // remove observer points
@@ -140,6 +157,11 @@ namespace ProAppVisibilityModule.ViewModels
 
             dlg.ShowDialog();
         }
+
+        /// <summary>
+        /// Method used to delete points frome the view's observer listbox
+        /// </summary>
+        /// <param name="observers">List of AddInPoint</param>
         private void DeletePoints(List<AddInPoint> observers)
         {
             if (observers == null || !observers.Any())
@@ -147,9 +169,9 @@ namespace ProAppVisibilityModule.ViewModels
 
             // remove graphics from map
             var guidList = observers.Select(x => x.GUID).ToList();
-            //RemoveGraphics(guidList);
-            //TODO update for Pro
+            RemoveGraphics(guidList);
 
+            // remove items from collection
             foreach (var point in observers)
             {
                 ObserverAddInPoints.Remove(point);
@@ -161,26 +183,36 @@ namespace ProAppVisibilityModule.ViewModels
         #region Event handlers
 
         /// <summary>
-        /// Method called when the map TOC is updated
-        /// Reset surface names
+        /// Override OnKeyKeyCommand to handle manual input
         /// </summary>
-        /// <param name="obj">not used</param>
-        //private void OnMapTocUpdated(object obj)
-        //{
-        //    if (ArcMap.Document == null || ArcMap.Document.FocusMap == null)
-        //        return;
+        /// <param name="obj"></param>
+        internal override void OnEnterKeyCommand(object obj)
+        {
+            var keyCommandMode = obj as string;
 
-        //    var map = ArcMap.Document.FocusMap;
-
-        //    ResetSurfaceNames(map);
-        //}
+            if(keyCommandMode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
+            {
+                ToolMode = MapPointToolMode.Observer;
+                OnNewMapPointEvent(Point1);
+            }
+            else if (keyCommandMode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
+            {
+                ToolMode = MapPointToolMode.Target;
+                OnNewMapPointEvent(Point2);
+            }
+            else
+            {
+                ToolMode = MapPointToolMode.Unknown;
+                base.OnEnterKeyCommand(obj);
+            }
+        }
 
         /// <summary>
         /// Override this method to implement a "Mode" to separate the input of
         /// observer points and target points
         /// </summary>
         /// <param name="obj">ToolMode string from resource file</param>
-        internal override void OnActivateTool(object obj)
+        internal override void OnActivateToolCommand(object obj)
         {
             var mode = obj.ToString();
             ToolMode = MapPointToolMode.Unknown;
@@ -193,21 +225,21 @@ namespace ProAppVisibilityModule.ViewModels
             else if (mode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
                 ToolMode = MapPointToolMode.Target;
 
-            base.OnActivateTool(obj);
+            base.OnActivateToolCommand(obj);
         }
 
         /// <summary>
         /// Override this event to collect observer points based on tool mode
         /// </summary>
         /// <param name="obj">MapPointToolMode</param>
-        internal override void OnNewMapPointEvent(object obj)
+        internal override async void OnNewMapPointEvent(object obj)
         {
             if (!IsActiveTab)
                 return;
 
             var point = obj as MapPoint;
 
-            if (point == null || !IsValidPoint(point, true))
+            if (point == null || !(await IsValidPoint(point, true)))
                 return;
 
             // ok, we have a point
@@ -216,34 +248,66 @@ namespace ProAppVisibilityModule.ViewModels
                 // in tool mode "Observer" we add observer points
                 // otherwise ignore
                 
-                AddGraphicToMap(point, ColorFactory.Blue, true, 5.0);
-                var addInPoint = new AddInPoint() { Point = point };
+                var guid = await AddGraphicToMap(point, ColorFactory.Blue, true, 5.0);
+                var addInPoint = new AddInPoint() { Point = point, GUID = guid };
                 Application.Current.Dispatcher.Invoke(() =>
                     {
                         ObserverAddInPoints.Insert(0, addInPoint);
                     });
             }
         }
+
+        /// <summary>
+        /// Method to update manual input boxes on mouse movement
+        /// </summary>
+        /// <param name="obj"></param>
+        internal override void OnMouseMoveEvent(object obj)
+        {
+            if (!IsActiveTab)
+                return;
+
+            var point = obj as MapPoint;
+
+            if (point == null)
+                return;
+
+            if (ToolMode == MapPointToolMode.Observer)
+            {
+                Point1Formatted = string.Empty;
+                Point1 = point;
+            }
+            else if (ToolMode == MapPointToolMode.Target)
+            {
+                Point2Formatted = string.Empty;
+                Point2 = point;
+            }
+        }
+
         /// <summary>
         /// Method to check to see point is withing the currently selected surface
         /// returns true if there is no surface selected or point is contained by layer AOI
         /// returns false if the point is not contained in the layer AOI
         /// </summary>
-        /// <param name="point">IPoint to validate</param>
+        /// <param name="point">MapPoint to validate</param>
         /// <param name="showPopup">boolean to show popup message or not</param>
         /// <returns></returns>
-        internal bool IsValidPoint(MapPoint point, bool showPopup = false)
+        internal async Task<bool> IsValidPoint(MapPoint point, bool showPopup = false)
         {
             var validPoint = true;
 
-            //TODO update to Pro, if point is within the surface layer?
-            //if (!string.IsNullOrWhiteSpace(SelectedSurfaceName) && ArcMap.Document != null && ArcMap.Document.FocusMap != null)
-            //{
-            //    validPoint = IsPointWithinExtent(point, GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName).AreaOfInterest);
+            if (!string.IsNullOrWhiteSpace(SelectedSurfaceName) && MapView.Active != null && MapView.Active.Map != null)
+            {
+                var layer = GetLayerFromMapByName(SelectedSurfaceName);
+                var env = await QueuedTask.Run(() =>
+                    {
+                        return layer.QueryExtent();
+                    });
+                validPoint = await IsPointWithinExtent(point, env);
 
-            //    if (validPoint == false && showPopup)
-            //        System.Windows.Forms.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgOutOfAOI);
-            //}
+                if (validPoint == false && showPopup)
+                    ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgOutOfAOI,
+                                                                        VisibilityLibrary.Properties.Resources.CaptionError);
+            }
 
             return validPoint;
         }
@@ -253,7 +317,7 @@ namespace ProAppVisibilityModule.ViewModels
         /// <summary>
         /// Enumeration used for the different tool modes
         /// </summary>
-        internal enum MapPointToolMode : int
+        public enum MapPointToolMode : int
         {
             Unknown = 0,
             Observer = 1,
@@ -263,237 +327,153 @@ namespace ProAppVisibilityModule.ViewModels
         /// <summary>
         /// Method used to check to see if a point is contained by an envelope
         /// </summary>
-        /// <param name="point">IPoint</param>
-        /// <param name="env">IEnvelope</param>
-        /// <returns></returns>
-        //TODO update to Pro
-        //internal bool IsPointWithinExtent(MapPoint point, IEnvelope env)
-        //{
-        //    var relationOp = env as IRelationalOperator;
+        /// <param name="point">MapPoint</param>
+        /// <param name="env">Envelope</param>
+        /// <returns>bool</returns>
+        internal async Task<bool> IsPointWithinExtent(MapPoint point, Envelope env)
+        {
+            var result = await QueuedTask.Run(() =>
+                {
+                    return GeometryEngine.Contains(env, point);
+                });
 
-        //    if (relationOp == null)
-        //        return false;
-
-        //    return relationOp.Contains(point);
-        //}
-
-        /// <summary>
-        /// Method to get a z offset distance in the correct units for the map
-        /// </summary>
-        /// <param name="map">IMap</param>
-        /// <param name="offset">the input offset</param>
-        /// <param name="zFactor">ISurface z factor</param>
-        /// <param name="distanceType">the "from" distance unit type</param>
-        /// <returns></returns>
-        // Update to Pro
-        //internal double GetOffsetInZUnits(IMap map, double offset, double zFactor, DistanceTypes distanceType)
-        //{
-        //    if (map.SpatialReference == null)
-        //        return offset;
-
-        //    double offsetInMapUnits = 0.0;
-        //    DistanceTypes distanceTo = DistanceTypes.Meters; // default to meters
-
-        //    var pcs = map.SpatialReference as IProjectedCoordinateSystem;
-
-        //    if (pcs != null)
-        //    {
-        //        // need to convert the offset from the input distance type to the spatial reference linear type
-        //        // then apply the zFactor
-        //        distanceTo = GetDistanceType(pcs.CoordinateUnit.FactoryCode);
-        //    }
-
-        //    offsetInMapUnits = GetDistanceFromTo(distanceType, distanceTo, offset);
-
-        //    var result = offsetInMapUnits / zFactor;
-
-        //    return result;
-        //}
+            return result;
+        }
 
         /// <summary>
-        /// Method to get a ISurface from a map with layer name
+        /// returns Layer if found in the map
         /// </summary>
-        /// <param name="map">IMap that contains surface layer</param>
-        /// <param name="name">Name of the layer that you are looking for</param>
-        /// <returns>ISurface</returns>
-        //TODO udpate to Pro
-        //public ISurface GetSurfaceFromMapByName(IMap map, string name)
-        //{
-        //    for (int x = 0; x < map.LayerCount; x++)
-        //    {
-        //        var layer = map.get_Layer(x);
-
-        //        if (layer == null || layer.Name != name)
-        //            continue;
-
-        //        var tin = layer as ITinLayer;
-        //        if (tin != null)
-        //        {
-        //            return tin.Dataset as ISurface;
-        //        }
-
-        //        var rasterSurface = new RasterSurfaceClass() as IRasterSurface;
-        //        ISurface surface = null;
-
-        //        var mosaicLayer = layer as IMosaicLayer;
-        //        var rasterLayer = layer as IRasterLayer;
-
-        //        if (mosaicLayer != null && mosaicLayer.PreviewLayer != null && mosaicLayer.PreviewLayer.Raster != null)
-        //        {
-        //            rasterSurface.PutRaster(mosaicLayer.PreviewLayer.Raster, 0);
-        //        }
-        //        else if (rasterLayer != null && rasterLayer.Raster != null)
-        //        {
-        //            rasterSurface.PutRaster(rasterLayer.Raster, 0);
-        //        }
-
-        //        surface = rasterSurface as ISurface;
-
-        //        if (surface != null)
-        //            return surface;
-        //    }
-
-        //    return null;
-        //}
-        /// <summary>
-        /// returns ILayer if found in the map layer collection
-        /// </summary>
-        /// <param name="map">IMap</param>
         /// <param name="name">string name of layer</param>
-        /// <returns></returns>
+        /// <returns>Layer</returns>
         /// 
-        //TODO update to Pro
-        //public ILayer GetLayerFromMapByName(IMap map, string name)
-        //{
-        //    for (int x = 0; x < map.LayerCount; x++)
-        //    {
-        //        var layer = map.get_Layer(x);
-
-        //        if (layer == null || layer.Name != name)
-        //            continue;
-
-        //        return layer;
-        //    }
-
-        //    return null;
-        //}
+        internal Layer GetLayerFromMapByName(string name)
+        {
+            var layer = MapView.Active.Map.GetLayersAsFlattenedList().FirstOrDefault(l => l.Name == name);
+            return layer;
+        }
 
         /// <summary>
-        /// Method to get all the names of the raster/tin layers that support ISurface
-        /// we use this method to populate a combobox for input selection of surface layer
+        /// Method used to get a list of surface layer names from the map
         /// </summary>
-        /// <param name="map">IMap</param>
         /// <returns></returns>
-        /// 
-        //TODO update to Pro
-        //public List<string> GetSurfaceNamesFromMap(IMap map, bool IncludeTinLayers = false)
-        //{
-        //    var list = new List<string>();
+        internal async Task<List<string>> GetSurfaceNamesFromMap()
+        {
+            var layerList = MapView.Active.Map.GetLayersAsFlattenedList();
 
-        //    for (int x = 0; x < map.LayerCount; x++)
-        //    {
-        //        try
-        //        {
-        //            var layer = map.get_Layer(x);
+            var elevationSurfaceList = await QueuedTask.Run(() =>
+                {
+                    var list = new List<Layer>();
+                    foreach(var layer in layerList)
+                    {
+                        var def = layer.GetDefinition();
+                        if(def != null && def.LayerType == ArcGIS.Core.CIM.MapLayerType.Operational && 
+                            (def is CIMRasterLayer || def is CIMTinLayer || def is CIMLASDatasetLayer || def is CIMMosaicLayer))
+                        {
+                            list.Add(layer);
+                        }
+                    }
 
-        //            if (layer == null)
-        //                continue;
+                    return list;
+                });
 
-        //            var tin = layer as ITinLayer;
+            var sortedList = elevationSurfaceList.Select(l => l.Name).ToList();
+            sortedList.Sort();
 
-        //            if (tin != null)
-        //            {
-        //                if (IncludeTinLayers)
-        //                    list.Add(layer.Name);
+            return sortedList;
+        }
 
-        //                continue;
-        //            }
+        /// <summary>
+        /// Method to get spatial reference from a feature class
+        /// </summary>
+        /// <param name="fcName">name of layer</param>
+        /// <returns>SpatialReference</returns>
+        internal async Task<SpatialReference> GetSpatialReferenceFromLayer(string layerName)
+        {
+            try
+            {
+                return await ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(() =>
+                {
+                    var layer = GetLayerFromMapByName(layerName);
 
-        //            var rasterSurface = new RasterSurfaceClass() as IRasterSurface;
-        //            ISurface surface = null;
-
-        //            var ml = layer as IMosaicLayer;
-
-        //            if (ml != null)
-        //            {
-        //                if (ml.PreviewLayer != null && ml.PreviewLayer.Raster != null)
-        //                {
-        //                    rasterSurface.PutRaster(ml.PreviewLayer.Raster, 0);
-
-        //                    surface = rasterSurface as ISurface;
-        //                    if (surface != null)
-        //                        list.Add(layer.Name);
-        //                }
-        //                continue;
-        //            }
-
-        //            var rasterLayer = layer as IRasterLayer;
-        //            if (rasterLayer != null && rasterLayer.Raster != null)
-        //            {
-        //                rasterSurface.PutRaster(rasterLayer.Raster, 0);
-
-        //                surface = rasterSurface as ISurface;
-        //                if (surface != null)
-        //                    list.Add(layer.Name);
-        //                continue;
-        //            }
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            Console.WriteLine(ex);
-        //        }
-        //    }
-
-        //    return list;
-        //}
+                    return layer.GetSpatialReference();
+                });
+            }
+            catch (Exception ex)
+            {
+                Debug.Print(ex.Message);
+            }
+            return null;
+        }
 
         /// <summary>
         /// Override to add aditional items in the class to reset tool
         /// </summary>
         /// <param name="toolReset"></param>
-        internal override void Reset(bool toolReset)
+        internal override async Task Reset(bool toolReset)
         {
-            base.Reset(toolReset);
+            try
+            {
+                await base.Reset(toolReset);
 
-            // TODO update to Pro
-            //if (ArcMap.Document == null || ArcMap.Document.FocusMap == null)
-            //    return;
+                if (MapView.Active == null || MapView.Active.Map == null)
+                    return;
 
-            //// reset surface names OC
-            //ResetSurfaceNames(ArcMap.Document.FocusMap);
+                // reset surface names OC
+                await ResetSurfaceNames();
+                Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        // reset observer points
+                        ObserverAddInPoints.Clear();
+                    
+                        ClearTempGraphics();
+                    });
+            }
+            catch(Exception ex)
+            {
 
-            // reset observer points
-            ObserverAddInPoints.Clear();
-
-            ClearTempGraphics();
+            }
         }
 
         /// <summary>
         /// Method used to reset the currently selected surfacename 
         /// Use when toc items or map changes, on tab selection changed, etc
         /// </summary>
-        /// <param name="map">IMap</param>
-        /// 
-        //TODO update to Pro
-        //internal void ResetSurfaceNames(IMap map)
-        //{
-        //    // keep the current selection if it's still valid
-        //    var tempName = SelectedSurfaceName;
+        internal async Task ResetSurfaceNames()
+        {
+            try
+            {
+                if (MapView.Active == null || MapView.Active.Map == null)
+                    return;
 
-        //    SurfaceLayerNames.Clear();
+                var names = await GetSurfaceNamesFromMap();
 
-        //    foreach (var name in GetSurfaceNamesFromMap(map, (this.GetType() == typeof(LLOSViewModel)) ? true : false))
-        //        SurfaceLayerNames.Add(name);
+                // keep the current selection if it's still valid
+                var tempName = SelectedSurfaceName;
 
-        //    if (SurfaceLayerNames.Contains(tempName))
-        //        SelectedSurfaceName = tempName;
-        //    else if (SurfaceLayerNames.Any())
-        //        SelectedSurfaceName = SurfaceLayerNames[0];
-        //    else
-        //        SelectedSurfaceName = string.Empty;
+                Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        SurfaceLayerNames.Clear();
+                    });
 
-        //    RaisePropertyChanged(() => SelectedSurfaceName);
-        //}
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    foreach (var name in names)
+                        SurfaceLayerNames.Add(name);
+                });
+                if (SurfaceLayerNames.Contains(tempName))
+                    SelectedSurfaceName = tempName;
+                else if (SurfaceLayerNames.Any())
+                    SelectedSurfaceName = SurfaceLayerNames[0];
+                else
+                    SelectedSurfaceName = string.Empty;
+
+                RaisePropertyChanged(() => SelectedSurfaceName);
+            }
+            catch(Exception ex)
+            {
+                Debug.Print(ex.Message);
+            }
+        }
 
         /// <summary>
         /// Method to handle the display coordinate type change
@@ -508,5 +488,132 @@ namespace ProAppVisibilityModule.ViewModels
                 ObserverAddInPoints.Add(item);
             RaisePropertyChanged(() => HasMapGraphics);
         }
+
+        /// <summary>
+        /// Method used to convert offset value to surface z units
+        /// </summary>
+        /// <param name="sr">spatial reference of z unit</param>
+        /// <param name="value">value to be converted into z units</param>
+        /// <returns>value is z units</returns>
+        internal double GetAsMapZUnits(SpatialReference sr, double value)
+        {
+            double result = value;
+
+            Unit unit = null;
+            // try to get map Z unit
+            try
+            {
+                unit = sr.ZUnit;
+            }
+            catch 
+            {
+                // do nothing
+                // catching this since accessing the ZUnit crashes when not set
+            }
+
+            // default to map linear unit
+            if (unit == null)
+                unit = sr.Unit;
+
+            // get linear unit of selected offset unit type
+            var offsetLinearUnit = GetLinearUnit(OffsetUnitType);
+
+            // convert to map z unit
+            result = offsetLinearUnit.ConvertTo(value, unit as LinearUnit);
+
+            return result;
+        }
+
+        internal double GetAsMapUnits(SpatialReference sr, double value)
+        {
+            double result = value;
+
+            // get map unit
+            var mapUnit = sr.Unit as LinearUnit;
+
+            if (mapUnit == null)
+                return result;
+
+            var offsetLinearUnit = GetLinearUnit(OffsetUnitType);
+
+            result = offsetLinearUnit.ConvertTo(value, mapUnit);
+
+            return result;
+        }
+
+        /// <summary>
+        /// Handler for active map view changed event
+        /// </summary>
+        /// <param name="obj"></param>
+        private async void OnActiveMapViewChanged(ActiveMapViewChangedEventArgs obj)
+        {
+            await ResetSurfaceNames();
+        }
+
+        /// <summary>
+        /// Handler for when layers are added or removed
+        /// </summary>
+        /// <param name="obj"></param>
+        private async void OnLayersAdded(LayerEventsArgs obj)
+        {
+            await ResetSurfaceNames();
+        }
+
+
+        private async void OnMapPropertyChanged(MapPropertyChangedEventArgs obj)
+        {
+            await ResetSurfaceNames();
+        }
+
+        private async void OnMapMemberPropertyChanged(MapMemberPropertiesChangedEventArgs obj)
+        {
+            IEnumerable<MapMemberEventHint> mapMemberHint = obj.EventHints;
+            if (mapMemberHint.ElementAt(0).ToString() == "Name")
+                await ResetSurfaceNames();
+        }
+
+
+        //internal double ConvertFromTo(DistanceTypes fromType, DistanceTypes toType, double input)
+        //{
+        //    double result = 0.0;
+
+        //    var linearUnitFrom = GetLinearUnit(fromType);
+        //    var linearUnitTo = GetLinearUnit(toType);
+
+        //    var unit = LinearUnit.CreateLinearUnit(linearUnitFrom.FactoryCode);
+
+        //    result = unit.ConvertTo(input, linearUnitTo);
+
+        //    return result;
+        //}
+
+        internal LinearUnit GetLinearUnit(DistanceTypes dtype)
+        {
+            LinearUnit result = LinearUnit.Meters;
+            switch (dtype)
+            {
+                case DistanceTypes.Feet:
+                    result = LinearUnit.Feet;
+                    break;
+                case DistanceTypes.Kilometers:
+                    result = LinearUnit.Kilometers;
+                    break;
+                case DistanceTypes.Miles:
+                    result = LinearUnit.Miles;
+                    break;
+                case DistanceTypes.NauticalMile:
+                    result = LinearUnit.NauticalMiles;
+                    break;
+                case DistanceTypes.Yards:
+                    result = LinearUnit.Yards;
+                    break;
+                case DistanceTypes.Meters:
+                default:
+                    result = LinearUnit.Meters;
+                    break;
+            }
+            return result;
+        }
+
     }
 }

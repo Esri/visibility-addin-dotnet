@@ -88,6 +88,33 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The number must be greater than min.
+        /// </summary>
+        public static string AENumMustBeGreater {
+            get {
+                return ResourceManager.GetString("AENumMustBeGreater", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The number must be less than max.
+        /// </summary>
+        public static string AENumMustBeLess {
+            get {
+                return ResourceManager.GetString("AENumMustBeLess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The number must be between {0} and {1}.
+        /// </summary>
+        public static string AENumRange {
+            get {
+                return ResourceManager.GetString("AENumRange", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cancel.
         /// </summary>
         public static string ButtonCancel {
@@ -102,6 +129,15 @@ namespace VisibilityLibrary.Properties {
         public static string ButtonOK {
             get {
                 return ResourceManager.GetString("ButtonOK", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error.
+        /// </summary>
+        public static string CaptionError {
+            get {
+                return ResourceManager.GetString("CaptionError", resourceCulture);
             }
         }
         
@@ -250,6 +286,15 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Miles.
+        /// </summary>
+        public static string EnumMiles {
+            get {
+                return ResourceManager.GetString("EnumMiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Mils.
         /// </summary>
         public static string EnumMils {
@@ -273,6 +318,15 @@ namespace VisibilityLibrary.Properties {
         public static string EnumSurveyFoot {
             get {
                 return ResourceManager.GetString("EnumSurveyFoot", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Yards.
+        /// </summary>
+        public static string EnumYards {
+            get {
+                return ResourceManager.GetString("EnumYards", resourceCulture);
             }
         }
         
@@ -484,6 +538,96 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to LLOS_Observers.
+        /// </summary>
+        public static string LLOSObserversLayerName {
+            get {
+                return ResourceManager.GetString("LLOSObserversLayerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to LLOS_Output.
+        /// </summary>
+        public static string LLOSOutputLayerName {
+            get {
+                return ResourceManager.GetString("LLOSOutputLayerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please verify that all Observer and Target Points are within the extents of the selected Surface.
+        /// </summary>
+        public static string LLOSPointsOutsideOfSurfaceExtent {
+            get {
+                return ResourceManager.GetString("LLOSPointsOutsideOfSurfaceExtent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to LLOS_Sight_Lines.
+        /// </summary>
+        public static string LLOSSightLinesLayerName {
+            get {
+                return ResourceManager.GetString("LLOSSightLinesLayerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to LLOS_Targets.
+        /// </summary>
+        public static string LLOSTargetsLayerName {
+            get {
+                return ResourceManager.GetString("LLOSTargetsLayerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The selected surface has not been projected.  Please project your data and try again..
+        /// </summary>
+        public static string LLOSUserPrompt {
+            get {
+                return ResourceManager.GetString("LLOSUserPrompt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Surface Projection.
+        /// </summary>
+        public static string LLOSUserPromptCaption {
+            get {
+                return ResourceManager.GetString("LLOSUserPromptCaption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Spatial Reference of Data Frame and surface must match. Please change the Spatial Reference of the Data Frame and try again..
+        /// </summary>
+        public static string LOSDataFrameMatch {
+            get {
+                return ResourceManager.GetString("LOSDataFrameMatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Verify that the Spatial Analyst extension is available and authorized for use..
+        /// </summary>
+        public static string LOSSpatialAnalystLicenseInvalid {
+            get {
+                return ResourceManager.GetString("LOSSpatialAnalystLicenseInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Spatial Reference .
+        /// </summary>
+        public static string LOSSpatialReferenceCaption {
+            get {
+                return ResourceManager.GetString("LOSSpatialReferenceCaption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Delete.
         /// </summary>
         public static string MenuLabelDelete {
@@ -529,6 +673,105 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to NumOfObservers.
+        /// </summary>
+        public static string NumOfObserversFieldName {
+            get {
+                return ResourceManager.GetString("NumOfObserversFieldName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to offset.
+        /// </summary>
+        public static string OffsetFieldName {
+            get {
+                return ResourceManager.GetString("OffsetFieldName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to offsetWithZ.
+        /// </summary>
+        public static string OffsetWithZFieldName {
+            get {
+                return ResourceManager.GetString("OffsetWithZFieldName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to RLOS_Visibility.
+        /// </summary>
+        public static string RLOSConvertedPolygonsLayerName {
+            get {
+                return ResourceManager.GetString("RLOSConvertedPolygonsLayerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to RLOS_Mask.
+        /// </summary>
+        public static string RLOSMaskLayerName {
+            get {
+                return ResourceManager.GetString("RLOSMaskLayerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to RLOS_Observers.
+        /// </summary>
+        public static string RLOSObserversLayerName {
+            get {
+                return ResourceManager.GetString("RLOSObserversLayerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to RLOS_Output.
+        /// </summary>
+        public static string RLOSOutputLayerName {
+            get {
+                return ResourceManager.GetString("RLOSOutputLayerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please verify that all Observer Points are within the extents of the selected Surface.
+        /// </summary>
+        public static string RLOSPointsOutsideOfSurfaceExtent {
+            get {
+                return ResourceManager.GetString("RLOSPointsOutsideOfSurfaceExtent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The selected surface has not been projected.  Please project your data and try again..
+        /// </summary>
+        public static string RLOSUserPrompt {
+            get {
+                return ResourceManager.GetString("RLOSUserPrompt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Surface Projection.
+        /// </summary>
+        public static string RLOSUserPromptCaption {
+            get {
+                return ResourceManager.GetString("RLOSUserPromptCaption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to TarIsVis.
+        /// </summary>
+        public static string TarIsVisFieldName {
+            get {
+                return ResourceManager.GetString("TarIsVisFieldName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Edit Properties.
         /// </summary>
         public static string TitleEditProperties {
@@ -556,11 +799,29 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Valid range -90 to 0.
+        /// </summary>
+        public static string TooltipBottomFOVValidRange {
+            get {
+                return ResourceManager.GetString("TooltipBottomFOVValidRange", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Edit Properties.
         /// </summary>
         public static string TooltipEditProperties {
             get {
                 return ResourceManager.GetString("TooltipEditProperties", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Valid range 0 to 360.
+        /// </summary>
+        public static string TooltipHFOVValidRange {
+            get {
+                return ResourceManager.GetString("TooltipHFOVValidRange", resourceCulture);
             }
         }
         
@@ -574,7 +835,7 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Map Point Tool.
+        ///   Looks up a localized string similar to Observer Map Point Tool.
         /// </summary>
         public static string TooltipMapPointTool {
             get {
@@ -606,6 +867,33 @@ namespace VisibilityLibrary.Properties {
         public static string TooltipTargetMapPointTool {
             get {
                 return ResourceManager.GetString("TooltipTargetMapPointTool", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Valid range 0 to 90.
+        /// </summary>
+        public static string TooltipTopFOVValidRange {
+            get {
+                return ResourceManager.GetString("TooltipTopFOVValidRange", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to VisCode.
+        /// </summary>
+        public static string VisCodeFieldName {
+            get {
+                return ResourceManager.GetString("VisCodeFieldName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Z.
+        /// </summary>
+        public static string ZFieldName {
+            get {
+                return ResourceManager.GetString("ZFieldName", resourceCulture);
             }
         }
     }

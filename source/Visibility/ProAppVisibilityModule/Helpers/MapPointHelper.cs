@@ -21,7 +21,11 @@ namespace ProAppVisibilityModule.Helpers
 {
     public static class MapPointHelper
     {
-    
+        /// <summary>
+        /// Helper method to get a string value of a MapPoint based on display configuration
+        /// </summary>
+        /// <param name="mp"></param>
+        /// <returns></returns>
         public static string GetMapPointAsDisplayString(MapPoint mp)
         {
             if (mp == null)
@@ -54,10 +58,10 @@ namespace ProAppVisibilityModule.Helpers
                         tgparam.NumDigits = 2;
                         result = mp.ToGeoCoordinateString(tgparam);
                         break;
-                    case CoordinateTypes.GARS:
-                        tgparam = new ToGeoCoordinateParameter(GeoCoordinateType.GARS);
-                        result = mp.ToGeoCoordinateString(tgparam);
-                        break;
+                    //case CoordinateTypes.GARS:
+                    //    tgparam = new ToGeoCoordinateParameter(GeoCoordinateType.GARS);
+                    //    result = mp.ToGeoCoordinateString(tgparam);
+                    //    break;
                     case CoordinateTypes.MGRS:
                         tgparam = new ToGeoCoordinateParameter(GeoCoordinateType.MGRS);
                         result = mp.ToGeoCoordinateString(tgparam);

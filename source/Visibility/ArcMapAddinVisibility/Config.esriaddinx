@@ -10,14 +10,14 @@
   <Targets>
     <Target name="Desktop" version="10.3" />
   </Targets>
-  <AddIn language="CLR4.5" library="ArcMapAddinVisibility.dll" namespace="ArcMapAddinVisibility">
+  <AddIn language="CLR4.5" library="Visibility.dll" namespace="ArcMapAddinVisibility">
     <ArcMap>
       <Commands>
-        <Button id="Esri_ArcMapAddinVisibility_VisibilityButton" class="VisibilityButton" message="Add-in command to show the Visibility window." caption="Show Visibility" tip="Show Visibility" category="Add-In Controls" image="Images\VisibilityButton.png" />
+        <Button id="Esri_ArcMapAddinVisibility_VisibilityButton" class="VisibilityButton" message="Perform Linear (LLOS) and Radial (RLOS) line of sight analysis. LLOS determines if a target(s) is observable from an observer(s) location. RLOS determines what is visible from observer(s) location based on a given distance and a field of view." caption="Visibility" tip="Visibility" category="Add-In Controls" image="Images\visibility-16.png" />
         <Tool id="Esri_ArcMapAddinVisibility_MapPointTool" class="MapPointTool" message="Add-in command to active a map point tool." caption="Map Point" tip="Map Point Tool" category="Add-In Controls" image="Images\MapPointTool.png" />
       </Commands>
       <DockableWindows>
-        <DockableWindow id="Esri_ArcMapAddinVisibility_DockableWindowVisibility" class="DockableWindowVisibility+AddinImpl" caption="Visibility" image="Images\DockableWindowVisibility.png">
+        <DockableWindow id="Esri_ArcMapAddinVisibility_DockableWindowVisibility" class="DockableWindowVisibility+AddinImpl" caption="Visibility" image="Images\visibility-16.png">
           <InitialPlacement height="300" width="300" state="pinned" position="left" />
         </DockableWindow>
       </DockableWindows>

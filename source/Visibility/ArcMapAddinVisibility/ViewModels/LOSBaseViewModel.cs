@@ -85,7 +85,7 @@ namespace ArcMapAddinVisibility.ViewModels
         public string SelectedSurfaceName { get; set; }
         public DistanceTypes OffsetUnitType { get; set; }
         public AngularTypes AngularUnitType { get; set; }
-
+        
         #endregion
 
         #region Commands
@@ -208,6 +208,54 @@ namespace ArcMapAddinVisibility.ViewModels
                 ObserverAddInPoints.Insert(0, addInPoint);
             }
         }
+        internal override void OnMouseMoveEvent(object obj)
+        {
+            if (!IsActiveTab)
+                return;
+
+            var point = obj as IPoint;
+
+            if (point == null)
+                return;
+
+            if(ToolMode == MapPointToolMode.Observer)
+            {
+                Point1Formatted = string.Empty;
+                Point1 = point;
+            }
+            else if(ToolMode == MapPointToolMode.Target)
+            {
+                Point2Formatted = string.Empty;
+                Point2 = point;
+            }
+        }
+        /// <summary>
+        /// Handler for "Enter" key press
+        /// If pressed when input textbox for observer or target is focused
+        ///     will set the correct tool mode and then call OnNewMapPointEvent
+        /// If pressed anywhere else, resets tool mode and calls base method
+        /// </summary>
+        /// <param name="obj">ToolMode from resources</param>
+        internal override void OnEnterKeyCommand(object obj)
+        {
+            var keyCommandMode = obj as string;
+
+            if(keyCommandMode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
+            {
+                ToolMode = MapPointToolMode.Observer;
+                OnNewMapPointEvent(Point1);
+            }
+            else if (keyCommandMode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
+            {
+                ToolMode = MapPointToolMode.Target;
+                OnNewMapPointEvent(Point2);
+            }
+            else
+            {
+                ToolMode = MapPointToolMode.Unknown;
+                base.OnEnterKeyCommand(obj);
+            }
+        }
         /// <summary>
         /// Method to check to see point is withing the currently selected surface
         /// returns true if there is no surface selected or point is contained by layer AOI
@@ -262,20 +310,19 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <summary>
         /// Method to get a z offset distance in the correct units for the map
         /// </summary>
-        /// <param name="map">IMap</param>
         /// <param name="offset">the input offset</param>
         /// <param name="zFactor">ISurface z factor</param>
         /// <param name="distanceType">the "from" distance unit type</param>
         /// <returns></returns>
-        internal double GetOffsetInZUnits(IMap map, double offset, double zFactor, DistanceTypes distanceType)
+        internal double GetOffsetInZUnits(double offset, double zFactor, DistanceTypes distanceType)
         {
-            if (map.SpatialReference == null)
+            if (SelectedSurfaceSpatialRef == null)
                 return offset;
 
             double offsetInMapUnits = 0.0;
             DistanceTypes distanceTo = DistanceTypes.Meters; // default to meters
 
-            var pcs = map.SpatialReference as IProjectedCoordinateSystem;
+            var pcs = SelectedSurfaceSpatialRef as IProjectedCoordinateSystem;
 
             if (pcs != null)
             {
@@ -299,12 +346,16 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <returns>ISurface</returns>
         public ISurface GetSurfaceFromMapByName(IMap map, string name)
         {
-            for (int x = 0; x < map.LayerCount; x++)
-            {
-                var layer = map.get_Layer(x);
+            var layers = map.get_Layers();
+            var layer = layers.Next();
 
-                if (layer == null || layer.Name != name)
+            while (layer != null)
+            {
+                if (layer.Name != name)
+                {
+                    layer = layers.Next();
                     continue;
+                }
 
                 var tin = layer as ITinLayer;
                 if (tin != null)
@@ -343,14 +394,15 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <returns></returns>
         public ILayer GetLayerFromMapByName(IMap map, string name)
         {
-            for (int x = 0; x < map.LayerCount; x++)
+            var layers = map.get_Layers();
+            var layer = layers.Next();
+
+            while (layer != null)
             {
-                var layer = map.get_Layer(x);
+                if (layer.Name == name)
+                    return layer;
 
-                if (layer == null || layer.Name != name)
-                    continue;
-
-                return layer;
+                layer = layers.Next();
             }
 
             return null;
@@ -366,22 +418,20 @@ namespace ArcMapAddinVisibility.ViewModels
         {
             var list = new List<string>();
 
-            for (int x = 0; x < map.LayerCount; x++)
+            var layers = map.get_Layers();
+            var layer = layers.Next();
+
+            while(layer != null)
             {
                 try
                 {
-                    var layer = map.get_Layer(x);
-
-                    if (layer == null)
-                        continue;
-
                     var tin = layer as ITinLayer;
 
                     if (tin != null)
                     {
                         if (IncludeTinLayers)
                             list.Add(layer.Name);
-
+                        layer = layers.Next();
                         continue;
                     }
 
@@ -400,6 +450,7 @@ namespace ArcMapAddinVisibility.ViewModels
                             if (surface != null)
                                 list.Add(layer.Name);
                         }
+                        layer = layers.Next();
                         continue;
                     }
 
@@ -411,6 +462,7 @@ namespace ArcMapAddinVisibility.ViewModels
                         surface = rasterSurface as ISurface;
                         if (surface != null)
                             list.Add(layer.Name);
+                        layer = layers.Next();
                         continue;
                     }
                 }
@@ -418,6 +470,8 @@ namespace ArcMapAddinVisibility.ViewModels
                 {
                     Console.WriteLine(ex);
                 }
+
+                layer = layers.Next();
             }
 
             return list;

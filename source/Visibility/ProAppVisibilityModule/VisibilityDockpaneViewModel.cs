@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Windows.Controls;
 using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Contracts;
+using VisibilityLibrary.Helpers;
 using VisibilityLibrary.Views;
 using VisibilityLibrary.Models;
 using ProAppVisibilityModule.ViewModels;
-using System.Windows.Controls;
-using VisibilityLibrary.Helpers;
+using System.Threading.Tasks;
 
 namespace ProAppVisibilityModule
 {
@@ -38,6 +39,9 @@ namespace ProAppVisibilityModule
         }
 
         object selectedTab = null;
+        /// <summary>
+        /// Property to notify when tab selection changes
+        /// </summary>
         public object SelectedTab
         {
             get { return selectedTab; }
@@ -59,6 +63,7 @@ namespace ProAppVisibilityModule
         public VisibilityRLOSView RLOSView { get; set; }
 
         #endregion
+
         /// <summary>
         /// Show the DockPane.
         /// </summary>
@@ -69,6 +74,21 @@ namespace ProAppVisibilityModule
                 return;
 
             pane.Activate();
+        }
+
+        protected override void OnShow(bool isVisible)
+        {
+            if (isVisible)
+            {
+                if (((ProLLOSViewModel)LLOSView.DataContext).ToolMode == ProLOSBaseViewModel.MapPointToolMode.Observer)
+                    ((ProLLOSViewModel)LLOSView.DataContext).OnActivateToolCommand(VisibilityLibrary.Properties.Resources.ToolModeObserver);
+                else if (((ProLLOSViewModel)LLOSView.DataContext).ToolMode == ProLOSBaseViewModel.MapPointToolMode.Target)
+                    ((ProLLOSViewModel)LLOSView.DataContext).OnActivateToolCommand(VisibilityLibrary.Properties.Resources.ToolModeTarget);
+                else if (((ProRLOSViewModel)RLOSView.DataContext).ToolMode == ProLOSBaseViewModel.MapPointToolMode.Observer)
+                    ((ProRLOSViewModel)RLOSView.DataContext).OnActivateToolCommand(VisibilityLibrary.Properties.Resources.ToolModeObserver);
+            }
+            
+            base.OnShow(isVisible);
         }
 
         /// <summary>

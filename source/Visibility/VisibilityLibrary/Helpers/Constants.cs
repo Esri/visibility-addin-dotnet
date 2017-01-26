@@ -29,5 +29,7 @@ namespace VisibilityLibrary
         public const string TAB_ITEM_SELECTED = "TAB_ITEM_SELECTED";
         public const string MAP_TOC_UPDATED = "MAP_TOC_UPDATED";
         public const string DISPLAY_COORDINATE_TYPE_CHANGED = "DisplayCoordinateTypeChanged";
+        public const string MAP_POINT_TOOL_ACTIVATED = "MAP_POINT_TOOL_ACTIVATED";
+        public const string MAP_POINT_TOOL_DEACTIVATED = "MAP_POINT_TOOL_DEACTIVATED";
     }
 }

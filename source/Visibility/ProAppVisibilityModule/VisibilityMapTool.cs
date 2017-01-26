@@ -17,35 +17,69 @@ using System.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using VisibilityLibrary.Helpers;
+using ArcGIS.Core.Geometry;
 
 namespace ProAppVisibilityModule
 {
     internal class VisibilityMapTool : MapTool
     {
+        public VisibilityMapTool()
+        {
+            IsSketchTool = true;
+            SketchType = SketchGeometryType.Point;
+            UseSnapping = true;
+        }
+
         protected override Task OnToolActivateAsync(bool active)
         {
+            Mediator.NotifyColleagues(VisibilityLibrary.Constants.MAP_POINT_TOOL_ACTIVATED, active);
+
             return base.OnToolActivateAsync(active);
         }
 
-        protected override void OnToolMouseDown(MapViewMouseButtonEventArgs e)
+        protected override Task OnToolDeactivateAsync(bool hasMapViewChanged)
         {
-            if (e.ChangedButton != System.Windows.Input.MouseButton.Left)
-                return;
+            Mediator.NotifyColleagues(VisibilityLibrary.Constants.MAP_POINT_TOOL_DEACTIVATED, hasMapViewChanged);
 
+            return base.OnToolDeactivateAsync(hasMapViewChanged);
+        }
+
+        protected override Task<bool> OnSketchCompleteAsync(ArcGIS.Core.Geometry.Geometry geometry)
+        {
+            try
+            {
+                var mp = geometry as MapPoint;
+                Mediator.NotifyColleagues(VisibilityLibrary.Constants.NEW_MAP_POINT, mp);
+            }
+            catch (Exception ex)
+            {
+                // do nothing
+            }
+
+            return base.OnSketchCompleteAsync(geometry);
+        }
+
+        /// <summary>
+        /// Method to handle the Tool Mouse Move event
+        /// Get MapPoint from ClientPoint and notify
+        /// </summary>
+        /// <param name="e">MapViewMouseEventArgs</param>
+        protected override void OnToolMouseMove(MapViewMouseEventArgs e)
+        {
             try
             {
                 QueuedTask.Run(() =>
                 {
                     var mp = MapView.Active.ClientToMap(e.ClientPoint);
-                    Mediator.NotifyColleagues(VisibilityLibrary.Constants.NEW_MAP_POINT, mp);
+                    Mediator.NotifyColleagues(VisibilityLibrary.Constants.MOUSE_MOVE_POINT, mp);
                 });
             }
             catch (Exception ex)
             {
-
+                // do nothing
             }
 
-            base.OnToolMouseDown(e);
+            base.OnToolMouseMove(e);
         }
     }
 }
