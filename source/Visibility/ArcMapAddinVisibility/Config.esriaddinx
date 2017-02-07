@@ -2,7 +2,7 @@
   <Name>Visibility</Name>
   <AddInID>{9cb838f4-d17a-403b-85d0-8f7dc002697e}</AddInID>
   <Description>Conduct Linear Line of Sight and Radial Line of Sight analysis</Description>
-  <Version>1.0</Version>
+  <Version>2.0</Version>
   <Image>Images\ArcMapAddinVisibility.png</Image>
   <Author>ESRI</Author>
   <Company>ESRI</Company>
