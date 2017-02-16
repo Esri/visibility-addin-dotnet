@@ -200,6 +200,7 @@
                     HorizontalAlignment="Right"
                     Orientation="Horizontal">
                     <Button
+                        Width="60"
                         Margin="3,20,0,0"
                         Command="{Binding CancelCommand}"
                         Content="{x:Static prop:Resources.LabelCancel}"
@@ -223,6 +224,7 @@
 
                     </Button>
                     <Button
+                        Width="60"
                         Margin="3,20,0,0"
                         Command="{Binding SubmitCommand}"
                         Content="{x:Static prop:Resources.LabelOK}"
