@@ -35,7 +35,15 @@ namespace ProAppVisibilityModule.Tests
         [TestCategory("ArcGISPro")]
         public static void MyClassInitialize(TestContext testContext)
         {
-            //Host.Initialize();
+            // TRICKY: Must be run as x86 processor (IntPtr.Size only obvious way to check)
+            // Check here, otherwise you will get an error on Host.Initialize
+            Assert.IsTrue(IntPtr.Size == 8,
+                "The ArcGIS Pro tests must be run as x64 Architecture");
+            // If the call above fails: 
+            // In Studio: Test | Test Settings | Default Architecture | set to x64
+            // VsTest: vstest.console.exe {TestDLL}.dll /InIsolation /platform:x64 
+
+            Host.Initialize();
         }
 
         [TestMethod, Description("Tests creating ProGraphic object")]

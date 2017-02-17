@@ -28,8 +28,6 @@ using ArcMapAddinVisibility;
 using ArcMapAddinVisibility.Models;
 using ArcMapAddinVisibility.ViewModels;
 
-
-
 namespace ArcMapAddinVisibility.Tests
 {
     [TestClass]
@@ -40,11 +38,21 @@ namespace ArcMapAddinVisibility.Tests
         [TestCategory("ArcMapAddin")]
         public static void MyClassInitialize(TestContext testContext)
         {
-            bool blnBoundToRuntime = ESRI.ArcGIS.RuntimeManager.Bind(ESRI.ArcGIS.ProductCode.EngineOrDesktop);
-            Assert.IsTrue(blnBoundToRuntime, "Not bound to runtime");
+            // TRICKY: Must be run as x86 processor (IntPtr.Size only obvious way to check)
+            // Check here, otherwise you just get a cryptic error on license call below
+            Assert.IsTrue(IntPtr.Size == 4, 
+                "The ArcMap tests must be run as x86 Architecture");
+            // If the call above fails: 
+            // In Studio: Test | Test Settings | Default Architecture | set to x86 
+            // MSTest: (This defaults to x86) 
+
+            if (ESRI.ArcGIS.RuntimeManager.ActiveRuntime == null)
+                ESRI.ArcGIS.RuntimeManager.BindLicense(ESRI.ArcGIS.ProductCode.EngineOrDesktop);
+            Assert.IsTrue(ESRI.ArcGIS.RuntimeManager.ActiveRuntime != null, 
+                "No ArcGIS Desktop Runtime available");
 
             IAoInitialize aoInitialize = new AoInitializeClass();
-            aoInitialize.Initialize(esriLicenseProductCode.esriLicenseProductCodeBasic); 
+            aoInitialize.Initialize(esriLicenseProductCode.esriLicenseProductCodeStandard); 
         }
 
         [TestMethod, Description("Tests converting Point to string")]
@@ -94,8 +102,7 @@ namespace ArcMapAddinVisibility.Tests
         public void CreateLOSBaseViewModelTest()
         {
             var losBaseViewModel = new LOSBaseViewModel();
-            Assert.IsNotNull(losBaseViewModel);
-           
+            Assert.IsNotNull(losBaseViewModel);         
         }
         #endregion
 
