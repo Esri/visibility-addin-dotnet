@@ -56,10 +56,11 @@ paired with observer and target information to produce Linear Line of Sight (LLO
 * To run Unit test from command prompt: Open a Visual Studio Command Prompt: Start Menu | Visual Studio 2015 | Visual Studio Tools | Developer Command Prompt for VS2015
 	* ArcMap
 		* ` cd visibility-addin-dotnet\source\Visibility\ArcMapAddinVisibility.Tests\bin\Release `
-		* ` MSTest /testcontainer:ArcMapAddinVisibility.Tests.dll * `
+		* ` MSTest /testcontainer:ArcMapAddinVisibility.Tests.dll `
 	* ArcGIS Pro
 		* ` cd visibility-addin-dotnet\source\Visibility\ProAppVisibilityModule.Tests\bin\Release `
-		* ` MSTest /testcontainer:ProAppVisibilityModule.Tests.dll * `
+		* ` vstest.console.exe ProAppVisibilityModule.Tests.dll /InIsolation /platform:x64  `
+			* Note: MsTest does not have a platform option (Pro must be run as x64), so must use VsTest
 
 `*` Note : Assembly references are based on a default install of the SDK, you may have to update the references if you chose an alternate install option
 

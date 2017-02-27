@@ -248,7 +248,7 @@ namespace ProAppVisibilityModule.ViewModels
                 // in tool mode "Observer" we add observer points
                 // otherwise ignore
                 
-                var guid = await AddGraphicToMap(point, ColorFactory.Blue, true, 5.0);
+                var guid = await AddGraphicToMap(point, ColorFactory.BlueRGB, true, 5.0);
                 var addInPoint = new AddInPoint() { Point = point, GUID = guid };
                 Application.Current.Dispatcher.Invoke(() =>
                     {

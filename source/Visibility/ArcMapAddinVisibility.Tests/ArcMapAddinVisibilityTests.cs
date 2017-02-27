@@ -57,7 +57,7 @@ namespace ArcMapAddinVisibility.Tests
 
         [TestMethod, Description("Tests converting Point to string")]
         [TestCategory("ArcMapAddin")]
-        public void PointToStringConverterTest()
+        public void ArcMapPointToStringConverterTest()
         {
             var pointConverter = new IPointToStringConverter();
             Assert.IsNotNull(pointConverter);
@@ -75,7 +75,7 @@ namespace ArcMapAddinVisibility.Tests
 
         [TestMethod, Description("Tests creating AMGraphic object")]
         [TestCategory("ArcMapAddin")]
-        public void CreateAMGraphicTest()
+        public void ArcMapCreateNullGraphicTest()
         {
             var amGraphic = new AMGraphic("tempGraphic", null);
             Assert.IsNotNull(amGraphic);
@@ -88,7 +88,7 @@ namespace ArcMapAddinVisibility.Tests
         #region LLOSViewModel
         [TestMethod, Description("Tests creating LLOSViewModel object")]
         [TestCategory("ArcMapAddin")]
-        public void CreateLLOSViewModelTest()
+        public void ArcMapCreateLLOSViewModelTest()
         {
             var llosViewModel = new LLOSViewModel();
             Assert.IsNotNull(llosViewModel);
@@ -99,7 +99,7 @@ namespace ArcMapAddinVisibility.Tests
         #region LOSBaseViewModel
         [TestMethod, Description("Tests creating LOSBaseViewModel object")]
         [TestCategory("ArcMapAddin")]
-        public void CreateLOSBaseViewModelTest()
+        public void ArcMapCreateLOSBaseViewModelTest()
         {
             var losBaseViewModel = new LOSBaseViewModel();
             Assert.IsNotNull(losBaseViewModel);         
@@ -109,7 +109,7 @@ namespace ArcMapAddinVisibility.Tests
         #region RLOSViewModel
         [TestMethod, Description("Tests creating RLOSViewModel object")]
         [TestCategory("ArcMapAddin")]
-        public void CreateRLOSViewModelTest()
+        public void ArcMapCreateRLOSViewModelTest()
         {
             var rlosViewModel = new RLOSViewModel();
             Assert.IsNotNull(rlosViewModel);
@@ -117,7 +117,7 @@ namespace ArcMapAddinVisibility.Tests
 
         [TestMethod, Description("Tests creating a FeatureWorkspace")]
         [TestCategory("ArcMapAddin")]
-        public void CreateFeatureWorkspaceTest()
+        public void ArcMapCreateFeatureWorkspaceTest()
         {
             var workspace = CreateFeatureWorkspace();
             Assert.IsNotNull(workspace);
@@ -125,7 +125,7 @@ namespace ArcMapAddinVisibility.Tests
 
         [TestMethod, Description("Tests creating an observers feature class")]
         [TestCategory("ArcMapAddin")]
-        public void CreateObserversFeatureClassTest()
+        public void ArcMapCreateObserversFeatureClassTest()
         {
             var workspace = CreateFeatureWorkspace();
             Assert.IsNotNull(workspace);
@@ -163,7 +163,7 @@ namespace ArcMapAddinVisibility.Tests
 
         [TestMethod, Description("Tests start/stop edit operations")]
         [TestCategory("ArcMapAddin")]
-        public void StartStopEditTest()
+        public void ArcMapStartStopEditTest()
         {
             IWorkspace workspace = CreateFeatureWorkspace() as IWorkspace;
             Assert.IsNotNull(workspace);
