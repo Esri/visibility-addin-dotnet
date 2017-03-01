@@ -318,7 +318,7 @@ namespace ProAppVisibilityModule.ViewModels
             }
         }
 
-        public async Task ExecuteVisibilityLLOS()
+        private async Task ExecuteVisibilityLLOS()
         {
             try
             {
