@@ -12,21 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// System
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Collections.ObjectModel;
 using System.Collections;
-using System.Windows;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
+
+// Pro SDK
 using ArcGIS.Core.Geometry;
-using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Core;
-using VisibilityLibrary.Helpers;
+using ArcGIS.Desktop.Framework.Threading.Tasks;
+using ArcGIS.Desktop.Mapping;
+
+// Visibility 
 using ProAppVisibilityModule.Helpers;
 using ProAppVisibilityModule.Models;
-using ArcGIS.Desktop.Framework.Threading.Tasks;
+using VisibilityLibrary.Helpers;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -230,7 +235,7 @@ namespace ProAppVisibilityModule.ViewModels
 
             if (ToolMode == MapPointToolMode.Target)
             {
-                var guid = await AddGraphicToMap(point, ColorFactory.Red, true, 5.0, markerStyle: SimpleMarkerStyle.Square, tag: "target");
+                var guid = await AddGraphicToMap(point, ColorFactory.RedRGB, true, 5.0, markerStyle: SimpleMarkerStyle.Square, tag: "target");
                 var addInPoint = new AddInPoint() { Point = point, GUID = guid };
                 Application.Current.Dispatcher.Invoke(() =>
                     {

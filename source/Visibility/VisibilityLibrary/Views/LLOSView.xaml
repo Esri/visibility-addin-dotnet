@@ -124,7 +124,7 @@
                     Height="60"
                     Margin="3,3,0,0"
                     ItemsSource="{Binding ObserverAddInPoints}"
-                    PreviewMouseRightButtonDown="ListBox_PreviewMouseRightButtonDown"
+                    PreviewMouseRightButtonDown="listBoxObservers_PreviewMouseRightButtonDown"
                     ScrollViewer.VerticalScrollBarVisibility="Visible"
                     SelectionMode="Multiple"
                     Style="{StaticResource listboxStyle}">
@@ -205,7 +205,7 @@
                     Height="60"
                     Margin="3,3,0,0"
                     ItemsSource="{Binding TargetAddInPoints}"
-                    PreviewMouseRightButtonDown="ListBox_PreviewMouseRightButtonDown"
+                    PreviewMouseRightButtonDown="listBoxTargets_PreviewMouseRightButtonDown"
                     ScrollViewer.VerticalScrollBarVisibility="Visible"
                     SelectionMode="Multiple"
                     Style="{StaticResource listboxStyle}">

@@ -12,22 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// System
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using ArcGIS.Desktop.Framework;
-using ArcGIS.Core.Geometry;
+using System.Windows;
+
+// Pro SDK
 using ArcGIS.Core.CIM;
+using ArcGIS.Core.Geometry;
+using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
+using ProAppVisibilityModule.Helpers;
+using ProAppVisibilityModule.Models;
+
+// Visibility
 using VisibilityLibrary.Helpers;
 using VisibilityLibrary.ViewModels;
-using ProAppVisibilityModule.Models;
-using ProAppVisibilityModule.Helpers;
-using System.Windows;
-using System.Diagnostics;
-using System.Text.RegularExpressions;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -554,7 +559,7 @@ namespace ProAppVisibilityModule.ViewModels
         internal async Task<string> AddGraphicToMap(Geometry geom, bool IsTempGraphic = false, double size = 1.0)
         {
             // default color Red
-            return await AddGraphicToMap(geom, ColorFactory.Red, IsTempGraphic, size);
+            return await AddGraphicToMap(geom, ColorFactory.RedRGB, IsTempGraphic, size);
         }
 
         internal async Task<string> AddGraphicToMap(Geometry geom, CIMColor color, bool IsTempGraphic = false, double size = 1.0, string text = "", SimpleMarkerStyle markerStyle = SimpleMarkerStyle.Circle, string tag = "")
@@ -592,7 +597,7 @@ namespace ProAppVisibilityModule.ViewModels
             {
                 await QueuedTask.Run(() =>
                 {
-                    var outline = SymbolFactory.ConstructStroke(ColorFactory.Black, 1.0, SimpleLineStyle.Solid);
+                    var outline = SymbolFactory.ConstructStroke(ColorFactory.BlackRGB, 1.0, SimpleLineStyle.Solid);
                     var s = SymbolFactory.ConstructPolygonSymbol(color, SimpleFillStyle.Solid, outline);
                     symbol = new CIMSymbolReference() { Symbol = s };
                 });

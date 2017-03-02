@@ -27,9 +27,10 @@ namespace VisibilityLibrary.Views
     
         private void ListBox_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
-            // right mouse click selects item in list box
-            // avoid this by setting e.Handled to true
-            e.Handled = true;
+            // TRICKY: right mouse click selects item in list box, 
+            // avoid this when multiple items are selected by setting e.Handled to true
+            if ((listBoxObservers.SelectedItems != null) && (listBoxObservers.SelectedItems.Count >= 1))
+                e.Handled = true;
         }
     }
 }
