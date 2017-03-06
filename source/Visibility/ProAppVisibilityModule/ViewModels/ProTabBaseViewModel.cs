@@ -58,7 +58,7 @@ namespace ProAppVisibilityModule.ViewModels
             Mediator.Register(VisibilityLibrary.Constants.MAP_POINT_TOOL_DEACTIVATED, OnMapPointToolDeactivated);
         }
 
-        private void OnMapPointToolDeactivated(object obj)
+        protected virtual void OnMapPointToolDeactivated(object obj)
         {
             foreach (var item in ProGraphicsList)
             {

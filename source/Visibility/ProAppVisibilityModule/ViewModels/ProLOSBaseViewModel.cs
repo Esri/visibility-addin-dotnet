@@ -60,6 +60,8 @@ namespace ProAppVisibilityModule.ViewModels
             LayersRemovedEvent.Subscribe(OnLayersAdded);
             MapPropertyChangedEvent.Subscribe(OnMapPropertyChanged);
             MapMemberPropertiesChangedEvent.Subscribe(OnMapMemberPropertyChanged);
+
+            ArcGIS.Desktop.Framework.Events.ActiveToolChangedEvent.Subscribe(OnActiveToolChanged);
         }
 
         ~ProLOSBaseViewModel()
@@ -71,6 +73,37 @@ namespace ProAppVisibilityModule.ViewModels
         }
 
         #region Properties
+
+        private string lastActiveToolName;
+
+        protected override void OnMapPointToolDeactivated(object obj)
+        {
+            ToolMode = MapPointToolMode.Unknown;
+
+            base.OnMapPointToolDeactivated(obj);
+        }
+
+        private bool observerToolActive = false;
+        public bool ObserverToolActive
+        {
+            get { return observerToolActive; }
+            set
+            {
+                observerToolActive = value;
+                RaisePropertyChanged(() => ObserverToolActive);
+            }
+        }
+
+        private bool targetToolActive = false;
+        public bool TargetToolActive
+        {
+            get { return targetToolActive; }
+            set
+            {
+                targetToolActive = value;
+                RaisePropertyChanged(() => TargetToolActive);
+            }
+        }
 
         private bool isRunning = false;
         public bool IsRunning
@@ -109,7 +142,33 @@ namespace ProAppVisibilityModule.ViewModels
                     throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEInvalidInput);
             }
         }
-        public MapPointToolMode ToolMode { get; set; }
+
+        private MapPointToolMode toolMode;
+        public MapPointToolMode ToolMode
+        {
+            get { return toolMode; }
+            set
+            {
+                toolMode = value;
+                if (toolMode == MapPointToolMode.Observer)
+                {
+                    ObserverToolActive = true;
+                    TargetToolActive = false;
+                }
+                else if (toolMode == MapPointToolMode.Target)
+                {
+                    ObserverToolActive = false;
+                    TargetToolActive = true;
+                }
+                else
+                {
+                    ObserverToolActive = false;
+                    TargetToolActive = false;
+
+                    ArcGIS.Desktop.Framework.FrameworkApplication.SetCurrentToolAsync(lastActiveToolName);
+                }
+            }
+        }
         public ObservableCollection<AddInPoint> ObserverAddInPoints { get; set; }
         public ObservableCollection<string> SurfaceLayerNames { get; set; }
         public string SelectedSurfaceName { get; set; }
@@ -214,16 +273,23 @@ namespace ProAppVisibilityModule.ViewModels
         /// <param name="obj">ToolMode string from resource file</param>
         internal override void OnActivateToolCommand(object obj)
         {
+            string currentTool = ArcGIS.Desktop.Framework.FrameworkApplication.CurrentTool;
+
             var mode = obj.ToString();
-            ToolMode = MapPointToolMode.Unknown;
+
+            MapPointToolMode lastToolMode = ToolMode;
 
             if (string.IsNullOrWhiteSpace(mode))
                 return;
 
-            if (mode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
+            if ((mode == VisibilityLibrary.Properties.Resources.ToolModeObserver) &&
+                (lastToolMode != MapPointToolMode.Observer))
                 ToolMode = MapPointToolMode.Observer;
-            else if (mode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
+            else if ((mode == VisibilityLibrary.Properties.Resources.ToolModeTarget) &&
+                (lastToolMode != MapPointToolMode.Target))
                 ToolMode = MapPointToolMode.Target;
+            else
+                ToolMode = MapPointToolMode.Unknown;
 
             base.OnActivateToolCommand(obj);
         }
@@ -572,20 +638,16 @@ namespace ProAppVisibilityModule.ViewModels
                 await ResetSurfaceNames();
         }
 
+        private void OnActiveToolChanged(ArcGIS.Desktop.Framework.Events.ToolEventArgs args)
+        {
+            string currentActiveToolName = args.CurrentID;
 
-        //internal double ConvertFromTo(DistanceTypes fromType, DistanceTypes toType, double input)
-        //{
-        //    double result = 0.0;
+            if (currentActiveToolName != "ProAppVisibilityModule_MapTool")
+            {
+                lastActiveToolName = currentActiveToolName;
+            }
 
-        //    var linearUnitFrom = GetLinearUnit(fromType);
-        //    var linearUnitTo = GetLinearUnit(toType);
-
-        //    var unit = LinearUnit.CreateLinearUnit(linearUnitFrom.FactoryCode);
-
-        //    result = unit.ConvertTo(input, linearUnitTo);
-
-        //    return result;
-        //}
+        }
 
         internal LinearUnit GetLinearUnit(DistanceTypes dtype)
         {
