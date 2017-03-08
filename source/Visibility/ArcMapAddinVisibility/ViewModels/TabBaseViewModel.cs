@@ -48,6 +48,8 @@ namespace ArcMapAddinVisibility.ViewModels
 
             Mediator.Register(VisibilityLibrary.Constants.MAP_POINT_TOOL_ACTIVATED, OnMapPointToolActivated);
             Mediator.Register(VisibilityLibrary.Constants.MAP_POINT_TOOL_DEACTIVATED, OnMapPointToolDeactivated);
+            Mediator.Register(VisibilityLibrary.Constants.MAP_TOOL_CHANGED, OnActiveToolChanged);
+
         }
 
         protected void OnMapPointToolActivated(object obj)
@@ -61,7 +63,22 @@ namespace ArcMapAddinVisibility.ViewModels
             // remove graphics from map
         }
 
+        protected virtual void OnActiveToolChanged(object obj)
+        {
+            string currentActiveToolName = obj as string;
+
+            if ((currentActiveToolName == "Esri_ArcMapAddinVisibility_MapPointTool"))   
+                return;
+
+            lastActiveToolName = currentActiveToolName;
+        }
+
         #region Properties
+
+        /// <summary>
+        /// save last active tool used, so we can set back to this 
+        /// </summary>
+        private string lastActiveToolName;
 
         // lists to store GUIDs of graphics, temp feedback and map graphics
         private static List<AMGraphic> GraphicsList = new List<AMGraphic>();
@@ -400,7 +417,7 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <param name="obj"></param>
         internal virtual void OnActivateToolCommand(object obj)
         {
-            SetToolActiveInToolBar(ArcMap.Application, "Esri_ArcMapAddinVisibility_MapPointTool");
+            SetToolActiveInToolBar("Esri_ArcMapAddinVisibility_MapPointTool");
         }
 
         /// <summary>
@@ -439,12 +456,7 @@ namespace ArcMapAddinVisibility.ViewModels
         /// </summary>
         public void DeactivateTool(string toolname)
         {
-            if (ArcMap.Application != null
-                && ArcMap.Application.CurrentTool != null
-                && ArcMap.Application.CurrentTool.Name.Equals(toolname))
-            {
-                SetToolActiveInToolBar(ArcMap.Application, "esriArcMapUI.PanTool");
-            }
+            SetToolActiveInToolBar(lastActiveToolName);
         }
 
         /// <summary>
@@ -452,18 +464,24 @@ namespace ArcMapAddinVisibility.ViewModels
         /// </summary>
         /// <param name="application"></param>
         /// <param name="toolName"></param>
-        public void SetToolActiveInToolBar(ESRI.ArcGIS.Framework.IApplication application, System.String toolName)
+        public void SetToolActiveInToolBar(string toolName)
         {
+            if ((ArcMap.Application == null) || (ArcMap.Application.CurrentTool == null) ||
+                string.IsNullOrEmpty(toolName))
+                return;
+
+            // Tricky: Check if tool already active - because setting CurrentTool will 
+            //         cause Activate/Deactive to be called by framework
             if (ArcMap.Application.CurrentTool.Name.Equals(toolName))
                 return;
 
-            ESRI.ArcGIS.Framework.ICommandBars commandBars = application.Document.CommandBars;
+            ESRI.ArcGIS.Framework.ICommandBars commandBars = ArcMap.Application.Document.CommandBars;
             ESRI.ArcGIS.esriSystem.UID commandID = new ESRI.ArcGIS.esriSystem.UIDClass();
             commandID.Value = toolName;
             ESRI.ArcGIS.Framework.ICommandItem commandItem = commandBars.Find(commandID, false, false);
 
             if (commandItem != null)
-                application.CurrentTool = commandItem;
+                ArcMap.Application.CurrentTool = commandItem;
         }
         #endregion
 
