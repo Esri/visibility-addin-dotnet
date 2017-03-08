@@ -299,7 +299,7 @@ namespace ProAppVisibilityModule.ViewModels
 
                 await ExecuteVisibilityLLOS();
 
-                DeactivateTool("ProAppVisibilityModule_MapTool");
+                DeactivateTool(VisibilityMapTool.ToolId);
 
                 GC.Collect();
                 GC.WaitForPendingFinalizers();

@@ -137,7 +137,7 @@ namespace ArcMapAddinVisibility.ViewModels
                     ObserverToolActive = false;
                     TargetToolActive = false;
 
-                    DeactivateTool("Esri_ArcMapAddinVisibility_MapPointTool");
+                    DeactivateTool(ThisAddIn.IDs.MapPointTool);
                 }
             }
         }

@@ -161,7 +161,7 @@ namespace ProAppVisibilityModule.ViewModels
                     ObserverToolActive = false;
                     TargetToolActive = false;
 
-                    DeactivateTool("ProAppVisibilityModule_MapTool");
+                    DeactivateTool(VisibilityMapTool.ToolId);
                 }
             }
         }

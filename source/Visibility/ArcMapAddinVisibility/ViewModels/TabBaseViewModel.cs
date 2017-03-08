@@ -67,7 +67,7 @@ namespace ArcMapAddinVisibility.ViewModels
         {
             string currentActiveToolName = obj as string;
 
-            if ((currentActiveToolName == "Esri_ArcMapAddinVisibility_MapPointTool"))   
+            if ((currentActiveToolName == ThisAddIn.IDs.MapPointTool))   
                 return;
 
             lastActiveToolName = currentActiveToolName;
@@ -417,7 +417,7 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <param name="obj"></param>
         internal virtual void OnActivateToolCommand(object obj)
         {
-            SetToolActiveInToolBar("Esri_ArcMapAddinVisibility_MapPointTool");
+            SetToolActiveInToolBar(ThisAddIn.IDs.MapPointTool);
         }
 
         /// <summary>
@@ -536,7 +536,7 @@ namespace ArcMapAddinVisibility.ViewModels
         {
             if (toolReset)
             {
-                DeactivateTool("Esri_ArcMapAddinVisibility_MapPointTool");
+                DeactivateTool(ThisAddIn.IDs.MapPointTool);
             }
 
             Point1 = null;

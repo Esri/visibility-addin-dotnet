@@ -274,7 +274,7 @@ namespace ProAppVisibilityModule.ViewModels
 
                 await ExecuteVisibilityRLOS();
 
-                DeactivateTool("ProAppVisibilityModule_MapTool");
+                DeactivateTool(VisibilityMapTool.ToolId);
 
                 //await base.CreateMapElement();
             }

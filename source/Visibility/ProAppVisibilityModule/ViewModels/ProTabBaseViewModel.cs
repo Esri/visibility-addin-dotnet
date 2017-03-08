@@ -385,7 +385,7 @@ namespace ProAppVisibilityModule.ViewModels
         /// <param name="obj"></param>
         internal virtual void OnActivateToolCommand(object obj)
         {
-            FrameworkApplication.SetCurrentToolAsync("ProAppVisibilityModule_MapTool");
+            FrameworkApplication.SetCurrentToolAsync(VisibilityMapTool.ToolId);
         }
 
         #endregion
@@ -471,7 +471,7 @@ namespace ProAppVisibilityModule.ViewModels
         {
             if (toolReset)
             {
-                DeactivateTool("ProAppVisibilityModule_MapTool");
+                DeactivateTool(VisibilityMapTool.ToolId);
             }
 
             Point1 = null;
@@ -694,7 +694,7 @@ namespace ProAppVisibilityModule.ViewModels
         {
             string currentActiveToolName = args.CurrentID;
 
-            if (currentActiveToolName != "ProAppVisibilityModule_MapTool")
+            if (currentActiveToolName != VisibilityMapTool.ToolId)
             {
                 lastActiveToolName = currentActiveToolName;
             }

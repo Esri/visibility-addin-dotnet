@@ -30,6 +30,12 @@ namespace ProAppVisibilityModule
             UseSnapping = true;
         }
 
+        public static string ToolId
+        {
+            // Important: this must match the Tool ID used in the DAML
+            get { return "ProAppVisibilityModule_MapTool"; }
+        }
+
         protected override Task OnToolActivateAsync(bool active)
         {
             Mediator.NotifyColleagues(VisibilityLibrary.Constants.MAP_POINT_TOOL_ACTIVATED, active);
