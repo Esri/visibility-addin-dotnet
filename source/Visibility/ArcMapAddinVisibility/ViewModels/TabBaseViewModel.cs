@@ -37,7 +37,7 @@ namespace ArcMapAddinVisibility.ViewModels
         {
             //commands
             ClearGraphicsCommand = new RelayCommand(OnClearGraphics);
-            ActivateToolCommand = new RelayCommand(OnActivateTool);
+            ActivateToolCommand = new RelayCommand(OnActivateToolCommand);
             EnterKeyCommand = new RelayCommand(OnEnterKeyCommand);
             CancelCommand = new RelayCommand(OnCancelCommand);
 
@@ -45,6 +45,20 @@ namespace ArcMapAddinVisibility.ViewModels
             Mediator.Register(Constants.NEW_MAP_POINT, OnNewMapPointEvent);
             Mediator.Register(Constants.MOUSE_MOVE_POINT, OnMouseMoveEvent);
             Mediator.Register(Constants.TAB_ITEM_SELECTED, OnTabItemSelected);
+
+            Mediator.Register(VisibilityLibrary.Constants.MAP_POINT_TOOL_ACTIVATED, OnMapPointToolActivated);
+            Mediator.Register(VisibilityLibrary.Constants.MAP_POINT_TOOL_DEACTIVATED, OnMapPointToolDeactivated);
+        }
+
+        protected void OnMapPointToolActivated(object obj)
+        {
+            // reactivate any graphics on the map
+        }
+
+        protected virtual void OnMapPointToolDeactivated(object obj)
+        {
+
+            // remove graphics from map
         }
 
         #region Properties
@@ -278,7 +292,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
         /// <summary>
         /// Clears all the graphics from the maps graphic container except temp graphics
-        /// Inlucdes map graphics only
+        /// Includes map graphics only
         /// Only removes map graphics that were created by this add-in
         /// </summary>
         /// <param name="obj"></param>
@@ -384,10 +398,11 @@ namespace ArcMapAddinVisibility.ViewModels
         /// Activates the map tool to get map points from mouse clicks/movement
         /// </summary>
         /// <param name="obj"></param>
-        internal virtual void OnActivateTool(object obj)
+        internal virtual void OnActivateToolCommand(object obj)
         {
             SetToolActiveInToolBar(ArcMap.Application, "Esri_ArcMapAddinVisibility_MapPointTool");
         }
+
         /// <summary>
         /// Handler for the "Enter"key command
         /// Calls CreateMapElement
@@ -428,9 +443,10 @@ namespace ArcMapAddinVisibility.ViewModels
                 && ArcMap.Application.CurrentTool != null
                 && ArcMap.Application.CurrentTool.Name.Equals(toolname))
             {
-                ArcMap.Application.CurrentTool = null;
+                SetToolActiveInToolBar(ArcMap.Application, "esriArcMapUI.PanTool");
             }
         }
+
         /// <summary>
         /// Method to set the map tool as the active tool for the map
         /// </summary>
@@ -438,6 +454,9 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <param name="toolName"></param>
         public void SetToolActiveInToolBar(ESRI.ArcGIS.Framework.IApplication application, System.String toolName)
         {
+            if (ArcMap.Application.CurrentTool.Name.Equals(toolName))
+                return;
+
             ESRI.ArcGIS.Framework.ICommandBars commandBars = application.Document.CommandBars;
             ESRI.ArcGIS.esriSystem.UID commandID = new ESRI.ArcGIS.esriSystem.UIDClass();
             commandID.Value = toolName;
@@ -447,6 +466,7 @@ namespace ArcMapAddinVisibility.ViewModels
                 application.CurrentTool = commandItem;
         }
         #endregion
+
         #region Private Functions
         /// <summary>
         /// Method will return a formatted point as a string based on the configuration settings for display coordinate type

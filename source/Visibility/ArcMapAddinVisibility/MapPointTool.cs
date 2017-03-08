@@ -53,6 +53,15 @@ namespace ArcMapAddinVisibility
 			m_Snapper = m_SnappingEnv.PointSnapper;
 			m_SnappingFeedback = new SnappingFeedbackClass();
 			m_SnappingFeedback.Initialize(ArcMap.Application, m_SnappingEnv, true);
+
+            Mediator.NotifyColleagues(VisibilityLibrary.Constants.MAP_POINT_TOOL_ACTIVATED, true);
+        }
+
+        protected override bool OnDeactivate()
+        {
+            Mediator.NotifyColleagues(VisibilityLibrary.Constants.MAP_POINT_TOOL_DEACTIVATED, false);
+
+            return base.OnDeactivate();
         }
 
         protected override void OnMouseDown(ESRI.ArcGIS.Desktop.AddIns.Tool.MouseEventArgs arg)
