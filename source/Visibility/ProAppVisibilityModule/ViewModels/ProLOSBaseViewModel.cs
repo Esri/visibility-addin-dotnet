@@ -60,8 +60,6 @@ namespace ProAppVisibilityModule.ViewModels
             LayersRemovedEvent.Subscribe(OnLayersAdded);
             MapPropertyChangedEvent.Subscribe(OnMapPropertyChanged);
             MapMemberPropertiesChangedEvent.Subscribe(OnMapMemberPropertyChanged);
-
-            ArcGIS.Desktop.Framework.Events.ActiveToolChangedEvent.Subscribe(OnActiveToolChanged);
         }
 
         ~ProLOSBaseViewModel()
@@ -73,8 +71,6 @@ namespace ProAppVisibilityModule.ViewModels
         }
 
         #region Properties
-
-        private string lastActiveToolName;
 
         protected override void OnMapPointToolDeactivated(object obj)
         {
@@ -165,10 +161,11 @@ namespace ProAppVisibilityModule.ViewModels
                     ObserverToolActive = false;
                     TargetToolActive = false;
 
-                    ArcGIS.Desktop.Framework.FrameworkApplication.SetCurrentToolAsync(lastActiveToolName);
+                    DeactivateTool("ProAppVisibilityModule_MapTool");
                 }
             }
         }
+
         public ObservableCollection<AddInPoint> ObserverAddInPoints { get; set; }
         public ObservableCollection<string> SurfaceLayerNames { get; set; }
         public string SelectedSurfaceName { get; set; }
@@ -273,8 +270,6 @@ namespace ProAppVisibilityModule.ViewModels
         /// <param name="obj">ToolMode string from resource file</param>
         internal override void OnActivateToolCommand(object obj)
         {
-            string currentTool = ArcGIS.Desktop.Framework.FrameworkApplication.CurrentTool;
-
             var mode = obj.ToString();
 
             MapPointToolMode lastToolMode = ToolMode;
@@ -291,7 +286,8 @@ namespace ProAppVisibilityModule.ViewModels
             else
                 ToolMode = MapPointToolMode.Unknown;
 
-            base.OnActivateToolCommand(obj);
+            if (ToolMode != MapPointToolMode.Unknown)
+                base.OnActivateToolCommand(obj);
         }
 
         /// <summary>
@@ -636,17 +632,6 @@ namespace ProAppVisibilityModule.ViewModels
             IEnumerable<MapMemberEventHint> mapMemberHint = obj.EventHints;
             if (mapMemberHint.ElementAt(0).ToString() == "Name")
                 await ResetSurfaceNames();
-        }
-
-        private void OnActiveToolChanged(ArcGIS.Desktop.Framework.Events.ToolEventArgs args)
-        {
-            string currentActiveToolName = args.CurrentID;
-
-            if (currentActiveToolName != "ProAppVisibilityModule_MapTool")
-            {
-                lastActiveToolName = currentActiveToolName;
-            }
-
         }
 
         internal LinearUnit GetLinearUnit(DistanceTypes dtype)

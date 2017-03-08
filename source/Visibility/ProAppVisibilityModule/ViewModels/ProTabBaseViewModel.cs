@@ -56,6 +56,54 @@ namespace ProAppVisibilityModule.ViewModels
 
             Mediator.Register(VisibilityLibrary.Constants.MAP_POINT_TOOL_ACTIVATED, OnMapPointToolActivated);
             Mediator.Register(VisibilityLibrary.Constants.MAP_POINT_TOOL_DEACTIVATED, OnMapPointToolDeactivated);
+
+            // Pro Events
+            ArcGIS.Desktop.Framework.Events.ActiveToolChangedEvent.Subscribe(OnActiveToolChanged);
+        }
+
+        private async void OnMapPointToolActivated(object obj)
+        {
+            var addList = new List<tempProGraphic>();
+            var removeList = new List<ProGraphic>();
+
+            foreach (var item in ProGraphicsList)
+            {
+                if (item.Disposable != null || item.IsTemp == false)
+                    continue;
+
+                // re-add graphic to map overlay
+                SimpleMarkerStyle ms = SimpleMarkerStyle.Circle;
+                CIMColor color = ColorFactory.BlueRGB;
+
+                if (item.Tag == "target")
+                {
+                    ms = SimpleMarkerStyle.Square;
+                    color = ColorFactory.RedRGB;
+                }
+                addList.Add(new tempProGraphic()
+                {
+                    GUID = item.GUID,
+                    Geometry = item.Geometry,
+                    Color = color,
+                    IsTemp = true,
+                    Size = 5.0,
+                    MarkerStyle = ms
+                });
+            }
+
+            foreach (var temp in addList)
+            {
+                var pgOLD = ProGraphicsList.FirstOrDefault(g => g.GUID == temp.GUID);
+
+                var guid = await AddGraphicToMap(temp.Geometry, temp.Color, temp.IsTemp, temp.Size, markerStyle: temp.MarkerStyle, tag: pgOLD.Tag);
+
+                var pgNew = ProGraphicsList.FirstOrDefault(g => g.GUID == guid);
+                pgNew.GUID = pgOLD.GUID;
+                removeList.Add(pgOLD);
+            }
+
+            foreach (var pg in removeList)
+                ProGraphicsList.Remove(pg);
         }
 
         protected virtual void OnMapPointToolDeactivated(object obj)
@@ -83,52 +131,12 @@ namespace ProAppVisibilityModule.ViewModels
             public SimpleMarkerStyle MarkerStyle { get; set; }
         }
 
-        private async void OnMapPointToolActivated(object obj)
-        {
-            var addList = new List<tempProGraphic>();
-            var removeList = new List<ProGraphic>();
-
-            foreach(var item in ProGraphicsList)
-            {
-                if (item.Disposable != null || item.IsTemp == false)
-                    continue;
-
-                // re-add graphic to map overlay
-                SimpleMarkerStyle ms = SimpleMarkerStyle.Circle;
-                CIMColor color = ColorFactory.BlueRGB;
-
-                if (item.Tag == "target")
-                {
-                    ms = SimpleMarkerStyle.Square;
-                    color = ColorFactory.RedRGB;
-                }
-                addList.Add(new tempProGraphic()
-                {
-                    GUID = item.GUID,
-                    Geometry = item.Geometry,
-                    Color = color,
-                    IsTemp = true,
-                    Size = 5.0,
-                    MarkerStyle = ms
-                });
-            }
-
-            foreach(var temp in addList)
-            {
-                var pgOLD = ProGraphicsList.FirstOrDefault(g => g.GUID == temp.GUID);
-
-                var guid = await AddGraphicToMap(temp.Geometry, temp.Color, temp.IsTemp, temp.Size, markerStyle: temp.MarkerStyle, tag: pgOLD.Tag);
-
-                var pgNew = ProGraphicsList.FirstOrDefault(g => g.GUID == guid);
-                pgNew.GUID = pgOLD.GUID;
-                removeList.Add(pgOLD);
-            }
-
-            foreach (var pg in removeList)
-                ProGraphicsList.Remove(pg);
-        }
-
         #region Properties
+
+        /// <summary>
+        /// save last active tool used, so we can set back to this 
+        /// </summary>
+        private string lastActiveToolName;
 
         /// <summary>
         /// lists to store GUIDs of graphics, temp feedback and map graphics
@@ -676,9 +684,19 @@ namespace ProAppVisibilityModule.ViewModels
                 FrameworkApplication.CurrentTool.Equals(toolname))
             {
                 Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        FrameworkApplication.SetCurrentToolAsync(String.Empty);
-                    });
+                {
+                    FrameworkApplication.SetCurrentToolAsync(lastActiveToolName);
+                });
+            }
+        }
+
+        private void OnActiveToolChanged(ArcGIS.Desktop.Framework.Events.ToolEventArgs args)
+        {
+            string currentActiveToolName = args.CurrentID;
+
+            if (currentActiveToolName != "ProAppVisibilityModule_MapTool")
+            {
+                lastActiveToolName = currentActiveToolName;
             }
         }
 
