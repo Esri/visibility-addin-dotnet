@@ -102,12 +102,13 @@
                     </TextBox.InputBindings>
                 </TextBox>
 
-                <Button
+                <ToggleButton
                     Grid.Row="3"
                     Grid.Column="2"
                     Margin="3,3,0,0"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
+                    IsChecked="{Binding ObserverToolActive}"
                     Command="{Binding ActivateToolCommand}"
                     CommandParameter="{x:Static prop:Resources.ToolModeObserver}"
                     ToolTip="{x:Static prop:Resources.TooltipMapPointTool}">
@@ -116,8 +117,8 @@
                         Height="16"
                         HorizontalAlignment="Right"
                         Source="/VisibilityLibrary;component/Images/Add_Point.png" />
-                    <Button.Style>
-                        <Style TargetType="Button">
+                    <ToggleButton.Style>
+                        <Style TargetType="ToggleButton">
                             <Setter Property="IsEnabled" Value="True" />
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsRunning}" Value="True">
@@ -125,8 +126,8 @@
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
-                    </Button.Style>
-                </Button>
+                    </ToggleButton.Style>
+                </ToggleButton>
                 <ListBox
                     x:Name="listBoxObservers"
                     Grid.Row="4"

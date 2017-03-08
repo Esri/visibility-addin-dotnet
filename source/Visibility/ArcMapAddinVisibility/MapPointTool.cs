@@ -32,13 +32,35 @@ namespace ArcMapAddinVisibility
         IPointSnapper m_Snapper;
         ISnappingFeedback m_SnappingFeedback;
 
+        /// <summary>
+        /// save last active tool used, so we can set back to this 
+        /// </summary>
+        private string lastActiveToolGuid;
+
         public MapPointTool()
         {
+            if ((ArcMap.Application != null) && (ArcMap.Application.CurrentTool != null))
+                lastActiveToolGuid = ArcMap.Application.CurrentTool.ID.Value as string;
         }
 
         protected override void OnUpdate()
         {
             Enabled = ArcMap.Application != null;
+
+            if ((ArcMap.Application == null) || (ArcMap.Application.CurrentTool == null))
+                return;
+
+            // Keep track of the last tool used here so we can set it back to address:
+            // https://github.com/Esri/visibility-addin-dotnet/issues/159
+            // This is not a very efficient place to do this because it is called repeatedly
+            // but only place I could find that knew the previous tool in use
+
+            if (ArcMap.Application.CurrentTool.ID.Value.ToString().Equals(lastActiveToolGuid))
+                return;
+
+            // this is a GUID - with no way to get the progID 
+            // (except PInvoke of Win32 ProgIDFromCLSID) so using GUIDs instead of more readable ProgID
+            lastActiveToolGuid = ArcMap.Application.CurrentTool.ID.Value as string;
         }
 
         protected override void OnActivate()
@@ -53,6 +75,18 @@ namespace ArcMapAddinVisibility
 			m_Snapper = m_SnappingEnv.PointSnapper;
 			m_SnappingFeedback = new SnappingFeedbackClass();
 			m_SnappingFeedback.Initialize(ArcMap.Application, m_SnappingEnv, true);
+
+            Mediator.NotifyColleagues(VisibilityLibrary.Constants.MAP_POINT_TOOL_ACTIVATED, true);
+
+            // Also notify what the previous tool was so it can be set back
+            Mediator.NotifyColleagues(VisibilityLibrary.Constants.MAP_TOOL_CHANGED, lastActiveToolGuid);
+        }
+
+        protected override bool OnDeactivate()
+        {
+            Mediator.NotifyColleagues(VisibilityLibrary.Constants.MAP_POINT_TOOL_DEACTIVATED, false);
+
+            return base.OnDeactivate();
         }
 
         protected override void OnMouseDown(ESRI.ArcGIS.Desktop.AddIns.Tool.MouseEventArgs arg)

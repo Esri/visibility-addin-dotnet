@@ -31,5 +31,6 @@ namespace VisibilityLibrary
         public const string DISPLAY_COORDINATE_TYPE_CHANGED = "DisplayCoordinateTypeChanged";
         public const string MAP_POINT_TOOL_ACTIVATED = "MAP_POINT_TOOL_ACTIVATED";
         public const string MAP_POINT_TOOL_DEACTIVATED = "MAP_POINT_TOOL_DEACTIVATED";
+        public const string MAP_TOOL_CHANGED = "MAP_TOOL_CHANGED";
     }
 }

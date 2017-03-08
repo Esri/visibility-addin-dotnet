@@ -56,31 +56,9 @@ namespace ProAppVisibilityModule.ViewModels
 
             Mediator.Register(VisibilityLibrary.Constants.MAP_POINT_TOOL_ACTIVATED, OnMapPointToolActivated);
             Mediator.Register(VisibilityLibrary.Constants.MAP_POINT_TOOL_DEACTIVATED, OnMapPointToolDeactivated);
-        }
 
-        private void OnMapPointToolDeactivated(object obj)
-        {
-            foreach (var item in ProGraphicsList)
-            {
-                if (item.Disposable != null && item.IsTemp == true)
-                {
-                    if (item.Disposable != null)
-                        item.Disposable.Dispose();
-                    item.Disposable = null;
-                }
-            }
-        }
-
-        private class tempProGraphic
-        {
-            public tempProGraphic() { }
-
-            public string GUID { get; set; }
-            public Geometry Geometry { get; set; }
-            public CIMColor Color { get; set; }
-            public bool IsTemp { get; set; }
-            public double Size { get; set; }
-            public SimpleMarkerStyle MarkerStyle { get; set; }
+            // Pro Events
+            ArcGIS.Desktop.Framework.Events.ActiveToolChangedEvent.Subscribe(OnActiveToolChanged);
         }
 
         private async void OnMapPointToolActivated(object obj)
@@ -88,7 +66,7 @@ namespace ProAppVisibilityModule.ViewModels
             var addList = new List<tempProGraphic>();
             var removeList = new List<ProGraphic>();
 
-            foreach(var item in ProGraphicsList)
+            foreach (var item in ProGraphicsList)
             {
                 if (item.Disposable != null || item.IsTemp == false)
                     continue;
@@ -113,7 +91,7 @@ namespace ProAppVisibilityModule.ViewModels
                 });
             }
 
-            foreach(var temp in addList)
+            foreach (var temp in addList)
             {
                 var pgOLD = ProGraphicsList.FirstOrDefault(g => g.GUID == temp.GUID);
 
@@ -128,7 +106,37 @@ namespace ProAppVisibilityModule.ViewModels
                 ProGraphicsList.Remove(pg);
         }
 
+        protected virtual void OnMapPointToolDeactivated(object obj)
+        {
+            foreach (var item in ProGraphicsList)
+            {
+                if (item.Disposable != null && item.IsTemp == true)
+                {
+                    if (item.Disposable != null)
+                        item.Disposable.Dispose();
+                    item.Disposable = null;
+                }
+            }
+        }
+
+        private class tempProGraphic
+        {
+            public tempProGraphic() { }
+
+            public string GUID { get; set; }
+            public Geometry Geometry { get; set; }
+            public CIMColor Color { get; set; }
+            public bool IsTemp { get; set; }
+            public double Size { get; set; }
+            public SimpleMarkerStyle MarkerStyle { get; set; }
+        }
+
         #region Properties
+
+        /// <summary>
+        /// save last active tool used, so we can set back to this 
+        /// </summary>
+        private string lastActiveToolName;
 
         /// <summary>
         /// lists to store GUIDs of graphics, temp feedback and map graphics
@@ -377,7 +385,7 @@ namespace ProAppVisibilityModule.ViewModels
         /// <param name="obj"></param>
         internal virtual void OnActivateToolCommand(object obj)
         {
-            FrameworkApplication.SetCurrentToolAsync("ProAppVisibilityModule_MapTool");
+            FrameworkApplication.SetCurrentToolAsync(VisibilityMapTool.ToolId);
         }
 
         #endregion
@@ -463,7 +471,7 @@ namespace ProAppVisibilityModule.ViewModels
         {
             if (toolReset)
             {
-                DeactivateTool("ProAppVisibilityModule_MapTool");
+                DeactivateTool(VisibilityMapTool.ToolId);
             }
 
             Point1 = null;
@@ -676,9 +684,19 @@ namespace ProAppVisibilityModule.ViewModels
                 FrameworkApplication.CurrentTool.Equals(toolname))
             {
                 Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        FrameworkApplication.SetCurrentToolAsync(String.Empty);
-                    });
+                {
+                    FrameworkApplication.SetCurrentToolAsync(lastActiveToolName);
+                });
+            }
+        }
+
+        private void OnActiveToolChanged(ArcGIS.Desktop.Framework.Events.ToolEventArgs args)
+        {
+            string currentActiveToolName = args.CurrentID;
+
+            if (currentActiveToolName != VisibilityMapTool.ToolId)
+            {
+                lastActiveToolName = currentActiveToolName;
             }
         }
 
