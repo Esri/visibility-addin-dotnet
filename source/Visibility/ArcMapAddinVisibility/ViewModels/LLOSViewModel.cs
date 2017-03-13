@@ -264,22 +264,31 @@ namespace ArcMapAddinVisibility.ViewModels
                             UpdateTargetObserverCount(DictionaryTargetObserverCount, targetPoint.Point);
                         }
 
+                        // First Add "SightLine" so it appears behind others
+                        // Black = Not visible -or- White = Visible
+                        if (targetIsVisible)                            
+                            AddGraphicToMap(pcolPolyline, new RgbColorClass() { RGB = 0xFFFFFF }, false,
+                                size: 6); //  white line
+                        else
+                            AddGraphicToMap(pcolPolyline, new RgbColorClass() { RGB = 0x000000 }, false,
+                                size: 6); //  black line
+
                         if (polyVisible != null)
                         {
-                            AddGraphicToMap(polyVisible, new RgbColorClass() { Green = 255 });
+                            AddGraphicToMap(polyVisible, new RgbColorClass() { Green = 255 }, size: 5);
                         }
 
                         if (polyInvisible != null)
                         {
-                            AddGraphicToMap(polyInvisible, new RgbColorClass() { Red = 255 });
+                            AddGraphicToMap(polyInvisible, new RgbColorClass() { Red = 255 }, size: 3);
                         }
 
                         if (polyVisible == null && polyInvisible == null)
                         {                           
                             if (targetIsVisible)
-                                AddGraphicToMap(pcol as IPolyline, new RgbColorClass() { Green = 255 });
+                                AddGraphicToMap(pcol as IPolyline, new RgbColorClass() { Green = 255 }, size: 3);
                             else
-                                AddGraphicToMap(pcol as IPolyline, new RgbColorClass() { Red = 255 });
+                                AddGraphicToMap(pcol as IPolyline, new RgbColorClass() { Red = 255 }, size: 3);
                         }
                     }
 
