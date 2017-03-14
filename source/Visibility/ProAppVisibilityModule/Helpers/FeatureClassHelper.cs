@@ -332,7 +332,7 @@ namespace ProAppVisibilityModule.Helpers
         /// <param name="environments">geoprocessing environments</param>
         /// <param name="addToMap">add to map or not</param>
         /// <returns></returns>
-        public static async Task CreateVisibility(string surfaceName, string observerFeatureClassName, string outRLOSFeatureClass, 
+        public static async Task<bool> CreateVisibility(string surfaceName, string observerFeatureClassName, string outRLOSFeatureClass, 
                                                     double observerOffset, double surfaceOffset, 
                                                     double minDistance, double maxDistance,
                                                     double horizontalStartAngle, double horizontalEndAngle,
@@ -387,9 +387,17 @@ namespace ProAppVisibilityModule.Helpers
 
             if (result.IsFailed)
             {
+                // Provide the user some feedback of what went wrong
+                System.Text.StringBuilder sb = new System.Text.StringBuilder();
+                sb.AppendLine("Visibility_3d GP Tool FAILED:");
                 foreach (var msg in result.Messages)
-                    Debug.Print(msg.Text);
+                    sb.AppendLine(msg.Text);
+
+                 ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(sb.ToString(),
+                        VisibilityLibrary.Properties.Resources.CaptionError);
             }
+
+            return result.IsFailed == false; 
         }
 
         /// <summary>

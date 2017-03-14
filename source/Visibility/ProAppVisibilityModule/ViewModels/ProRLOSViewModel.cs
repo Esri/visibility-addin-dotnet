@@ -335,12 +335,13 @@ namespace ProAppVisibilityModule.ViewModels
                 
                 string maskFeatureClassName = CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + RLOSMaskLayerName;
 
-                await CreateMask(RLOSMaskLayerName, maxDistanceInMapUnits, surfaceSR);
+                await CreateMask(RLOSMaskLayerName, minDistanceInMapUnits, maxDistanceInMapUnits, horizontalStartAngleInDegrees,
+                    horizontalEndAngleInDegrees, surfaceSR);
 
                 var environments = Geoprocessing.MakeEnvironmentArray(mask: maskFeatureClassName, overwriteoutput: true);
                 var rlosOutputLayer = CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + RLOSOutputLayerName;
 
-                await FeatureClassHelper.CreateVisibility(SelectedSurfaceName, ObserversLayerName,
+                bool vizSuccess = await FeatureClassHelper.CreateVisibility(SelectedSurfaceName, ObserversLayerName,
                     rlosOutputLayer,
                     observerOffsetInMapZUnits, surfaceOffsetInMapZUnits,
                     minDistanceInMapUnits, maxDistanceInMapUnits,
@@ -349,6 +350,9 @@ namespace ProAppVisibilityModule.ViewModels
                     ShowNonVisibleData,
                     environments,
                     false);
+
+                if (!vizSuccess)
+                    return;
 
                 var rlosConvertedPolygonsLayer = CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + RLOSConvertedPolygonsLayerName;
 
@@ -396,7 +400,9 @@ namespace ProAppVisibilityModule.ViewModels
         /// <param name="maskFeatureClassName"></param>
         /// <param name="bufferDistance"></param>
         /// <returns>Task</returns>
-        private async Task CreateMask(string maskFeatureClassName, double bufferDistance, SpatialReference surfaceSR)
+        private async Task CreateMask(string maskFeatureClassName, 
+            double minDistanceInMapUnits, double maxDistanceInMapUnits, 
+            double horizontalStartAngleInDegrees, double horizontalEndAngleInDegrees, SpatialReference surfaceSR)
         {
             // create new
             await FeatureClassHelper.CreateLayer(maskFeatureClassName, "POLYGON", false, false);
@@ -414,32 +420,43 @@ namespace ProAppVisibilityModule.ViewModels
                         EditOperation editOperation = new EditOperation();
                         editOperation.Callback(context =>
                         {
-                            try
-                            {
-                                var shapeFieldName = fcDefinition.GetShapeField();
+                        try
+                        {
+                            var shapeFieldName = fcDefinition.GetShapeField();
 
-                                foreach (var observer in ObserverAddInPoints)
+                            foreach (var observer in ObserverAddInPoints)
+                            {
+                                using (var rowBuffer = enterpriseFeatureClass.CreateRowBuffer())
                                 {
-                                    using (var rowBuffer = enterpriseFeatureClass.CreateRowBuffer())
-                                    {
-                                        // Either the field index or the field name can be used in the indexer.
-                                        // project the point here or the buffer tool may use an angular unit and run forever
-                                        var point = GeometryEngine.Project(observer.Point, surfaceSR);
-                                        var polygon = GeometryEngine.Buffer(point, bufferDistance);
-                                        rowBuffer[shapeFieldName] = polygon;
+                                    // Either the field index or the field name can be used in the indexer.
+                                    // project the point here or the buffer tool may use an angular unit and run forever
+                                    var point = GeometryEngine.Project(observer.Point, surfaceSR);
+                                    Geometry polygon = null;
 
-                                        using (var feature = enterpriseFeatureClass.CreateRow(rowBuffer))
-                                        {
-                                            //To Indicate that the attribute table has to be updated
-                                            context.Invalidate(feature);
-                                        }
+                                    if (ShowNonVisibleData && 
+                                        !((LeftHorizontalFOV == 0.0) && (RightHorizontalFOV == 360.0)))
+                                    {
+                                        polygon = GeometryHelper.constructCircularRingSector(point as MapPoint,
+                                            minDistanceInMapUnits, maxDistanceInMapUnits, horizontalStartAngleInDegrees,
+                                            horizontalEndAngleInDegrees, surfaceSR);                                       
                                     }
-                                }
-                            }
-                            catch (GeodatabaseException exObj)
-                            {
-                                message = exObj.Message;
-                            }
+                                    else
+                                    {
+                                        polygon = GeometryEngine.Buffer(point, maxDistanceInMapUnits);
+                                    }
+
+                                    rowBuffer[shapeFieldName] = polygon;
+
+                                    Feature feature = enterpriseFeatureClass.CreateRow(rowBuffer);
+                                    feature.Store();
+                                    context.Invalidate(feature);
+                                } // using
+                            } // for each 
+                        }
+                        catch (GeodatabaseException exObj)
+                        {
+                            message = exObj.Message;
+                        }
                         }, enterpriseFeatureClass);
 
                         creationResult = await editOperation.ExecuteAsync();
