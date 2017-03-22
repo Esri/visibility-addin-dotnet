@@ -612,13 +612,13 @@ namespace ArcMapAddinVisibility.ViewModels
         /// Adds a graphic element to the map graphics container
         /// </summary>
         /// <param name="geom">IGeometry</param>
-        internal string AddGraphicToMap(IGeometry geom, IColor color, bool IsTempGraphic = false, esriSimpleMarkerStyle markerStyle = esriSimpleMarkerStyle.esriSMSCircle, int size = 5)
+        internal string AddGraphicToMap(IGeometry geom, IColor color, bool IsTempGraphic = false, 
+            esriSimpleMarkerStyle markerStyle = esriSimpleMarkerStyle.esriSMSCircle, int size = 5)
         {
             if (geom == null || ArcMap.Document == null || ArcMap.Document.FocusMap == null)
                 return string.Empty;
 
             IElement element = null;
-            double width = 2.0;
 
             geom.Project(ArcMap.Document.FocusMap.SpatialReference);
 
@@ -644,7 +644,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
                 var lineSymbol = new SimpleLineSymbolClass();
                 lineSymbol.Color = color;
-                lineSymbol.Width = width;
+                lineSymbol.Width = (double)size;
 
                 le.Symbol = lineSymbol;
             }
@@ -689,24 +689,6 @@ namespace ArcMapAddinVisibility.ViewModels
             RaisePropertyChanged(() => HasMapGraphics);
 
             return eprop.Name;
-        }
-
-        internal void AddGraphicToMap(IGeometry geom, IColor color)
-        {
-            AddGraphicToMap(geom, color, false);
-        }
-
-        internal void AddGraphicToMap(IGeometry geom)
-        {
-            var rgbColor = new ESRI.ArcGIS.Display.RgbColorClass() { Red = 255 };
-            AddGraphicToMap(geom, rgbColor);
-        }
-        internal void AddGraphicToMap(IGeometry geom, bool isTemp)
-        {
-            ESRI.ArcGIS.Display.IRgbColor rgbColor = new ESRI.ArcGIS.Display.RgbColorClass();
-            rgbColor.Red = 255;
-            //ESRI.ArcGIS.Display.IColor color = rgbColor; // Implicit cast.
-            AddGraphicToMap(geom, rgbColor, isTemp);
         }
 
         internal DistanceTypes GetDistanceType(int linearUnitFactoryCode)
