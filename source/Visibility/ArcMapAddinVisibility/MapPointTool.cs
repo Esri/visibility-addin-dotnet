@@ -85,7 +85,7 @@ namespace ArcMapAddinVisibility
         protected override bool OnDeactivate()
         {
             Mediator.NotifyColleagues(VisibilityLibrary.Constants.MAP_POINT_TOOL_DEACTIVATED, false);
-
+            this.Cursor = Cursors.Default;
             return base.OnDeactivate();
         }
 
