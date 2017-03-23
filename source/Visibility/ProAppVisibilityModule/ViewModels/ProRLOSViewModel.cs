@@ -436,7 +436,7 @@ namespace ProAppVisibilityModule.ViewModels
                                     if (ShowNonVisibleData && 
                                         !((LeftHorizontalFOV == 0.0) && (RightHorizontalFOV == 360.0)))
                                     {
-                                        polygon = GeometryHelper.constructCircularRingSector(point as MapPoint,
+                                        polygon = GeometryHelper.ConstructRangeFan(point as MapPoint,
                                             minDistanceInMapUnits, maxDistanceInMapUnits, horizontalStartAngleInDegrees,
                                             horizontalEndAngleInDegrees, surfaceSR);                                       
                                     }

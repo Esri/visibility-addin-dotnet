@@ -25,10 +25,10 @@ namespace ProAppVisibilityModule.Helpers
     public static class GeometryHelper
     {
         /// <summary>
-        /// Returns a polygon with a circular ring sector (like a wiper blade swipe with inner and outer radius)
+        /// Returns a polygon with a range fan(circular ring sector - like a donut wedge or wiper blade swipe with inner and outer radius)
         /// from the input parameters
         /// </summary>
-        public static Geometry constructCircularRingSector(MapPoint centerPoint,
+        public static Geometry ConstructRangeFan(MapPoint centerPoint,
             double innerDistanceInMapUnits, double outerDistanceInMapUnits,
             double horizontalStartAngleInBearing, double horizontalEndAngleInBearing,
             SpatialReference sr)
@@ -92,8 +92,8 @@ namespace ProAppVisibilityModule.Helpers
             // so if masking mimimum distance, add observer point back in
             if (innerDistanceInMapUnits > 0.0)
             {
-                // Buffer 1% of distance
-                var observerBuffer = GeometryEngine.Buffer(centerPoint, outerDistanceInMapUnits * 0.01);
+                // Buffer % of observer distance
+                var observerBuffer = GeometryEngine.Buffer(centerPoint, outerDistanceInMapUnits * 0.025);
 
                 // Tricky/Workaround: GP mask did not work with Multiparts with arcs so had to convert to densified polygon
                 var observerBufferDensified = GeometryEngine.DensifyByLength(observerBuffer, outerDistanceInMapUnits * 0.002);
