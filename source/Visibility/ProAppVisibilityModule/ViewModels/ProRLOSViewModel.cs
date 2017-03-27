@@ -332,13 +332,13 @@ namespace ProAppVisibilityModule.ViewModels
                 var verticalLowerAngleInDegrees = GetAngularDistanceFromTo(AngularUnitType, AngularTypes.DEGREES, BottomVerticalFOV);
 
                 await FeatureClassHelper.UpdateShapeWithZ(ObserversLayerName, VisibilityLibrary.Properties.Resources.ZFieldName, observerOffsetInMapZUnits);
-                
-                string maskFeatureClassName = CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + RLOSMaskLayerName;
 
                 await CreateMask(RLOSMaskLayerName, minDistanceInMapUnits, maxDistanceInMapUnits, horizontalStartAngleInDegrees,
                     horizontalEndAngleInDegrees, surfaceSR);
 
-                var environments = Geoprocessing.MakeEnvironmentArray(mask: maskFeatureClassName, overwriteoutput: true);
+                string maxRangeMaskFeatureClassName = CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + RLOSMaskLayerName;
+                var environments = Geoprocessing.MakeEnvironmentArray(mask: maxRangeMaskFeatureClassName, overwriteoutput: true);
+
                 var rlosOutputLayer = CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + RLOSOutputLayerName;
 
                 bool vizSuccess = await FeatureClassHelper.CreateVisibility(SelectedSurfaceName, ObserversLayerName,
@@ -356,7 +356,17 @@ namespace ProAppVisibilityModule.ViewModels
 
                 var rlosConvertedPolygonsLayer = CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + RLOSConvertedPolygonsLayerName;
 
-                await FeatureClassHelper.IntersectOutput(rlosOutputLayer, rlosConvertedPolygonsLayer, false, "Value");
+                string rangeFanMaskFeatureClassName = string.Empty;
+                if ((MinDistance > 0) || !((LeftHorizontalFOV == 0.0) && (RightHorizontalFOV == 360.0)))
+                {
+                    string RLOSRangeFanMaskLayerName = "RangeFan_" + RLOSMaskLayerName;
+                    rangeFanMaskFeatureClassName = CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + RLOSRangeFanMaskLayerName;
+
+                    await CreateMask(RLOSRangeFanMaskLayerName, minDistanceInMapUnits, maxDistanceInMapUnits, horizontalStartAngleInDegrees,
+                        horizontalEndAngleInDegrees, surfaceSR, true);
+                }
+
+                await FeatureClassHelper.IntersectOutput(rlosOutputLayer, rlosConvertedPolygonsLayer, false, "Value", rangeFanMaskFeatureClassName);
 
                 await FeatureClassHelper.CreateUniqueValueRenderer(GetLayerFromMapByName(RLOSConvertedPolygonsLayerName) as FeatureLayer, ShowNonVisibleData, RLOSConvertedPolygonsLayerName);
 
@@ -402,7 +412,8 @@ namespace ProAppVisibilityModule.ViewModels
         /// <returns>Task</returns>
         private async Task CreateMask(string maskFeatureClassName, 
             double minDistanceInMapUnits, double maxDistanceInMapUnits, 
-            double horizontalStartAngleInDegrees, double horizontalEndAngleInDegrees, SpatialReference surfaceSR)
+            double horizontalStartAngleInDegrees, double horizontalEndAngleInDegrees, 
+            SpatialReference surfaceSR, bool constructRangeFans = false)
         {
             // create new
             await FeatureClassHelper.CreateLayer(maskFeatureClassName, "POLYGON", false, false);
@@ -433,8 +444,7 @@ namespace ProAppVisibilityModule.ViewModels
                                     var point = GeometryEngine.Project(observer.Point, surfaceSR);
                                     Geometry polygon = null;
 
-                                    if (ShowNonVisibleData && 
-                                        !((LeftHorizontalFOV == 0.0) && (RightHorizontalFOV == 360.0)))
+                                    if (constructRangeFans)
                                     {
                                         polygon = GeometryHelper.ConstructRangeFan(point as MapPoint,
                                             minDistanceInMapUnits, maxDistanceInMapUnits, horizontalStartAngleInDegrees,

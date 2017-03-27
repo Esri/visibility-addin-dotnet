@@ -33,6 +33,29 @@ namespace ProAppVisibilityModule.Helpers
             double horizontalStartAngleInBearing, double horizontalEndAngleInBearing,
             SpatialReference sr)
         {
+            // if full circle(or greater), return donut section with inner/outer rings
+            if ((horizontalStartAngleInBearing <= 0.0) && (horizontalEndAngleInBearing >= 360.0))
+            {
+                // Just add 2 concentric circle buffers
+                PolygonBuilder donutPb = new PolygonBuilder();
+
+                var outerBuffer = GeometryEngine.Buffer(centerPoint, outerDistanceInMapUnits);
+                // Tricky/Workaround: GP mask/intersect did not work with Multiparts with arcs so had to convert to densified polygon
+                var outerBufferDensified = GeometryEngine.DensifyByLength(outerBuffer, outerDistanceInMapUnits * 0.005);
+                var outerBufferPolygon = outerBufferDensified as Polygon;
+
+                donutPb.AddPart(outerBufferPolygon.Points);
+
+                var innerBuffer = GeometryEngine.Buffer(centerPoint, innerDistanceInMapUnits);
+                var innerBufferDensified = GeometryEngine.DensifyByLength(innerBuffer, innerDistanceInMapUnits * 0.005);
+                var innerBufferPolygon = innerBufferDensified as Polygon;
+
+                donutPb.AddPart(innerBufferPolygon.Points);
+
+                return donutPb.ToGeometry();
+            }
+
+            // Otherwise if range fan, construct that
             var points = new List<MapPoint>();
 
             MapPoint startPoint = null;
@@ -87,20 +110,6 @@ namespace ProAppVisibilityModule.Helpers
 
             PolygonBuilder pb = new PolygonBuilder();
             pb.AddPart(points);
-
-            // TRICKY: Observer Point must be included in GP Tool Mask, 
-            // so if masking mimimum distance, add observer point back in
-            if (innerDistanceInMapUnits > 0.0)
-            {
-                // Buffer % of observer distance
-                var observerBuffer = GeometryEngine.Buffer(centerPoint, outerDistanceInMapUnits * 0.025);
-
-                // Tricky/Workaround: GP mask did not work with Multiparts with arcs so had to convert to densified polygon
-                var observerBufferDensified = GeometryEngine.DensifyByLength(observerBuffer, outerDistanceInMapUnits * 0.002);
-                var observerBufferPolygon = observerBufferDensified as Polygon;
-
-                pb.AddPart(observerBufferPolygon.Points);
-            }
 
             return pb.ToGeometry();
         }

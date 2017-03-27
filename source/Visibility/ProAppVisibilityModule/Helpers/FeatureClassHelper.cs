@@ -290,14 +290,24 @@ namespace ProAppVisibilityModule.Helpers
         /// <param name="simplify"></param>
         /// <param name="rasterField"></param>
         /// <returns></returns>
-        public static async Task IntersectOutput(string inputRasterLayer, string outputPolygonLayer, bool simplify, string rasterField)
+        public static async Task IntersectOutput(string inputRasterLayer, string outputPolygonLayer, 
+            bool simplify, string rasterField, string intersectMaskFeatureClass)
         {
+            string rasterToPolyLayer = outputPolygonLayer;
+
+            bool addToMap = true;
+            if (!string.IsNullOrEmpty(intersectMaskFeatureClass))
+            {
+                rasterToPolyLayer += "_rasterToPoly";
+                addToMap = false;
+            }
+
             //RasterToPolygon_conversion (in_raster, out_polygon_features, {simplify}, {raster_field})
             List<object> arguments = new List<object>();
             // in_raster
             arguments.Add(inputRasterLayer);
             // out_polygon_features
-            arguments.Add(outputPolygonLayer);
+            arguments.Add(rasterToPolyLayer);
             // {simplify}
             arguments.Add(simplify);
             // {raster_field}
@@ -305,13 +315,39 @@ namespace ProAppVisibilityModule.Helpers
 
             var environments = Geoprocessing.MakeEnvironmentArray(overwriteoutput: true);
 
-            IGPResult result = await Geoprocessing.ExecuteToolAsync("RasterToPolygon_conversion", Geoprocessing.MakeValueArray(arguments.ToArray()), environments);
+            IGPResult result = await Geoprocessing.ExecuteToolAsync("RasterToPolygon_conversion", 
+                Geoprocessing.MakeValueArray(arguments.ToArray()), environments,
+                null, null, addToMap ? GPExecuteToolFlags.Default : GPExecuteToolFlags.None);
 
             if (result.IsFailed)
             {
                 foreach (var msg in result.Messages)
                     Debug.Print(msg.Text);
             }
+
+            if (string.IsNullOrEmpty(intersectMaskFeatureClass))
+                return;
+
+            // Intersect_analysis('infeatures';'in_features', 'out_feature_class', 'NO_FID')
+            List<object> argumentsIntersect = new List<object>();
+            // in_features
+            string intersectLayers = rasterToPolyLayer + ';' + intersectMaskFeatureClass;
+            argumentsIntersect.Add(intersectLayers);
+            // out_polygon_features
+            argumentsIntersect.Add(outputPolygonLayer);
+            // Don't include FIDs in join (or they will both appear in output)
+            argumentsIntersect.Add("NO_FID"); 
+
+            // if non-empty, intersect with intersectMaskFeatureClass
+            result = await Geoprocessing.ExecuteToolAsync("Intersect_analysis", 
+                Geoprocessing.MakeValueArray(argumentsIntersect.ToArray()), environments);
+
+            if (result.IsFailed)
+            {
+                foreach (var msg in result.Messages)
+                    Debug.Print(msg.Text);
+            }
+
         }
 
         /// <summary>
