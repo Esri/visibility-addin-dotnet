@@ -341,7 +341,7 @@ namespace ProAppVisibilityModule.ViewModels
 
                 var rlosOutputLayer = CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + RLOSOutputLayerName;
 
-                bool vizSuccess = await FeatureClassHelper.CreateVisibility(SelectedSurfaceName, ObserversLayerName,
+                bool success = await FeatureClassHelper.CreateVisibility(SelectedSurfaceName, ObserversLayerName,
                     rlosOutputLayer,
                     observerOffsetInMapZUnits, surfaceOffsetInMapZUnits,
                     minDistanceInMapUnits, maxDistanceInMapUnits,
@@ -351,7 +351,7 @@ namespace ProAppVisibilityModule.ViewModels
                     environments,
                     false);
 
-                if (!vizSuccess)
+                if (!success)
                     return;
 
                 var rlosConvertedPolygonsLayer = CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + RLOSConvertedPolygonsLayerName;
@@ -366,7 +366,9 @@ namespace ProAppVisibilityModule.ViewModels
                         horizontalEndAngleInDegrees, surfaceSR, true);
                 }
 
-                await FeatureClassHelper.IntersectOutput(rlosOutputLayer, rlosConvertedPolygonsLayer, false, "Value", rangeFanMaskFeatureClassName);
+                success = await FeatureClassHelper.IntersectOutput(rlosOutputLayer, rlosConvertedPolygonsLayer, false, "Value", rangeFanMaskFeatureClassName);
+                if (!success)
+                    return;
 
                 await FeatureClassHelper.CreateUniqueValueRenderer(GetLayerFromMapByName(RLOSConvertedPolygonsLayerName) as FeatureLayer, ShowNonVisibleData, RLOSConvertedPolygonsLayerName);
 

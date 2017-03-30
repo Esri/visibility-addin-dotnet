@@ -27,30 +27,46 @@ namespace ProAppVisibilityModule.Helpers
         /// <summary>
         /// Returns a polygon with a range fan(circular ring sector - like a donut wedge or wiper blade swipe with inner and outer radius)
         /// from the input parameters
+        /// Input Angles must be 0-360 degrees
         /// </summary>
         public static Geometry ConstructRangeFan(MapPoint centerPoint,
             double innerDistanceInMapUnits, double outerDistanceInMapUnits,
             double horizontalStartAngleInBearing, double horizontalEndAngleInBearing,
-            SpatialReference sr)
+            SpatialReference sr, double incrementAngleStep = 5.0)
         {
+            // Check inputs
+            if ((centerPoint == null) || (sr == null) ||
+                (innerDistanceInMapUnits < 0.0) || (outerDistanceInMapUnits < 0.0) ||
+                (horizontalStartAngleInBearing < 0.0) || (horizontalStartAngleInBearing > 360.0) ||
+                (horizontalEndAngleInBearing < 0.0) || (horizontalEndAngleInBearing > 360.0))
+                return null;
+
+            // Tricky - if angle cuts across 360, need to adjust for this case (ex. Angle: 270->90)
+            if (horizontalStartAngleInBearing > horizontalEndAngleInBearing)
+                horizontalStartAngleInBearing = -(360.0 - horizontalStartAngleInBearing);
+
+            double deltaAngle = Math.Abs(horizontalStartAngleInBearing - horizontalEndAngleInBearing);
+
             // if full circle(or greater), return donut section with inner/outer rings
-            if ((horizontalStartAngleInBearing <= 0.0) && (horizontalEndAngleInBearing >= 360.0))
+            if ((deltaAngle == 0.0) || (deltaAngle >= 360.0))
             {
                 // Just add 2 concentric circle buffers
                 PolygonBuilder donutPb = new PolygonBuilder();
 
-                var outerBuffer = GeometryEngine.Buffer(centerPoint, outerDistanceInMapUnits);
-                // Tricky/Workaround: GP mask/intersect did not work with Multiparts with arcs so had to convert to densified polygon
-                var outerBufferDensified = GeometryEngine.DensifyByLength(outerBuffer, outerDistanceInMapUnits * 0.005);
-                var outerBufferPolygon = outerBufferDensified as Polygon;
+                EllipticArcSegment circularArcOuter = 
+                    EllipticArcBuilder.CreateEllipticArcSegment((Coordinate2D)centerPoint, 
+                    outerDistanceInMapUnits, esriArcOrientation.esriArcClockwise, sr);
 
-                donutPb.AddPart(outerBufferPolygon.Points);
+                donutPb.AddPart(new List<Segment> { circularArcOuter });
 
-                var innerBuffer = GeometryEngine.Buffer(centerPoint, innerDistanceInMapUnits);
-                var innerBufferDensified = GeometryEngine.DensifyByLength(innerBuffer, innerDistanceInMapUnits * 0.005);
-                var innerBufferPolygon = innerBufferDensified as Polygon;
+                if (innerDistanceInMapUnits > 0.0)
+                {
+                    EllipticArcSegment circularArcInner =
+                        EllipticArcBuilder.CreateEllipticArcSegment((Coordinate2D)centerPoint,
+                        innerDistanceInMapUnits, esriArcOrientation.esriArcCounterClockwise, sr);
 
-                donutPb.AddPart(innerBufferPolygon.Points);
+                    donutPb.AddPart(new List<Segment> { circularArcInner });
+                }
 
                 return donutPb.ToGeometry();
             }
@@ -60,24 +76,23 @@ namespace ProAppVisibilityModule.Helpers
 
             MapPoint startPoint = null;
 
-            if (innerDistanceInMapUnits == 0.0)
+            if (innerDistanceInMapUnits <= 0.0)
             {
                 startPoint = centerPoint;
                 points.Add(startPoint);
             }
 
-            // Tricky - if angle cuts across 360, need to adjust for this case (ex. Angle: 270->90)
-            if (horizontalStartAngleInBearing > horizontalEndAngleInBearing)
-                horizontalStartAngleInBearing = -(360.0 - horizontalStartAngleInBearing);
-
             double minAngle = Math.Min(horizontalStartAngleInBearing, horizontalEndAngleInBearing);
             double maxAngle = Math.Max(horizontalStartAngleInBearing, horizontalEndAngleInBearing);
-            double step = 5.0;
+
+            // don't let this create more than 360 points per arc
+            if ((deltaAngle / incrementAngleStep) > 360.0)
+                incrementAngleStep = deltaAngle / 360.0;
 
             // Draw Outer Arc of Ring
             // Implementation Note: because of the unique shape of this ring, 
             // it was easier to manually create these points than use EllipticArcBuilder 
-            for (double angle = minAngle; angle <= maxAngle; angle += step)
+            for (double angle = minAngle; angle <= maxAngle; angle += incrementAngleStep)
             {
                 double cartesianAngle = (450 - angle) % 360;
                 double angleInRadians = cartesianAngle * (Math.PI / 180.0);
@@ -94,7 +109,7 @@ namespace ProAppVisibilityModule.Helpers
             if (innerDistanceInMapUnits > 0.0)
             {
                 // Draw Inner Arc of Ring - if inner distance set
-                for (double angle = maxAngle; angle >= minAngle; angle -= step)
+                for (double angle = maxAngle; angle >= minAngle; angle -= incrementAngleStep)
                 {
                     double cartesianAngle = (450 - angle) % 360;
                     double angleInRadians = cartesianAngle * (Math.PI / 180.0);

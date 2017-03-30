@@ -137,9 +137,47 @@ namespace ArcMapAddinVisibility.ViewModels
             double horizontalStartAngleInBearing, double horizontalEndAngleInBearing,
             ISpatialReference sr)
         {
+            if ((centerPoint == null) || (sr == null) ||
+                (innerDistanceInMapUnits < 0.0) || (outerDistanceInMapUnits < 0.0) ||
+                (horizontalStartAngleInBearing < 0.0) || (horizontalStartAngleInBearing > 360.0) ||
+                (horizontalEndAngleInBearing < 0.0) || (horizontalEndAngleInBearing > 360.0))
+                return null;
+
+            // Tricky - if angle cuts across 360, need to adjust for this case (ex.Angle: 270->90)
+            if (horizontalStartAngleInBearing > horizontalEndAngleInBearing)
+                horizontalStartAngleInBearing = -(360.0 - horizontalStartAngleInBearing);
+
+            double deltaAngle = Math.Abs(horizontalStartAngleInBearing - horizontalEndAngleInBearing);
+
             // Create Polygon to store points
             IPointCollection points = new PolygonClass();
 
+            // if full circle(or greater), return donut section with inner/outer rings
+            if ((deltaAngle == 0.0) || (deltaAngle >= 360.0))
+            {
+                IGeometryCollection geometryCollection = points as IGeometryCollection;
+
+                ICircularArc circularArcOuter = new CircularArcClass();
+                ISegmentCollection ringOuter = new RingClass();
+                circularArcOuter.PutCoordsByAngle(centerPoint, 0.0, 2 * Math.PI, outerDistanceInMapUnits);
+                ringOuter.AddSegment(circularArcOuter as ISegment);
+                geometryCollection.AddGeometry(ringOuter as IGeometry);
+
+                if (innerDistanceInMapUnits > 0.0)
+                {
+                    ICircularArc circularArcInner = new CircularArcClass();
+                    ISegmentCollection ringInner = new RingClass();
+                    circularArcInner.PutCoordsByAngle(centerPoint, 0.0, 2 * Math.PI, innerDistanceInMapUnits);
+                    ringInner.AddSegment(circularArcInner as ISegment);
+                    geometryCollection.AddGeometry(ringInner as IGeometry);
+                }
+
+                (points as ITopologicalOperator).Simplify();
+
+                return points as IGeometry;
+            }
+
+            // Otherwise if range fan, construct that
             IPoint startPoint = null;
 
             if (innerDistanceInMapUnits == 0.0)
@@ -147,10 +185,6 @@ namespace ArcMapAddinVisibility.ViewModels
                 startPoint = centerPoint;
                 points.AddPoint(startPoint);
             }
-
-            // Tricky - if angle cuts across 360, need to adjust for this case (ex.Angle: 270->90)
-            if (horizontalStartAngleInBearing > horizontalEndAngleInBearing)
-                horizontalStartAngleInBearing = -(360.0 - horizontalStartAngleInBearing);
 
             double minAngle = Math.Min(horizontalStartAngleInBearing, horizontalEndAngleInBearing);
             double maxAngle = Math.Max(horizontalStartAngleInBearing, horizontalEndAngleInBearing);
