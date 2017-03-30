@@ -43,7 +43,7 @@ namespace ProAppVisibilityModule.Helpers
         /// <item>POLYLINE</item>
         /// <item>POLYGON</item></list></param>
         /// <returns></returns>
-        public static async Task CreateLayer(string featureclassName, string featureclassType, bool zEnabled, bool addToMap)
+        public static async Task<bool> CreateLayer(string featureclassName, string featureclassType, bool zEnabled, bool addToMap)
         {
             List<object> arguments = new List<object>();
             // store the results in the default geodatabase
@@ -73,17 +73,7 @@ namespace ProAppVisibilityModule.Helpers
                 null,
                 addToMap ? GPExecuteToolFlags.Default : GPExecuteToolFlags.None);
 
-            if (result.IsFailed)
-            {
-                foreach (var msg in result.Messages)
-                    Debug.Print(msg.Text);
-
-                // If the tool failed, try to remove the table that was created so execution will run next time
-                //List<object> args = new List<object>();
-                //args.Add(outLineFeatureLayer);
-                //IGPResult result2 = await Geoprocessing.ExecuteToolAsync("Delete_management", Geoprocessing.MakeValueArray(args.ToArray()), environments, flags: GPExecuteToolFlags.Default);
-
-            }
+            return isResultGoodAndReportMessages(result, "CreateFeatureclass_management");
         }
 
         /// <summary>
@@ -135,6 +125,7 @@ namespace ProAppVisibilityModule.Helpers
 
             IGPResult result = await Geoprocessing.ExecuteToolAsync("JoinField_management", Geoprocessing.MakeValueArray(arguments.ToArray()));
         }
+
         /// <summary>
         /// Create sight lines
         /// </summary>
@@ -144,7 +135,7 @@ namespace ProAppVisibilityModule.Helpers
         /// <param name="observerOffsetFieldName"></param>
         /// <param name="targetOffsetFieldName"></param>
         /// <returns></returns>
-        public static async Task CreateSightLines(string observersFeatureLayer, 
+        public static async Task<bool> CreateSightLines(string observersFeatureLayer, 
                                                     string targetsFeatureLayer, 
                                                     string outLineFeatureLayer, 
                                                     string observerOffsetFieldName, 
@@ -172,17 +163,16 @@ namespace ProAppVisibilityModule.Helpers
 
             IGPResult result = await Geoprocessing.ExecuteToolAsync("ConstructSightLines_3d", Geoprocessing.MakeValueArray(arguments.ToArray()), environments, flags: GPExecuteToolFlags.Default);
 
-            if (result.IsFailed)
+            bool success = isResultGoodAndReportMessages(result, "ConstructSightLines_3d");
+            if (!success)
             {
-                foreach (var msg in result.Messages)
-                    Debug.Print(msg.Text);
-
                 // If the tool failed, try to remove the table that was created so execution will run next time
                 List<object> args = new List<object>();
                 args.Add(outLineFeatureLayer);
                 IGPResult result2 = await Geoprocessing.ExecuteToolAsync("Delete_management", Geoprocessing.MakeValueArray(args.ToArray()), environments, flags: GPExecuteToolFlags.Default);
-
             }
+
+            return success;
         }
 
         /// <summary>
@@ -192,7 +182,7 @@ namespace ProAppVisibilityModule.Helpers
         /// <param name="surface"></param>
         /// <param name="outProperty"></param>
         /// <returns></returns>
-        public static async Task AddSurfaceInformation(string featureClass, string surface, string outProperty)
+        public static async Task<bool> AddSurfaceInformation(string featureClass, string surface, string outProperty)
         {
             //AddSurfaceInformation_3d
             List<object> arguments = new List<object>();
@@ -205,11 +195,7 @@ namespace ProAppVisibilityModule.Helpers
 
             IGPResult result = await Geoprocessing.ExecuteToolAsync("AddSurfaceInformation_3d", Geoprocessing.MakeValueArray(arguments.ToArray()), flags: GPExecuteToolFlags.Default);
 
-            if (result.IsFailed)
-            {
-                foreach (var msg in result.Messages)
-                    Debug.Print(msg.Text);
-            }
+            return isResultGoodAndReportMessages(result, "AddSurfaceInformation_3d");
         }
 
         /// <summary>
@@ -219,7 +205,7 @@ namespace ProAppVisibilityModule.Helpers
         /// <param name="lineFeatureClassName"></param>
         /// <param name="outLOSFeatureClass"></param>
         /// <returns></returns>
-        public static async Task CreateLOS(string surfaceName, 
+        public static async Task<bool> CreateLOS(string surfaceName, 
                                             string lineFeatureClassName, 
                                             string outLOSFeatureClass)
         {
@@ -247,17 +233,16 @@ namespace ProAppVisibilityModule.Helpers
 
             IGPResult result = await Geoprocessing.ExecuteToolAsync("LineOfSight_3d", Geoprocessing.MakeValueArray(arguments.ToArray()), environments, flags: GPExecuteToolFlags.Default);
 
-            if(result.IsFailed)
+            bool success = isResultGoodAndReportMessages(result, "LineOfSight_3d");
+            if (!success)
             {
-                foreach (var msg in result.Messages)
-                    Debug.Print(msg.Text);
-
                 // If the tool failed, try to remove the table that was created so execution will run next time
                 List<object> args = new List<object>();
                 args.Add(outLOSFeatureClass);
                 IGPResult result2 = await Geoprocessing.ExecuteToolAsync("Delete_management", Geoprocessing.MakeValueArray(args.ToArray()), environments, flags: GPExecuteToolFlags.Default);
-
             }
+
+            return success;
         }
 
         /// <summary>
@@ -283,21 +268,37 @@ namespace ProAppVisibilityModule.Helpers
         }
 
         /// <summary>
-        /// Method to run Raster to polygon
+        /// Method to run raster to polygon and optionally intersect with layer
         /// </summary>
-        /// <param name="inputRasterLayer"></param>
-        /// <param name="outputPolygonLayer"></param>
-        /// <param name="simplify"></param>
-        /// <param name="rasterField"></param>
-        /// <returns></returns>
-        public static async Task IntersectOutput(string inputRasterLayer, string outputPolygonLayer, bool simplify, string rasterField)
+        /// <param name="inputRasterLayer">input raster layer to convert to polygons</param>
+        /// <param name="outputPolygonLayer">output layer converted to polygons</param>
+        /// <param name="simplify">simplify(smooth) output polygons</param>
+        /// <param name="rasterField">field from raster </param>
+        /// <param name="intersectMaskFeatureClass">(Optional)If present, the layer to intersect with the output polygon layer</param>
+        /// <returns>success</returns>
+        public static async Task<bool> IntersectOutput(string inputRasterLayer, string outputPolygonLayer, 
+            bool simplify, string rasterField, string intersectMaskFeatureClass = "")
         {
+            if (string.IsNullOrEmpty(inputRasterLayer) || string.IsNullOrEmpty(outputPolygonLayer))
+                return false;
+
+            string rasterToPolyLayer = outputPolygonLayer;
+
+            bool addToMap = true;
+
+            if (!string.IsNullOrEmpty(intersectMaskFeatureClass))
+            {
+                // If intersect layer present, create a temporary polygon layer & don't add to map 
+                rasterToPolyLayer += "_rasterToPoly";
+                addToMap = false;
+            }
+
             //RasterToPolygon_conversion (in_raster, out_polygon_features, {simplify}, {raster_field})
             List<object> arguments = new List<object>();
             // in_raster
             arguments.Add(inputRasterLayer);
             // out_polygon_features
-            arguments.Add(outputPolygonLayer);
+            arguments.Add(rasterToPolyLayer);
             // {simplify}
             arguments.Add(simplify);
             // {raster_field}
@@ -305,13 +306,32 @@ namespace ProAppVisibilityModule.Helpers
 
             var environments = Geoprocessing.MakeEnvironmentArray(overwriteoutput: true);
 
-            IGPResult result = await Geoprocessing.ExecuteToolAsync("RasterToPolygon_conversion", Geoprocessing.MakeValueArray(arguments.ToArray()), environments);
+            IGPResult result = await Geoprocessing.ExecuteToolAsync("RasterToPolygon_conversion", 
+                Geoprocessing.MakeValueArray(arguments.ToArray()), environments,
+                null, null, addToMap ? GPExecuteToolFlags.Default : GPExecuteToolFlags.None);
 
-            if (result.IsFailed)
-            {
-                foreach (var msg in result.Messages)
-                    Debug.Print(msg.Text);
-            }
+            if (!isResultGoodAndReportMessages(result, "RasterToPolygon_conversion"))
+                return false;
+
+            // If intersect layer *not* present, we are done, return
+            if (string.IsNullOrEmpty(intersectMaskFeatureClass))
+                return true;
+
+            // Intersect_analysis('infeatures';'in_features', 'out_feature_class', 'NO_FID')
+            List<object> argumentsIntersect = new List<object>();
+            // in_features
+            string intersectLayers = rasterToPolyLayer + ';' + intersectMaskFeatureClass;
+            argumentsIntersect.Add(intersectLayers);
+            // out_polygon_features
+            argumentsIntersect.Add(outputPolygonLayer);
+            // Don't include FIDs in join (or they will both appear in output)
+            argumentsIntersect.Add("NO_FID"); 
+
+            // if non-empty, intersect with intersectMaskFeatureClass
+            result = await Geoprocessing.ExecuteToolAsync("Intersect_analysis", 
+                Geoprocessing.MakeValueArray(argumentsIntersect.ToArray()), environments);
+
+            return isResultGoodAndReportMessages(result, "Intersect_analysis");
         }
 
         /// <summary>
@@ -332,7 +352,7 @@ namespace ProAppVisibilityModule.Helpers
         /// <param name="environments">geoprocessing environments</param>
         /// <param name="addToMap">add to map or not</param>
         /// <returns></returns>
-        public static async Task CreateVisibility(string surfaceName, string observerFeatureClassName, string outRLOSFeatureClass, 
+        public static async Task<bool> CreateVisibility(string surfaceName, string observerFeatureClassName, string outRLOSFeatureClass, 
                                                     double observerOffset, double surfaceOffset, 
                                                     double minDistance, double maxDistance,
                                                     double horizontalStartAngle, double horizontalEndAngle,
@@ -385,11 +405,7 @@ namespace ProAppVisibilityModule.Helpers
             IGPResult result = await Geoprocessing.ExecuteToolAsync("Visibility_3d", Geoprocessing.MakeValueArray(arguments.ToArray()), environments,
                 null, null, addToMap ? GPExecuteToolFlags.Default : GPExecuteToolFlags.None);
 
-            if (result.IsFailed)
-            {
-                foreach (var msg in result.Messages)
-                    Debug.Print(msg.Text);
-            }
+            return isResultGoodAndReportMessages(result, "Visibility_3d");
         }
 
         /// <summary>
@@ -1102,6 +1118,7 @@ namespace ProAppVisibilityModule.Helpers
                 featureLayer.SetRenderer(uniqueValueRenderer);
             });
         }
+
         public static async Task CreateVisCodeRenderer(FeatureLayer featureLayer, string visField, 
                                                         int visCodeVisible, int visCodeNotVisible, 
                                                         CIMColor visibleColor, CIMColor notVisibleColor,
@@ -1175,7 +1192,26 @@ namespace ProAppVisibilityModule.Helpers
             });
         }
 
-    }
+        private static bool isResultGoodAndReportMessages(IGPResult result, string toolToReport)
+        {
+            // Return if no errors
+            if (!result.IsFailed)
+                return true;
+
+            // If failed, provide feedback of what went wrong
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            sb.Append(toolToReport);
+            sb.AppendLine(" - GP Tool FAILED:");
+            foreach (var msg in result.Messages)
+                sb.AppendLine(msg.Text);
+
+            ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(sb.ToString(),
+                    VisibilityLibrary.Properties.Resources.CaptionError);
+
+            return false;
+        }
+
+    } // end class
 
     public class VisibilityStats
     {

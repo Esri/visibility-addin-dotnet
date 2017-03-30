@@ -87,6 +87,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Helpers\FeatureClassHelper.cs" />
+    <Compile Include="Helpers\GeometryHelper.cs" />
     <Compile Include="Helpers\MapPointHelper.cs" />
     <Compile Include="Models\AddInPoint.cs" />
     <Compile Include="Models\ProGraphic.cs" />

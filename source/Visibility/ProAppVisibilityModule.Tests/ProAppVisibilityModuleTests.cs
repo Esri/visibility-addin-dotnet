@@ -92,5 +92,119 @@ namespace ProAppVisibilityModule.Tests
             Assert.IsNotNull(llosViewModel.TargetAddInPoints);
         }
 
+        [TestMethod, Description("Tests creating RangeFans")]
+        [TestCategory("ArcGISPro")]
+        public void TestGeometryHelperConstructRangeFan()
+        {
+            SpatialReference sr = SpatialReferences.WGS84;
+
+            MapPoint centerPoint1 = MapPointBuilder.CreateMapPoint(10.0, 20.0, sr);
+            MapPoint centerPoint2 = MapPointBuilder.CreateMapPoint(-10.0, 20.0, sr);
+            MapPoint centerPoint3 = MapPointBuilder.CreateMapPoint(10.0, -20.0, sr);
+            MapPoint centerPoint4 = MapPointBuilder.CreateMapPoint(-10.0, -20.0, sr);
+            MapPoint centerPoint5 = MapPointBuilder.CreateMapPoint(0.0, 0.0, sr);
+
+            MapPoint[] mapPoints = { centerPoint1, centerPoint2, centerPoint3, centerPoint4, centerPoint5 };
+
+            foreach (MapPoint centerPoint in mapPoints)
+            {
+                ///////////////////////////////////////////////
+                // Basic Test
+                double minDistanceInMapUnits = 1.0;
+                double maxDistanceInMapUnits = 2.0;
+                double horizontalStartAngleInDegrees = 45.0;
+                double horizontalEndAngleInDegrees = 90.0;
+                double stepAngle = 5.0;
+                Geometry polygon = Helpers.GeometryHelper.ConstructRangeFan(centerPoint,
+                    minDistanceInMapUnits, maxDistanceInMapUnits, horizontalStartAngleInDegrees,
+                    horizontalEndAngleInDegrees, sr, stepAngle);
+                Assert.IsNotNull(polygon);
+                Assert.IsTrue(polygon.PointCount > 20);
+                ///////////////////////////////////////////////
+
+                ///////////////////////////////////////////////
+                // range fan, crossing 360
+                horizontalStartAngleInDegrees = 315.0;
+                horizontalEndAngleInDegrees = 45.0;
+                minDistanceInMapUnits = 1.0;
+                maxDistanceInMapUnits = 2.0;
+                stepAngle = 5.0;
+                polygon = Helpers.GeometryHelper.ConstructRangeFan(centerPoint,
+                    minDistanceInMapUnits, maxDistanceInMapUnits, horizontalStartAngleInDegrees,
+                    horizontalEndAngleInDegrees, sr, stepAngle);
+                Assert.IsNotNull(polygon);
+                Assert.IsTrue(polygon.PointCount > 38);
+                ///////////////////////////////////////////////
+
+                ///////////////////////////////////////////////
+                // full circle/360 degrees, 2 circles
+                horizontalStartAngleInDegrees = 0.0;
+                horizontalEndAngleInDegrees = 360.0;
+                minDistanceInMapUnits = 1.0;
+                maxDistanceInMapUnits = 2.0;
+                polygon = Helpers.GeometryHelper.ConstructRangeFan(centerPoint,
+                    minDistanceInMapUnits, maxDistanceInMapUnits, horizontalStartAngleInDegrees,
+                    horizontalEndAngleInDegrees, sr, stepAngle);
+                Assert.IsNotNull(polygon);
+                Assert.IsTrue(GeometryEngine.Length(polygon) >= minDistanceInMapUnits * 4 * Math.PI);
+                ///////////////////////////////////////////////
+
+                ///////////////////////////////////////////////
+                // full circle/360 degrees, 1 circle
+                horizontalStartAngleInDegrees = 0.0;
+                horizontalEndAngleInDegrees = 360.0;
+                minDistanceInMapUnits = 0.0;
+                maxDistanceInMapUnits = 2.0;
+                polygon = Helpers.GeometryHelper.ConstructRangeFan(centerPoint,
+                    minDistanceInMapUnits, maxDistanceInMapUnits, horizontalStartAngleInDegrees,
+                    horizontalEndAngleInDegrees, sr, stepAngle);
+                Assert.IsNotNull(polygon);
+                Assert.IsTrue(GeometryEngine.Length(polygon) >= maxDistanceInMapUnits * 2 * Math.PI);
+                ///////////////////////////////////////////////
+
+                ///////////////////////////////////////////////
+                // full circle/360 degrees, 1 circle - start/stop angle != 0,360
+                horizontalStartAngleInDegrees = 10.0;
+                horizontalEndAngleInDegrees = 10.0;
+                minDistanceInMapUnits = 0.0;
+                maxDistanceInMapUnits = 2.0;
+                polygon = Helpers.GeometryHelper.ConstructRangeFan(centerPoint,
+                    minDistanceInMapUnits, maxDistanceInMapUnits, horizontalStartAngleInDegrees,
+                    horizontalEndAngleInDegrees, sr, stepAngle);
+                Assert.IsNotNull(polygon);
+                Assert.IsTrue(GeometryEngine.Length(polygon) >= maxDistanceInMapUnits * 2 * Math.PI);
+                ///////////////////////////////////////////////
+
+                ///////////////////////////////////////////////
+                // bad input, negative distance
+                horizontalStartAngleInDegrees = 120.0;
+                horizontalEndAngleInDegrees = 180.0;
+                minDistanceInMapUnits = 0.0;
+                maxDistanceInMapUnits = -2.0;
+                polygon = Helpers.GeometryHelper.ConstructRangeFan(centerPoint,
+                    minDistanceInMapUnits, maxDistanceInMapUnits, horizontalStartAngleInDegrees,
+                    horizontalEndAngleInDegrees, sr, stepAngle);
+                Assert.IsNull(polygon);
+                ///////////////////////////////////////////////
+
+                ///////////////////////////////////////////////
+                // null center point
+                polygon = Helpers.GeometryHelper.ConstructRangeFan(null,
+                    minDistanceInMapUnits, maxDistanceInMapUnits, horizontalStartAngleInDegrees,
+                    horizontalEndAngleInDegrees, sr);
+                Assert.IsNull(polygon);
+                ///////////////////////////////////////////////
+
+                ///////////////////////////////////////////////
+                // null SR
+                polygon = Helpers.GeometryHelper.ConstructRangeFan(centerPoint,
+                    minDistanceInMapUnits, maxDistanceInMapUnits, horizontalStartAngleInDegrees,
+                    horizontalEndAngleInDegrees, null);
+                Assert.IsNull(polygon);
+                ///////////////////////////////////////////////
+            }
+
+        }
+
     }
 }
