@@ -73,7 +73,7 @@ namespace ProAppVisibilityModule.Helpers
                 null,
                 addToMap ? GPExecuteToolFlags.Default : GPExecuteToolFlags.None);
 
-            return isResultGoodAndReportMessages(result, "CreateFeatureclass_management");
+            return isResultGoodAndReportMessages(result, "CreateFeatureclass_management", arguments);
         }
 
         /// <summary>
@@ -163,7 +163,7 @@ namespace ProAppVisibilityModule.Helpers
 
             IGPResult result = await Geoprocessing.ExecuteToolAsync("ConstructSightLines_3d", Geoprocessing.MakeValueArray(arguments.ToArray()), environments, flags: GPExecuteToolFlags.Default);
 
-            bool success = isResultGoodAndReportMessages(result, "ConstructSightLines_3d");
+            bool success = isResultGoodAndReportMessages(result, "ConstructSightLines_3d", arguments);
             if (!success)
             {
                 // If the tool failed, try to remove the table that was created so execution will run next time
@@ -195,7 +195,7 @@ namespace ProAppVisibilityModule.Helpers
 
             IGPResult result = await Geoprocessing.ExecuteToolAsync("AddSurfaceInformation_3d", Geoprocessing.MakeValueArray(arguments.ToArray()), flags: GPExecuteToolFlags.Default);
 
-            return isResultGoodAndReportMessages(result, "AddSurfaceInformation_3d");
+            return isResultGoodAndReportMessages(result, "AddSurfaceInformation_3d", arguments);
         }
 
         /// <summary>
@@ -233,7 +233,7 @@ namespace ProAppVisibilityModule.Helpers
 
             IGPResult result = await Geoprocessing.ExecuteToolAsync("LineOfSight_3d", Geoprocessing.MakeValueArray(arguments.ToArray()), environments, flags: GPExecuteToolFlags.Default);
 
-            bool success = isResultGoodAndReportMessages(result, "LineOfSight_3d");
+            bool success = isResultGoodAndReportMessages(result, "LineOfSight_3d", arguments);
             if (!success)
             {
                 // If the tool failed, try to remove the table that was created so execution will run next time
@@ -310,7 +310,7 @@ namespace ProAppVisibilityModule.Helpers
                 Geoprocessing.MakeValueArray(arguments.ToArray()), environments,
                 null, null, addToMap ? GPExecuteToolFlags.Default : GPExecuteToolFlags.None);
 
-            if (!isResultGoodAndReportMessages(result, "RasterToPolygon_conversion"))
+            if (!isResultGoodAndReportMessages(result, "RasterToPolygon_conversion", arguments))
                 return false;
 
             // If intersect layer *not* present, we are done, return
@@ -331,7 +331,7 @@ namespace ProAppVisibilityModule.Helpers
             result = await Geoprocessing.ExecuteToolAsync("Intersect_analysis", 
                 Geoprocessing.MakeValueArray(argumentsIntersect.ToArray()), environments);
 
-            return isResultGoodAndReportMessages(result, "Intersect_analysis");
+            return isResultGoodAndReportMessages(result, "Intersect_analysis", arguments);
         }
 
         /// <summary>
@@ -405,7 +405,7 @@ namespace ProAppVisibilityModule.Helpers
             IGPResult result = await Geoprocessing.ExecuteToolAsync("Visibility_3d", Geoprocessing.MakeValueArray(arguments.ToArray()), environments,
                 null, null, addToMap ? GPExecuteToolFlags.Default : GPExecuteToolFlags.None);
 
-            return isResultGoodAndReportMessages(result, "Visibility_3d");
+            return isResultGoodAndReportMessages(result, "Visibility_3d", arguments);
         }
 
         /// <summary>
@@ -1192,7 +1192,8 @@ namespace ProAppVisibilityModule.Helpers
             });
         }
 
-        private static bool isResultGoodAndReportMessages(IGPResult result, string toolToReport)
+        private static bool isResultGoodAndReportMessages(IGPResult result, string toolToReport,
+            List<object> toolParameters)
         {
             // Return if no errors
             if (!result.IsFailed)
@@ -1204,6 +1205,15 @@ namespace ProAppVisibilityModule.Helpers
             sb.AppendLine(" - GP Tool FAILED:");
             foreach (var msg in result.Messages)
                 sb.AppendLine(msg.Text);
+
+            if (toolParameters != null)
+            {
+                sb.Append("Parameters: ");
+                int count = 0;
+                foreach (var param in toolParameters)
+                    sb.Append(string.Format("{0}:{1} ", count++, param));
+                sb.AppendLine();
+            }
 
             ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(sb.ToString(),
                     VisibilityLibrary.Properties.Resources.CaptionError);

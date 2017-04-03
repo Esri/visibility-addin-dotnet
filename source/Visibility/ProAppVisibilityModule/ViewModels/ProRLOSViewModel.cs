@@ -272,7 +272,11 @@ namespace ProAppVisibilityModule.ViewModels
                 if (!CanCreateElement || MapView.Active == null || MapView.Active.Map == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
                     return;
 
-                await ExecuteVisibilityRLOS();
+                bool success = await ExecuteVisibilityRLOS();
+
+                if (!success)
+                    MessageBox.Show("LLOS computations did not complete correctly.\nPlease check your parameters and try again.",
+                        VisibilityLibrary.Properties.Resources.CaptionError);
 
                 DeactivateTool(VisibilityMapTool.ToolId);
 
@@ -293,8 +297,10 @@ namespace ProAppVisibilityModule.ViewModels
 
         #region Private
 
-        private async Task ExecuteVisibilityRLOS()
+        private async Task<bool> ExecuteVisibilityRLOS()
         {
+            bool success = false;
+
             try
             {
                 var surfaceSR = await GetSpatialReferenceFromLayer(SelectedSurfaceName);
@@ -302,10 +308,12 @@ namespace ProAppVisibilityModule.ViewModels
                 if(surfaceSR == null || !surfaceSR.IsProjected)
                 {
                     MessageBox.Show(VisibilityLibrary.Properties.Resources.RLOSUserPrompt, VisibilityLibrary.Properties.Resources.RLOSUserPromptCaption);
-                    return;
+                    return false;
                 }
 
-                await FeatureClassHelper.CreateLayer(ObserversLayerName, "POINT", true, true);
+                success = await FeatureClassHelper.CreateLayer(ObserversLayerName, "POINT", true, true);
+                if (!success)
+                    return false;
 
                 // add fields for observer offset
 
@@ -318,7 +326,9 @@ namespace ProAppVisibilityModule.ViewModels
 
                 // update with surface information
 
-                await FeatureClassHelper.AddSurfaceInformation(ObserversLayerName, SelectedSurfaceName, VisibilityLibrary.Properties.Resources.ZFieldName);
+                success = await FeatureClassHelper.AddSurfaceInformation(ObserversLayerName, SelectedSurfaceName, VisibilityLibrary.Properties.Resources.ZFieldName);
+                if (!success)
+                    return false;
 
                 // Visibility
 
@@ -341,7 +351,7 @@ namespace ProAppVisibilityModule.ViewModels
 
                 var rlosOutputLayer = CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + RLOSOutputLayerName;
 
-                bool success = await FeatureClassHelper.CreateVisibility(SelectedSurfaceName, ObserversLayerName,
+                success = await FeatureClassHelper.CreateVisibility(SelectedSurfaceName, ObserversLayerName,
                     rlosOutputLayer,
                     observerOffsetInMapZUnits, surfaceOffsetInMapZUnits,
                     minDistanceInMapUnits, maxDistanceInMapUnits,
@@ -352,7 +362,7 @@ namespace ProAppVisibilityModule.ViewModels
                     false);
 
                 if (!success)
-                    return;
+                    return false;
 
                 var rlosConvertedPolygonsLayer = CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + RLOSConvertedPolygonsLayerName;
 
@@ -368,7 +378,7 @@ namespace ProAppVisibilityModule.ViewModels
 
                 success = await FeatureClassHelper.IntersectOutput(rlosOutputLayer, rlosConvertedPolygonsLayer, false, "Value", rangeFanMaskFeatureClassName);
                 if (!success)
-                    return;
+                    return false;
 
                 await FeatureClassHelper.CreateUniqueValueRenderer(GetLayerFromMapByName(RLOSConvertedPolygonsLayerName) as FeatureLayer, ShowNonVisibleData, RLOSConvertedPolygonsLayerName);
 
@@ -398,11 +408,16 @@ namespace ProAppVisibilityModule.ViewModels
                 }
 
                 executionCounter++;
+
+                success = true;
             }
             catch (Exception ex)
             {
                 Debug.Print(ex.Message);
+                success = false;
             }
+
+            return success;
         }
 
         /// <summary>
