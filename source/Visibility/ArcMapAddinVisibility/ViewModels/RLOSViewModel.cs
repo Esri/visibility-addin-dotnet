@@ -353,8 +353,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
                         esriLicenseStatus status = GetSpatialAnalystLicense();
                         if (status == esriLicenseStatus.esriLicenseUnavailable || status == esriLicenseStatus.esriLicenseFailure ||
-                            status == esriLicenseStatus.esriLicenseNotInitialized || status == esriLicenseStatus.esriLicenseNotLicensed ||
-                            status == esriLicenseStatus.esriLicenseUnavailable)
+                            status == esriLicenseStatus.esriLicenseNotInitialized || status == esriLicenseStatus.esriLicenseNotLicensed)
                         {
                             System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.LOSSpatialAnalystLicenseInvalid, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
                             return;
@@ -524,11 +523,12 @@ namespace ArcMapAddinVisibility.ViewModels
         {
             //Check out a Spatial Analyst license with the ArcView product. 
             esriLicenseProductCode productCode =
-                esriLicenseProductCode.esriLicenseProductCodeAdvanced;
+                esriLicenseProductCode.esriLicenseProductCodeBasic;
             IAoInitialize pAoInitialize = new AoInitializeClass();
             esriLicenseStatus licenseStatus = esriLicenseStatus.esriLicenseUnavailable;
             //Check the productCode. 
             licenseStatus = pAoInitialize.IsProductCodeAvailable(productCode);
+            Console.WriteLine("licenstatus:" + licenseStatus);
             if (licenseStatus == esriLicenseStatus.esriLicenseAvailable)
             {
                 //Check the extensionCode. 
