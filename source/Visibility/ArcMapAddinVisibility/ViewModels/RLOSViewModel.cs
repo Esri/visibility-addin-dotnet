@@ -528,7 +528,6 @@ namespace ArcMapAddinVisibility.ViewModels
             esriLicenseStatus licenseStatus = esriLicenseStatus.esriLicenseUnavailable;
             //Check the productCode. 
             licenseStatus = pAoInitialize.IsProductCodeAvailable(productCode);
-            Console.WriteLine("licenstatus:" + licenseStatus);
             if (licenseStatus == esriLicenseStatus.esriLicenseAvailable)
             {
                 //Check the extensionCode. 
