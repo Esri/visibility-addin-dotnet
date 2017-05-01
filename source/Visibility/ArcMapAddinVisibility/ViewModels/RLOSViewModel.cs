@@ -249,6 +249,13 @@ namespace ArcMapAddinVisibility.ViewModels
                 if (surface == null)
                     return;
 
+                bool spatialAnalystAvailable = IsSpatialAnalystAvailable();
+                if (!spatialAnalystAvailable)
+                {
+                    System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.LOSSpatialAnalystLicenseInvalid, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+                    return;
+                }
+
                 // Determine if selected surface is projected or geographic
                 ILayer surfaceLayer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
                 var geoDataset = surfaceLayer as IGeoDataset;
@@ -350,14 +357,6 @@ namespace ArcMapAddinVisibility.ViewModels
                         parameters.Add(layerPath);
                         parameters.Add(strPath);
                         parameters.Add(outPath);
-
-                        esriLicenseStatus status = GetSpatialAnalystLicense();
-                        if (status == esriLicenseStatus.esriLicenseUnavailable || status == esriLicenseStatus.esriLicenseFailure ||
-                            status == esriLicenseStatus.esriLicenseNotInitialized || status == esriLicenseStatus.esriLicenseNotLicensed)
-                        {
-                            System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.LOSSpatialAnalystLicenseInvalid, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
-                            return;
-                        }
 
                         IGeoProcessor2 gp = new GeoProcessorClass();
 
@@ -516,38 +515,14 @@ namespace ArcMapAddinVisibility.ViewModels
         }
 
         /// <summary>
-        /// Check out spatial analyst license
+        /// Checks to see if spatial analyst license available (it has been checked out by ArcMap)
         /// </summary>
-        /// <returns>esriLicenseStatus</returns>
-        public esriLicenseStatus GetSpatialAnalystLicense()
+        /// <returns>true/false</returns>
+        public bool IsSpatialAnalystAvailable()
         {
-            //Check out a Spatial Analyst license with the ArcView product. 
-            esriLicenseProductCode productCode =
-                esriLicenseProductCode.esriLicenseProductCodeBasic;
-            IAoInitialize pAoInitialize = new AoInitializeClass();
-            esriLicenseStatus licenseStatus = esriLicenseStatus.esriLicenseUnavailable;
-            //Check the productCode. 
-            licenseStatus = pAoInitialize.IsProductCodeAvailable(productCode);
-            if (licenseStatus == esriLicenseStatus.esriLicenseAvailable)
-            {
-                //Check the extensionCode. 
-                licenseStatus = pAoInitialize.IsExtensionCodeAvailable(productCode,
-                    esriLicenseExtensionCode.esriLicenseExtensionCodeSpatialAnalyst);
-                if (licenseStatus == esriLicenseStatus.esriLicenseAvailable)
-                {
-                    //Initialize the license. 
-                    licenseStatus = pAoInitialize.Initialize(productCode);
-                    if ((licenseStatus == esriLicenseStatus.esriLicenseCheckedOut))
-                    {
-                        //Check out the Spatial Analyst extension. 
-                        licenseStatus = pAoInitialize.CheckOutExtension
-                            (esriLicenseExtensionCode.esriLicenseExtensionCodeSpatialAnalyst)
-                            ;
-                    }
-                }
-            }
+            IAoInitialize aoInitializer = new AoInitializeClass();
 
-            return licenseStatus;
+            return aoInitializer.IsExtensionCheckedOut(esriLicenseExtensionCode.esriLicenseExtensionCodeSpatialAnalyst);
         }
 
         /// <summary>
