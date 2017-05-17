@@ -400,7 +400,7 @@
     <value>Image Service Layer Warning</value>
   </data>
   <data name="MsgLayerIsImageService" xml:space="preserve">
-    <value>The selected layer is an Image Service and make take a long time to process. Do you wish to continue?</value>
+    <value>The selected input surface layer is an Image Service and make take a long time to process. Do you wish to continue?</value>
   </data>
   <data name="MsgSurfaceLayerNotFound" xml:space="preserve">
     <value>The surface layer was not found. Please try again.</value>
