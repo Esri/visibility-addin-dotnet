@@ -396,4 +396,13 @@
   <data name="RLOSPointsOutsideOfSurfaceExtent" xml:space="preserve">
     <value>Please verify that all Observer Points are within the extents of the selected Surface</value>
   </data>
+  <data name="CaptionLayerIsImageService" xml:space="preserve">
+    <value>Image Service Layer Warning</value>
+  </data>
+  <data name="MsgLayerIsImageService" xml:space="preserve">
+    <value>The selected layer is an Image Service and make take a long time to process. Do you wish to continue?</value>
+  </data>
+  <data name="MsgSurfaceLayerNotFound" xml:space="preserve">
+    <value>The surface layer was not found. Please try again.</value>
+  </data>
 </root>

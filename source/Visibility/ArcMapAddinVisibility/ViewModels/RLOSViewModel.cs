@@ -256,8 +256,21 @@ namespace ArcMapAddinVisibility.ViewModels
                     return;
                 }
 
-                // Determine if selected surface is projected or geographic
                 ILayer surfaceLayer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
+                // Issue warning if layer is ImageServerLayer
+                if (surfaceLayer is IImageServerLayer)
+                {
+                    MessageBoxResult mbr = MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgLayerIsImageService,
+                        VisibilityLibrary.Properties.Resources.CaptionLayerIsImageService, MessageBoxButton.YesNo);
+
+                    if (mbr == MessageBoxResult.No)
+                    {
+                        System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+                        return;
+                    }
+                }
+
+                // Determine if selected surface is projected or geographic
                 var geoDataset = surfaceLayer as IGeoDataset;
                 SelectedSurfaceSpatialRef = geoDataset.SpatialReference;
 
@@ -344,6 +357,13 @@ namespace ArcMapAddinVisibility.ViewModels
                     {
                         ILayer layer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
                         string layerPath = GetLayerPath(layer);
+
+                        if (string.IsNullOrEmpty(layerPath))
+                        {
+                            // if layer path didn't resolve, issue error and stop
+                            System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgSurfaceLayerNotFound, VisibilityLibrary.Properties.Resources.AEInvalidInput);
+                            throw new Exception(VisibilityLibrary.Properties.Resources.MsgSurfaceLayerNotFound);
+                        }
 
                         IFeatureLayer ipFeatureLayer = new FeatureLayerClass();
                         ipFeatureLayer.FeatureClass = pointFc;
@@ -1053,7 +1073,12 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <returns>file path of layer</returns>
         private static string GetLayerPath(ILayer layer)
         {
-            if (layer is IRasterLayer)
+            if (layer is IImageServerLayer)
+            {
+                IImageServerLayer mlayer = layer as IImageServerLayer;
+                return mlayer.Name;
+            } 
+            else if (layer is IRasterLayer)
             {
                 IRasterLayer rlayer = layer as IRasterLayer;
                 return rlayer.FilePath;
