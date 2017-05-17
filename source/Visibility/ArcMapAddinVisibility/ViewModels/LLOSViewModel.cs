@@ -185,8 +185,22 @@ namespace ArcMapAddinVisibility.ViewModels
                 if (surface == null)
                     return;
 
-                // Determine if selected surface is projected or geographic
                 ILayer surfaceLayer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
+
+                // Issue warning if layer is ImageServerLayer
+                if (surfaceLayer is IImageServerLayer)
+                {
+                    MessageBoxResult mbr = MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgLayerIsImageService,
+                        VisibilityLibrary.Properties.Resources.CaptionLayerIsImageService, MessageBoxButton.YesNo);
+
+                    if (mbr == MessageBoxResult.No)
+                    {
+                        System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+                        return;
+                    }
+                }
+
+                // Determine if selected surface is projected or geographic
                 var geoDataset = surfaceLayer as IGeoDataset;
                 SelectedSurfaceSpatialRef = geoDataset.SpatialReference;
 

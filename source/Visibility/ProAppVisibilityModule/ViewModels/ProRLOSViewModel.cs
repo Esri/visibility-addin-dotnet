@@ -303,12 +303,26 @@ namespace ProAppVisibilityModule.ViewModels
 
             try
             {
+                // Check surface spatial reference
                 var surfaceSR = await GetSpatialReferenceFromLayer(SelectedSurfaceName);
-
                 if(surfaceSR == null || !surfaceSR.IsProjected)
                 {
                     MessageBox.Show(VisibilityLibrary.Properties.Resources.RLOSUserPrompt, VisibilityLibrary.Properties.Resources.RLOSUserPromptCaption);
                     return false;
+                }
+
+                // Warn if Image Service layer
+                Layer surfaceLayer = GetLayerFromMapByName(SelectedSurfaceName);
+                if (surfaceLayer is ImageServiceLayer)
+                {
+                    MessageBoxResult mbr = MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgLayerIsImageService,
+                        VisibilityLibrary.Properties.Resources.CaptionLayerIsImageService, MessageBoxButton.YesNo);
+
+                    if (mbr == MessageBoxResult.No)
+                    {
+                        System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+                        return false;
+                    }
                 }
 
                 success = await FeatureClassHelper.CreateLayer(ObserversLayerName, "POINT", true, true);
