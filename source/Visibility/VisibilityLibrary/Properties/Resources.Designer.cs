@@ -664,7 +664,7 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The selected input surface layer is an Image Service and make take a long time to process. Do you wish to continue?.
+        ///   Looks up a localized string similar to The selected input surface layer is an Image Service and may take a long time to process. Do you wish to continue?.
         /// </summary>
         public static string MsgLayerIsImageService {
             get {
