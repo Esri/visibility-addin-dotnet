@@ -466,14 +466,22 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <param name="toolName"></param>
         public void SetToolActiveInToolBar(string toolName)
         {
-            if ((ArcMap.Application == null) || (ArcMap.Application.CurrentTool == null) ||
-                string.IsNullOrEmpty(toolName))
+            if (ArcMap.Application == null)
                 return;
 
-            // Tricky: Check if tool already active - because setting CurrentTool will 
-            //         cause Activate/Deactive to be called by framework
-            if (ArcMap.Application.CurrentTool.Name.Equals(toolName))
+            if (string.IsNullOrEmpty(toolName))
+            {
+                if (ArcMap.Application.CurrentTool != null) // TRICKY: setting current tool to null at startup causes crash so extra check
+                    ArcMap.Application.CurrentTool = null;
+
                 return;
+            }
+
+            if ((ArcMap.Application.CurrentTool != null) && 
+                (ArcMap.Application.CurrentTool.Name.Equals(toolName)))
+                    // Tricky: Check if tool already active - because setting CurrentTool again will 
+                    //         cause Activate/Deactive to be called by ArcGIS framework
+                    return;
 
             ESRI.ArcGIS.Framework.ICommandBars commandBars = ArcMap.Application.Document.CommandBars;
             ESRI.ArcGIS.esriSystem.UID commandID = new ESRI.ArcGIS.esriSystem.UIDClass();
