@@ -229,7 +229,7 @@
     <value>Observer Points</value>
   </data>
   <data name="LabelOffsets" xml:space="preserve">
-    <value>Height</value>
+    <value>Height Above Surface</value>
   </data>
   <data name="LabelOK" xml:space="preserve">
     <value>OK</value>
