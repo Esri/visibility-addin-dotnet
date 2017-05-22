@@ -457,7 +457,7 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Offsets.
+        ///   Looks up a localized string similar to Height.
         /// </summary>
         public static string LabelOffsets {
             get {
