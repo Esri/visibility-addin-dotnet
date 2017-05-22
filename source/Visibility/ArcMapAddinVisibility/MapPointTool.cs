@@ -39,8 +39,6 @@ namespace ArcMapAddinVisibility
 
         public MapPointTool()
         {
-            if ((ArcMap.Application != null) && (ArcMap.Application.CurrentTool != null))
-                lastActiveToolGuid = ArcMap.Application.CurrentTool.ID.Value as string;
         }
 
         protected override void OnUpdate()
@@ -55,12 +53,15 @@ namespace ArcMapAddinVisibility
             // This is not a very efficient place to do this because it is called repeatedly
             // but only place I could find that knew the previous tool in use
 
-            if (ArcMap.Application.CurrentTool.ID.Value.ToString().Equals(lastActiveToolGuid))
-                return;
-
             // this is a GUID - with no way to get the progID 
             // (except PInvoke of Win32 ProgIDFromCLSID) so using GUIDs instead of more readable ProgID
-            lastActiveToolGuid = ArcMap.Application.CurrentTool.ID.Value as string;
+            string currentActiveToolGuid = ArcMap.Application.CurrentTool.ID.Value as string;
+
+            if (currentActiveToolGuid.Equals(lastActiveToolGuid)
+               || currentActiveToolGuid.Equals("{224824C0-D14C-E386-96E2-C1D699426A56}")) // this tool's GUID
+                return;
+
+            lastActiveToolGuid = currentActiveToolGuid;        
         }
 
         protected override void OnActivate()

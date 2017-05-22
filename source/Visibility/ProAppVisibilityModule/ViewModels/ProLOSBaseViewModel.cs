@@ -360,10 +360,21 @@ namespace ProAppVisibilityModule.ViewModels
             if (!string.IsNullOrWhiteSpace(SelectedSurfaceName) && MapView.Active != null && MapView.Active.Map != null)
             {
                 var layer = GetLayerFromMapByName(SelectedSurfaceName);
+
+                // WORKAROUND/BUG:
+                // QueryExtent() is taking several minutes to return from this call with ImageServiceLayer
+                // during which MCT can't do anything, so for now just return true, 
+                // fix this in the future when QueryExtent() or alternate works with ImageServiceLayer
+                if (layer is ImageServiceLayer)
+                {
+                    return true;
+                }
+
                 var env = await QueuedTask.Run(() =>
-                    {
-                        return layer.QueryExtent();
-                    });
+                {
+                    return layer.QueryExtent();
+                });
+
                 validPoint = await IsPointWithinExtent(point, env);
 
                 if (validPoint == false && showPopup)
