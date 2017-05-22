@@ -59,6 +59,8 @@ namespace ProAppVisibilityModule.ViewModels
 
             // Pro Events
             ArcGIS.Desktop.Framework.Events.ActiveToolChangedEvent.Subscribe(OnActiveToolChanged);
+
+            ClearGraphicsVisible = false;
         }
 
         private async void OnMapPointToolActivated(object obj)
@@ -153,6 +155,11 @@ namespace ProAppVisibilityModule.ViewModels
                 return ProGraphicsList.Any(g => g.IsTemp == false);
             }
         }
+
+        /// <summary>
+        /// Property used to determine if ClearGraphics button should be visible
+        /// </summary>
+        public bool ClearGraphicsVisible { get; set; }
 
         private MapPoint point1 = null;
         /// <summary>

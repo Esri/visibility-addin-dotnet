@@ -50,6 +50,7 @@ namespace ArcMapAddinVisibility.ViewModels
             Mediator.Register(VisibilityLibrary.Constants.MAP_POINT_TOOL_DEACTIVATED, OnMapPointToolDeactivated);
             Mediator.Register(VisibilityLibrary.Constants.MAP_TOOL_CHANGED, OnActiveToolChanged);
 
+            ClearGraphicsVisible = false;
         }
 
         protected void OnMapPointToolActivated(object obj)
@@ -83,6 +84,9 @@ namespace ArcMapAddinVisibility.ViewModels
         // lists to store GUIDs of graphics, temp feedback and map graphics
         private static List<AMGraphic> GraphicsList = new List<AMGraphic>();
 
+        /// <summary>
+        /// Property used to determine if there are non temp graphics
+        /// </summary>
         public bool HasMapGraphics
         {
             get
@@ -91,6 +95,11 @@ namespace ArcMapAddinVisibility.ViewModels
                 return GraphicsList.Any(g => g.IsTemp == false);
             }
         }
+
+        /// <summary>
+        /// Property used to determine if ClearGraphics button should be visible
+        /// </summary>
+        public bool ClearGraphicsVisible { get; set; }
 
         private IPoint point1 = null;
         /// <summary>

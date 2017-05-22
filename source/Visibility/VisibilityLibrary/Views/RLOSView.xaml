@@ -15,6 +15,8 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/VisibilityLibrary;component/MAResourceDictionary.xaml" />
             </ResourceDictionary.MergedDictionaries>
+
+            <BooleanToVisibilityConverter x:Key="BoolToVis" />
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
@@ -259,7 +261,8 @@
                         Margin="3,20,0,0"
                         Command="{Binding ClearGraphicsCommand}"
                         Content="{x:Static prop:Resources.LabelClearGraphics}"
-                        ToolTip="{x:Static prop:Resources.LabelClearGraphics}">
+                        ToolTip="{x:Static prop:Resources.LabelClearGraphics}"
+                        Visibility="{Binding Path=ClearGraphicsVisible, Converter={StaticResource BoolToVis}}" >
                         <Button.Style>
                             <Style TargetType="Button">
                                 <Setter Property="IsEnabled" Value="False" />
