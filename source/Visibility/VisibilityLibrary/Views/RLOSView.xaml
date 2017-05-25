@@ -139,7 +139,8 @@
                     ItemsSource="{Binding ObserverAddInPoints}"
                     PreviewMouseRightButtonDown="ListBox_PreviewMouseRightButtonDown"
                     ScrollViewer.VerticalScrollBarVisibility="Visible"
-                    SelectionMode="Multiple">
+                    SelectionMode="Multiple"
+                    ItemContainerStyle="{StaticResource listboxItemStyle}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
