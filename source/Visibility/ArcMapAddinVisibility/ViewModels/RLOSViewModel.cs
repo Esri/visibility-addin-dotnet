@@ -129,6 +129,110 @@ namespace ArcMapAddinVisibility.ViewModels
         }
 
         /// <summary>
+        /// Returns a polygon with a range fan(circular ring sector - like a donut wedge or wiper blade swipe with inner and outer radius)
+        /// from the input parameters
+        /// </summary>
+        public static IGeometry ConstructRangeFan(IPoint centerPoint,
+            double innerDistanceInMapUnits, double outerDistanceInMapUnits,
+            double horizontalStartAngleInBearing, double horizontalEndAngleInBearing,
+            ISpatialReference sr)
+        {
+            if ((centerPoint == null) || (sr == null) ||
+                (innerDistanceInMapUnits < 0.0) || (outerDistanceInMapUnits < 0.0) ||
+                (horizontalStartAngleInBearing < 0.0) || (horizontalStartAngleInBearing > 360.0) ||
+                (horizontalEndAngleInBearing < 0.0) || (horizontalEndAngleInBearing > 360.0))
+                return null;
+
+            // Tricky - if angle cuts across 360, need to adjust for this case (ex.Angle: 270->90)
+            if (horizontalStartAngleInBearing > horizontalEndAngleInBearing)
+                horizontalStartAngleInBearing = -(360.0 - horizontalStartAngleInBearing);
+
+            double deltaAngle = Math.Abs(horizontalStartAngleInBearing - horizontalEndAngleInBearing);
+
+            // Create Polygon to store points
+            IPointCollection points = new PolygonClass();
+
+            // if full circle(or greater), return donut section with inner/outer rings
+            if ((deltaAngle == 0.0) || (deltaAngle >= 360.0))
+            {
+                IGeometryCollection geometryCollection = points as IGeometryCollection;
+
+                ICircularArc circularArcOuter = new CircularArcClass();
+                ISegmentCollection ringOuter = new RingClass();
+                circularArcOuter.PutCoordsByAngle(centerPoint, 0.0, 2 * Math.PI, outerDistanceInMapUnits);
+                ringOuter.AddSegment(circularArcOuter as ISegment);
+                geometryCollection.AddGeometry(ringOuter as IGeometry);
+
+                if (innerDistanceInMapUnits > 0.0)
+                {
+                    ICircularArc circularArcInner = new CircularArcClass();
+                    ISegmentCollection ringInner = new RingClass();
+                    circularArcInner.PutCoordsByAngle(centerPoint, 0.0, 2 * Math.PI, innerDistanceInMapUnits);
+                    ringInner.AddSegment(circularArcInner as ISegment);
+                    geometryCollection.AddGeometry(ringInner as IGeometry);
+                }
+
+                (points as ITopologicalOperator).Simplify();
+
+                return points as IGeometry;
+            }
+
+            // Otherwise if range fan, construct that
+            IPoint startPoint = null;
+
+            if (innerDistanceInMapUnits == 0.0)
+            {
+                startPoint = centerPoint;
+                points.AddPoint(startPoint);
+            }
+
+            double minAngle = Math.Min(horizontalStartAngleInBearing, horizontalEndAngleInBearing);
+            double maxAngle = Math.Max(horizontalStartAngleInBearing, horizontalEndAngleInBearing);
+            double step = 5.0;
+
+            // Draw Outer Arc of Ring
+            // Implementation Note: because of the unique shape of this ring, 
+            // it was easier to manually create these points than use IConstructCircularArc
+            for (double angle = minAngle; angle <= maxAngle; angle += step)
+            {
+                double cartesianAngle = (450 - angle) % 360;
+                double angleInRadians = cartesianAngle * (Math.PI / 180.0);
+                double x = centerPoint.X + (outerDistanceInMapUnits * Math.Cos(angleInRadians));
+                double y = centerPoint.Y + (outerDistanceInMapUnits * Math.Sin(angleInRadians));
+
+                IPoint pointToAdd = new PointClass();
+                pointToAdd.PutCoords(x, y);
+                pointToAdd.SpatialReference = sr;
+                points.AddPoint(pointToAdd);
+
+                if (startPoint == null)
+                    startPoint = pointToAdd;
+            }
+
+            if (innerDistanceInMapUnits > 0.0)
+            {
+                // Draw Inner Arc of Ring - if inner distance set
+                for (double angle = maxAngle; angle >= minAngle; angle -= step)
+                {
+                    double cartesianAngle = (450 - angle) % 360;
+                    double angleInRadians = cartesianAngle * (Math.PI / 180.0);
+                    double x = centerPoint.X + (innerDistanceInMapUnits * Math.Cos(angleInRadians));
+                    double y = centerPoint.Y + (innerDistanceInMapUnits * Math.Sin(angleInRadians));
+
+                    IPoint pointToAdd = new PointClass();
+                    pointToAdd.PutCoords(x, y);
+                    pointToAdd.SpatialReference = sr;
+                    points.AddPoint(pointToAdd);
+                }
+            }
+
+            // close Polygon
+            points.AddPoint(startPoint);
+
+            return points as IGeometry;
+        }
+
+        /// <summary>
         /// Where all of the work is done.  Override from TabBaseViewModel
         /// </summary>
         internal override void CreateMapElement()
@@ -140,15 +244,33 @@ namespace ArcMapAddinVisibility.ViewModels
                 if (!CanCreateElement || ArcMap.Document == null || ArcMap.Document.FocusMap == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
                     return;
 
-                //base.CreateMapElement();
-
                 var surface = GetSurfaceFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
 
                 if (surface == null)
                     return;
 
-                // Determine if selected surface is projected or geographic
+                bool spatialAnalystAvailable = IsSpatialAnalystAvailable();
+                if (!spatialAnalystAvailable)
+                {
+                    System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.LOSSpatialAnalystLicenseInvalid, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+                    return;
+                }
+
                 ILayer surfaceLayer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
+                // Issue warning if layer is ImageServerLayer
+                if (surfaceLayer is IImageServerLayer)
+                {
+                    MessageBoxResult mbr = MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgLayerIsImageService,
+                        VisibilityLibrary.Properties.Resources.CaptionLayerIsImageService, MessageBoxButton.YesNo);
+
+                    if (mbr == MessageBoxResult.No)
+                    {
+                        System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+                        return;
+                    }
+                }
+
+                // Determine if selected surface is projected or geographic
                 var geoDataset = surfaceLayer as IGeoDataset;
                 SelectedSurfaceSpatialRef = geoDataset.SpatialReference;
 
@@ -166,7 +288,6 @@ namespace ArcMapAddinVisibility.ViewModels
 
                 using (ComReleaser oComReleaser = new ComReleaser())
                 {
-
                     // Create feature workspace
                     IFeatureWorkspace workspace = CreateFeatureWorkspace("tempWorkspace");
 
@@ -189,30 +310,22 @@ namespace ArcMapAddinVisibility.ViewModels
                     double finalBottomVerticalFOV = GetAngularDistance(ArcMap.Document.FocusMap, BottomVerticalFOV, AngularUnitType);
                     double finalTopVerticalFOV = GetAngularDistance(ArcMap.Document.FocusMap, TopVerticalFOV, AngularUnitType);
 
-                    // Out radius geometries
-                    List<IGeometry> radius2GeomList = new List<IGeometry>();
-                    List<IGeometry> radius1_2GeomList = new List<IGeometry>();
-                    List<IGeometry> donutGeomList = new List<IGeometry>();
+                    // Output radius geometries
+                    List<IGeometry> maxRangeBufferGeomList = new List<IGeometry>();
+                    List<IGeometry> rangeFanGeomList = new List<IGeometry>();
 
                     foreach (var observerPoint in ObserverAddInPoints)
                     {
-                        // Create buffer geometries for final Min/Max distance
+                        // Create 2 clipping geometries:
+                        // 1. maxRangeBufferGeomList - is used to clip the viz GP output because 2. doesn't work directly
+                        // 2. rangeFanGeomList - this is the range fan input by the user
                         ITopologicalOperator topologicalOperator = observerPoint.Point as ITopologicalOperator;
-                        IGeometry geom = topologicalOperator.Buffer(finalMaxDistance);
-                        radius2GeomList.Add(geom);
-                        radius1_2GeomList.Add(geom);
-                        if (finalMinDistance > 0)
-                        {
-                            IGeometry geom2 = topologicalOperator.Buffer(finalMinDistance);
+                        IGeometry geomBuffer = topologicalOperator.Buffer(finalMaxDistance);
+                        maxRangeBufferGeomList.Add(geomBuffer);      
 
-                            ITopologicalOperator eraseTopo = geom as ITopologicalOperator;
-                            IGeometry erasedGeom = eraseTopo.Difference(geom2);
-                            donutGeomList.Add(erasedGeom);
-                        }
-                        else
-                        {
-                            radius1_2GeomList.Add(geom);
-                        }
+                        IGeometry geomRangeFan = ConstructRangeFan(observerPoint.Point, finalMinDistance, finalMaxDistance,
+                            finalLeftHorizontalFOV, finalRightHorizontalFOV, SelectedSurfaceSpatialRef);
+                        rangeFanGeomList.Add(geomRangeFan);
 
                         double z1 = surface.GetElevation(observerPoint.Point) + finalObserverOffset;
 
@@ -245,6 +358,13 @@ namespace ArcMapAddinVisibility.ViewModels
                         ILayer layer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
                         string layerPath = GetLayerPath(layer);
 
+                        if (string.IsNullOrEmpty(layerPath))
+                        {
+                            // if layer path didn't resolve, issue error and stop
+                            System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgSurfaceLayerNotFound, VisibilityLibrary.Properties.Resources.AEInvalidInput);
+                            throw new Exception(VisibilityLibrary.Properties.Resources.MsgSurfaceLayerNotFound);
+                        }
+
                         IFeatureLayer ipFeatureLayer = new FeatureLayerClass();
                         ipFeatureLayer.FeatureClass = pointFc;
 
@@ -258,21 +378,12 @@ namespace ArcMapAddinVisibility.ViewModels
                         parameters.Add(strPath);
                         parameters.Add(outPath);
 
-                        esriLicenseStatus status = GetSpatialAnalystLicense();
-                        if (status == esriLicenseStatus.esriLicenseUnavailable || status == esriLicenseStatus.esriLicenseFailure ||
-                            status == esriLicenseStatus.esriLicenseNotInitialized || status == esriLicenseStatus.esriLicenseNotLicensed ||
-                            status == esriLicenseStatus.esriLicenseUnavailable)
-                        {
-                            System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.LOSSpatialAnalystLicenseInvalid, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
-                            return;
-                        }
-
                         IGeoProcessor2 gp = new GeoProcessorClass();
 
                         gp.AddOutputsToMap = false;
 
                         // Add a mask to buffer the output to selected distance
-                        SetGPMask(workspace, radius2GeomList, gp, "radiusMask");
+                        SetGPMask(workspace, maxRangeBufferGeomList, gp, "radiusMask");
 
                         object oResult = gp.Execute("Visibility_sa", parameters, null);
                         IGeoProcessorResult ipResult = (IGeoProcessorResult)oResult;
@@ -281,8 +392,8 @@ namespace ArcMapAddinVisibility.ViewModels
                         gp = null;
                         GC.Collect();
 
-                        // Add buffer geometries to the map
-                        foreach (IGeometry geom in radius1_2GeomList)
+                        // Add the range fan geometries to the map
+                        foreach (IGeometry geom in rangeFanGeomList)
                         {
                             var color = new RgbColorClass() { Blue = 255 } as IColor;
                             AddGraphicToMap(geom, color, true);
@@ -291,7 +402,7 @@ namespace ArcMapAddinVisibility.ViewModels
                         IRasterLayer outputRasterLayer = new RasterLayerClass();
                         outputRasterLayer.CreateFromFilePath(outPath);
 
-                        string fcName = IntersectOutput(outputRasterLayer, ipDataset, workspace, donutGeomList);
+                        string fcName = IntersectOutput(outputRasterLayer, ipDataset, workspace, rangeFanGeomList);
 
                         IFeatureClass finalFc = workspace.OpenFeatureClass(fcName);
 
@@ -424,38 +535,14 @@ namespace ArcMapAddinVisibility.ViewModels
         }
 
         /// <summary>
-        /// Check out spatial analyst license
+        /// Checks to see if spatial analyst license available (it has been checked out by ArcMap)
         /// </summary>
-        /// <returns>esriLicenseStatus</returns>
-        public esriLicenseStatus GetSpatialAnalystLicense()
+        /// <returns>true/false</returns>
+        public bool IsSpatialAnalystAvailable()
         {
-            //Check out a Spatial Analyst license with the ArcView product. 
-            esriLicenseProductCode productCode =
-                esriLicenseProductCode.esriLicenseProductCodeAdvanced;
-            IAoInitialize pAoInitialize = new AoInitializeClass();
-            esriLicenseStatus licenseStatus = esriLicenseStatus.esriLicenseUnavailable;
-            //Check the productCode. 
-            licenseStatus = pAoInitialize.IsProductCodeAvailable(productCode);
-            if (licenseStatus == esriLicenseStatus.esriLicenseAvailable)
-            {
-                //Check the extensionCode. 
-                licenseStatus = pAoInitialize.IsExtensionCodeAvailable(productCode,
-                    esriLicenseExtensionCode.esriLicenseExtensionCodeSpatialAnalyst);
-                if (licenseStatus == esriLicenseStatus.esriLicenseAvailable)
-                {
-                    //Initialize the license. 
-                    licenseStatus = pAoInitialize.Initialize(productCode);
-                    if ((licenseStatus == esriLicenseStatus.esriLicenseCheckedOut))
-                    {
-                        //Check out the Spatial Analyst extension. 
-                        licenseStatus = pAoInitialize.CheckOutExtension
-                            (esriLicenseExtensionCode.esriLicenseExtensionCodeSpatialAnalyst)
-                            ;
-                    }
-                }
-            }
+            IAoInitialize aoInitializer = new AoInitializeClass();
 
-            return licenseStatus;
+            return aoInitializer.IsExtensionCheckedOut(esriLicenseExtensionCode.esriLicenseExtensionCodeSpatialAnalyst);
         }
 
         /// <summary>
@@ -986,7 +1073,12 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <returns>file path of layer</returns>
         private static string GetLayerPath(ILayer layer)
         {
-            if (layer is IRasterLayer)
+            if (layer is IImageServerLayer)
+            {
+                IImageServerLayer mlayer = layer as IImageServerLayer;
+                return mlayer.Name;
+            } 
+            else if (layer is IRasterLayer)
             {
                 IRasterLayer rlayer = layer as IRasterLayer;
                 return rlayer.FilePath;

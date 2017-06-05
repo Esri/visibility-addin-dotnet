@@ -25,11 +25,22 @@ namespace VisibilityLibrary.Views
             InitializeComponent();
         }
 
-        private void ListBox_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        private void listBoxObservers_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
-            // right mouse click selects item in list box
-            // avoid this by setting e.Handled to true
-            e.Handled = true;
+            // TRICKY: right mouse click selects item in list box, 
+            // avoid this when multiple items are selected by setting e.Handled to true
+            if ((listBoxObservers.SelectedItems != null) && (listBoxObservers.SelectedItems.Count >= 1))
+                e.Handled = true;
         }
+
+        private void listBoxTargets_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            // TRICKY: right mouse click selects item in list box, 
+            // avoid this when multiple items are selected by setting e.Handled to true
+            if ((listBoxTargets.SelectedItems != null) && (listBoxTargets.SelectedItems.Count >= 1))
+                e.Handled = true;
+        }
+
+
     }
 }

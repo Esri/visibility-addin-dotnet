@@ -12,21 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// System
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Collections.ObjectModel;
 using System.Collections;
-using System.Windows;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
+
+// Pro SDK
 using ArcGIS.Core.Geometry;
-using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Core;
-using VisibilityLibrary.Helpers;
+using ArcGIS.Desktop.Framework.Threading.Tasks;
+using ArcGIS.Desktop.Mapping;
+
+// Visibility 
 using ProAppVisibilityModule.Helpers;
 using ProAppVisibilityModule.Models;
-using ArcGIS.Desktop.Framework.Threading.Tasks;
+using VisibilityLibrary.Helpers;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -230,7 +235,7 @@ namespace ProAppVisibilityModule.ViewModels
 
             if (ToolMode == MapPointToolMode.Target)
             {
-                var guid = await AddGraphicToMap(point, ColorFactory.Red, true, 5.0, markerStyle: SimpleMarkerStyle.Square, tag: "target");
+                var guid = await AddGraphicToMap(point, ColorFactory.RedRGB, true, 5.0, markerStyle: SimpleMarkerStyle.Square, tag: "target");
                 var addInPoint = new AddInPoint() { Point = point, GUID = guid };
                 Application.Current.Dispatcher.Invoke(() =>
                     {
@@ -292,9 +297,13 @@ namespace ProAppVisibilityModule.ViewModels
                 if (!CanCreateElement || MapView.Active == null || MapView.Active.Map == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
                     return;
 
-                await ExecuteVisibilityLLOS();
+                bool success = await ExecuteVisibilityLLOS();
 
-                DeactivateTool("ProAppVisibilityModule_MapTool");
+                if (!success)
+                    MessageBox.Show("LLOS computations did not complete correctly.\nPlease check your parameters and try again.",
+                        VisibilityLibrary.Properties.Resources.CaptionError);
+
+                DeactivateTool(VisibilityMapTool.ToolId);
 
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
@@ -313,12 +322,14 @@ namespace ProAppVisibilityModule.ViewModels
             }
         }
 
-        private async Task ExecuteVisibilityLLOS()
+        private async Task<bool> ExecuteVisibilityLLOS()
         {
+            bool success = false;
+
             try
             {
+                // Check surface spatial reference
                 var surfaceSR = await GetSpatialReferenceFromLayer(SelectedSurfaceName);
-
                 if (surfaceSR == null || !surfaceSR.IsProjected)
                 {
                     MessageBox.Show(VisibilityLibrary.Properties.Resources.RLOSUserPrompt, VisibilityLibrary.Properties.Resources.RLOSUserPromptCaption);
@@ -332,10 +343,24 @@ namespace ProAppVisibilityModule.ViewModels
 
                     await Reset(true);
                     
-                    return;
+                    return false;
                 }
 
-                await FeatureClassHelper.CreateLayer(ObserversLayerName, "POINT", true, true);
+                // Warn if Image Service layer
+                Layer surfaceLayer = GetLayerFromMapByName(SelectedSurfaceName);
+                if (surfaceLayer is ImageServiceLayer)
+                {
+                    MessageBoxResult mbr = MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgLayerIsImageService,
+                        VisibilityLibrary.Properties.Resources.CaptionLayerIsImageService, MessageBoxButton.YesNo);
+
+                    if (mbr == MessageBoxResult.No)
+                    {
+                        System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+                        return false;
+                    }
+                }
+
+                success = await FeatureClassHelper.CreateLayer(ObserversLayerName, "POINT", true, true);
 
                 // add fields for observer offset
 
@@ -343,7 +368,10 @@ namespace ProAppVisibilityModule.ViewModels
                 await FeatureClassHelper.AddFieldToLayer(ObserversLayerName, VisibilityLibrary.Properties.Resources.OffsetWithZFieldName, "DOUBLE");
                 await FeatureClassHelper.AddFieldToLayer(ObserversLayerName, VisibilityLibrary.Properties.Resources.TarIsVisFieldName, "SHORT");
 
-                await FeatureClassHelper.CreateLayer(TargetsLayerName, "POINT", true, true);
+                success = await FeatureClassHelper.CreateLayer(TargetsLayerName, "POINT", true, true);
+
+                if (!success)
+                    return false;
 
                 // add fields for target offset
 
@@ -358,8 +386,13 @@ namespace ProAppVisibilityModule.ViewModels
                 await FeatureClassHelper.CreatingFeatures(TargetsLayerName, TargetAddInPoints, GetAsMapZUnits(surfaceSR, TargetOffset.Value));
 
                 // update with surface information
-                await FeatureClassHelper.AddSurfaceInformation(ObserversLayerName, SelectedSurfaceName, VisibilityLibrary.Properties.Resources.ZFieldName);
-                await FeatureClassHelper.AddSurfaceInformation(TargetsLayerName, SelectedSurfaceName, VisibilityLibrary.Properties.Resources.ZFieldName);
+                success = await FeatureClassHelper.AddSurfaceInformation(ObserversLayerName, SelectedSurfaceName, VisibilityLibrary.Properties.Resources.ZFieldName);
+                if (!success)
+                    return false;
+
+                success = await FeatureClassHelper.AddSurfaceInformation(TargetsLayerName, SelectedSurfaceName, VisibilityLibrary.Properties.Resources.ZFieldName);
+                if (!success)
+                    return false;
 
                 await FeatureClassHelper.UpdateShapeWithZ(ObserversLayerName, VisibilityLibrary.Properties.Resources.ZFieldName, GetAsMapZUnits(surfaceSR, ObserverOffset.Value));
                 await FeatureClassHelper.UpdateShapeWithZ(TargetsLayerName, VisibilityLibrary.Properties.Resources.ZFieldName, GetAsMapZUnits(surfaceSR, TargetOffset.Value));
@@ -369,20 +402,26 @@ namespace ProAppVisibilityModule.ViewModels
                 GC.WaitForPendingFinalizers();
                 GC.Collect();
 
-                await FeatureClassHelper.CreateSightLines(ObserversLayerName,
+                success = await FeatureClassHelper.CreateSightLines(ObserversLayerName,
                     TargetsLayerName,
                     CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + SightLinesLayerName, 
                     VisibilityLibrary.Properties.Resources.OffsetWithZFieldName, 
                     VisibilityLibrary.Properties.Resources.OffsetWithZFieldName);
+
+                if (!success)
+                    return false;
 
                 // LOS
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
                 GC.Collect();
 
-                await FeatureClassHelper.CreateLOS(SelectedSurfaceName,
+                success = await FeatureClassHelper.CreateLOS(SelectedSurfaceName,
                     CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + SightLinesLayerName,
                     CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + OutputLayerName);
+
+                if (!success)
+                    return false;
 
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
@@ -450,17 +489,21 @@ namespace ProAppVisibilityModule.ViewModels
                     var envelope = await QueuedTask.Run(() => outputLayer.QueryExtent());
                     await ZoomToExtent(envelope);
                     executionCounter++;
+
+                    success = true;
                 }
                 else
                 {
-                    MessageBox.Show("LLOS computations did not complete correctly.  Please try again by selecting the 'OK' button.");
+                    success = false;
                 }
-                
             }
             catch(Exception ex)
             {
+                success = false;
                 Debug.Print(ex.Message);
             }
+
+            return success;
         }
 
         internal override void OnDisplayCoordinateTypeChanged(object obj)

@@ -142,6 +142,15 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Image Service Layer Warning.
+        /// </summary>
+        public static string CaptionLayerIsImageService {
+            get {
+                return ResourceManager.GetString("CaptionLayerIsImageService", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to DD.
         /// </summary>
         public static string EnumCTDD {
@@ -448,7 +457,7 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Offsets.
+        ///   Looks up a localized string similar to Height Above Surface.
         /// </summary>
         public static string LabelOffsets {
             get {
@@ -655,11 +664,29 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The selected input surface layer is an Image Service and may take a long time to process. Do you wish to continue?.
+        /// </summary>
+        public static string MsgLayerIsImageService {
+            get {
+                return ResourceManager.GetString("MsgLayerIsImageService", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Point does not fall within the input extent..
         /// </summary>
         public static string MsgOutOfAOI {
             get {
                 return ResourceManager.GetString("MsgOutOfAOI", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The surface layer was not found. Please try again..
+        /// </summary>
+        public static string MsgSurfaceLayerNotFound {
+            get {
+                return ResourceManager.GetString("MsgSurfaceLayerNotFound", resourceCulture);
             }
         }
         

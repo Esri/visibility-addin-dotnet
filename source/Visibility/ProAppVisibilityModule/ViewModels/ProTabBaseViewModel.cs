@@ -12,22 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// System
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using ArcGIS.Desktop.Framework;
-using ArcGIS.Core.Geometry;
+using System.Windows;
+
+// Pro SDK
 using ArcGIS.Core.CIM;
+using ArcGIS.Core.Geometry;
+using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
+using ProAppVisibilityModule.Helpers;
+using ProAppVisibilityModule.Models;
+
+// Visibility
 using VisibilityLibrary.Helpers;
 using VisibilityLibrary.ViewModels;
-using ProAppVisibilityModule.Models;
-using ProAppVisibilityModule.Helpers;
-using System.Windows;
-using System.Diagnostics;
-using System.Text.RegularExpressions;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -51,31 +56,11 @@ namespace ProAppVisibilityModule.ViewModels
 
             Mediator.Register(VisibilityLibrary.Constants.MAP_POINT_TOOL_ACTIVATED, OnMapPointToolActivated);
             Mediator.Register(VisibilityLibrary.Constants.MAP_POINT_TOOL_DEACTIVATED, OnMapPointToolDeactivated);
-        }
 
-        private void OnMapPointToolDeactivated(object obj)
-        {
-            foreach (var item in ProGraphicsList)
-            {
-                if (item.Disposable != null && item.IsTemp == true)
-                {
-                    if (item.Disposable != null)
-                        item.Disposable.Dispose();
-                    item.Disposable = null;
-                }
-            }
-        }
+            // Pro Events
+            ArcGIS.Desktop.Framework.Events.ActiveToolChangedEvent.Subscribe(OnActiveToolChanged);
 
-        private class tempProGraphic
-        {
-            public tempProGraphic() { }
-
-            public string GUID { get; set; }
-            public Geometry Geometry { get; set; }
-            public CIMColor Color { get; set; }
-            public bool IsTemp { get; set; }
-            public double Size { get; set; }
-            public SimpleMarkerStyle MarkerStyle { get; set; }
+            ClearGraphicsVisible = false;
         }
 
         private async void OnMapPointToolActivated(object obj)
@@ -83,7 +68,7 @@ namespace ProAppVisibilityModule.ViewModels
             var addList = new List<tempProGraphic>();
             var removeList = new List<ProGraphic>();
 
-            foreach(var item in ProGraphicsList)
+            foreach (var item in ProGraphicsList)
             {
                 if (item.Disposable != null || item.IsTemp == false)
                     continue;
@@ -108,7 +93,7 @@ namespace ProAppVisibilityModule.ViewModels
                 });
             }
 
-            foreach(var temp in addList)
+            foreach (var temp in addList)
             {
                 var pgOLD = ProGraphicsList.FirstOrDefault(g => g.GUID == temp.GUID);
 
@@ -123,7 +108,37 @@ namespace ProAppVisibilityModule.ViewModels
                 ProGraphicsList.Remove(pg);
         }
 
+        protected virtual void OnMapPointToolDeactivated(object obj)
+        {
+            foreach (var item in ProGraphicsList)
+            {
+                if (item.Disposable != null && item.IsTemp == true)
+                {
+                    if (item.Disposable != null)
+                        item.Disposable.Dispose();
+                    item.Disposable = null;
+                }
+            }
+        }
+
+        private class tempProGraphic
+        {
+            public tempProGraphic() { }
+
+            public string GUID { get; set; }
+            public Geometry Geometry { get; set; }
+            public CIMColor Color { get; set; }
+            public bool IsTemp { get; set; }
+            public double Size { get; set; }
+            public SimpleMarkerStyle MarkerStyle { get; set; }
+        }
+
         #region Properties
+
+        /// <summary>
+        /// save last active tool used, so we can set back to this 
+        /// </summary>
+        private string lastActiveToolName;
 
         /// <summary>
         /// lists to store GUIDs of graphics, temp feedback and map graphics
@@ -140,6 +155,11 @@ namespace ProAppVisibilityModule.ViewModels
                 return ProGraphicsList.Any(g => g.IsTemp == false);
             }
         }
+
+        /// <summary>
+        /// Property used to determine if ClearGraphics button should be visible
+        /// </summary>
+        public bool ClearGraphicsVisible { get; set; }
 
         private MapPoint point1 = null;
         /// <summary>
@@ -372,7 +392,7 @@ namespace ProAppVisibilityModule.ViewModels
         /// <param name="obj"></param>
         internal virtual void OnActivateToolCommand(object obj)
         {
-            FrameworkApplication.SetCurrentToolAsync("ProAppVisibilityModule_MapTool");
+            FrameworkApplication.SetCurrentToolAsync(VisibilityMapTool.ToolId);
         }
 
         #endregion
@@ -458,7 +478,7 @@ namespace ProAppVisibilityModule.ViewModels
         {
             if (toolReset)
             {
-                DeactivateTool("ProAppVisibilityModule_MapTool");
+                DeactivateTool(VisibilityMapTool.ToolId);
             }
 
             Point1 = null;
@@ -554,7 +574,7 @@ namespace ProAppVisibilityModule.ViewModels
         internal async Task<string> AddGraphicToMap(Geometry geom, bool IsTempGraphic = false, double size = 1.0)
         {
             // default color Red
-            return await AddGraphicToMap(geom, ColorFactory.Red, IsTempGraphic, size);
+            return await AddGraphicToMap(geom, ColorFactory.RedRGB, IsTempGraphic, size);
         }
 
         internal async Task<string> AddGraphicToMap(Geometry geom, CIMColor color, bool IsTempGraphic = false, double size = 1.0, string text = "", SimpleMarkerStyle markerStyle = SimpleMarkerStyle.Circle, string tag = "")
@@ -592,7 +612,7 @@ namespace ProAppVisibilityModule.ViewModels
             {
                 await QueuedTask.Run(() =>
                 {
-                    var outline = SymbolFactory.ConstructStroke(ColorFactory.Black, 1.0, SimpleLineStyle.Solid);
+                    var outline = SymbolFactory.ConstructStroke(ColorFactory.BlackRGB, 1.0, SimpleLineStyle.Solid);
                     var s = SymbolFactory.ConstructPolygonSymbol(color, SimpleFillStyle.Solid, outline);
                     symbol = new CIMSymbolReference() { Symbol = s };
                 });
@@ -671,9 +691,19 @@ namespace ProAppVisibilityModule.ViewModels
                 FrameworkApplication.CurrentTool.Equals(toolname))
             {
                 Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        FrameworkApplication.SetCurrentToolAsync(String.Empty);
-                    });
+                {
+                    FrameworkApplication.SetCurrentToolAsync(lastActiveToolName);
+                });
+            }
+        }
+
+        private void OnActiveToolChanged(ArcGIS.Desktop.Framework.Events.ToolEventArgs args)
+        {
+            string currentActiveToolName = args.CurrentID;
+
+            if (currentActiveToolName != VisibilityMapTool.ToolId)
+            {
+                lastActiveToolName = currentActiveToolName;
             }
         }
 

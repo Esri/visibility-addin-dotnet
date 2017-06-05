@@ -1,4 +1,18 @@
-﻿using System;
+﻿// Copyright 2016 Esri 
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections.ObjectModel;
@@ -26,8 +40,8 @@ namespace ArcMapAddinVisibility.ViewModels
             AngularUnitType = AngularTypes.DEGREES;
 
             ObserverAddInPoints = new ObservableCollection<AddInPoint>();
-            
-            ToolMode = MapPointToolMode.Unknown;
+
+            toolMode = MapPointToolMode.Unknown;
             SurfaceLayerNames = new ObservableCollection<string>();
             SelectedSurfaceName = string.Empty;
 
@@ -37,10 +51,31 @@ namespace ArcMapAddinVisibility.ViewModels
             DeletePointCommand = new RelayCommand(OnDeletePointCommand);
             DeleteAllPointsCommand = new RelayCommand(OnDeleteAllPointsCommand);
             EditPropertiesDialogCommand = new RelayCommand(OnEditPropertiesDialogCommand);
-
         }
 
         #region Properties
+
+        private bool observerToolActive = false;
+        public bool ObserverToolActive
+        {
+            get { return observerToolActive; }
+            set
+            {
+                observerToolActive = value;
+                RaisePropertyChanged(() => ObserverToolActive);
+            }
+        }
+
+        private bool targetToolActive = false;
+        public bool TargetToolActive
+        {
+            get { return targetToolActive; }
+            set
+            {
+                targetToolActive = value;
+                RaisePropertyChanged(() => TargetToolActive);
+            }
+        }
 
         private bool isRunning = false;
         public bool IsRunning
@@ -79,7 +114,34 @@ namespace ArcMapAddinVisibility.ViewModels
                     throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEInvalidInput);
             }
         }
-        internal MapPointToolMode ToolMode { get; set; }
+
+        private MapPointToolMode toolMode;
+        public MapPointToolMode ToolMode
+        {
+            get { return toolMode; }
+            set
+            {
+                toolMode = value;
+                if (toolMode == MapPointToolMode.Observer)
+                {
+                    ObserverToolActive = true;
+                    TargetToolActive = false;
+                }
+                else if (toolMode == MapPointToolMode.Target)
+                {
+                    ObserverToolActive = false;
+                    TargetToolActive = true;
+                }
+                else
+                {
+                    ObserverToolActive = false;
+                    TargetToolActive = false;
+
+                    DeactivateTool(ThisAddIn.IDs.MapPointTool);
+                }
+            }
+        }
+
         public ObservableCollection<AddInPoint> ObserverAddInPoints { get; set; }
         public ObservableCollection<string> SurfaceLayerNames { get; set; }
         public string SelectedSurfaceName { get; set; }
@@ -166,20 +228,34 @@ namespace ArcMapAddinVisibility.ViewModels
         /// observer points and target points
         /// </summary>
         /// <param name="obj">ToolMode string from resource file</param>
-        internal override void OnActivateTool(object obj)
+        internal override void OnActivateToolCommand(object obj)
         {
             var mode = obj.ToString();
-            ToolMode = MapPointToolMode.Unknown;
+
+            MapPointToolMode lastToolMode = ToolMode;
 
             if (string.IsNullOrWhiteSpace(mode))
                 return;
 
-            if (mode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
+            if ((mode == VisibilityLibrary.Properties.Resources.ToolModeObserver) &&
+                (lastToolMode != MapPointToolMode.Observer))
                 ToolMode = MapPointToolMode.Observer;
-            else if (mode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
+            else if ((mode == VisibilityLibrary.Properties.Resources.ToolModeTarget) &&
+                (lastToolMode != MapPointToolMode.Target))
                 ToolMode = MapPointToolMode.Target;
+            else
+                ToolMode = MapPointToolMode.Unknown;
 
-            base.OnActivateTool(obj);
+            if (ToolMode != MapPointToolMode.Unknown)
+                base.OnActivateToolCommand(obj);
+        }
+
+        protected override void OnMapPointToolDeactivated(object obj)
+        {
+            if (ToolMode != MapPointToolMode.Unknown)
+                ToolMode = MapPointToolMode.Unknown;
+
+            base.OnMapPointToolDeactivated(obj);
         }
 
         /// <summary>
@@ -284,7 +360,7 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <summary>
         /// Enumeration used for the different tool modes
         /// </summary>
-        internal enum MapPointToolMode : int
+        public enum MapPointToolMode : int
         {
             Unknown = 0,
             Observer = 1,

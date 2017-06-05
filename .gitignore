@@ -7,6 +7,7 @@ NuGet.exe
 *-old
 *-sav
 *-sav.*
+*.sav
 
 #############
 ## Python
@@ -35,6 +36,8 @@ develop-eggs
 [Bb]in/
 [Oo]bj/
 *.vshost.*
+*.VC.db
+*.VC.opendb
 
 #################
 ## Eclipse
@@ -181,4 +184,3 @@ Thumbs.db
 
 # Folder config file
 Desktop.ini
-

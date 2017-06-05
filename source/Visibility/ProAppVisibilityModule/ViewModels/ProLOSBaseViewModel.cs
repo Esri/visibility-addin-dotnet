@@ -72,6 +72,35 @@ namespace ProAppVisibilityModule.ViewModels
 
         #region Properties
 
+        protected override void OnMapPointToolDeactivated(object obj)
+        {
+            ToolMode = MapPointToolMode.Unknown;
+
+            base.OnMapPointToolDeactivated(obj);
+        }
+
+        private bool observerToolActive = false;
+        public bool ObserverToolActive
+        {
+            get { return observerToolActive; }
+            set
+            {
+                observerToolActive = value;
+                RaisePropertyChanged(() => ObserverToolActive);
+            }
+        }
+
+        private bool targetToolActive = false;
+        public bool TargetToolActive
+        {
+            get { return targetToolActive; }
+            set
+            {
+                targetToolActive = value;
+                RaisePropertyChanged(() => TargetToolActive);
+            }
+        }
+
         private bool isRunning = false;
         public bool IsRunning
         {
@@ -109,7 +138,34 @@ namespace ProAppVisibilityModule.ViewModels
                     throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEInvalidInput);
             }
         }
-        public MapPointToolMode ToolMode { get; set; }
+
+        private MapPointToolMode toolMode;
+        public MapPointToolMode ToolMode
+        {
+            get { return toolMode; }
+            set
+            {
+                toolMode = value;
+                if (toolMode == MapPointToolMode.Observer)
+                {
+                    ObserverToolActive = true;
+                    TargetToolActive = false;
+                }
+                else if (toolMode == MapPointToolMode.Target)
+                {
+                    ObserverToolActive = false;
+                    TargetToolActive = true;
+                }
+                else
+                {
+                    ObserverToolActive = false;
+                    TargetToolActive = false;
+
+                    DeactivateTool(VisibilityMapTool.ToolId);
+                }
+            }
+        }
+
         public ObservableCollection<AddInPoint> ObserverAddInPoints { get; set; }
         public ObservableCollection<string> SurfaceLayerNames { get; set; }
         public string SelectedSurfaceName { get; set; }
@@ -215,17 +271,23 @@ namespace ProAppVisibilityModule.ViewModels
         internal override void OnActivateToolCommand(object obj)
         {
             var mode = obj.ToString();
-            ToolMode = MapPointToolMode.Unknown;
+
+            MapPointToolMode lastToolMode = ToolMode;
 
             if (string.IsNullOrWhiteSpace(mode))
                 return;
 
-            if (mode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
+            if ((mode == VisibilityLibrary.Properties.Resources.ToolModeObserver) &&
+                (lastToolMode != MapPointToolMode.Observer))
                 ToolMode = MapPointToolMode.Observer;
-            else if (mode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
+            else if ((mode == VisibilityLibrary.Properties.Resources.ToolModeTarget) &&
+                (lastToolMode != MapPointToolMode.Target))
                 ToolMode = MapPointToolMode.Target;
+            else
+                ToolMode = MapPointToolMode.Unknown;
 
-            base.OnActivateToolCommand(obj);
+            if (ToolMode != MapPointToolMode.Unknown)
+                base.OnActivateToolCommand(obj);
         }
 
         /// <summary>
@@ -248,7 +310,7 @@ namespace ProAppVisibilityModule.ViewModels
                 // in tool mode "Observer" we add observer points
                 // otherwise ignore
                 
-                var guid = await AddGraphicToMap(point, ColorFactory.Blue, true, 5.0);
+                var guid = await AddGraphicToMap(point, ColorFactory.BlueRGB, true, 5.0);
                 var addInPoint = new AddInPoint() { Point = point, GUID = guid };
                 Application.Current.Dispatcher.Invoke(() =>
                     {
@@ -298,10 +360,21 @@ namespace ProAppVisibilityModule.ViewModels
             if (!string.IsNullOrWhiteSpace(SelectedSurfaceName) && MapView.Active != null && MapView.Active.Map != null)
             {
                 var layer = GetLayerFromMapByName(SelectedSurfaceName);
+
+                // WORKAROUND/BUG:
+                // QueryExtent() is taking several minutes to return from this call with ImageServiceLayer
+                // during which MCT can't do anything, so for now just return true, 
+                // fix this in the future when QueryExtent() or alternate works with ImageServiceLayer
+                if (layer is ImageServiceLayer)
+                {
+                    return true;
+                }
+
                 var env = await QueuedTask.Run(() =>
-                    {
-                        return layer.QueryExtent();
-                    });
+                {
+                    return layer.QueryExtent();
+                });
+
                 validPoint = await IsPointWithinExtent(point, env);
 
                 if (validPoint == false && showPopup)
@@ -571,21 +644,6 @@ namespace ProAppVisibilityModule.ViewModels
             if (mapMemberHint.ElementAt(0).ToString() == "Name")
                 await ResetSurfaceNames();
         }
-
-
-        //internal double ConvertFromTo(DistanceTypes fromType, DistanceTypes toType, double input)
-        //{
-        //    double result = 0.0;
-
-        //    var linearUnitFrom = GetLinearUnit(fromType);
-        //    var linearUnitTo = GetLinearUnit(toType);
-
-        //    var unit = LinearUnit.CreateLinearUnit(linearUnitFrom.FactoryCode);
-
-        //    result = unit.ConvertTo(input, linearUnitTo);
-
-        //    return result;
-        //}
 
         internal LinearUnit GetLinearUnit(DistanceTypes dtype)
         {
