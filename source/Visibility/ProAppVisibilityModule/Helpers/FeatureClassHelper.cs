@@ -423,7 +423,7 @@ namespace ProAppVisibilityModule.Helpers
             {
                 var gridcodeUniqueList = new List<int>();
 
-                using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
+                using (Geodatabase geodatabase = new Geodatabase(FgdbFileToConnectionPath(CoreModule.CurrentProject.DefaultGeodatabasePath)))
                 using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(outputLayerName))
                 {
                     var filter = new QueryFilter();
@@ -535,7 +535,7 @@ namespace ProAppVisibilityModule.Helpers
                 bool creationResult = false;
                 await QueuedTask.Run(async () =>
                 {
-                    using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
+                    using (Geodatabase geodatabase = new Geodatabase(FgdbFileToConnectionPath(CoreModule.CurrentProject.DefaultGeodatabasePath)))
                     using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(featureClassName))
                     using (FeatureClassDefinition fcDefinition = enterpriseFeatureClass.GetDefinition())
                     {
@@ -602,7 +602,7 @@ namespace ProAppVisibilityModule.Helpers
                 bool creationResult = false;
                 await QueuedTask.Run(async () =>
                 {
-                    using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
+                    using (Geodatabase geodatabase = new Geodatabase(FgdbFileToConnectionPath(CoreModule.CurrentProject.DefaultGeodatabasePath)))
                     using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(featureClassName))
                     using (FeatureClassDefinition fcDefinition = enterpriseFeatureClass.GetDefinition())
                     {
@@ -665,7 +665,7 @@ namespace ProAppVisibilityModule.Helpers
             {
                 await ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(() =>
                 {
-                    using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
+                    using (Geodatabase geodatabase = new Geodatabase(FgdbFileToConnectionPath(CoreModule.CurrentProject.DefaultGeodatabasePath)))
                     using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(layerName))
                     {
                         var filter = new QueryFilter();
@@ -698,14 +698,14 @@ namespace ProAppVisibilityModule.Helpers
             {
                 await ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(() =>
                 {
-                    using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
+                    using (Geodatabase geodatabase = new Geodatabase(FgdbFileToConnectionPath(CoreModule.CurrentProject.DefaultGeodatabasePath)))
                     using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(layerName))
                     {
                         var filter = new QueryFilter();
-                       // if (sourceOIDs.Count > 0)
-                            filter.WhereClause = string.Format("OID IN ({0})", string.Join(",", sourceOIDs));
-                       // else
-                       //     filter.WhereClause = "";
+                        // if (sourceOIDs.Count > 0)
+                        filter.WhereClause = string.Format("OID IN ({0})", string.Join(",", sourceOIDs));
+                        // else
+                        //     filter.WhereClause = "";
 
                         var cursor = enterpriseFeatureClass.Search(filter, true);
 
@@ -717,7 +717,7 @@ namespace ProAppVisibilityModule.Helpers
                             if (!visibilityStats.ObserverOIDs.Contains(observerOID))
                                 visibilityStats.ObserverOIDs.Add(observerOID);
 
-                            if(visibilityStats.TargetOIDVisCounts.ContainsKey(targetOID))
+                            if (visibilityStats.TargetOIDVisCounts.ContainsKey(targetOID))
                             {
                                 visibilityStats.TargetOIDVisCounts[targetOID]++;
                             }
@@ -745,7 +745,7 @@ namespace ProAppVisibilityModule.Helpers
                 bool creationResult = false;
                 await ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(async () =>
                 {
-                    using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
+                    using (Geodatabase geodatabase = new Geodatabase(FgdbFileToConnectionPath(CoreModule.CurrentProject.DefaultGeodatabasePath)))
                     {
                         // do the observers layer
                         using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(observersLayerName))
@@ -1219,6 +1219,11 @@ namespace ProAppVisibilityModule.Helpers
                     VisibilityLibrary.Properties.Resources.CaptionError);
 
             return false;
+        }
+
+        public static FileGeodatabaseConnectionPath FgdbFileToConnectionPath(string fGdbPath)
+        {
+            return new FileGeodatabaseConnectionPath(new Uri(CoreModule.CurrentProject.DefaultGeodatabasePath));
         }
 
     } // end class

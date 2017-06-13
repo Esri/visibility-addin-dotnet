@@ -455,7 +455,7 @@ namespace ProAppVisibilityModule.ViewModels
                 bool creationResult = false;
                 await ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(async () =>
                 {
-                    using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
+                    using (Geodatabase geodatabase = new Geodatabase(FeatureClassHelper.FgdbFileToConnectionPath(CoreModule.CurrentProject.DefaultGeodatabasePath)))
                     using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(maskFeatureClassName))
                     using (FeatureClassDefinition fcDefinition = enterpriseFeatureClass.GetDefinition())
                     {
