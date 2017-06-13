@@ -455,7 +455,7 @@ namespace ProAppVisibilityModule.ViewModels
                 bool creationResult = false;
                 await ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(async () =>
                 {
-                    using (Geodatabase geodatabase = new Geodatabase(CoreModule.CurrentProject.DefaultGeodatabasePath))
+                    using (Geodatabase geodatabase = new Geodatabase(FeatureClassHelper.FgdbFileToConnectionPath(CoreModule.CurrentProject.DefaultGeodatabasePath)))
                     using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(maskFeatureClassName))
                     using (FeatureClassDefinition fcDefinition = enterpriseFeatureClass.GetDefinition())
                     {
@@ -472,7 +472,7 @@ namespace ProAppVisibilityModule.ViewModels
                                 {
                                     // Either the field index or the field name can be used in the indexer.
                                     // project the point here or the buffer tool may use an angular unit and run forever
-                                    var point = GeometryEngine.Project(observer.Point, surfaceSR);
+                                    var point = GeometryEngine.Instance.Project(observer.Point, surfaceSR);
                                     Geometry polygon = null;
 
                                     if (constructRangeFans)
@@ -483,7 +483,7 @@ namespace ProAppVisibilityModule.ViewModels
                                     }
                                     else
                                     {
-                                        polygon = GeometryEngine.Buffer(point, maxDistanceInMapUnits);
+                                        polygon = GeometryEngine.Instance.Buffer(point, maxDistanceInMapUnits);
                                     }
 
                                     rowBuffer[shapeFieldName] = polygon;

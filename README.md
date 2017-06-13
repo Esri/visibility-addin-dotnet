@@ -31,16 +31,16 @@ paired with observer and target information to produce Linear Line of Sight (LLO
 * Visual Studio 2015
 * ArcGIS for Desktop 
 	* ArcMap 10.3.1+
-	* ArcGIS Pro 1.4+
+	* ArcGIS Pro 2.0+
 * ArcGIS Desktop SDK for .NET 10.3.1+
 	* [ArcGIS Desktop for .NET Requirements](https://desktop.arcgis.com/en/desktop/latest/get-started/system-requirements/arcobjects-sdk-system-requirements.htm)
-* [ArcGIS Pro SDK](http://pro.arcgis.com/en/pro-app/sdk/) 1.4+
+* [ArcGIS Pro SDK](http://pro.arcgis.com/en/pro-app/sdk/) 2.0+
 
 ### Run Requirements
 
 * ArcGIS for Desktop 
 	* ArcMap 10.3.1+
-	* ArcGIS Pro 1.4+
+	* ArcGIS Pro 2.0+
 	* 3D Analyst and Spatial Analyst extensions installed and licensed
 
 ## Instructions
