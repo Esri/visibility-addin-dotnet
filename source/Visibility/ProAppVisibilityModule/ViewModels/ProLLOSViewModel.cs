@@ -235,7 +235,7 @@ namespace ProAppVisibilityModule.ViewModels
 
             if (ToolMode == MapPointToolMode.Target)
             {
-                var guid = await AddGraphicToMap(point, ColorFactory.RedRGB, true, 5.0, markerStyle: SimpleMarkerStyle.Square, tag: "target");
+                var guid = await AddGraphicToMap(point, ColorFactory.Instance.RedRGB, true, 5.0, markerStyle: SimpleMarkerStyle.Square, tag: "target");
                 var addInPoint = new AddInPoint() { Point = point, GUID = guid };
                 Application.Current.Dispatcher.Invoke(() =>
                     {
@@ -463,8 +463,8 @@ namespace ProAppVisibilityModule.ViewModels
                                                                    VisibilityLibrary.Properties.Resources.TarIsVisFieldName,
                                                                    1,
                                                                    0,
-                                                                   ColorFactory.WhiteRGB,
-                                                                   ColorFactory.BlackRGB,
+                                                                   ColorFactory.Instance.WhiteRGB,
+                                                                   ColorFactory.Instance.BlackRGB,
                                                                    6.0,
                                                                    6.0);
 
@@ -472,8 +472,8 @@ namespace ProAppVisibilityModule.ViewModels
                                                                    VisibilityLibrary.Properties.Resources.VisCodeFieldName,
                                                                    1,
                                                                    2,
-                                                                   ColorFactory.GreenRGB,
-                                                                   ColorFactory.RedRGB,
+                                                                   ColorFactory.Instance.GreenRGB,
+                                                                   ColorFactory.Instance.RedRGB,
                                                                    5.0,
                                                                    3.0);
                     //await Reset(true);

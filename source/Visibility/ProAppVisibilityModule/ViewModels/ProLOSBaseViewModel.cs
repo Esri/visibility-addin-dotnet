@@ -309,8 +309,8 @@ namespace ProAppVisibilityModule.ViewModels
             {
                 // in tool mode "Observer" we add observer points
                 // otherwise ignore
-                
-                var guid = await AddGraphicToMap(point, ColorFactory.BlueRGB, true, 5.0);
+
+                var guid = await AddGraphicToMap(point, ColorFactory.Instance.BlueRGB, true, 5.0);
                 var addInPoint = new AddInPoint() { Point = point, GUID = guid };
                 Application.Current.Dispatcher.Invoke(() =>
                     {
@@ -407,7 +407,7 @@ namespace ProAppVisibilityModule.ViewModels
         {
             var result = await QueuedTask.Run(() =>
                 {
-                    return GeometryEngine.Contains(env, point);
+                    return GeometryEngine.Instance.Contains(env, point);
                 });
 
             return result;

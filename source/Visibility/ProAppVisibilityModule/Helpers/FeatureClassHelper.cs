@@ -470,7 +470,7 @@ namespace ProAppVisibilityModule.Helpers
                     visValue.FieldValues = new string[] { gc.ToString() };
                     visValues.Add(visValue);
 
-                    var visSymbol = SymbolFactory.ConstructPolygonSymbol(CIMColor.CreateRGBColor(colors.Current.R, colors.Current.G, colors.Current.B));
+                    var visSymbol = SymbolFactory.Instance.ConstructPolygonSymbol(CIMColor.CreateRGBColor(colors.Current.R, colors.Current.G, colors.Current.B));
                     string observerString = cnt == 1 ? " Observer" : " Observers";
                     string label = "Visible by " + cnt.ToString() + observerString;
                     var visClass = new CIMUniqueValueClass()
@@ -496,8 +496,8 @@ namespace ProAppVisibilityModule.Helpers
                 uniqueValueRenderer.UseDefaultSymbol = true;
                 uniqueValueRenderer.DefaultLabel = "non visible data";
 
-                uniqueValueRenderer.DefaultSymbol = showNonVisData ? new CIMSymbolReference() { Symbol = SymbolFactory.ConstructPolygonSymbol(ColorFactory.RedRGB) } :
-                                                                     new CIMSymbolReference() { Symbol = SymbolFactory.ConstructPolygonSymbol(ColorFactory.CreateRGBColor(0, 0, 0, 0)) };
+                uniqueValueRenderer.DefaultSymbol = showNonVisData ? new CIMSymbolReference() { Symbol = SymbolFactory.Instance.ConstructPolygonSymbol(ColorFactory.Instance.RedRGB) } :
+                                                                     new CIMSymbolReference() { Symbol = SymbolFactory.Instance.ConstructPolygonSymbol(ColorFactory.Instance.CreateRGBColor(0, 0, 0, 0)) };
 
                 featureLayer.SetRenderer(uniqueValueRenderer);
 
@@ -867,9 +867,9 @@ namespace ProAppVisibilityModule.Helpers
                 noVisValue.FieldValues = new string[] { "0" };
                 noVisValues.Add(noVisValue);
 
-                var noVisSymbol = SymbolFactory.ConstructPointSymbol();
-                var s1 = SymbolFactory.ConstructMarker(CIMColor.CreateRGBColor(255, 0, 0), 5, SimpleMarkerStyle.Circle);
-                var s2 = SymbolFactory.ConstructMarker(CIMColor.CreateRGBColor(0, 0, 255), 12, SimpleMarkerStyle.Circle);
+                var noVisSymbol = SymbolFactory.Instance.ConstructPointSymbol();
+                var s1 = SymbolFactory.Instance.ConstructMarker(CIMColor.CreateRGBColor(255, 0, 0), 5, SimpleMarkerStyle.Circle);
+                var s2 = SymbolFactory.Instance.ConstructMarker(CIMColor.CreateRGBColor(0, 0, 255), 12, SimpleMarkerStyle.Circle);
 
                 noVisSymbol.SymbolLayers = new CIMSymbolLayer[2] { s1, s2 };
 
@@ -890,9 +890,9 @@ namespace ProAppVisibilityModule.Helpers
                 visTarValue.FieldValues = new string[] { "1" };
                 visTarValues.Add(visTarValue);
 
-                var visSymbol = SymbolFactory.ConstructPointSymbol();
-                var vis1 = SymbolFactory.ConstructMarker(CIMColor.CreateRGBColor(0, 255, 0), 5, SimpleMarkerStyle.Circle);
-                var vis2 = SymbolFactory.ConstructMarker(CIMColor.CreateRGBColor(0, 0, 255), 12, SimpleMarkerStyle.Circle);
+                var visSymbol = SymbolFactory.Instance.ConstructPointSymbol();
+                var vis1 = SymbolFactory.Instance.ConstructMarker(CIMColor.CreateRGBColor(0, 255, 0), 5, SimpleMarkerStyle.Circle);
+                var vis2 = SymbolFactory.Instance.ConstructMarker(CIMColor.CreateRGBColor(0, 0, 255), 12, SimpleMarkerStyle.Circle);
 
                 visSymbol.SymbolLayers = new CIMSymbolLayer[2] { vis1, vis2 };
 
@@ -920,7 +920,7 @@ namespace ProAppVisibilityModule.Helpers
                 var defaultColor = CIMColor.CreateRGBColor(215, 215, 215);
                 uniqueValueRenderer.DefaultSymbol = new CIMSymbolReference()
                 {
-                    Symbol = SymbolFactory.ConstructPointSymbol(defaultColor)
+                    Symbol = SymbolFactory.Instance.ConstructPointSymbol(defaultColor)
                 };
 
                 //var renderer = featureLayer.CreateRenderer(uniqueValueRenderer);
@@ -945,7 +945,7 @@ namespace ProAppVisibilityModule.Helpers
                 noVisValue.FieldValues = new string[] { "0" };
                 noVisValues.Add(noVisValue);
 
-                var noVisSymbol = SymbolFactory.ConstructPointSymbol(CIMColor.CreateRGBColor(255, 0, 0), 12, SimpleMarkerStyle.Circle);
+                var noVisSymbol = SymbolFactory.Instance.ConstructPointSymbol(CIMColor.CreateRGBColor(255, 0, 0), 12, SimpleMarkerStyle.Circle);
 
                 var noVis = new CIMUniqueValueClass()
                 {
@@ -970,7 +970,7 @@ namespace ProAppVisibilityModule.Helpers
 
                 uniqueValueRenderer.DefaultSymbol = new CIMSymbolReference()
                 {
-                    Symbol = SymbolFactory.ConstructPointSymbol(CIMColor.CreateRGBColor(0, 255, 0), 12, SimpleMarkerStyle.Circle)
+                    Symbol = SymbolFactory.Instance.ConstructPointSymbol(CIMColor.CreateRGBColor(0, 255, 0), 12, SimpleMarkerStyle.Circle)
                 };
 
                 //var renderer = featureLayer.CreateRenderer(uniqueValueRenderer);
@@ -1017,7 +1017,7 @@ namespace ProAppVisibilityModule.Helpers
         {
             await QueuedTask.Run(() =>
             {
-                GroupLayer groupLayer = LayerFactory.CreateGroupLayer(MapView.Active.Map, 0, groupLayerName);
+                GroupLayer groupLayer = LayerFactory.Instance.CreateGroupLayer(MapView.Active.Map, 0, groupLayerName);
 
                 var grpLayerDef = groupLayer.GetDefinition() as CIMGroupLayer;
                 List<string> layerIds = new List<string>();
@@ -1065,12 +1065,12 @@ namespace ProAppVisibilityModule.Helpers
                 noVisValues.Add(noVisValue);
 
                 var ss = new CIMSolidStroke();
-                ss.Color = ColorFactory.BlackRGB;
+                ss.Color = ColorFactory.Instance.BlackRGB;
                 ss.Width = 6.0;
                 ss.Enable = true;
                 ss.LineStyle3D = Simple3DLineStyle.Tube;
                 //var noVisSymbol = SymbolFactory.ConstructLineSymbol(CIMColor.CreateRGBColor(0, 0, 0), 6.0, SimpleLineStyle.Solid);
-                var noVisSymbol = SymbolFactory.ConstructLineSymbol(ss);
+                var noVisSymbol = SymbolFactory.Instance.ConstructLineSymbol(ss);
 
                 var noVis = new CIMUniqueValueClass()
                 {
@@ -1090,11 +1090,11 @@ namespace ProAppVisibilityModule.Helpers
 
                 //var hasVisSymbol = SymbolFactory.ConstructLineSymbol(CIMColor.CreateRGBColor(255, 255, 255), 6, SimpleLineStyle.Solid);
                 var ss2 = new CIMSolidStroke();
-                ss2.Color = ColorFactory.WhiteRGB;
+                ss2.Color = ColorFactory.Instance.WhiteRGB;
                 ss2.Width = 6.0;
                 ss2.Enable = true;
                 ss2.LineStyle3D = Simple3DLineStyle.Tube;
-                var hasVisSymbol = SymbolFactory.ConstructLineSymbol(ss2);
+                var hasVisSymbol = SymbolFactory.Instance.ConstructLineSymbol(ss2);
 
                 var hasVis = new CIMUniqueValueClass()
                 {
@@ -1144,7 +1144,7 @@ namespace ProAppVisibilityModule.Helpers
                 ss.Width = notVisibleSize;
                 ss.Enable = true;
                 ss.LineStyle3D = Simple3DLineStyle.Tube;
-                var noVisSymbol = SymbolFactory.ConstructLineSymbol(ss);
+                var noVisSymbol = SymbolFactory.Instance.ConstructLineSymbol(ss);
 
                 var noVis = new CIMUniqueValueClass()
                 {
@@ -1166,7 +1166,7 @@ namespace ProAppVisibilityModule.Helpers
                 ss2.Width = visibleSize;
                 ss2.Enable = true;
                 ss2.LineStyle3D = Simple3DLineStyle.Tube;
-                var hasVisSymbol = SymbolFactory.ConstructLineSymbol(ss2);
+                var hasVisSymbol = SymbolFactory.Instance.ConstructLineSymbol(ss2);
 
                 var hasVis = new CIMUniqueValueClass()
                 {
