@@ -146,7 +146,7 @@ namespace ProAppVisibilityModule.Tests
                     minDistanceInMapUnits, maxDistanceInMapUnits, horizontalStartAngleInDegrees,
                     horizontalEndAngleInDegrees, sr, stepAngle);
                 Assert.IsNotNull(polygon);
-                Assert.IsTrue(GeometryEngine.Length(polygon) >= minDistanceInMapUnits * 4 * Math.PI);
+                Assert.IsTrue(GeometryEngine.Instance.Length(polygon) >= minDistanceInMapUnits * 4 * Math.PI);
                 ///////////////////////////////////////////////
 
                 ///////////////////////////////////////////////
@@ -159,7 +159,7 @@ namespace ProAppVisibilityModule.Tests
                     minDistanceInMapUnits, maxDistanceInMapUnits, horizontalStartAngleInDegrees,
                     horizontalEndAngleInDegrees, sr, stepAngle);
                 Assert.IsNotNull(polygon);
-                Assert.IsTrue(GeometryEngine.Length(polygon) >= maxDistanceInMapUnits * 2 * Math.PI);
+                Assert.IsTrue(GeometryEngine.Instance.Length(polygon) >= maxDistanceInMapUnits * 2 * Math.PI);
                 ///////////////////////////////////////////////
 
                 ///////////////////////////////////////////////
@@ -172,7 +172,7 @@ namespace ProAppVisibilityModule.Tests
                     minDistanceInMapUnits, maxDistanceInMapUnits, horizontalStartAngleInDegrees,
                     horizontalEndAngleInDegrees, sr, stepAngle);
                 Assert.IsNotNull(polygon);
-                Assert.IsTrue(GeometryEngine.Length(polygon) >= maxDistanceInMapUnits * 2 * Math.PI);
+                Assert.IsTrue(GeometryEngine.Instance.Length(polygon) >= maxDistanceInMapUnits * 2 * Math.PI);
                 ///////////////////////////////////////////////
 
                 ///////////////////////////////////////////////
