@@ -15,7 +15,6 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/VisibilityLibrary;component/MAResourceDictionary.xaml" />
             </ResourceDictionary.MergedDictionaries>
-
             <BooleanToVisibilityConverter x:Key="BoolToVis" />
         </ResourceDictionary>
     </UserControl.Resources>
@@ -130,7 +129,8 @@
                     PreviewMouseRightButtonDown="listBoxObservers_PreviewMouseRightButtonDown"
                     ScrollViewer.VerticalScrollBarVisibility="Visible"
                     SelectionMode="Multiple"
-                    Style="{StaticResource listboxStyle}">
+                    Style="{StaticResource listboxStyle}"
+                    ItemContainerStyle="{StaticResource listboxItemStyle}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
@@ -212,7 +212,8 @@
                     PreviewMouseRightButtonDown="listBoxTargets_PreviewMouseRightButtonDown"
                     ScrollViewer.VerticalScrollBarVisibility="Visible"
                     SelectionMode="Multiple"
-                    Style="{StaticResource listboxStyle}">
+                    Style="{StaticResource listboxStyle}"
+                    ItemContainerStyle="{StaticResource listboxItemStyle}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">

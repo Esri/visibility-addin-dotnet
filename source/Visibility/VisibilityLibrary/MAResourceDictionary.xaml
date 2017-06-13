@@ -86,6 +86,10 @@
             </DataTrigger>
         </Style.Triggers>
     </Style>
+    <Style x:Key="listboxItemStyle" TargetType="ListBoxItem">
+        <Setter Property="Foreground" Value="Black" />
+        <Setter Property="Background" Value="White" />
+    </Style>
     <Style x:Key="listboxStyle" TargetType="ListBox">
         <Setter Property="IsEnabled" Value="True" />
         <Style.Triggers>
