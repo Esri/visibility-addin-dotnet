@@ -407,7 +407,9 @@ namespace ProAppVisibilityModule.ViewModels
         {
             var result = await QueuedTask.Run(() =>
                 {
-                    return GeometryEngine.Instance.Contains(env, point);
+                    Geometry projectedPoint = GeometryEngine.Instance.Project(point, env.SpatialReference);
+
+                    return GeometryEngine.Instance.Contains(env, projectedPoint);
                 });
 
             return result;
