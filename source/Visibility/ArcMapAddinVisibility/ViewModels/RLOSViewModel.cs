@@ -300,10 +300,12 @@ namespace ArcMapAddinVisibility.ViewModels
                     double finalSurfaceOffset = GetOffsetInZUnits(SurfaceOffset, surface.ZFactor, OffsetUnitType);
 
                     double conversionFactor = GetConversionFactor(SelectedSurfaceSpatialRef);
-                    double convertedMinDistance = MinDistance * conversionFactor;
-                    double convertedMaxDistance = MaxDistance * conversionFactor;
-                    double finalMinDistance = GetLinearDistance(ArcMap.Document.FocusMap, convertedMinDistance, OffsetUnitType);
-                    double finalMaxDistance = GetLinearDistance(ArcMap.Document.FocusMap, convertedMaxDistance, OffsetUnitType);
+                    //double convertedMinDistance = MinDistance * conversionFactor;
+                    //double convertedMaxDistance = MaxDistance * conversionFactor;
+                    //double finalMinDistance = GetLinearDistance(ArcMap.Document.FocusMap, convertedMinDistance, OffsetUnitType);
+                    //double finalMaxDistance = GetLinearDistance(ArcMap.Document.FocusMap, convertedMaxDistance, OffsetUnitType);
+                    double finalMinDistance = GetLinearDistance(ArcMap.Document.FocusMap, MinDistance, OffsetUnitType);
+                    double finalMaxDistance = GetLinearDistance(ArcMap.Document.FocusMap, MaxDistance, OffsetUnitType);
 
                     double finalLeftHorizontalFOV = GetAngularDistance(ArcMap.Document.FocusMap, LeftHorizontalFOV, AngularUnitType);
                     double finalRightHorizontalFOV = GetAngularDistance(ArcMap.Document.FocusMap, RightHorizontalFOV, AngularUnitType);
@@ -969,14 +971,34 @@ namespace ArcMapAddinVisibility.ViewModels
             if (ipSpatialReference is IGeographicCoordinateSystem)
             {
                 IAngularUnit ipAngularUnit = ((IGeographicCoordinateSystem)ipSpatialReference).CoordinateUnit;
+                String name= ipAngularUnit.Name;
                 dConversionFactor = ipAngularUnit.ConversionFactor;
             }
             else
             {
                 ILinearUnit ipLinearUnit = ((IProjectedCoordinateSystem)ipSpatialReference).CoordinateUnit;
+                String name = ipLinearUnit.Name;
                 dConversionFactor = ipLinearUnit.ConversionFactor;
             }
             return dConversionFactor;
+        }
+
+        private static String GetUnitString(ISpatialReference ipSpatialReference)
+        {
+            String name = "";
+            if (ipSpatialReference is IGeographicCoordinateSystem)
+            {
+                IAngularUnit ipAngularUnit = ((IGeographicCoordinateSystem)ipSpatialReference).CoordinateUnit;
+                name = ipAngularUnit.Name;
+                
+            }
+            else
+            {
+                ILinearUnit ipLinearUnit = ((IProjectedCoordinateSystem)ipSpatialReference).CoordinateUnit;
+                name = ipLinearUnit.Name;
+                
+            }
+            return name;
         }
 
         /// <summary>
