@@ -1028,21 +1028,21 @@ namespace ArcMapAddinVisibility.ViewModels
                 case "Foot":
                     outUnit = DistanceTypes.Feet;
                     break;
-                case "KILOMETER":
+                case "Kilometer":
                     outUnit = DistanceTypes.Kilometers;
                     break;
                 case "Meter":
                     outUnit = DistanceTypes.Meters;
                     break;
-                case "MILE_US":
-                case "MILE_STATUTE":
+                case "Mile_US":
+                case "Mile_Statute":
                     outUnit = DistanceTypes.Miles;
                     break;
-                case "NAUTICAL_MILE":
+                case "Nautical_Mile":
                     outUnit = DistanceTypes.NauticalMile;
                     break;
-                case "YARD":
-                case "YARD_US":
+                case "Yard":
+                case "Yard_US":
                     outUnit = DistanceTypes.Yards;
                     break;
             }
