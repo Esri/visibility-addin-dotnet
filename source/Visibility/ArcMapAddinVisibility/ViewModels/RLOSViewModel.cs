@@ -300,12 +300,29 @@ namespace ArcMapAddinVisibility.ViewModels
                     double finalSurfaceOffset = GetOffsetInZUnits(SurfaceOffset, surface.ZFactor, OffsetUnitType);
 
                     double conversionFactor = GetConversionFactor(SelectedSurfaceSpatialRef);
-                    //double convertedMinDistance = MinDistance * conversionFactor;
-                    //double convertedMaxDistance = MaxDistance * conversionFactor;
-                    //double finalMinDistance = GetLinearDistance(ArcMap.Document.FocusMap, convertedMinDistance, OffsetUnitType);
-                    //double finalMaxDistance = GetLinearDistance(ArcMap.Document.FocusMap, convertedMaxDistance, OffsetUnitType);
-                    double finalMinDistance = GetLinearDistance(ArcMap.Document.FocusMap, MinDistance, OffsetUnitType);
-                    double finalMaxDistance = GetLinearDistance(ArcMap.Document.FocusMap, MaxDistance, OffsetUnitType);
+                    string unitString = GetUnitString(SelectedSurfaceSpatialRef);
+                    DistanceTypes srUnit = GetMTUnitFromEsriUnit(unitString);
+
+                    //Distance in meters
+                    double convertedMinDistance = MinDistance * conversionFactor;
+                    double convertedMaxDistance = MaxDistance * conversionFactor;
+
+                    double finalMinDistance;
+                    double finalMaxDistance;
+                    if (srUnit.ToString() != OffsetUnitType.ToString())
+                    {
+                        finalMinDistance = GetLinearDistance(ArcMap.Document.FocusMap, convertedMinDistance, OffsetUnitType);
+                        finalMaxDistance = GetLinearDistance(ArcMap.Document.FocusMap, convertedMaxDistance, OffsetUnitType);
+                    }
+                    else
+                    {
+                        finalMinDistance = GetDistanceFromTo(DistanceTypes.Meters, srUnit, convertedMinDistance);
+                        finalMaxDistance = GetDistanceFromTo(DistanceTypes.Meters, srUnit, convertedMaxDistance);
+                        //finalMinDistance = convertedMinDistance;
+                        //finalMaxDistance = convertedMaxDistance;
+                    }
+                    //double finalMinDistance = GetLinearDistance(ArcMap.Document.FocusMap, MinDistance, OffsetUnitType);
+                    //double finalMaxDistance = GetLinearDistance(ArcMap.Document.FocusMap, MaxDistance, OffsetUnitType);
 
                     double finalLeftHorizontalFOV = GetAngularDistance(ArcMap.Document.FocusMap, LeftHorizontalFOV, AngularUnitType);
                     double finalRightHorizontalFOV = GetAngularDistance(ArcMap.Document.FocusMap, RightHorizontalFOV, AngularUnitType);
@@ -999,6 +1016,37 @@ namespace ArcMapAddinVisibility.ViewModels
                 
             }
             return name;
+        }
+
+        private static DistanceTypes GetMTUnitFromEsriUnit(String esriUnit)
+        {
+            DistanceTypes outUnit = DistanceTypes.Meters; ;
+            switch(esriUnit)
+            {
+                
+                case "Foot_US":
+                case "Foot":
+                    outUnit = DistanceTypes.Feet;
+                    break;
+                case "KILOMETER":
+                    outUnit = DistanceTypes.Kilometers;
+                    break;
+                case "Meter":
+                    outUnit = DistanceTypes.Meters;
+                    break;
+                case "MILE_US":
+                case "MILE_STATUTE":
+                    outUnit = DistanceTypes.Miles;
+                    break;
+                case "NAUTICAL_MILE":
+                    outUnit = DistanceTypes.NauticalMile;
+                    break;
+                case "YARD":
+                case "YARD_US":
+                    outUnit = DistanceTypes.Yards;
+                    break;
+            }
+            return outUnit;
         }
 
         /// <summary>
