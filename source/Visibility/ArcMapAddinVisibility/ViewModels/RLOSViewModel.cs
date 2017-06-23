@@ -301,8 +301,11 @@ namespace ArcMapAddinVisibility.ViewModels
 
                     double conversionFactor = GetConversionFactor(SelectedSurfaceSpatialRef);
                     string unitString = GetUnitString(SelectedSurfaceSpatialRef);
+                    //unit of raster
                     DistanceTypes srUnit = GetMTUnitFromEsriUnit(unitString);
-
+                    //get distance in map units
+                    double muMaxDist = GetDistanceFromTo(OffsetUnitType, srUnit, MaxDistance);
+                    double muMinDist = GetDistanceFromTo(OffsetUnitType, srUnit, MinDistance);
                     //Distance in meters
                     double convertedMinDistance = MinDistance * conversionFactor;
                     double convertedMaxDistance = MaxDistance * conversionFactor;
@@ -339,10 +342,10 @@ namespace ArcMapAddinVisibility.ViewModels
                         // 1. maxRangeBufferGeomList - is used to clip the viz GP output because 2. doesn't work directly
                         // 2. rangeFanGeomList - this is the range fan input by the user
                         ITopologicalOperator topologicalOperator = observerPoint.Point as ITopologicalOperator;
-                        IGeometry geomBuffer = topologicalOperator.Buffer(finalMaxDistance);
+                        IGeometry geomBuffer = topologicalOperator.Buffer(muMaxDist);
                         maxRangeBufferGeomList.Add(geomBuffer);      
 
-                        IGeometry geomRangeFan = ConstructRangeFan(observerPoint.Point, finalMinDistance, finalMaxDistance,
+                        IGeometry geomRangeFan = ConstructRangeFan(observerPoint.Point, muMinDist, muMaxDist,
                             finalLeftHorizontalFOV, finalRightHorizontalFOV, SelectedSurfaceSpatialRef);
                         rangeFanGeomList.Add(geomRangeFan);
 
@@ -352,7 +355,7 @@ namespace ArcMapAddinVisibility.ViewModels
                         IFeature ipFeature = pointFc.CreateFeature();
 
                         // Set the field values for the feature
-                        SetFieldValues(finalObserverOffset, finalSurfaceOffset, finalMinDistance, finalMaxDistance, finalLeftHorizontalFOV,
+                        SetFieldValues(finalObserverOffset, finalSurfaceOffset,muMinDist, muMaxDist, finalLeftHorizontalFOV,
                             finalRightHorizontalFOV, finalBottomVerticalFOV, finalTopVerticalFOV, ipFeature);
 
                         if (double.IsNaN(z1))
@@ -1028,21 +1031,21 @@ namespace ArcMapAddinVisibility.ViewModels
                 case "Foot":
                     outUnit = DistanceTypes.Feet;
                     break;
-                case "KILOMETER":
+                case "Kilometer":
                     outUnit = DistanceTypes.Kilometers;
                     break;
                 case "Meter":
                     outUnit = DistanceTypes.Meters;
                     break;
-                case "MILE_US":
-                case "MILE_STATUTE":
+                case "Mile_US":
+                case "Mile_Statute":
                     outUnit = DistanceTypes.Miles;
                     break;
-                case "NAUTICAL_MILE":
+                case "Nautical_Mile":
                     outUnit = DistanceTypes.NauticalMile;
                     break;
-                case "YARD":
-                case "YARD_US":
+                case "Yard":
+                case "Yard_US":
                     outUnit = DistanceTypes.Yards;
                     break;
             }
