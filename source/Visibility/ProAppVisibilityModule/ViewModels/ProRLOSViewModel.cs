@@ -525,6 +525,7 @@ namespace ProAppVisibilityModule.ViewModels
             }
         }
 
+        // TODO: Move repeated method GetAngularDistanceFromTo to common visibility library
         /// <summary>
         /// Method to convert to/from different types of angular units
         /// </summary>
