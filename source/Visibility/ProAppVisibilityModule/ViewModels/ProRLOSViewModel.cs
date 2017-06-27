@@ -134,8 +134,10 @@ namespace ProAppVisibilityModule.ViewModels
             get { return _LeftHorizontalFOV; }
             set
             {
-                if(value < 0.0 || value > 360.0)
-                    throw new ArgumentException(string.Format(VisibilityLibrary.Properties.Resources.AENumRange, 0, 360));
+                var checkAngleInDegrees = GetAngularDistanceFromTo(AngularUnitType, AngularTypes.DEGREES, value);
+
+                if (checkAngleInDegrees < 0.0 || checkAngleInDegrees > 360.0)
+                    throw new ArgumentException(string.Format(VisibilityLibrary.Properties.Resources.AENumRange, 0, GetAngularDistanceFromTo(AngularTypes.DEGREES, AngularUnitType, 360.0)));
 
                 _LeftHorizontalFOV = value;
                 RaisePropertyChanged(() => LeftHorizontalFOV);
@@ -147,8 +149,10 @@ namespace ProAppVisibilityModule.ViewModels
             get { return _RightHorizontalFOV; }
             set
             {
-                if (value < 0.0 || value > 360.0)
-                    throw new ArgumentException(string.Format(VisibilityLibrary.Properties.Resources.AENumRange, 0, 360));
+                var checkAngleInDegrees = GetAngularDistanceFromTo(AngularUnitType, AngularTypes.DEGREES, value);
+
+                if (checkAngleInDegrees < 0.0 || checkAngleInDegrees > 360.0)
+                    throw new ArgumentException(string.Format(VisibilityLibrary.Properties.Resources.AENumRange, 0, GetAngularDistanceFromTo(AngularTypes.DEGREES, AngularUnitType, 360.0)));
 
                 _RightHorizontalFOV = value;
                 RaisePropertyChanged(() => RightHorizontalFOV);
@@ -160,8 +164,10 @@ namespace ProAppVisibilityModule.ViewModels
             get { return _BottomVerticalFOV; }
             set
             {
-                if (value < -90.0 || value > 0.0)
-                    throw new ArgumentException(string.Format(VisibilityLibrary.Properties.Resources.AENumRange, -90.0, 0.0));
+                var checkAngleInDegrees = GetAngularDistanceFromTo(AngularUnitType, AngularTypes.DEGREES, value);
+
+                if (checkAngleInDegrees < -90.0 || checkAngleInDegrees > 0.0)
+                    throw new ArgumentException(string.Format(VisibilityLibrary.Properties.Resources.AENumRange, GetAngularDistanceFromTo(AngularTypes.DEGREES, AngularUnitType, -90.0), 0.0));
 
                 _BottomVerticalFOV = value;
                 RaisePropertyChanged(() => BottomVerticalFOV);
@@ -174,8 +180,10 @@ namespace ProAppVisibilityModule.ViewModels
             get { return _TopVerticalFOV; }
             set
             {
-                if (value < 0.0 || value > 90.0)
-                    throw new ArgumentException(string.Format(VisibilityLibrary.Properties.Resources.AENumRange, 0.0, 90.0));
+                var checkAngleInDegrees = GetAngularDistanceFromTo(AngularUnitType, AngularTypes.DEGREES, value);
+
+                if (checkAngleInDegrees < -0.0 || checkAngleInDegrees > 90.0)
+                    throw new ArgumentException(string.Format(VisibilityLibrary.Properties.Resources.AENumRange, 0.0, GetAngularDistanceFromTo(AngularTypes.DEGREES, AngularUnitType, 90.0)));
 
                 _TopVerticalFOV = value;
                 RaisePropertyChanged(() => TopVerticalFOV);
@@ -381,7 +389,7 @@ namespace ProAppVisibilityModule.ViewModels
                 var rlosConvertedPolygonsLayer = CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + RLOSConvertedPolygonsLayerName;
 
                 string rangeFanMaskFeatureClassName = string.Empty;
-                if ((MinDistance > 0) || !((LeftHorizontalFOV == 0.0) && (RightHorizontalFOV == 360.0)))
+                if ((MinDistance > 0) || !((horizontalStartAngleInDegrees == 0.0) && (horizontalEndAngleInDegrees == 360.0)))
                 {
                     string RLOSRangeFanMaskLayerName = "RangeFan_" + RLOSMaskLayerName;
                     rangeFanMaskFeatureClassName = CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + RLOSRangeFanMaskLayerName;
@@ -547,7 +555,7 @@ namespace ProAppVisibilityModule.ViewModels
                 Console.WriteLine(ex);
             }
 
-            return angularDistance;
+            return Math.Round(angularDistance, 1);
         }
 
         #endregion Private

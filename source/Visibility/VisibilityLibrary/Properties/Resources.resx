@@ -367,13 +367,13 @@
     <value>The number must be between {0} and {1}</value>
   </data>
   <data name="TooltipBottomFOVValidRange" xml:space="preserve">
-    <value>Valid range -90 to 0</value>
+    <value>Valid vertical angular range</value>
   </data>
   <data name="TooltipHFOVValidRange" xml:space="preserve">
-    <value>Valid range 0 to 360</value>
+    <value>Valid horizontal angular range</value>
   </data>
   <data name="TooltipTopFOVValidRange" xml:space="preserve">
-    <value>Valid range 0 to 90</value>
+    <value>Valid vertical angular range</value>
   </data>
   <data name="NumOfObserversFieldName" xml:space="preserve">
     <value>NumOfObservers</value>
