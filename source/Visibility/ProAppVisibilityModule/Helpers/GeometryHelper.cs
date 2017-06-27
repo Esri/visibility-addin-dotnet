@@ -32,7 +32,7 @@ namespace ProAppVisibilityModule.Helpers
         public static Geometry ConstructRangeFan(MapPoint centerPoint,
             double innerDistanceInMapUnits, double outerDistanceInMapUnits,
             double horizontalStartAngleInBearing, double horizontalEndAngleInBearing,
-            SpatialReference sr, double incrementAngleStep = 5.0)
+            SpatialReference sr, double incrementAngleStep = 1.0)
         {
             // Check inputs
             if ((centerPoint == null) || (sr == null) ||
