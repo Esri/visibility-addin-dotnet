@@ -72,11 +72,6 @@
                                 </StackPanel>
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
-                        <ComboBox.ItemContainerStyle>
-                            <Style TargetType="ComboBoxItem">
-                                <Setter Property="Foreground" Value="Black" />
-                            </Style>
-                        </ComboBox.ItemContainerStyle>
                     </ComboBox>
                     <Button
                         Grid.Column="1"
@@ -139,7 +134,8 @@
                     ItemsSource="{Binding ObserverAddInPoints}"
                     PreviewMouseRightButtonDown="ListBox_PreviewMouseRightButtonDown"
                     ScrollViewer.VerticalScrollBarVisibility="Visible"
-                    SelectionMode="Multiple">
+                    SelectionMode="Multiple"
+                    Style="{StaticResource listboxStyle}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
@@ -165,16 +161,6 @@
                             Command="{Binding DeletePointCommand}"
                             CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}}, Path=SelectedItems}" />
                     </ListBox.InputBindings>
-                    <ListBox.Style>
-                        <Style TargetType="ListBox">
-                            <Setter Property="IsEnabled" Value="True" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
-                                    <Setter Property="IsEnabled" Value="False" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ListBox.Style>
                 </ListBox>
 
                 <CheckBox
@@ -187,7 +173,7 @@
                     IsChecked="{Binding ShowNonVisibleData}"
                     ToolTip="{x:Static prop:Resources.LabelNonVisible}">
                     <CheckBox.Style>
-                        <Style TargetType="CheckBox">
+                        <Style TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
                             <Setter Property="IsEnabled" Value="True" />
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsRunning}" Value="True">
@@ -209,7 +195,7 @@
                         Content="{x:Static prop:Resources.LabelCancel}"
                         ToolTip="{x:Static prop:Resources.LabelCancel}">
                         <Button.Style>
-                            <Style TargetType="Button">
+                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                                 <Setter Property="IsEnabled" Value="False" />
                                 <Style.Triggers>
                                     <MultiDataTrigger>
@@ -233,7 +219,7 @@
                         Content="{x:Static prop:Resources.LabelOK}"
                         ToolTip="{x:Static prop:Resources.LabelOK}">
                         <Button.Style>
-                            <Style TargetType="Button">
+                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                                 <Setter Property="IsEnabled" Value="False" />
                                 <Style.Triggers>
                                     <MultiDataTrigger>
@@ -281,8 +267,10 @@
                     Grid.ColumnSpan="3"
                     Margin="3,3,0,0"
                     HorizontalAlignment="Stretch"
-                    Header="{x:Static prop:Resources.LabelObserverOptions}"
                     IsExpanded="False">
+                    <Expander.Header>
+                        <Label Content="{x:Static prop:Resources.LabelObserverOptions}" />
+                    </Expander.Header>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
@@ -310,11 +298,10 @@
 
                         <GroupBox Grid.ColumnSpan="4" Header="{x:Static prop:Resources.LabelOffsets}">
                             <StackPanel>
-                                <TextBlock
+                                <Label
                                     Grid.Row="0"
                                     Grid.ColumnSpan="2"
-                                    Margin="3,3,0,0"
-                                    Text="{x:Static prop:Resources.LabelObserverOffset}" />
+                                    Content="{x:Static prop:Resources.LabelObserverOffset}" />
                                 <TextBox
                                     x:Name="tbObserverOffset"
                                     Margin="3,3,0,0"
@@ -326,10 +313,9 @@
                                     </TextBox.InputBindings>
                                 </TextBox>
 
-                                <TextBlock
+                                <Label
                                     Grid.ColumnSpan="4"
-                                    Margin="3,3,0,0"
-                                    Text="{x:Static prop:Resources.LabelSurfaceOffset}" />
+                                    Content="{x:Static prop:Resources.LabelSurfaceOffset}" />
                                 <TextBox
                                     x:Name="tbSurfaceOffset"
                                     Margin="3,3,0,0"
@@ -347,11 +333,6 @@
                                     Margin="3,3,0,0"
                                     ItemsSource="{Binding Source={StaticResource lineDistanceData}}"
                                     SelectedItem="{Binding Path=OffsetUnitType, Mode=TwoWay}">
-                                    <ComboBox.ItemContainerStyle>
-                                        <Style TargetType="ComboBoxItem">
-                                            <Setter Property="Foreground" Value="Black" />
-                                        </Style>
-                                    </ComboBox.ItemContainerStyle>
                                 </ComboBox>
                             </StackPanel>
                         </GroupBox>
@@ -415,10 +396,9 @@
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
-                                <TextBlock
+                                <Label
                                     Grid.ColumnSpan="3"
-                                    Margin="3,3,0,0"
-                                    Text="{x:Static prop:Resources.LabelHorizontalFOV}" />
+                                    Content="{x:Static prop:Resources.LabelHorizontalFOV}" />
                                 <TextBox
                                     x:Name="tbHFOVFrom"
                                     Grid.Row="1"
@@ -452,11 +432,10 @@
                                     </TextBox.InputBindings>
                                 </TextBox>
 
-                                <TextBlock
+                                <Label
                                     Grid.Row="2"
                                     Grid.ColumnSpan="3"
-                                    Margin="3,3,0,0"
-                                    Text="{x:Static prop:Resources.LabelVerticalFOV}" />
+                                    Content="{x:Static prop:Resources.LabelVerticalFOV}" />
                                 <TextBox
                                     x:Name="tbVFOVFrom"
                                     Grid.Row="3"
@@ -499,12 +478,6 @@
                                     Margin="3,3,0,0"
                                     ItemsSource="{Binding Source={StaticResource angularDistanceData}}"
                                     SelectedItem="{Binding Path=AngularUnitType, Mode=TwoWay}">
-                                    <ComboBox.ItemContainerStyle>
-                                        <Style TargetType="ComboBoxItem">
-                                            <Setter Property="Foreground" Value="Black" />
-                                        </Style>
-                                    </ComboBox.ItemContainerStyle>
-
                                 </ComboBox>
                             </Grid>
                         </GroupBox>

@@ -84,6 +84,8 @@
     <AddInContent Include="Config.daml" />
     <AddInContent Include="Images\AddInDesktop16.png" />
     <AddInContent Include="Images\AddInDesktop32.png" />
+    <AddInContent Include="DarkImages\AddInDesktop16.png" />
+    <AddInContent Include="DarkImages\AddInDesktop32.png" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Helpers\FeatureClassHelper.cs" />
@@ -112,20 +114,10 @@
   </ItemGroup>
   <ItemGroup>
     <AddInContent Include="Images\GenericButtonPurple16.png" />
-  </ItemGroup>
-  <ItemGroup>
     <AddInContent Include="Images\GenericButtonPurple32.png" />
-  </ItemGroup>
-  <ItemGroup>
     <AddInContent Include="Images\GenericButtonBlue16.png" />
-  </ItemGroup>
-  <ItemGroup>
     <AddInContent Include="Images\GenericButtonBlue32.png" />
-  </ItemGroup>
-  <ItemGroup>
     <AddInContent Include="Images\GenericButtonRed16.png" />
-  </ItemGroup>
-  <ItemGroup>
     <AddInContent Include="Images\GenericButtonRed32.png" />
   </ItemGroup>
   <ItemGroup>
@@ -141,6 +133,8 @@
   <ItemGroup>
     <AddInContent Include="Images\visibility-16.png" />
     <AddInContent Include="Images\visibility-32.png" />
+    <AddInContent Include="DarkImages\visibility-16.png" />
+    <AddInContent Include="DarkImages\visibility-32.png" />	
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <UsingTask AssemblyFile="C:\Program Files\ArcGIS\Pro\bin\proapp-sdk-MSBuild.dll" TaskName="proapp_sdk_MSBuild.PackageAddIn" />

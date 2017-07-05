@@ -826,7 +826,7 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Valid range -90 to 0.
+        ///   Looks up a localized string similar to Valid vertical angle.
         /// </summary>
         public static string TooltipBottomFOVValidRange {
             get {
@@ -844,7 +844,7 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Valid range 0 to 360.
+        ///   Looks up a localized string similar to Valid horizontal angle.
         /// </summary>
         public static string TooltipHFOVValidRange {
             get {
@@ -898,7 +898,7 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Valid range 0 to 90.
+        ///   Looks up a localized string similar to Valid vertical angle.
         /// </summary>
         public static string TooltipTopFOVValidRange {
             get {

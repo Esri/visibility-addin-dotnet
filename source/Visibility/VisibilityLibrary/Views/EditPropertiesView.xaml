@@ -37,11 +37,6 @@
             Margin="3,3,0,0"
             ItemsSource="{Binding Source={StaticResource coordinateTypes}}"
             SelectedItem="{Binding Path=SelectedCoordinateType, Mode=TwoWay}">
-            <ComboBox.ItemContainerStyle>
-                <Style TargetType="ComboBoxItem">
-                    <Setter Property="Foreground" Value="Black" />
-                </Style>
-            </ComboBox.ItemContainerStyle>
         </ComboBox>
         <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
             <Button

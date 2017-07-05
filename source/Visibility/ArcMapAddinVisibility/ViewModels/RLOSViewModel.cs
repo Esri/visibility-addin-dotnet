@@ -41,13 +41,116 @@ namespace ArcMapAddinVisibility.ViewModels
 
         #region Properties
 
-        public double SurfaceOffset { get; set; }
-        public double MinDistance { get; set; }
-        public double MaxDistance { get; set; }
-        public double LeftHorizontalFOV { get; set; }
-        public double RightHorizontalFOV { get; set; }
-        public double BottomVerticalFOV { get; set; }
-        public double TopVerticalFOV { get; set; }
+        private double _SurfaceOffset = 0.0;
+        public double SurfaceOffset
+        {
+            get { return _SurfaceOffset; }
+            set
+            {
+                if (value < 0.0)
+                    throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEMustBePositive);
+
+                _SurfaceOffset = value;
+                RaisePropertyChanged(() => SurfaceOffset);
+            }
+        }
+
+        private double _MinDistance = 0.0;
+        public double MinDistance
+        {
+            get { return _MinDistance; }
+            set
+            {
+                if (value < 0.0)
+                    throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEMustBePositive);
+
+                if (value > MaxDistance)
+                    throw new ArgumentException(VisibilityLibrary.Properties.Resources.AENumMustBeLess);
+
+                _MinDistance = value;
+                RaisePropertyChanged(() => MinDistance);
+            }
+        }
+
+        private double _MaxDistance = 1000.0;
+        public double MaxDistance
+        {
+            get { return _MaxDistance; }
+            set
+            {
+                if (value < 0.0)
+                    throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEMustBePositive);
+
+                if (value < MinDistance)
+                    throw new ArgumentException(VisibilityLibrary.Properties.Resources.AENumMustBeGreater);
+
+                _MaxDistance = value;
+                RaisePropertyChanged(() => MaxDistance);
+            }
+        }
+
+        private double _LeftHorizontalFOV = 0.0;
+        public double LeftHorizontalFOV
+        {
+            get { return _LeftHorizontalFOV; }
+            set
+            {
+                var checkAngleInDegrees = GetAngularDistanceFromTo(AngularUnitType, AngularTypes.DEGREES, value);
+
+                if (checkAngleInDegrees < 0.0 || checkAngleInDegrees > 360.0)
+                    throw new ArgumentException(string.Format(VisibilityLibrary.Properties.Resources.AENumRange, 0, GetAngularDistanceFromTo(AngularTypes.DEGREES, AngularUnitType, 360.0)));
+
+                _LeftHorizontalFOV = value;
+                RaisePropertyChanged(() => LeftHorizontalFOV);
+            }
+        }
+        private double _RightHorizontalFOV = 360.0;
+        public double RightHorizontalFOV
+        {
+            get { return _RightHorizontalFOV; }
+            set
+            {
+                var checkAngleInDegrees = GetAngularDistanceFromTo(AngularUnitType, AngularTypes.DEGREES, value);
+
+                if (checkAngleInDegrees < 0.0 || checkAngleInDegrees > 360.0)
+                    throw new ArgumentException(string.Format(VisibilityLibrary.Properties.Resources.AENumRange, 0, GetAngularDistanceFromTo(AngularTypes.DEGREES, AngularUnitType, 360.0)));
+
+                _RightHorizontalFOV = value;
+                RaisePropertyChanged(() => RightHorizontalFOV);
+            }
+        }
+        private double _BottomVerticalFOV = -90.0;
+        public double BottomVerticalFOV
+        {
+            get { return _BottomVerticalFOV; }
+            set
+            {
+                var checkAngleInDegrees = GetAngularDistanceFromTo(AngularUnitType, AngularTypes.DEGREES, value);
+
+                if (checkAngleInDegrees < -90.0 || checkAngleInDegrees > 0.0)
+                    throw new ArgumentException(string.Format(VisibilityLibrary.Properties.Resources.AENumRange, GetAngularDistanceFromTo(AngularTypes.DEGREES, AngularUnitType, -90.0), 0.0));
+
+                _BottomVerticalFOV = value;
+                RaisePropertyChanged(() => BottomVerticalFOV);
+            }
+        }
+
+        private double _TopVerticalFOV = 90.0;
+        public double TopVerticalFOV
+        {
+            get { return _TopVerticalFOV; }
+            set
+            {
+                var checkAngleInDegrees = GetAngularDistanceFromTo(AngularUnitType, AngularTypes.DEGREES, value);
+
+                if (checkAngleInDegrees < -0.0 || checkAngleInDegrees > 90.0)
+                    throw new ArgumentException(string.Format(VisibilityLibrary.Properties.Resources.AENumRange, 0.0, GetAngularDistanceFromTo(AngularTypes.DEGREES, AngularUnitType, 90.0)));
+
+                _TopVerticalFOV = value;
+                RaisePropertyChanged(() => TopVerticalFOV);
+            }
+        }
+
         public bool ShowNonVisibleData { get; set; }
         public int RunCount { get; set; }
 
@@ -135,7 +238,7 @@ namespace ArcMapAddinVisibility.ViewModels
         public static IGeometry ConstructRangeFan(IPoint centerPoint,
             double innerDistanceInMapUnits, double outerDistanceInMapUnits,
             double horizontalStartAngleInBearing, double horizontalEndAngleInBearing,
-            ISpatialReference sr)
+            ISpatialReference sr, double incrementAngleStep = 1.0)
         {
             if ((centerPoint == null) || (sr == null) ||
                 (innerDistanceInMapUnits < 0.0) || (outerDistanceInMapUnits < 0.0) ||
@@ -188,12 +291,11 @@ namespace ArcMapAddinVisibility.ViewModels
 
             double minAngle = Math.Min(horizontalStartAngleInBearing, horizontalEndAngleInBearing);
             double maxAngle = Math.Max(horizontalStartAngleInBearing, horizontalEndAngleInBearing);
-            double step = 5.0;
 
             // Draw Outer Arc of Ring
             // Implementation Note: because of the unique shape of this ring, 
             // it was easier to manually create these points than use IConstructCircularArc
-            for (double angle = minAngle; angle <= maxAngle; angle += step)
+            for (double angle = minAngle; angle <= maxAngle; angle += incrementAngleStep)
             {
                 double cartesianAngle = (450 - angle) % 360;
                 double angleInRadians = cartesianAngle * (Math.PI / 180.0);
@@ -212,7 +314,7 @@ namespace ArcMapAddinVisibility.ViewModels
             if (innerDistanceInMapUnits > 0.0)
             {
                 // Draw Inner Arc of Ring - if inner distance set
-                for (double angle = maxAngle; angle >= minAngle; angle -= step)
+                for (double angle = maxAngle; angle >= minAngle; angle -= incrementAngleStep)
                 {
                     double cartesianAngle = (450 - angle) % 360;
                     double angleInRadians = cartesianAngle * (Math.PI / 180.0);
@@ -300,10 +402,32 @@ namespace ArcMapAddinVisibility.ViewModels
                     double finalSurfaceOffset = GetOffsetInZUnits(SurfaceOffset, surface.ZFactor, OffsetUnitType);
 
                     double conversionFactor = GetConversionFactor(SelectedSurfaceSpatialRef);
+                    string unitString = GetUnitString(SelectedSurfaceSpatialRef);
+                    //unit of raster
+                    DistanceTypes srUnit = GetMTUnitFromEsriUnit(unitString);
+                    //get distance in map units
+                    double muMaxDist = GetDistanceFromTo(OffsetUnitType, srUnit, MaxDistance);
+                    double muMinDist = GetDistanceFromTo(OffsetUnitType, srUnit, MinDistance);
+                    //Distance in meters
                     double convertedMinDistance = MinDistance * conversionFactor;
                     double convertedMaxDistance = MaxDistance * conversionFactor;
-                    double finalMinDistance = GetLinearDistance(ArcMap.Document.FocusMap, convertedMinDistance, OffsetUnitType);
-                    double finalMaxDistance = GetLinearDistance(ArcMap.Document.FocusMap, convertedMaxDistance, OffsetUnitType);
+
+                    double finalMinDistance;
+                    double finalMaxDistance;
+                    if (srUnit.ToString() != OffsetUnitType.ToString())
+                    {
+                        finalMinDistance = GetLinearDistance(ArcMap.Document.FocusMap, convertedMinDistance, OffsetUnitType);
+                        finalMaxDistance = GetLinearDistance(ArcMap.Document.FocusMap, convertedMaxDistance, OffsetUnitType);
+                    }
+                    else
+                    {
+                        finalMinDistance = GetDistanceFromTo(DistanceTypes.Meters, srUnit, convertedMinDistance);
+                        finalMaxDistance = GetDistanceFromTo(DistanceTypes.Meters, srUnit, convertedMaxDistance);
+                        //finalMinDistance = convertedMinDistance;
+                        //finalMaxDistance = convertedMaxDistance;
+                    }
+                    //double finalMinDistance = GetLinearDistance(ArcMap.Document.FocusMap, MinDistance, OffsetUnitType);
+                    //double finalMaxDistance = GetLinearDistance(ArcMap.Document.FocusMap, MaxDistance, OffsetUnitType);
 
                     double finalLeftHorizontalFOV = GetAngularDistance(ArcMap.Document.FocusMap, LeftHorizontalFOV, AngularUnitType);
                     double finalRightHorizontalFOV = GetAngularDistance(ArcMap.Document.FocusMap, RightHorizontalFOV, AngularUnitType);
@@ -320,10 +444,10 @@ namespace ArcMapAddinVisibility.ViewModels
                         // 1. maxRangeBufferGeomList - is used to clip the viz GP output because 2. doesn't work directly
                         // 2. rangeFanGeomList - this is the range fan input by the user
                         ITopologicalOperator topologicalOperator = observerPoint.Point as ITopologicalOperator;
-                        IGeometry geomBuffer = topologicalOperator.Buffer(finalMaxDistance);
+                        IGeometry geomBuffer = topologicalOperator.Buffer(muMaxDist);
                         maxRangeBufferGeomList.Add(geomBuffer);      
 
-                        IGeometry geomRangeFan = ConstructRangeFan(observerPoint.Point, finalMinDistance, finalMaxDistance,
+                        IGeometry geomRangeFan = ConstructRangeFan(observerPoint.Point, muMinDist, muMaxDist,
                             finalLeftHorizontalFOV, finalRightHorizontalFOV, SelectedSurfaceSpatialRef);
                         rangeFanGeomList.Add(geomRangeFan);
 
@@ -333,7 +457,7 @@ namespace ArcMapAddinVisibility.ViewModels
                         IFeature ipFeature = pointFc.CreateFeature();
 
                         // Set the field values for the feature
-                        SetFieldValues(finalObserverOffset, finalSurfaceOffset, finalMinDistance, finalMaxDistance, finalLeftHorizontalFOV,
+                        SetFieldValues(finalObserverOffset, finalSurfaceOffset,muMinDist, muMaxDist, finalLeftHorizontalFOV,
                             finalRightHorizontalFOV, finalBottomVerticalFOV, finalTopVerticalFOV, ipFeature);
 
                         if (double.IsNaN(z1))
@@ -969,14 +1093,65 @@ namespace ArcMapAddinVisibility.ViewModels
             if (ipSpatialReference is IGeographicCoordinateSystem)
             {
                 IAngularUnit ipAngularUnit = ((IGeographicCoordinateSystem)ipSpatialReference).CoordinateUnit;
+                String name= ipAngularUnit.Name;
                 dConversionFactor = ipAngularUnit.ConversionFactor;
             }
             else
             {
                 ILinearUnit ipLinearUnit = ((IProjectedCoordinateSystem)ipSpatialReference).CoordinateUnit;
+                String name = ipLinearUnit.Name;
                 dConversionFactor = ipLinearUnit.ConversionFactor;
             }
             return dConversionFactor;
+        }
+
+        private static String GetUnitString(ISpatialReference ipSpatialReference)
+        {
+            String name = "";
+            if (ipSpatialReference is IGeographicCoordinateSystem)
+            {
+                IAngularUnit ipAngularUnit = ((IGeographicCoordinateSystem)ipSpatialReference).CoordinateUnit;
+                name = ipAngularUnit.Name;
+                
+            }
+            else
+            {
+                ILinearUnit ipLinearUnit = ((IProjectedCoordinateSystem)ipSpatialReference).CoordinateUnit;
+                name = ipLinearUnit.Name;
+                
+            }
+            return name;
+        }
+
+        private static DistanceTypes GetMTUnitFromEsriUnit(String esriUnit)
+        {
+            DistanceTypes outUnit = DistanceTypes.Meters; ;
+            switch(esriUnit)
+            {
+                
+                case "Foot_US":
+                case "Foot":
+                    outUnit = DistanceTypes.Feet;
+                    break;
+                case "Kilometer":
+                    outUnit = DistanceTypes.Kilometers;
+                    break;
+                case "Meter":
+                    outUnit = DistanceTypes.Meters;
+                    break;
+                case "Mile_US":
+                case "Mile_Statute":
+                    outUnit = DistanceTypes.Miles;
+                    break;
+                case "Nautical_Mile":
+                    outUnit = DistanceTypes.NauticalMile;
+                    break;
+                case "Yard":
+                case "Yard_US":
+                    outUnit = DistanceTypes.Yards;
+                    break;
+            }
+            return outUnit;
         }
 
         /// <summary>
@@ -1033,6 +1208,7 @@ namespace ArcMapAddinVisibility.ViewModels
             return result;
         }
 
+        // TODO: Move repeated method GetAngularDistanceFromTo to common visibility library
         /// <summary>
         /// Method to convert to/from different types of angular units
         /// </summary>
@@ -1063,8 +1239,8 @@ namespace ArcMapAddinVisibility.ViewModels
                 Console.WriteLine(ex);
             }
 
-            return angularDistance;
-        }  
+            return Math.Round(angularDistance, 1);
+        }
 
         /// <summary>
         /// Return the layer file path of the provided layer

@@ -40,7 +40,7 @@
         </ObjectDataProvider.MethodParameters>
     </ObjectDataProvider>
     <!--  store here your styles  -->
-    <Style TargetType="ComboBox">
+    <Style TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
         <Setter Property="ItemTemplate">
             <Setter.Value>
                 <DataTemplate>
@@ -78,7 +78,7 @@
             </DataTrigger>
         </Style.Triggers>
     </Style>
-    <Style x:Key="textboxStyle" TargetType="TextBox">
+    <Style x:Key="textboxStyle" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
         <Setter Property="IsEnabled" Value="True" />
         <Style.Triggers>
             <DataTrigger Binding="{Binding IsRunning}" Value="True">
@@ -86,7 +86,7 @@
             </DataTrigger>
         </Style.Triggers>
     </Style>
-    <Style x:Key="listboxStyle" TargetType="ListBox">
+    <Style x:Key="listboxStyle" TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
         <Setter Property="IsEnabled" Value="True" />
         <Style.Triggers>
             <DataTrigger Binding="{Binding IsRunning}" Value="True">
