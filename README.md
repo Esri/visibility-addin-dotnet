@@ -1,4 +1,4 @@
-# visibility
+# Visibility
 
 These visibility component uses elevation data paired with observer and target information to produce Linear Line of Sight (LLOS) and Radial Line of Sight (RLOS) information.
 
@@ -21,6 +21,7 @@ These visibility component uses elevation data paired with observer and target i
 * [New to Github?](#new-to-github)
 * [Issues](#issues)
 * [Contributing](#contributing)
+* [Repository Points of Contact](#repository-points-of-contact)
 * [Licensing](#licensing)
 
 ## Requirements
@@ -80,7 +81,7 @@ Find a bug or want to request a new feature?  Please let us know by submitting a
 
 Anyone and everyone is welcome to contribute. Please see our [guidelines for contributing](https://github.com/esri/contributing).
 
-### Repository Points of Contact
+## Repository Points of Contact
 
 #### Repository Owner: [Kevin](https://github.com/kgonzago)
 
