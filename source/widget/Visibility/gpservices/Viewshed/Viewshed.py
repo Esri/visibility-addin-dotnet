@@ -180,7 +180,7 @@ def main():
     Extent = str(xMin) + " " + str(yMin) + " " + str(xMax) + " " + str(yMax)
     # Call image service a second time to get corrected extents
     arcpy.env.extent = Extent
-    arcpy.env.mask = "in_memory\\OutBuffer"
+    arcpy.env.mask = "in_memory\\OuterBuffer"
     arcpy.AddMessage("Clipping image to observer buffer...")
     # arcpy.MakeImageServerLayer_management(elevation, "elevation", Extent, "#", "#", "#", "#", "#", elevDesc.meanCellWidth)
     arcpy.Clip_management(elevation, Extent, "in_memory\clip")
