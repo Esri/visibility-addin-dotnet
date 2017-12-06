@@ -289,11 +289,15 @@ namespace ArcMapAddinVisibility.ViewModels
         {
             Reset(true);
         }
+
         /// <summary>
         /// Method to refresh the active view
         /// </summary>
         private static void RefreshActiveView()
         {
+            if ((ArcMap.Application == null) || (ArcMap.Application.Document == null))
+                return;
+
             var mxdoc = ArcMap.Application.Document as IMxDocument;
             if (mxdoc == null)
                 return;
