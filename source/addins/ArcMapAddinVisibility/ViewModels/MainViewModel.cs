@@ -34,21 +34,35 @@ namespace ArcMapAddinVisibility.ViewModels
 
             Events_ActiveViewChanged();
 
-            // listen to some map events
-            ArcMap.Events.ActiveViewChanged += Events_ActiveViewChanged;
+            SyncEvents();
 
             VisibilityConfig.AddInConfig.LoadConfiguration();
         }
+
         private IMap map = null;
+
+        public void SyncEvents()
+        {
+            // TODO: this will not be called when DockWindow is open on ArcMap launch so should be moved
+
+            // listen to some map events
+            if (ArcMap.Events != null)
+            {
+                ArcMap.Events.ActiveViewChanged += Events_ActiveViewChanged;
+            }
+        }
+
         void Events_ActiveViewChanged()
         {
+            if (ArcMap.Document == null)
+                return;
+
             map = ArcMap.Document.FocusMap as IMap;
 
             if (map == null)
                 return;
 
             // hook events
-
             var viewEvents = map as IActiveViewEvents_Event;
             if (viewEvents == null)
                 return;
