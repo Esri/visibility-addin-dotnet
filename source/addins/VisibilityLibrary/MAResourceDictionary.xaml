@@ -69,6 +69,7 @@
                     Source="/VisibilityLibrary;component/Images/GeoprocessingEnvironmentSettings16.png" />
             </Setter.Value>
         </Setter>
+        <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Command" Value="{Binding EditPropertiesDialogCommand}" />
         <Setter Property="ToolTip" Value="{x:Static prop:Resources.TooltipEditProperties}" />
         <Setter Property="IsEnabled" Value="True" />

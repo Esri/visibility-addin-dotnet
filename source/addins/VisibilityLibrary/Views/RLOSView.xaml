@@ -116,6 +116,7 @@
                         Source="/VisibilityLibrary;component/Images/Add_Point.png" />
                     <ToggleButton.Style>
                         <Style TargetType="ToggleButton">
+                            <Setter Property="Background" Value="Transparent"/>
                             <Setter Property="IsEnabled" Value="True" />
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsRunning}" Value="True">
