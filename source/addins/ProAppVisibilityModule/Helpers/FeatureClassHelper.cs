@@ -494,7 +494,7 @@ namespace ProAppVisibilityModule.Helpers
 
                 //Draw the rest with the default symbol
                 uniqueValueRenderer.UseDefaultSymbol = true;
-                uniqueValueRenderer.DefaultLabel = "non visible data";
+                uniqueValueRenderer.DefaultLabel = "Not Visible";
 
                 uniqueValueRenderer.DefaultSymbol = showNonVisData ? new CIMSymbolReference() { Symbol = SymbolFactory.Instance.ConstructPolygonSymbol(ColorFactory.Instance.RedRGB) } :
                                                                      new CIMSymbolReference() { Symbol = SymbolFactory.Instance.ConstructPolygonSymbol(ColorFactory.Instance.CreateRGBColor(0, 0, 0, 0)) };
@@ -966,7 +966,7 @@ namespace ProAppVisibilityModule.Helpers
 
                 //Draw the rest with the default symbol
                 uniqueValueRenderer.UseDefaultSymbol = true;
-                uniqueValueRenderer.DefaultLabel = "Can be seen";
+                uniqueValueRenderer.DefaultLabel = "Visible";
 
                 uniqueValueRenderer.DefaultSymbol = new CIMSymbolReference()
                 {
@@ -1075,7 +1075,7 @@ namespace ProAppVisibilityModule.Helpers
                 var noVis = new CIMUniqueValueClass()
                 {
                     Values = noVisValues.ToArray(),
-                    Label = "Not visible",
+                    Label = "Not Visible",
                     Visible = true,
                     Editable = true,
                     Symbol = new CIMSymbolReference() { Symbol = noVisSymbol }
@@ -1149,7 +1149,7 @@ namespace ProAppVisibilityModule.Helpers
                 var noVis = new CIMUniqueValueClass()
                 {
                     Values = noVisValues.ToArray(),
-                    Label = "Not visible",
+                    Label = "Not Visible",
                     Visible = true,
                     Editable = true,
                     Symbol = new CIMSymbolReference() { Symbol = noVisSymbol }
