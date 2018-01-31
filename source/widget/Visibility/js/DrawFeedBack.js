@@ -17,32 +17,20 @@
 
 define([
   'dojo/_base/declare',
-  'dojo/_base/lang',
-  'dojo/_base/connect',
-  'dojo/topic',
-  'esri/graphic',
-  'esri/toolbars/draw',
-  'esri/geometry/Circle',
-  'esri/geometry/Polyline',
-  'esri/geometry/geometryEngine',
+  'dojo/_base/lang',  
+  'dojo/topic',  
   './Feedback'
 ], function (
   dojoDeclare,
   dojoLang,
-  dojoConnect,
-  dojoTopic,
-  esriGraphic,
-  esriDraw,
-  esriCircle,
-  esriPolyline,
-  esriGeometryEngine,
+  dojoTopic,  
   drawFeedback
 ) {
     var clz = dojoDeclare([drawFeedback], {
         /**
          *
          **/
-        constructor: function (map,coordTool) {
+        constructor: function () {
             this.syncEvents();
             this.inherited(arguments);            
         },
@@ -65,7 +53,7 @@ define([
         /*
         Handler for clearing out points
         */
-        clearPoints: function (centerPoint) {
+        clearPoints: function () {
             this._points = [];
             this.map.graphics.clear();
         },
@@ -73,7 +61,7 @@ define([
         /**
          *
          **/
-        clearGraphics: function (evt) {
+        clearGraphics: function () {
             this.map.graphics.clear();
         },
         
@@ -96,7 +84,6 @@ define([
                 snapPoint = this.map.snappingManager._snappingPoint;
             }
             var start = snapPoint || evt.mapPoint;
-            var map = this.map;
             this._points.push(start.offset(0, 0));
             this.set('startPoint', this._points[0]);
             this._drawEnd(start);            
@@ -105,7 +92,7 @@ define([
         /*
          *
          */
-        cleanup: function (evt) {
+        cleanup: function () {
             //do nothing yet
         }
 

@@ -16,43 +16,36 @@
 
 /*global define*/
 define([
-    'dojo/_base/declare',
-    'dojo/_base/lang',
-    'dojo/on',
-    'dojo/topic',
-    'dojo/dom-attr',
-    'dijit/_WidgetBase',
-    'dijit/_TemplatedMixin',
-    'dijit/_WidgetsInTemplateMixin',
-    'dojo/text!../templates/ConfirmNotation.html'
+    "dojo/_base/declare",
+    "dijit/_WidgetBase",
+    "dijit/_TemplatedMixin",
+    "dijit/_WidgetsInTemplateMixin",
+    "dojo/text!../templates/ConfirmNotation.html"
 ], function (
     dojoDeclare,
-    dojoLang,
-    dojoOn,
-    dojoTopic,
-    dojoDomAttr,
     dijitWidgetBase,
     dijitTemplatedMixin,
     dijitWidgetsInTemplate,
     ConfirmNotation
 ) {
-    'use strict';
+    "use strict";
     return dojoDeclare([dijitWidgetBase, dijitTemplatedMixin, dijitWidgetsInTemplate], {
       templateString: ConfirmNotation,
       numberOfInputs: 0,
       selectOptions: {},
-        
-        constructor: function (options1) {
-            this.numberOfInputs = options1.length; 
+
+        constructor: function (options1,args) {
+            dojoDeclare.safeMixin(this, args);
+            this.numberOfInputs = options1.length;
             this.selectOptions = options1;
-            
         },
-        
+
         postCreate: function () {
-          this.label1.innerHTML = "There are " + this.numberOfInputs + " notations that match your input please confirm which you would like to use:";
+          this.label1.innerHTML = this.numberOfInputs + " " + this.nls.notationsMatch;
           for (var i = 0; i < this.selectOptions.length; i++) {
-              this.comboOptions.addOption({ value: this.selectOptions[i].name , label: this.selectOptions[i].notationType});
+              this.comboOptions.addOption({ value: this.selectOptions[i].name , 
+                label: this.selectOptions[i].notationType});
           }
-       },
+       }
     });
 });

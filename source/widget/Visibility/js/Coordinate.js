@@ -1,26 +1,42 @@
+///////////////////////////////////////////////////////////////////////////
+// Copyright © 2017 Esri. All Rights Reserved.
+//
+// Licensed under the Apache License Version 2.0 (the 'License');
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an 'AS IS' BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+///////////////////////////////////////////////////////////////////////////
+
 define([
-  'dojo/_base/declare',
-  'dojo/_base/array',
-  'dojo/_base/lang',
-  'dojo/Stateful',
-  'dojo/topic',
-  'dojo/Deferred',
-  'esri/geometry/Point',
-  'esri/SpatialReference',
-  'esri/geometry/webMercatorUtils',
-  './util',
-  './dialogConfirm',
-  './ConfirmNotation'
+  "dojo/_base/declare",
+  "dojo/_base/array",
+  "dojo/_base/lang",
+  "dojo/Stateful",
+  "dojo/Deferred",
+  "esri/geometry/Point",
+  "esri/SpatialReference",
+  "esri/geometry/webMercatorUtils",
+  "jimu/dijit/Message",
+  "./util",
+  "./dialogConfirm",
+  "./ConfirmNotation"
 ], function (
   dojoDeclare,
   dojoArray,
   dojoLang,
   dojoStateful,
-  dojoTopic,
   DojoDeferred,
   EsriPoint,
   EsriSpatialReference,
   EsriWMUtils,
+  JimuMessage,
   CoordinateUtilities,
   dialogConfirm,
   ConfirmNotation
@@ -38,27 +54,27 @@ define([
       this.inputString = value;
     },
 
-    formatString: 'YN XE',
+    formatString: "YN XE",
     _formatStringSetter: function (value) {
       this.formatString = value;
     },
 
-    inputType: 'UNKNOWN',
+    inputType: "UNKNOWN",
 
-    formatType: 'DD',
-    
+    formatType: "DD",
+
     _formatTypeSetter: function (value) {
       this.formatType = value;
       this.getFormattedValue();
     },
 
-    outputString: '',    
+    outputString: "",
 
     coordinateEsriGeometry: null,
-    
+
     _coordinateEsriGeometrySetter: function (value) {
-        var pt;
-        if (value == null) return;
+      var pt;
+      if (value === null) {return;}
       if (value.spatialReference.wkid !== 4326) {
         pt = EsriWMUtils.webMercatorToGeographic(value);
       } else {
@@ -84,166 +100,170 @@ define([
       var sanitizedInput = this.util.getCleanInput(this.inputString);
       this.util.getCoordinateType(sanitizedInput).then(dojoLang.hitch(this, function(itm){
         if (itm) {
-          if (itm.length == 1) {
+          if (itm.length === 1) {
             var sortedInput = this.processCoordTextInput(sanitizedInput, itm[0],false);
-            this.util.getXYNotation(sortedInput, itm[0].conversionType).then(dojoLang.hitch(this,function(r){
-              if (r.length <= 0 || (!r[0][0] && r[0][0] != 0)){
+            this.util.getXYNotation(sortedInput, itm[0].conversionType).then(
+              dojoLang.hitch(this,function(r){
+              if (r.length <= 0 || (!r[0][0] && r[0][0] !== 0)){
                 this.hasError = true;
                 this.valid = false;
-                this.message = 'Invalid Coordinate';
-                this.inputTypeDef.resolve(this);
+                this.message = "Invalid Coordinate";                
               } else {
                 this.isManual = true;
                 this.valid = true;
-                this.formatType = itm[0].conversionType;                
+                this.formatType = itm[0].conversionType;
                 this.inputType = itm[0].conversionType;
-                this.coordinateEsriGeometry = new EsriPoint(r[0][0],r[0][1],new EsriSpatialReference({wkid: 4326}));
-                this.message = '';
-                this.inputTypeDef.resolve(this);
-              }              
-              })), dojoLang.hitch(this, function (r) {
+                this.coordinateEsriGeometry = 
+                  new EsriPoint(r[0][0],r[0][1],new EsriSpatialReference({wkid: 4326}));
+                this.message = "Invalid Coordinate";                
+              }
+              this.inputTypeDef.resolve(this);
+              })), dojoLang.hitch(this, function () {
                 this.hasError = true;
                 this.valid = false;
-                this.inputType = 'UNKNOWN';
-                this.message = 'Invalid Coordinate';
+                this.inputType = "UNKNOWN";
+                this.message = "Invalid Coordinate";
                 this.inputTypeDef.resolve(this);
-              });
+              }); // jshint ignore:line
           } else {
             var dialog = new dialogConfirm({
-               title: 'Confirm Input Notation',
-               content: new ConfirmNotation(itm),
+               nls: this.nls,
+               title: this.nls.comfirmInputNotation,
+               content: new ConfirmNotation(itm,{nls: this.nls}),
                style: "width: 400px",
                hasSkipCheckBox: false
             });
-            
-            dialog.show().then(dojoLang.hitch(this, function() {                    
+
+            dialog.show().then(dojoLang.hitch(this, function() {
               var singleMatch = dojoArray.filter(itm, function (singleItm) {
-                return singleItm.name == dialog.content.comboOptions.get('value');
+                return singleItm.name === dialog.content.comboOptions.get("value");
               });
               var withStr = this.processCoordTextInput(sanitizedInput, singleMatch[0],false);
-              this.util.getXYNotation(withStr, singleMatch[0].conversionType).then(dojoLang.hitch(this,function(r) {
-                  if (r.length <= 0 || (!r[0][0] && r[0][0] != 0)){
+              this.util.getXYNotation(withStr, singleMatch[0].conversionType).then(
+                dojoLang.hitch(this,function(r) {
+                  if (r.length <= 0 || (!r[0][0] && r[0][0] !== 0)){
                   this.hasError = true;
                   this.valid = false;
-                  this.message = 'Invalid Coordinate';
-                  this.inputTypeDef.resolve(this);
+                  this.message = "Invalid Coordinate";                  
                 } else {
                   this.isManual = true;
                   this.valid = true;
                   this.inputType = itm[0].conversionType;
                   this.formatType = itm[0].conversionType;
-                  this.coordinateEsriGeometry = new EsriPoint(r[0][0],r[0][1],new EsriSpatialReference({wkid: 4326}));
-                  this.message = '';
-                  this.inputTypeDef.resolve(this);
-                }              
-                })), dojoLang.hitch(this, function (r) {
+                  this.coordinateEsriGeometry = 
+                    new EsriPoint(r[0][0],r[0][1],new EsriSpatialReference({wkid: 4326}));
+                  this.message = "";                  
+                }
+                this.inputTypeDef.resolve(this);
+                })), dojoLang.hitch(this, function () {
                   this.hasError = true;
                   this.valid = false;
-                  this.inputType = 'UNKNOWN';
-                  this.message = 'Invalid Coordinate';
+                  this.inputType = "UNKNOWN";
+                  this.message = "Invalid Coordinate";
                   this.inputTypeDef.resolve(this);
-                });
+                }); // jshint ignore:line
             }, function() {
-               deferred.reject();
+              this.inputTypeDef.reject();
             }));
           }
-        } else {            
+        } else {
             this.hasError = true;
             this.valid = false;
-            this.inputType = 'UNKNOWN';
-            this.message = 'Invalid Coordinate';
+            this.inputType = "UNKNOWN";
+            this.message = "Invalid Coordinate";
             this.inputTypeDef.resolve(this);
         }
       }));
-      return this.inputTypeDef;
+      return this.inputTypeDef.promise;
     },
-    
+
     /**
      *
      **/
     processCoordTextInput: function (withStr, asType, testingMode) {
-        
-        var match = asType.pattern.exec(withStr);            
-        
-        var northSouthPrefix, northSouthSuffix, eastWestPrefix, eastWestSuffix, latDeg, longDeg, latMin, longMin, latSec, longSec;
-        
+
+        var match = asType.pattern.exec(withStr);
+
+        var northSouthPrefix, northSouthSuffix, eastWestPrefix, eastWestSuffix;
+        var latDeg, longDeg, latMin, longMin, latSec, longSec;
+
         var prefixSuffixError = false;
-        
+
         var conversionType = asType.name;
-        
+
         switch (asType.name) {
-          case 'DD':
+          case "DD":
             northSouthPrefix = match[2];
             northSouthSuffix = match[7];
             eastWestPrefix = match[10];
             eastWestSuffix = match[16];
-            latDeg = match[3].replace(/[,:]/, '.');
-            longDeg = match[11].replace(/[,:]/, '.');   
-            conversionType = 'DD'; 
-            break; 
-          case 'DDrev':
+            latDeg = match[3].replace(/[,:]/, ".");
+            longDeg = match[11].replace(/[,:]/, ".");
+            conversionType = "DD";
+            break;
+          case "DDrev":
             northSouthPrefix = match[11];
             northSouthSuffix = match[16];
             eastWestPrefix = match[2];
             eastWestSuffix = match[8];
-            latDeg = match[12].replace(/[,:]/, '.');
-            longDeg = match[3].replace(/[,:]/, '.');  
-            conversionType = 'DD';             
-            break;            
-          case 'DDM':            
+            latDeg = match[12].replace(/[,:]/, ".");
+            longDeg = match[3].replace(/[,:]/, ".");
+            conversionType = "DD";
+            break;
+          case "DDM":
             northSouthPrefix = match[2];
             northSouthSuffix = match[7];
             eastWestPrefix = match[10];
             eastWestSuffix = match[15];
             latDeg = match[3];
-            latMin = match[4].replace(/[,:]/, '.');
+            latMin = match[4].replace(/[,:]/, ".");
             longDeg = match[11];
-            longMin = match[12].replace(/[,:]/, '.');
-            conversionType = 'DDM';             
+            longMin = match[12].replace(/[,:]/, ".");
+            conversionType = "DDM";
             break;
-          case 'DDMrev':
+          case "DDMrev":
             northSouthPrefix = match[10];
             northSouthSuffix = match[15];
             eastWestPrefix = match[2];
             eastWestSuffix = match[7];
             latDeg = match[11];
-            latMin = match[12].replace(/[,:]/, '.');
+            latMin = match[12].replace(/[,:]/, ".");
             longDeg = match[3];
-            longMin = match[4].replace(/[,:]/, '.');                
-            conversionType = 'DDM';            
+            longMin = match[4].replace(/[,:]/, ".");
+            conversionType = "DDM";
             break;
-          case 'DMS':
+          case "DMS":
             northSouthPrefix = match[2];
             northSouthSuffix = match[8];
             eastWestPrefix = match[11];
             eastWestSuffix = match[17];
             latDeg = match[3];
             latMin = match[4];
-            latSec = match[5].replace(/[,:]/, '.');
+            latSec = match[5].replace(/[,:]/, ".");
             longDeg = match[12];
             longMin = match[13];
-            longSec = match[14].replace(/[,:]/, '.');
-            conversionType = 'DMS';               
+            longSec = match[14].replace(/[,:]/, ".");
+            conversionType = "DMS";
             break;
-          case 'DMSrev':
+          case "DMSrev":
             northSouthPrefix = match[11];
             northSouthSuffix = match[17];
             eastWestPrefix = match[2];
             eastWestSuffix = match[8];
             latDeg = match[12];
             latMin = match[13];
-            latSec = match[14].replace(/[,:]/, '.');
+            latSec = match[14].replace(/[,:]/, ".");
             longDeg = match[3];
             longMin = match[4];
-            longSec = match[5].replace(/[,:]/, '.');
-            conversionType = 'DMS';               
+            longSec = match[5].replace(/[,:]/, ".");
+            conversionType = "DMS";
             break;
         }
-        
+
         //check for north/south prefix/suffix
         if(northSouthPrefix && northSouthSuffix) {
-              prefixSuffixError = true;                    
-              new RegExp(/[Ss-]/).test(northSouthPrefix)?northSouthPrefix = '-':northSouthPrefix = '+';
+              prefixSuffixError = true;
+              northSouthPrefix = new RegExp(/[Ss-]/).test(northSouthPrefix)?'-':'+';
             } else {
               if(northSouthPrefix && new RegExp(/[Ss-]/).test(northSouthPrefix)){
                 northSouthPrefix = '-';
@@ -258,8 +278,8 @@ define([
             
         //check for east/west prefix/suffix
         if(eastWestPrefix && eastWestSuffix) {
-          prefixSuffixError = true;                    
-          new RegExp(/[Ww-]/).test(eastWestPrefix)?eastWestPrefix = '-':eastWestPrefix = '+';
+          prefixSuffixError = true;
+          eastWestPrefix = new RegExp(/[Ww-]/).test(eastWestPrefix)?'-':'+';
         } else {
           if(eastWestPrefix && new RegExp(/[Ww-]/).test(eastWestPrefix)){
             eastWestPrefix = '-';
@@ -275,7 +295,7 @@ define([
         //give user warning if lat or long is determined as having a prefix and suffix 
         if(prefixSuffixError) {
           if(!testingMode) {
-          new JimuMessage({message: 'The input coordinate has been detected as having both a prefix and suffix for the latitude or longitude value, returned coordinate is based on the prefix.'});
+          new JimuMessage({message: this.nls.prefixSuffixError});
           }
         }            
         
@@ -284,10 +304,12 @@ define([
             withStr = northSouthPrefix + latDeg + "," + eastWestPrefix + longDeg;
             break;              
           case 'DDM':
-            withStr = northSouthPrefix + latDeg + " " + latMin + "," + eastWestPrefix + longDeg + " " + longMin;
+            withStr = northSouthPrefix + latDeg + " " + latMin + "," + 
+              eastWestPrefix + longDeg + " " + longMin;
             break;
           case 'DMS':
-            withStr = northSouthPrefix + latDeg + " " + latMin + " " + latSec + "," + eastWestPrefix + longDeg + " " + longMin + " " + longSec;
+            withStr = northSouthPrefix + latDeg + " " + latMin + " " + latSec + "," + 
+              eastWestPrefix + longDeg + " " + longMin + " " + longSec;
             break;
           default:
             withStr = withStr;              
