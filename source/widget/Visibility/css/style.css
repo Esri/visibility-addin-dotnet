@@ -79,8 +79,6 @@
 /**
  * Coordinate Format Dialog
  **/
-
-
 .btnContainer {
     text-align: right;
     margin-top: 6px;
@@ -159,14 +157,6 @@
 
 .claro .dartThemeClaroDijitTooltipContainerOverride .dijitTooltipConnector {    
     background-image: url('images/tooltip.png');    
-}
-
-.DartTheme .jimu-icon {
-    background-image: url(images/sprite.png);
-}
-
-.DartTheme  .jimu-widget-cw .cpbtn {
-    background: url(../images/copy.png);
 }
 
 .DartTheme  .add-with-icon .draw {
