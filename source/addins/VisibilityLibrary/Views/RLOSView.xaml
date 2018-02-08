@@ -196,7 +196,7 @@
                         Content="{x:Static prop:Resources.LabelCancel}"
                         ToolTip="{x:Static prop:Resources.LabelCancel}">
                         <Button.Style>
-                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                            <Style TargetType="Button" BasedOn="{StaticResource TransparentButtonStyle}">
                                 <Setter Property="IsEnabled" Value="False" />
                                 <Style.Triggers>
                                     <MultiDataTrigger>
@@ -220,7 +220,7 @@
                         Content="{x:Static prop:Resources.LabelOK}"
                         ToolTip="{x:Static prop:Resources.LabelOK}">
                         <Button.Style>
-                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                            <Style TargetType="Button" BasedOn="{StaticResource TransparentButtonStyle}">
                                 <Setter Property="IsEnabled" Value="False" />
                                 <Style.Triggers>
                                     <MultiDataTrigger>
@@ -251,7 +251,7 @@
                         ToolTip="{x:Static prop:Resources.LabelClearGraphics}"
                         Visibility="{Binding Path=ClearGraphicsVisible, Converter={StaticResource BoolToVis}}" >
                         <Button.Style>
-                            <Style TargetType="Button">
+                            <Style TargetType="Button" BasedOn="{StaticResource TransparentButtonStyle}">
                                 <Setter Property="IsEnabled" Value="False" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding HasMapGraphics}" Value="True">

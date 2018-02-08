@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <PropertyGroup>
+  <PropertyGroup>
     <BUILD_MAJOR Condition="'$(BUILD_MAJOR)' == ''">4</BUILD_MAJOR>
     <BUILD_MINOR Condition="'$(BUILD_MINOR)' == ''">0</BUILD_MINOR>
-	<BUILD_PATCH Condition="'$(BUILD_PATCH)' == ''">0</BUILD_PATCH>
+    <BUILD_PATCH Condition="'$(BUILD_PATCH)' == ''">0</BUILD_PATCH>
     <BUILD_NUMBER Condition="'$(BUILD_NUMBER)' == ''">0</BUILD_NUMBER>
   </PropertyGroup>
   <PropertyGroup>
@@ -103,6 +103,9 @@
     <Compile Include="ViewModels\ProLOSBaseViewModel.cs" />
     <Compile Include="ViewModels\ProRLOSViewModel.cs" />
     <Compile Include="ViewModels\ProTabBaseViewModel.cs" />
+    <Compile Include="Views\ProEditPropertiesView.xaml.cs">
+      <DependentUpon>ProEditPropertiesView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="VisibilityMapTool.cs" />
     <Compile Include="PropertiesButton.cs" />
     <Compile Include="VisibilityDockpane.xaml.cs">
@@ -113,6 +116,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Views\ProEditPropertiesView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="VisibilityDockpane.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -140,7 +147,7 @@
     <AddInContent Include="Images\visibility-16.png" />
     <AddInContent Include="Images\visibility-32.png" />
     <AddInContent Include="DarkImages\visibility-16.png" />
-    <AddInContent Include="DarkImages\visibility-32.png" />	
+    <AddInContent Include="DarkImages\visibility-32.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <UsingTask AssemblyFile="C:\Program Files\ArcGIS\Pro\bin\proapp-sdk-MSBuild.dll" TaskName="proapp_sdk_MSBuild.PackageAddIn" />
@@ -156,7 +163,7 @@
   -->
   <Target Name="BeforeBuild">
     <Error Text="C:\Program Files\ArcGIS\Pro\bin\Esri.ProApp.SDK.Desktop.targets not found." Condition="!Exists('C:\Program Files\ArcGIS\Pro\bin\Esri.ProApp.SDK.Desktop.targets')" />
-	 <XmlPeek XmlInputPath="Config.daml" Query="//@version[1]">
+    <XmlPeek XmlInputPath="Config.daml" Query="//@version[1]">
       <Output TaskParameter="Result" ItemName="Peeked" />
     </XmlPeek>
     <Message Importance="High" Text="old build number @(Peeked) new build number $(BUILD_MAJOR).$(BUILD_MINOR).$(BUILD_PATCH).$(BUILD_NUMBER)" />
