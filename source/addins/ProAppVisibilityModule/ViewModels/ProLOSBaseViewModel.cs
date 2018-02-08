@@ -207,7 +207,7 @@ namespace ProAppVisibilityModule.ViewModels
         /// <param name="obj"></param>
         private void OnEditPropertiesDialogCommand(object obj)
         {
-            var dlg = new EditPropertiesView();
+            var dlg = new ProEditPropertiesView();
 
             dlg.DataContext = new EditPropertiesViewModel();
 
