@@ -20,6 +20,7 @@ define([
   'jimu/BaseWidget',
   'dijit/_WidgetsInTemplateMixin',   
   'jimu/dijit/Message',
+  'jimu/utils',
   './js/VisibilityControl'
 	],
 function(
@@ -28,6 +29,7 @@ function(
   jimuBaseWidget,
   dijitWidgetsInTemplateMixin,   
   jimuMessage,
+  utils,
   VisibilityControl
 ){
 	var clazz = dojoDeclare([jimuBaseWidget, dijitWidgetsInTemplateMixin], {
@@ -63,12 +65,68 @@ function(
         map: this.map
       }, domConstruct.create("div")).placeAt(this.visibilityContainer);
       visibilityCtrl.startup();
+      this._setTheme();
     },
 
     _isURL: function(s) {
       var regexp = 
         /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
       return regexp.test(s);
+    },
+    
+    /**
+    * Handle different theme styles
+    **/
+    //source:
+    //https://stackoverflow.com/questions/9979415/dynamically-load-and-unload-stylesheets
+    _removeStyleFile: function (filename, filetype) {
+      //determine element type to create nodelist from
+      var targetelement = null;
+      if (filetype === "js") {
+        targetelement = "script";
+      } else if (filetype === "css") {
+        targetelement = "link";
+      } else {
+        targetelement = "none";
+      }
+      //determine corresponding attribute to test for
+      var targetattr = null;
+      if (filetype === "js") {
+        targetattr = "src";
+      } else if (filetype === "css") {
+        targetattr = "href";
+      } else {
+        targetattr = "none";
+      }
+      var allsuspects = document.getElementsByTagName(targetelement);
+      //search backwards within nodelist for matching elements to remove
+      for (var i = allsuspects.length; i >= 0; i--) {
+        if (allsuspects[i] &&
+          allsuspects[i].getAttribute(targetattr) !== null &&
+          allsuspects[i].getAttribute(targetattr).indexOf(filename) !== -1) {
+          //remove element by calling parentNode.removeChild()
+          allsuspects[i].parentNode.removeChild(allsuspects[i]);
+        }
+      }
+    },
+    
+    _setTheme: function () {
+      //Check if DartTheme
+      if (this.appConfig.theme.name === "DartTheme") {
+        //Load appropriate CSS for dart theme
+        utils.loadStyleLink('darkOverrideCSS', this.folderUrl + "css/dartTheme.css", null);
+      } else {
+        this._removeStyleFile(this.folderUrl + "css/dartTheme.css", 'css');
+      }
+      //Check if DashBoardTheme
+      if (this.appConfig.theme.name === "DashboardTheme" && 
+        this.appConfig.theme.styles[0] === "default"){
+        //Load appropriate CSS for dashboard theme
+        utils.loadStyleLink('darkDashboardOverrideCSS', this.folderUrl + 
+          "css/dashboardTheme.css", null);
+      } else {
+        this._removeStyleFile(this.folderUrl + "css/dashboardTheme.css", 'css');
+      }
     }
   });
   return clazz;

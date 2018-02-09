@@ -1,0 +1,275 @@
+/* dropdown / select menus */
+.jimu-widget-visibility .dijitSelect .dijitArrowButton
+{
+    background-color: transparent;
+    border-color: #fafafc;
+}
+
+.jimu-widget-visibility .dijitSelect .dijitButtonContents
+{
+    background-color: transparent;
+}
+
+/* disabled input boxes */
+.jimu-widget-visibility .claro .dijitSelectHover,
+.jimu-widget-visibility .claro .dijitSelectFocused{
+  border: 1px solid #00f;
+}
+
+.jimu-widget-visibility .dijitTextBoxDisabled .dijitInputContainer  {
+     background-color: transparent; 
+}
+
+.claro .dijitTextBoxHover {
+  background-color: #222;
+}
+
+.claro .dijitTextBoxFocused .dijitInputContainer {
+  background: #222;
+}
+
+/* button icons */
+
+.jimu-widget-visibility .settingBtn {
+    display: inline-block;
+    background: url(./images/settings_white.png);
+    background-repeat: no-repeat;
+    background-color: transparent;
+    width: 15px;
+    height: 15px;
+    margin-top: 7px;
+    margin-left: 5px;
+    margin-bottom: -3px;
+}
+
+.jimu-widget-visibility .settingBtn:hover {
+    background: url('./images/settings_white_hover.png');
+}
+
+.jimu-widget-visibility .editBtn {
+    float: right;
+    background: url(./images/draw_white.png);
+    background-repeat: no-repeat;
+    background-color: transparent;
+    width: 30px;
+    height: 30px;
+}
+
+.jimu-widget-visibility .editBtn:hover {
+    background: url('./images/draw_white_hover.png');
+    background-repeat: no-repeat;
+}
+
+.jimu-widget-visibility .jimu-edit-active {
+    background: url('./images/draw_white_hover.png');
+    background-repeat: no-repeat;
+    border: none;
+}
+
+.jimu-widget-visibility .polygonBtn {
+    display: inline-block;
+    background: url(./images/polygon_white.png);
+    background-repeat: no-repeat;
+    background-color: transparent;
+    width: 30px;
+    height: 30px;
+}
+
+.jimu-widget-visibility .polygonBtn:hover {
+    background: url('./images/polygon_white_hover.png');
+    background-repeat: no-repeat;
+}
+
+.jimu-widget-visibility .jimu-polygon-active {
+    background: url('./images/polygon_white_hover.png');
+    background-repeat: no-repeat;
+    border: none;
+}
+
+.jimu-widget-visibility .extentBtn {
+    display: inline-block;
+    background: url(./images/extent_white.png);
+    background-repeat: no-repeat;
+    background-color: transparent;
+    width: 30px;
+    height: 30px;
+}
+
+.jimu-widget-visibility .extentBtn:hover {
+    background: url('./images/extent_white_hover.png');
+    background-repeat: no-repeat;
+}
+
+.jimu-widget-visibility .jimu-extent-active {
+    background: url('./images/extent_white_hover.png');
+    background-repeat: no-repeat;
+    border: none;
+}
+
+/* dojo color picker */
+
+.jimu-colorpalette {
+  background-color: #222;
+}
+
+.jimu-color-picker-dialog .dijitTooltipContainer {
+  background-color: #222 !important;
+}
+
+.claro .dojoxColorPicker {
+    background: #222;
+}
+
+/* dojo select */
+
+.claro .dijitSelect{
+  background-color: #222;
+}
+.claro .dijitSelectHover,
+.claro .dijitSelectFocused{
+  border: 1px solid #999;
+}
+.claro .dijitSelect .dijitArrowButton {
+  background-color: #222;
+}
+.claro .dijitMenu{
+  border:1px solid #999;
+}
+.claro .dijitMenu .dijitMenuItem{
+  color: #fff;
+}
+.claro .dijitMenu .dijitMenuItem,
+.claro .dijitMenu .dijitMenuItem td{
+  background-color: #222;
+  border: 1px solid #222;
+  font-weight: normal;
+}
+.claro .dijitMenu .dijitMenuItem:hover,
+.claro .dijitMenu .dijitMenuItem:hover td
+ {
+  background: none;
+  background-color: #1e90ff;
+}
+.claro .dijitMenu .dijitMenuItemSelected td{
+  background: none;
+  background-color: #1e90ff;
+  font-weight: normal;
+  color: #fff;
+}
+.claro .dijitMenuItem .esriTravelModesTypeName{
+  color: #fff;
+}
+.claro .dijitMenuItem .dijitMenuItemSelected td:hover .esriTravelModesTypeName{
+  color: #666;
+}
+
+/*dojo dialog box*/
+
+.claro .dijitDialog {
+  background-color: #222;
+}
+.claro .dijitDialogTitle {
+  color: #fff;
+}
+
+.claro .dijitDialogPaneActionBar {
+  background-color: #222;
+  border-top: none;
+}
+
+.claro .dijitDialogTitleBar {
+    border: 0px solid #222;
+    border-bottom: 1px solid #000;
+    background-color: #222;
+    background-image: none;    
+}
+.claro .dijitTooltipContainer {
+    background-color: #222;
+    border: 1px solid #9a9a9a;
+    color: #fff;
+}
+
+.claro .dijitDialogPaneContent {
+    background-color: #222;
+    border: 0px solid #9a9a9a;
+    color: #fff;
+}
+.claro .dijitDialogPaneContent  {
+  float: right;
+}
+
+/*tab*/
+
+.claro .dijitTab{
+  background: #222;
+  color: white;
+}
+.claro .dijitTabContainerTop-tabs .dijitTabChecked{
+  background: #333;
+}
+.claro .dijitTabContainerTop-dijitContentPane{
+  background: #222;
+  color: white;
+}
+
+/*ComboBox*/
+
+.claro .dijitComboBox .dijitButtonNode,
+.claro .dijitSelect .dijitArrowButton {
+  background-image: none;
+  background-color: transparent;
+}
+
+.claro .dijitComboBox .dijitArrowButtonContainer,
+.claro .dijitSelect .dijitArrowButtonContainer {
+  border-width: 0 !important;
+}
+
+.claro .dijitSelect .dijitButtonContents {
+  border-style: none;
+}
+
+/*Button*/
+
+.claro .dijitButton .dijitButtonNode {
+    border: 0px solid #000000;
+    background-image: none;
+    background-color: #666;
+    padding: 5px 18px 8px 18px;
+    font-size: 14px;    
+}
+
+.claro .dijitButtonHover  .dijitButtonNode {
+  background-color: #333;
+}
+
+/*tree*/
+
+.claro .dijitTreeRow{
+  background-color: #333;
+  color: white;
+}
+
+.claro .dijitTabPaneWrapper, .claro .dijitToolbar{
+  background-color: #222;
+}
+
+.claro .dijitToolbar .dijitToggleButtonChecked .dijitButtonNode{
+  background-color: #666;
+}
+.claro .dijitDropDownButton .dijitButtonNode,
+.claro .dijitButton .dijitButtonNode,
+.claro .dijitToggleButton .dijitButtonNode{
+  color: white;
+}
+.claro .dijitButtonDisabled .dijitButtonNode{
+  color: #bbb;
+}
+
+.claro .dgrid-header, .dgrid-header-row, .dgrid-footer {
+  background-color: #222;
+}
+
+.claro .dijitTooltipConnector{
+  background-image: url(images/tooltip_dark.png);
+}

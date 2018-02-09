@@ -32,11 +32,15 @@ define([
   /**
    *
    **/
-  constructor: function (geoServiceURL) {
-      if (!geoServiceURL) {
-        geoServiceURL = "//utility.arcgisonline.com/arcgis/rest/services/Geometry/GeometryServer";
+  constructor: function (ac) {
+      this.appConfig = ac.appConfig;
+      this.nls = ac.nls;
+      var gs = this.appConfig.geometryService;
+      if (!gs) {
+        gs = '//utility.arcgisonline.com/arcgis/rest/services/Geometry/GeometryServer';
+
       }
-      this.geomService = new EsriGeometryService(geoServiceURL);
+      this.geomService = new EsriGeometryService(gs);
   },
 
   /**
@@ -173,9 +177,6 @@ define([
   },
 
   getNotations: function () {
-  /* jshint ignore:start */
-  // have to ignore parts of the regexp being too long
-  // as they cannot be split over mulitple lines
   var strs = [
   {
   name: "DD",
@@ -183,7 +184,7 @@ define([
   /^(([NS\+\-\s])*([0-8]?\d([,.]\d*)?|90([,.]0*)?)([°˚º^~*]*)([NS\+\-\s])*)([,:;\s|\/\\]+)/,
   /(([EW\+\-\s])*([0]?\d?\d([,.]\d*)?|1[0-7]\d([,.]\d*)?|180([,.]0*)?)([°˚º^~*]*)([EW\+\-\s])*)$/
   ].map(function(r) {return r.source;}).join("")),
-  notationType: "DD - Latitude/Longitude",
+  notationType: this.nls.DDLatLongNotation,
   conversionType: "DD"
   }, {
   name: "DDrev",
@@ -191,7 +192,7 @@ define([
   /^(([EW\+\-\s])*([0]?\d?\d([,.]\d*)?|1[0-7]\d([,.]\d*)?|180([,.]0*)?)([°˚º^~*]*)([EW\+\-\s])*)/,
   /([,:;\s|\/\\]+)(([NS\+\-\s])*([0-8]?\d([,.]\d*)?|90([,.]0*)?)([°˚º^~*]*)([NS\+\-\s])*)$/
   ].map(function(r) {return r.source;}).join("")),
-  notationType: "DD - Longitude/Latitude",
+  notationType: this.nls.DDLongLatNotation,
   conversionType: "DD"
   }, {
   name: "DDM",
@@ -201,7 +202,7 @@ define([
   /(([EW\+\-\s])*([0]?\d?\d|1[0-7]\d|180)[°˚º^~*\s\-_]+(([0-5]\d|\d)([,.]\d*)?)['′\s_]*([EW\+\-\s])*)/,
   /[\s]*$/
   ].map(function(r) {return r.source;}).join("")),
-  notationType: "DDM - Latitude/Longitude",
+  notationType: this.nls.DDMLatLongNotation,
   conversionType: "DDM"
   }, {
   name: "DDMrev",
@@ -210,7 +211,7 @@ define([
   /([,:;\s|\/\\]+)/,
   /(([NS\+\-\s])*([0-8]?\d|90)[°˚º^~*\s\-_]+(([0-5]?\d|\d)([,.]\d*)?)['′\s_]*([NS\+\-\s])*)[\s]*$/
   ].map(function(r) {return r.source;}).join("")),
-  notationType: "DDM - Longitude/Latitude",
+  notationType: this.nls.DDMLongLatNotation,
   conversionType: "DDM"
   }, {
   name: "DMS",
@@ -219,7 +220,7 @@ define([
   /([,:;\s|\/\\]+)/,
   /(([EW\+\-\s])*([0]?\d?\d|1[0-7]\d|180)[°˚º^~*\s\-_]+([0-5]\d|\d)['′\s\-_]+(([0-5]?\d|\d)([,.]\d*)?)["¨˝\s_]*([EW\+\-\s])*)[\s]*$/
   ].map(function(r) {return r.source;}).join("")),
-  notationType: "DMS - Latitude/Longitude",
+  notationType: this.nls.DMSLatLongNotation,
   conversionType: "DMS"
   }, {
   name: "DMSrev",
@@ -228,17 +229,17 @@ define([
   /([,:;\s|\/\\]+)/,
   /(([NS\+\-\s])*([0-8]?\d|90)[°˚º^~*\s\-_]+([0-5]?\d|\d)['′\s\-_]+(([0-5]?\d|\d)([,.]\d*)?)["¨˝\s_]*([NS\+\-\s])*)[\s]*$/
   ].map(function(r) {return r.source;}).join("")),
-  notationType: "DMS - Longitude/Latitude",
+  notationType: this.nls.DMSLongLatNotation,
   conversionType: "DMS"
   }, {
   name: "GARS",
   pattern: /^\d{3}[a-zA-Z]{2}[1-4]?[1-9]?$/,
-  notationType: "GARS",
+  notationType: this.nls.GARSNotation,
   conversionType: "GARS"
   }, {
   name: "GEOREF",
   pattern: /^[a-zA-Z]{4}\d{1,8}$/,
-  notationType: "GEOREF",
+  notationType: this.nls.GEOREFNotation,
   conversionType: "GEOREF"
   }, {
   name: "MGRS",
@@ -250,7 +251,7 @@ define([
   /(\d[-,;:\s]+\d|\d{2}[-,;:\s]+\d{2}|\d{3}[-,;:\s]+\d{3}|\d{4}[-,;:\s]+\d{4}|\d{5}[-,;:\s]+\d{5})/,
   /$|^[ABYZ][-,;:\s]*[A-HJ-NP-Z]{2}[-,;:\s]*(\d{2}|\d{4}|\d{6}|\d{8}|\d{10})?$/
   ].map(function(r) {return r.source;}).join("")),
-  notationType: "MGRS",
+  notationType: this.nls.MGRSNotation,
   conversionType: "MGRS"
   },
   {
@@ -258,20 +259,19 @@ define([
   pattern: new RegExp([
     /^\d{1,2}[-,;:\s]*[c-hj-np-xC-HJ-NP-X][-,;:\s]*\d{1,6}\.?\d*[mM]?[-,;:\s]?\d{1,7}\.?\d*[mM]?$/
   ].map(function(r) {return r.source;}).join("")),
-  notationType: "UTM - Band Letter",
+  notationType: this.nls.UTMBandNotation,
   conversionType: "UTM"
   }, {
   name: "UTM (H)",
   pattern: new RegExp([
     /^\d{1,2}[-,;:\s]*[NnSs][-,;:\s]*\d{1,6}\.?\d*[mM]?[-,;:\s]+\d{1,7}\.?\d*[mM]?$/
   ].map(function(r) {return r.source;}).join("")),
-  notationType: "UTM - Hemisphere (N/S)",
+  notationType: this.nls.UTMHemNotation,
   conversionType: "UTM (H)"
   }
   ];
 
   return strs;
-  /* jshint ignore:end */
   },
 
   getCoordinateType: function (fromInput) {
