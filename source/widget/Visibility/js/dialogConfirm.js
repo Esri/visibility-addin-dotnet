@@ -77,7 +77,7 @@ define([
         div.appendChild(this.skipCheckBox.domNode);
         label = domConstruct.create("label", {
           "for": this.skipCheckBox.id,
-          innerHTML: "Remember my decision and do not ask again.<br/>"
+          innerHTML: ""
         }, div);
       }
       if (this.hasOkButton) {

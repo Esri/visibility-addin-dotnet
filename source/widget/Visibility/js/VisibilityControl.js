@@ -103,6 +103,7 @@ define([
 
         constructor: function(args) {
             dojoDeclare.safeMixin(this, args);
+            this.nls = args.nls;
         },
 
         postCreate: function () {
@@ -179,7 +180,7 @@ define([
                       appConfig: this.appConfig}, this.observerCoords);      
                   this.coordTool.inputCoordinate.formatType = 'DD';
                   this.coordinateFormat = new dijitTooltipDialog({
-                    content: new EditOutputCoordinate(),
+                    content: new EditOutputCoordinate({nls: this.nls}),
                     style: 'width: 400px'
                   });
 
@@ -361,7 +362,6 @@ define([
          * 
          */
         callBack: function (jobInfo){
-          console.log(jobInfo.jobStatus);
         },
         
         /*
@@ -446,7 +446,7 @@ define([
             this.coordTool.inputCoordinate.getInputType().then(dojoLang.hitch(this, function (r) {
               if(r.inputType === "UNKNOWN"){
                 new Message({
-                  message: 'Unable to determine input coordinate type please check your input.'
+                  message: this.nls.parseCoordinatesError
                 });
               } else {
                 dojoTopic.publish(

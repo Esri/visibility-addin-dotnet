@@ -89,7 +89,7 @@ define([
      **/
     constructor: function (args) {
       dojoDeclare.safeMixin(this, args);
-      this.util = new CoordinateUtilities(this.appConfig.geometryService);
+      this.util = new CoordinateUtilities(args);
     },
 
     /**
@@ -107,7 +107,7 @@ define([
               if (r.length <= 0 || (!r[0][0] && r[0][0] !== 0)){
                 this.hasError = true;
                 this.valid = false;
-                this.message = "Invalid Coordinate";                
+                this.message = "";                
               } else {
                 this.isManual = true;
                 this.valid = true;
@@ -115,14 +115,14 @@ define([
                 this.inputType = itm[0].conversionType;
                 this.coordinateEsriGeometry = 
                   new EsriPoint(r[0][0],r[0][1],new EsriSpatialReference({wkid: 4326}));
-                this.message = "Invalid Coordinate";                
+                this.message = "";                
               }
               this.inputTypeDef.resolve(this);
               })), dojoLang.hitch(this, function () {
                 this.hasError = true;
                 this.valid = false;
                 this.inputType = "UNKNOWN";
-                this.message = "Invalid Coordinate";
+                this.message = "";
                 this.inputTypeDef.resolve(this);
               }); // jshint ignore:line
           } else {
@@ -144,7 +144,7 @@ define([
                   if (r.length <= 0 || (!r[0][0] && r[0][0] !== 0)){
                   this.hasError = true;
                   this.valid = false;
-                  this.message = "Invalid Coordinate";                  
+                  this.message = "";                  
                 } else {
                   this.isManual = true;
                   this.valid = true;
@@ -159,7 +159,7 @@ define([
                   this.hasError = true;
                   this.valid = false;
                   this.inputType = "UNKNOWN";
-                  this.message = "Invalid Coordinate";
+                  this.message = "";
                   this.inputTypeDef.resolve(this);
                 }); // jshint ignore:line
             }, function() {
@@ -170,7 +170,7 @@ define([
             this.hasError = true;
             this.valid = false;
             this.inputType = "UNKNOWN";
-            this.message = "Invalid Coordinate";
+            this.message = "";
             this.inputTypeDef.resolve(this);
         }
       }));
