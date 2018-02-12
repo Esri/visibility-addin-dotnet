@@ -45,10 +45,9 @@ namespace ProAppVisibilityModule.Models
         public string Text
         {
             get
-            {
-                //return MapPointHelper.GetMapPointAsDisplayString(Point);
+            {                
                 string outFormattedString = string.Empty;
-                CoordinateType ccType = ConversionUtils.GetCoordinateString(string.Format("{0} {1}", Point.X, Point.Y), out outFormattedString);
+                CoordinateType ccType = ConversionUtils.GetCoordinateString(MapPointHelper.GetMapPointAsDisplayString(Point), out outFormattedString);
                 if (ccType != CoordinateType.Unknown)
                     return outFormattedString;
                 return string.Empty;
