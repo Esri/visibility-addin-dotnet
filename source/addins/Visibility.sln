@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2015
-VisualStudioVersion = 14.0.25123.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArcMapAddinVisibility", "ArcMapAddinVisibility\ArcMapAddinVisibility.csproj", "{C37767BB-18E6-4743-A5EC-1D7F2B38F487}"
 EndProject
@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProAppVisibilityModule.Test
 	ProjectSection(ProjectDependencies) = postProject
 		{4DE1A8A8-BCA3-40C7-8929-041023F2D3E6} = {4DE1A8A8-BCA3-40C7-8929-041023F2D3E6}
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoordinateConversionLibrary", "..\..\..\coordinate-conversion-addin-dotnet\source\CoordinateConversion\CoordinateConversionLibrary\CoordinateConversionLibrary.csproj", "{67FFDFAE-F8EC-45AA-A3F9-6109BCF5BBF4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,13 +40,15 @@ Global
 		{4DE1A8A8-BCA3-40C7-8929-041023F2D3E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4DE1A8A8-BCA3-40C7-8929-041023F2D3E6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{62C15F2D-AA25-43AB-B1DB-7B248276BC24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{62C15F2D-AA25-43AB-B1DB-7B248276BC24}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62C15F2D-AA25-43AB-B1DB-7B248276BC24}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{62C15F2D-AA25-43AB-B1DB-7B248276BC24}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B3882DC4-BC2C-4BD7-9802-BDA76954B067}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B3882DC4-BC2C-4BD7-9802-BDA76954B067}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B3882DC4-BC2C-4BD7-9802-BDA76954B067}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B3882DC4-BC2C-4BD7-9802-BDA76954B067}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67FFDFAE-F8EC-45AA-A3F9-6109BCF5BBF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67FFDFAE-F8EC-45AA-A3F9-6109BCF5BBF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67FFDFAE-F8EC-45AA-A3F9-6109BCF5BBF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67FFDFAE-F8EC-45AA-A3F9-6109BCF5BBF4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -15,10 +15,12 @@
 using ArcGIS.Core.Geometry;
 using VisibilityLibrary.Helpers;
 using ProAppVisibilityModule.Helpers;
+using CoordinateConversionLibrary.Models;
+using CoordinateConversionLibrary.Helpers;
 
 namespace ProAppVisibilityModule.Models
 {
-    public class AddInPoint : NotificationObject
+    public class AddInPoint : VisibilityLibrary.Helpers.NotificationObject
     {
         public AddInPoint()
         {
@@ -42,7 +44,14 @@ namespace ProAppVisibilityModule.Models
         }
         public string Text
         {
-            get { return MapPointHelper.GetMapPointAsDisplayString(Point); }
+            get
+            {                
+                string outFormattedString = string.Empty;
+                CoordinateType ccType = ConversionUtils.GetCoordinateString(MapPointHelper.GetMapPointAsDisplayString(Point), out outFormattedString);
+                if (ccType != CoordinateType.Unknown)
+                    return outFormattedString;
+                return string.Empty;
+            }
         }
 
         private string guid = string.Empty;

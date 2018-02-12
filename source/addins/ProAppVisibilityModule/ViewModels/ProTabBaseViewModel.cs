@@ -34,6 +34,10 @@ using ProAppVisibilityModule.Models;
 using VisibilityLibrary.Helpers;
 using VisibilityLibrary.ViewModels;
 
+// Coordinate Conversion Library
+using CoordinateConversionLibrary.Helpers;
+using CoordinateConversionLibrary.Models;
+
 namespace ProAppVisibilityModule.ViewModels
 {
     /// <summary>
@@ -50,12 +54,12 @@ namespace ProAppVisibilityModule.ViewModels
             CancelCommand = new VisibilityLibrary.Helpers.RelayCommand(OnCancelCommand);
 
             // Mediator
-            Mediator.Register(VisibilityLibrary.Constants.NEW_MAP_POINT, OnNewMapPointEvent);
-            Mediator.Register(VisibilityLibrary.Constants.MOUSE_MOVE_POINT, OnMouseMoveEvent);
-            Mediator.Register(VisibilityLibrary.Constants.TAB_ITEM_SELECTED, OnTabItemSelected);
+            VisibilityLibrary.Helpers.Mediator.Register(VisibilityLibrary.Constants.NEW_MAP_POINT, OnNewMapPointEvent);
+            VisibilityLibrary.Helpers.Mediator.Register(VisibilityLibrary.Constants.MOUSE_MOVE_POINT, OnMouseMoveEvent);
+            VisibilityLibrary.Helpers.Mediator.Register(VisibilityLibrary.Constants.TAB_ITEM_SELECTED, OnTabItemSelected);
 
-            Mediator.Register(VisibilityLibrary.Constants.MAP_POINT_TOOL_ACTIVATED, OnMapPointToolActivated);
-            Mediator.Register(VisibilityLibrary.Constants.MAP_POINT_TOOL_DEACTIVATED, OnMapPointToolDeactivated);
+            VisibilityLibrary.Helpers.Mediator.Register(VisibilityLibrary.Constants.MAP_POINT_TOOL_ACTIVATED, OnMapPointToolActivated);
+            VisibilityLibrary.Helpers.Mediator.Register(VisibilityLibrary.Constants.MAP_POINT_TOOL_DEACTIVATED, OnMapPointToolDeactivated);
 
             // Pro Events
             ArcGIS.Desktop.Framework.Events.ActiveToolChangedEvent.Subscribe(OnActiveToolChanged);
@@ -210,11 +214,15 @@ namespace ProAppVisibilityModule.ViewModels
                 // return a formatted first point depending on how it was entered, manually or via map point tool
                 if (string.IsNullOrWhiteSpace(point1Formatted))
                 {
-                    if (Point1 == null)
-                        return string.Empty;
-
-                    // only format if the Point1 data was generated from a mouse click
-                    return MapPointHelper.GetMapPointAsDisplayString(Point1);
+                    if (Point1 != null)
+                    {
+                        // only format if the Point1 data was generated from a mouse click
+                        string outFormattedString = string.Empty;
+                        CoordinateType ccType = ConversionUtils.GetCoordinateString(MapPointHelper.GetMapPointAsDisplayString(Point1), out outFormattedString);
+                        if (ccType != CoordinateType.Unknown)
+                            return outFormattedString;
+                    }
+                    return string.Empty;
                 }
                 else
                 {
@@ -260,11 +268,15 @@ namespace ProAppVisibilityModule.ViewModels
                 // return a formatted second point depending on how it was entered, manually or via map point tool
                 if (string.IsNullOrWhiteSpace(point2Formatted))
                 {
-                    if (Point2 == null)
-                        return string.Empty;
-
-                    // only format if the Point2 data was generated from a mouse click
-                    return MapPointHelper.GetMapPointAsDisplayString(Point2);
+                    if (Point2 != null)
+                    {
+                        // only format if the Point2 data was generated from a mouse click
+                        string outFormattedString = string.Empty;
+                        CoordinateType ccType = ConversionUtils.GetCoordinateString(MapPointHelper.GetMapPointAsDisplayString(Point2), out outFormattedString);
+                        if (ccType != CoordinateType.Unknown)
+                            return outFormattedString;
+                    }
+                    return string.Empty;
                 }
                 else
                 {
