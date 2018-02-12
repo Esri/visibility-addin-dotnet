@@ -12,12 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using CoordinateConversionLibrary.Helpers;
+using CoordinateConversionLibrary.Models;
 using ESRI.ArcGIS.Geometry;
 using VisibilityLibrary.Helpers;
 
 namespace ArcMapAddinVisibility.Models
 {
-    public class AddInPoint : NotificationObject
+    public class AddInPoint : VisibilityLibrary.Helpers.NotificationObject
     {
         public AddInPoint()
         {
@@ -43,7 +45,15 @@ namespace ArcMapAddinVisibility.Models
         }
         public string Text
         {
-            get { return pointConverter.Convert(point as object, typeof(string), null, null) as string; }
+            get
+            {
+                var pointStr = pointConverter.Convert(point as object, typeof(string), null, null) as string;
+                string outFormattedString = string.Empty;
+                CoordinateType ccType = ConversionUtils.GetCoordinateString(pointStr, out outFormattedString);
+                if (ccType != CoordinateType.Unknown)
+                    return outFormattedString;
+                return string.Empty;
+            }
         }
 
         private string guid = string.Empty;
