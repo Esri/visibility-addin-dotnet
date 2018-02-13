@@ -25,8 +25,6 @@ using VisibilityLibrary;
 using VisibilityLibrary.ViewModels;
 using VisibilityLibrary.Models;
 using ArcMapAddinVisibility.Models;
-using CoordinateConversionLibrary.Models;
-using CoordinateConversionLibrary.Helpers;
 
 namespace ArcMapAddinVisibility.ViewModels
 {
@@ -38,19 +36,19 @@ namespace ArcMapAddinVisibility.ViewModels
         public TabBaseViewModel()
         {
             //commands
-            ClearGraphicsCommand = new VisibilityLibrary.Helpers.RelayCommand(OnClearGraphics);
-            ActivateToolCommand = new VisibilityLibrary.Helpers.RelayCommand(OnActivateToolCommand);
-            EnterKeyCommand = new VisibilityLibrary.Helpers.RelayCommand(OnEnterKeyCommand);
-            CancelCommand = new VisibilityLibrary.Helpers.RelayCommand(OnCancelCommand);
+            ClearGraphicsCommand = new RelayCommand(OnClearGraphics);
+            ActivateToolCommand = new RelayCommand(OnActivateToolCommand);
+            EnterKeyCommand = new RelayCommand(OnEnterKeyCommand);
+            CancelCommand = new RelayCommand(OnCancelCommand);
 
             // Mediator
-            VisibilityLibrary.Helpers.Mediator.Register(Constants.NEW_MAP_POINT, OnNewMapPointEvent);
-            VisibilityLibrary.Helpers.Mediator.Register(Constants.MOUSE_MOVE_POINT, OnMouseMoveEvent);
-            VisibilityLibrary.Helpers.Mediator.Register(Constants.TAB_ITEM_SELECTED, OnTabItemSelected);
+            Mediator.Register(Constants.NEW_MAP_POINT, OnNewMapPointEvent);
+            Mediator.Register(Constants.MOUSE_MOVE_POINT, OnMouseMoveEvent);
+            Mediator.Register(Constants.TAB_ITEM_SELECTED, OnTabItemSelected);
 
-            VisibilityLibrary.Helpers.Mediator.Register(VisibilityLibrary.Constants.MAP_POINT_TOOL_ACTIVATED, OnMapPointToolActivated);
-            VisibilityLibrary.Helpers.Mediator.Register(VisibilityLibrary.Constants.MAP_POINT_TOOL_DEACTIVATED, OnMapPointToolDeactivated);
-            VisibilityLibrary.Helpers.Mediator.Register(VisibilityLibrary.Constants.MAP_TOOL_CHANGED, OnActiveToolChanged);
+            Mediator.Register(VisibilityLibrary.Constants.MAP_POINT_TOOL_ACTIVATED, OnMapPointToolActivated);
+            Mediator.Register(VisibilityLibrary.Constants.MAP_POINT_TOOL_DEACTIVATED, OnMapPointToolDeactivated);
+            Mediator.Register(VisibilityLibrary.Constants.MAP_TOOL_CHANGED, OnActiveToolChanged);
 
             ClearGraphicsVisible = false;
         }
@@ -156,8 +154,8 @@ namespace ArcMapAddinVisibility.ViewModels
                     {
                         // only format if the Point1 data was generated from a mouse click
                         string outFormattedString = string.Empty;
-                        CoordinateType ccType = ConversionUtils.GetCoordinateString(GetFormattedPoint(Point1), out outFormattedString);
-                        if (ccType != CoordinateType.Unknown)
+                        CoordinateConversionLibrary.Models.CoordinateType ccType = CoordinateConversionLibrary.Helpers.ConversionUtils.GetCoordinateString(GetFormattedPoint(Point1), out outFormattedString);
+                        if (ccType != CoordinateConversionLibrary.Models.CoordinateType.Unknown)
                             return outFormattedString;
                     }
                     return string.Empty;
@@ -178,7 +176,9 @@ namespace ArcMapAddinVisibility.ViewModels
                     return;
                 }
                 // try to convert string to an IPoint
-                var point = GetPointFromString(value);
+                string outFormattedString = string.Empty;
+                CoordinateConversionLibrary.Models.CoordinateType ccType = CoordinateConversionLibrary.Helpers.ConversionUtils.GetCoordinateString(value, out outFormattedString);
+                IPoint point = (ccType != CoordinateConversionLibrary.Models.CoordinateType.Unknown) ? GetPointFromString(outFormattedString) : null;
                 if (point != null)
                 {
                     point1Formatted = value;
@@ -213,8 +213,8 @@ namespace ArcMapAddinVisibility.ViewModels
                     {
                         // only format if the Point1 data was generated from a mouse click
                         string outFormattedString = string.Empty;
-                        CoordinateType ccType = ConversionUtils.GetCoordinateString(GetFormattedPoint(Point2), out outFormattedString);
-                        if (ccType != CoordinateType.Unknown)
+                        CoordinateConversionLibrary.Models.CoordinateType ccType = CoordinateConversionLibrary.Helpers.ConversionUtils.GetCoordinateString(GetFormattedPoint(Point2), out outFormattedString);
+                        if (ccType != CoordinateConversionLibrary.Models.CoordinateType.Unknown)
                             return outFormattedString;
                     }
                     return string.Empty;
@@ -234,7 +234,9 @@ namespace ArcMapAddinVisibility.ViewModels
                     return;
                 }
                 // try to convert string to an IPoint
-                var point = GetPointFromString(value);
+                string outFormattedString = string.Empty;
+                CoordinateConversionLibrary.Models.CoordinateType ccType = CoordinateConversionLibrary.Helpers.ConversionUtils.GetCoordinateString(value, out outFormattedString);
+                IPoint point = (ccType != CoordinateConversionLibrary.Models.CoordinateType.Unknown) ? GetPointFromString(outFormattedString) : null;
                 if (point != null)
                 {
                     point2Formatted = value;
