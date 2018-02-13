@@ -34,10 +34,6 @@ using ProAppVisibilityModule.Models;
 using VisibilityLibrary.Helpers;
 using VisibilityLibrary.ViewModels;
 
-// Coordinate Conversion Library
-using CoordinateConversionLibrary.Helpers;
-using CoordinateConversionLibrary.Models;
-
 namespace ProAppVisibilityModule.ViewModels
 {
     /// <summary>
@@ -54,12 +50,12 @@ namespace ProAppVisibilityModule.ViewModels
             CancelCommand = new VisibilityLibrary.Helpers.RelayCommand(OnCancelCommand);
 
             // Mediator
-            VisibilityLibrary.Helpers.Mediator.Register(VisibilityLibrary.Constants.NEW_MAP_POINT, OnNewMapPointEvent);
-            VisibilityLibrary.Helpers.Mediator.Register(VisibilityLibrary.Constants.MOUSE_MOVE_POINT, OnMouseMoveEvent);
-            VisibilityLibrary.Helpers.Mediator.Register(VisibilityLibrary.Constants.TAB_ITEM_SELECTED, OnTabItemSelected);
+            Mediator.Register(VisibilityLibrary.Constants.NEW_MAP_POINT, OnNewMapPointEvent);
+            Mediator.Register(VisibilityLibrary.Constants.MOUSE_MOVE_POINT, OnMouseMoveEvent);
+            Mediator.Register(VisibilityLibrary.Constants.TAB_ITEM_SELECTED, OnTabItemSelected);
 
-            VisibilityLibrary.Helpers.Mediator.Register(VisibilityLibrary.Constants.MAP_POINT_TOOL_ACTIVATED, OnMapPointToolActivated);
-            VisibilityLibrary.Helpers.Mediator.Register(VisibilityLibrary.Constants.MAP_POINT_TOOL_DEACTIVATED, OnMapPointToolDeactivated);
+            Mediator.Register(VisibilityLibrary.Constants.MAP_POINT_TOOL_ACTIVATED, OnMapPointToolActivated);
+            Mediator.Register(VisibilityLibrary.Constants.MAP_POINT_TOOL_DEACTIVATED, OnMapPointToolDeactivated);
 
             // Pro Events
             ArcGIS.Desktop.Framework.Events.ActiveToolChangedEvent.Subscribe(OnActiveToolChanged);
@@ -218,8 +214,8 @@ namespace ProAppVisibilityModule.ViewModels
                     {
                         // only format if the Point1 data was generated from a mouse click
                         string outFormattedString = string.Empty;
-                        CoordinateType ccType = ConversionUtils.GetCoordinateString(MapPointHelper.GetMapPointAsDisplayString(Point1), out outFormattedString);
-                        if (ccType != CoordinateType.Unknown)
+                        CoordinateConversionLibrary.Models.CoordinateType ccType = CoordinateConversionLibrary.Helpers.ConversionUtils.GetCoordinateString(MapPointHelper.GetMapPointAsDisplayString(Point1), out outFormattedString);
+                        if (ccType != CoordinateConversionLibrary.Models.CoordinateType.Unknown)
                             return outFormattedString;
                     }
                     return string.Empty;
@@ -240,7 +236,9 @@ namespace ProAppVisibilityModule.ViewModels
                     return;
                 }
                 // try to convert string to a MapPoint
-                var point = GetMapPointFromString(value);
+                string outFormattedString = string.Empty;
+                CoordinateConversionLibrary.Models.CoordinateType ccType = CoordinateConversionLibrary.Helpers.ConversionUtils.GetCoordinateString(value, out outFormattedString);
+                MapPoint point = (ccType != CoordinateConversionLibrary.Models.CoordinateType.Unknown) ? GetMapPointFromString(outFormattedString) : null;
                 if (point != null)
                 {
                     point1Formatted = value;
@@ -272,8 +270,8 @@ namespace ProAppVisibilityModule.ViewModels
                     {
                         // only format if the Point2 data was generated from a mouse click
                         string outFormattedString = string.Empty;
-                        CoordinateType ccType = ConversionUtils.GetCoordinateString(MapPointHelper.GetMapPointAsDisplayString(Point2), out outFormattedString);
-                        if (ccType != CoordinateType.Unknown)
+                        CoordinateConversionLibrary.Models.CoordinateType ccType = CoordinateConversionLibrary.Helpers.ConversionUtils.GetCoordinateString(MapPointHelper.GetMapPointAsDisplayString(Point2), out outFormattedString);
+                        if (ccType != CoordinateConversionLibrary.Models.CoordinateType.Unknown)
                             return outFormattedString;
                     }
                     return string.Empty;
@@ -293,7 +291,9 @@ namespace ProAppVisibilityModule.ViewModels
                     return;
                 }
                 // try to convert string to a MapPoint
-                var point = GetMapPointFromString(value);
+                string outFormattedString = string.Empty;
+                CoordinateConversionLibrary.Models.CoordinateType ccType = CoordinateConversionLibrary.Helpers.ConversionUtils.GetCoordinateString(value, out outFormattedString);
+                MapPoint point = (ccType != CoordinateConversionLibrary.Models.CoordinateType.Unknown) ? GetMapPointFromString(outFormattedString) : null;
                 if (point != null)
                 {
                     point2Formatted = value;
