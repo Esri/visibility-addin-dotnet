@@ -215,8 +215,7 @@ namespace ProAppVisibilityModule.ViewModels
                         // only format if the Point1 data was generated from a mouse click
                         string outFormattedString = string.Empty;
                         CoordinateConversionLibrary.Models.CoordinateType ccType = CoordinateConversionLibrary.Helpers.ConversionUtils.GetCoordinateString(MapPointHelper.GetMapPointAsDisplayString(Point1), out outFormattedString);
-                        if (ccType != CoordinateConversionLibrary.Models.CoordinateType.Unknown)
-                            return outFormattedString;
+                        return outFormattedString;
                     }
                     return string.Empty;
                 }
@@ -271,8 +270,7 @@ namespace ProAppVisibilityModule.ViewModels
                         // only format if the Point2 data was generated from a mouse click
                         string outFormattedString = string.Empty;
                         CoordinateConversionLibrary.Models.CoordinateType ccType = CoordinateConversionLibrary.Helpers.ConversionUtils.GetCoordinateString(MapPointHelper.GetMapPointAsDisplayString(Point2), out outFormattedString);
-                        if (ccType != CoordinateConversionLibrary.Models.CoordinateType.Unknown)
-                            return outFormattedString;
+                        return outFormattedString;
                     }
                     return string.Empty;
                 }
