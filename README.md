@@ -37,6 +37,21 @@ These visibility component uses elevation data paired with observer and target i
 
 ### Build Requirements 
 
+##### Obtain the Dependent Repositories
+
+* Clone this repository
+* Clone the following component repository *to the same root folder location* 
+	* [coordinate-conversion-addin-dotnet](https://github.com/Esri/coordinate-conversion-addin-dotnet)
+* Your local folder structure should now look like:
+
+```
+{Github Clone Location}
++---coordinate-conversion-addin-dotnet
++---visibility-addin-dotnet
+```
+
+##### Product Requirements
+
 * Add-Ins for ArcGIS for Desktop
     * Visual Studio 2015
     * ArcGIS for Desktop 
