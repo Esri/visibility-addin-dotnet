@@ -1,7 +1,7 @@
 <div>
     <span class='jimu-widget-subtitle'>${nls.setCoordFormat}</span>
     <div class="controlContainer">
-        <select tabindex=1 style="width:80px" name="test" data-dojo-type='dijit/form/Select' data-dojo-attach-point="frmtSelect">
+        <select style="width:80px" name="test" data-dojo-type='dijit/form/Select' data-dojo-attach-point="frmtSelect">
             <option value="DD">${nls.DD}</option>
             <option value="DDM">${nls.DDM}</option>
             <option value="DMS">${nls.DMS}</option>
@@ -13,7 +13,7 @@
             <option value="UTM (H)">${nls.UTM_H}</option>
         </select>
 
-        <input tabindex=2 type ="text" data-dojo-attach-point="frmtVal" class="jimu-input"></input>
+        <input type ="text" data-dojo-attach-point="frmtVal" class="jimu-input"></input>
 
         <div class='settingsContainer' data-dojo-attach-point="prefixContainer">
             <div data-dojo-attach-point='addSignChkBox'  data-dojo-type='jimu/dijit/CheckBox'>${nls.prefixNumbers}</div>
@@ -21,7 +21,7 @@
 
     </div>
     <div class="btnContainer">
-        <div tabindex=3 data-dojo-attach-point="cancelButton" class='jimu-btn'>${nls.cancelBtn}</div>
-        <div tabindex=4 data-dojo-attach-point="applyButton" class='jimu-btn'>${nls.applyBtn}</div>
+        <div data-dojo-attach-point="applyButton" class='jimu-btn'>${nls.applyBtn}</div>
+        <div data-dojo-attach-point="cancelButton" class='jimu-btn'>${nls.cancelBtn}</div>
     </div>
 </div>
