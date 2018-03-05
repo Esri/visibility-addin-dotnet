@@ -684,7 +684,7 @@ namespace ProAppVisibilityModule.Helpers
             }
             catch (Exception ex)
             {
-                // do nothing
+                System.Diagnostics.Debug.WriteLine(ex.Message);
             }
 
             return sourceOIDs;
@@ -731,7 +731,7 @@ namespace ProAppVisibilityModule.Helpers
             }
             catch (Exception ex)
             {
-                // do nothing
+                System.Diagnostics.Debug.WriteLine(ex.Message);
             }
 
             return visibilityStats;

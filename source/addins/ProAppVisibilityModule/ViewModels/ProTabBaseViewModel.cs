@@ -318,7 +318,11 @@ namespace ProAppVisibilityModule.ViewModels
             }
             set
             {
-                Reset(true);
+                QueuedTask.Run(async () =>
+                {
+                    await Reset(true);
+                });
+                
                 isActiveTab = value;
                 RaisePropertyChanged(() => IsActiveTab);
             }
@@ -383,7 +387,10 @@ namespace ProAppVisibilityModule.ViewModels
             if (!CanCreateElement)
                 return;
 
-            CreateMapElement();
+            QueuedTask.Run(async () =>
+            {
+                await CreateMapElement();
+            });
         }
 
         /// <summary>
@@ -392,7 +399,10 @@ namespace ProAppVisibilityModule.ViewModels
         /// <param name="obj"></param>
         private void OnCancelCommand(object obj)
         {
-            Reset(true);
+            QueuedTask.Run(async () =>
+            {
+                await Reset(true);
+            });
         }
 
         /// <summary>
@@ -453,10 +463,10 @@ namespace ProAppVisibilityModule.ViewModels
         /// </summary>
         internal virtual async Task CreateMapElement()
         {
-                await Task.Run(() =>
-                    {
-                        ClearTempGraphics();
-                    });
+            await Task.Run(() =>
+            {
+                ClearTempGraphics();
+            });
         }
 
         /// <summary>
@@ -488,7 +498,10 @@ namespace ProAppVisibilityModule.ViewModels
         {
             if (toolReset)
             {
-                DeactivateTool(VisibilityMapTool.ToolId);
+                await QueuedTask.Run(() =>
+                {
+                    DeactivateTool(VisibilityMapTool.ToolId);
+                });
             }
 
             Point1 = null;
@@ -532,7 +545,7 @@ namespace ProAppVisibilityModule.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    // do nothing
+                    System.Diagnostics.Debug.WriteLine(ex.Message);
                 }
 
                 if (point != null)
@@ -548,7 +561,7 @@ namespace ProAppVisibilityModule.ViewModels
             }
             catch (Exception ex)
             {
-                // do nothing
+                System.Diagnostics.Debug.WriteLine(ex.Message);
             }
 
             if (point == null)
@@ -573,6 +586,7 @@ namespace ProAppVisibilityModule.ViewModels
                     }
                     catch (Exception ex)
                     {
+                        System.Diagnostics.Debug.WriteLine(ex.Message);
                         return null;
                     }
                 }

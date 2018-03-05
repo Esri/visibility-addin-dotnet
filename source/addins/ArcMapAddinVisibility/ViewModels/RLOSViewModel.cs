@@ -559,6 +559,7 @@ namespace ArcMapAddinVisibility.ViewModels
                     }
                     catch (Exception ex)
                     {
+                        System.Diagnostics.Debug.WriteLine(ex.Message);
                         System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
                     }
 
@@ -567,6 +568,7 @@ namespace ArcMapAddinVisibility.ViewModels
             }
             catch(Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine(ex.Message);
                 System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
             }
             finally
@@ -907,6 +909,7 @@ namespace ArcMapAddinVisibility.ViewModels
             }
             catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine(ex.Message);
                 return null;
             }
 

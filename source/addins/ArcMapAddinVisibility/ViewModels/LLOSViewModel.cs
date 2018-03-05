@@ -330,6 +330,7 @@ namespace ArcMapAddinVisibility.ViewModels
             }
             catch(Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine(ex.Message);
                 System.Windows.Forms.MessageBox.Show(VisibilityLibrary.Properties.Resources.ExceptionSomethingWentWrong,
                                                      VisibilityLibrary.Properties.Resources.CaptionError);
             }
