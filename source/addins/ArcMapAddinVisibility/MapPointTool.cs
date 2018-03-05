@@ -28,9 +28,9 @@ namespace ArcMapAddinVisibility
 {
     public class MapPointTool : ESRI.ArcGIS.Desktop.AddIns.Tool
     {
-        ISnappingEnvironment m_SnappingEnv;
-        IPointSnapper m_Snapper;
-        ISnappingFeedback m_SnappingFeedback;
+        ISnappingEnvironment m_SnappingEnv = null;
+        IPointSnapper m_Snapper = null;
+        ISnappingFeedback m_SnappingFeedback = null;
 
         /// <summary>
         /// save last active tool used, so we can set back to this 
@@ -57,8 +57,9 @@ namespace ArcMapAddinVisibility
             // (except PInvoke of Win32 ProgIDFromCLSID) so using GUIDs instead of more readable ProgID
             string currentActiveToolGuid = ArcMap.Application.CurrentTool.ID.Value as string;
 
-            if (currentActiveToolGuid.Equals(lastActiveToolGuid)
-               || currentActiveToolGuid.Equals("{224824C0-D14C-E386-96E2-C1D699426A56}")) // this tool's GUID
+            if (string.IsNullOrEmpty(currentActiveToolGuid) ||
+                currentActiveToolGuid.Equals(lastActiveToolGuid) ||
+                currentActiveToolGuid.Equals("{224824C0-D14C-E386-96E2-C1D699426A56}")) // this tool's GUID
                 return;
 
             lastActiveToolGuid = currentActiveToolGuid;        
@@ -72,8 +73,13 @@ namespace ArcMapAddinVisibility
             this.Cursor = Cursors.Cross;
 
 			snapUID.Value = "{E07B4C52-C894-4558-B8D4-D4050018D1DA}";
-			m_SnappingEnv = ArcMap.Application.FindExtensionByCLSID(snapUID) as ISnappingEnvironment;
-			m_Snapper = m_SnappingEnv.PointSnapper;
+
+            if (ArcMap.Application != null)
+			    m_SnappingEnv = ArcMap.Application.FindExtensionByCLSID(snapUID) as ISnappingEnvironment;
+
+            if (m_SnappingEnv != null)
+                m_Snapper = m_SnappingEnv.PointSnapper;
+
 			m_SnappingFeedback = new SnappingFeedbackClass();
 			m_SnappingFeedback.Initialize(ArcMap.Application, m_SnappingEnv, true);
 
@@ -92,19 +98,26 @@ namespace ArcMapAddinVisibility
 
         protected override void OnMouseDown(ESRI.ArcGIS.Desktop.AddIns.Tool.MouseEventArgs arg)
         {
-            if (arg.Button != System.Windows.Forms.MouseButtons.Left)
+            if ((arg == null) || (arg.Button != System.Windows.Forms.MouseButtons.Left))
                 return;
 
             try
             {
+                if ((ArcMap.Document == null) || (ArcMap.Document.FocusMap == null))
+                    return;
+
                 //Get the active view from the ArcMap static class.
-                IActiveView activeView = ArcMap.Document.FocusMap as IActiveView;
+                IActiveView activeView = (IActiveView)ArcMap.Document.FocusMap;
 
                 var point = activeView.ScreenDisplay.DisplayTransformation.ToMapPoint(arg.X, arg.Y) as IPoint;
                 ISnappingResult snapResult = null;
                 //Try to snap the current position
-                snapResult = m_Snapper.Snap(point);
-                m_SnappingFeedback.Update(null, 0);
+                if (m_Snapper != null)
+                    snapResult = m_Snapper.Snap(point);
+
+                if (m_SnappingFeedback != null)
+                    m_SnappingFeedback.Update(null, 0);
+
                 if (snapResult != null && snapResult.Location != null)
                     point = snapResult.Location;
 
