@@ -258,26 +258,28 @@ namespace ArcMapAddinVisibility.ViewModels
             // if full circle(or greater), return donut section with inner/outer rings
             if ((deltaAngle == 0.0) || (deltaAngle >= 360.0))
             {
-                IGeometryCollection geometryCollection = points as IGeometryCollection;
+                IGeometryCollection geometryCollection = (IGeometryCollection)points;
 
                 ICircularArc circularArcOuter = new CircularArcClass();
                 ISegmentCollection ringOuter = new RingClass();
                 circularArcOuter.PutCoordsByAngle(centerPoint, 0.0, 2 * Math.PI, outerDistanceInMapUnits);
-                ringOuter.AddSegment(circularArcOuter as ISegment);
-                geometryCollection.AddGeometry(ringOuter as IGeometry);
+                ringOuter.AddSegment((ISegment)circularArcOuter);
+                geometryCollection.AddGeometry((IGeometry)ringOuter);
 
                 if (innerDistanceInMapUnits > 0.0)
                 {
                     ICircularArc circularArcInner = new CircularArcClass();
                     ISegmentCollection ringInner = new RingClass();
                     circularArcInner.PutCoordsByAngle(centerPoint, 0.0, 2 * Math.PI, innerDistanceInMapUnits);
-                    ringInner.AddSegment(circularArcInner as ISegment);
-                    geometryCollection.AddGeometry(ringInner as IGeometry);
+                    ringInner.AddSegment((ISegment)circularArcInner);
+                    geometryCollection.AddGeometry((IGeometry)ringInner);
                 }
 
-                (points as ITopologicalOperator).Simplify();
+                ITopologicalOperator topOp = points as ITopologicalOperator;
+                if (topOp != null)
+                    topOp.Simplify();
 
-                return points as IGeometry;
+                return (IGeometry)points;
             }
 
             // Otherwise if range fan, construct that
@@ -331,7 +333,7 @@ namespace ArcMapAddinVisibility.ViewModels
             // close Polygon
             points.AddPoint(startPoint);
 
-            return points as IGeometry;
+            return (IGeometry)points;
         }
 
         /// <summary>
@@ -343,13 +345,16 @@ namespace ArcMapAddinVisibility.ViewModels
             {
                 IsRunning = true;
 
-                if (!CanCreateElement || ArcMap.Document == null || ArcMap.Document.FocusMap == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
+                if (!CanCreateElement || ArcMap.Document == null || ArcMap.Document.FocusMap == null 
+                    || string.IsNullOrWhiteSpace(SelectedSurfaceName))
                     return;
 
                 var surface = GetSurfaceFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
-
                 if (surface == null)
+                {
+                    System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.CaptionError);
                     return;
+                }
 
                 bool spatialAnalystAvailable = IsSpatialAnalystAvailable();
                 if (!spatialAnalystAvailable)
@@ -374,6 +379,12 @@ namespace ArcMapAddinVisibility.ViewModels
 
                 // Determine if selected surface is projected or geographic
                 var geoDataset = surfaceLayer as IGeoDataset;
+                if (geoDataset == null)
+                {
+                    System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.CaptionError);
+                    return;
+                }
+
                 SelectedSurfaceSpatialRef = geoDataset.SpatialReference;
 
                 if (SelectedSurfaceSpatialRef is IGeographicCoordinateSystem)
@@ -392,11 +403,21 @@ namespace ArcMapAddinVisibility.ViewModels
                 {
                     // Create feature workspace
                     IFeatureWorkspace workspace = CreateFeatureWorkspace("tempWorkspace");
+                    if (workspace == null)
+                    {
+                        System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.CaptionError);
+                        return;
+                    }
 
                     StartEditOperation((IWorkspace)workspace);
 
                     // Create feature class
                     IFeatureClass pointFc = CreateObserversFeatureClass(workspace, SelectedSurfaceSpatialRef, "Output" + RunCount.ToString());
+                    if (pointFc == null)
+                    {
+                        System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.CaptionError);
+                        return;
+                    }
 
                     double finalObserverOffset = GetOffsetInZUnits(ObserverOffset.Value, surface.ZFactor, OffsetUnitType);
                     double finalSurfaceOffset = GetOffsetInZUnits(SurfaceOffset, surface.ZFactor, OffsetUnitType);
@@ -423,11 +444,7 @@ namespace ArcMapAddinVisibility.ViewModels
                     {
                         finalMinDistance = GetDistanceFromTo(DistanceTypes.Meters, srUnit, convertedMinDistance);
                         finalMaxDistance = GetDistanceFromTo(DistanceTypes.Meters, srUnit, convertedMaxDistance);
-                        //finalMinDistance = convertedMinDistance;
-                        //finalMaxDistance = convertedMaxDistance;
                     }
-                    //double finalMinDistance = GetLinearDistance(ArcMap.Document.FocusMap, MinDistance, OffsetUnitType);
-                    //double finalMaxDistance = GetLinearDistance(ArcMap.Document.FocusMap, MaxDistance, OffsetUnitType);
 
                     double finalLeftHorizontalFOV = GetAngularDistance(ArcMap.Document.FocusMap, LeftHorizontalFOV, AngularUnitType);
                     double finalRightHorizontalFOV = GetAngularDistance(ArcMap.Document.FocusMap, RightHorizontalFOV, AngularUnitType);
@@ -440,16 +457,24 @@ namespace ArcMapAddinVisibility.ViewModels
 
                     foreach (var observerPoint in ObserverAddInPoints)
                     {
+                        if ((observerPoint == null) || (observerPoint.Point == null))
+                            continue;
+
                         // Create 2 clipping geometries:
                         // 1. maxRangeBufferGeomList - is used to clip the viz GP output because 2. doesn't work directly
                         // 2. rangeFanGeomList - this is the range fan input by the user
                         ITopologicalOperator topologicalOperator = observerPoint.Point as ITopologicalOperator;
+                        if (topologicalOperator == null)
+                            continue;
+
                         IGeometry geomBuffer = topologicalOperator.Buffer(muMaxDist);
+
                         maxRangeBufferGeomList.Add(geomBuffer);      
 
                         IGeometry geomRangeFan = ConstructRangeFan(observerPoint.Point, muMinDist, muMaxDist,
                             finalLeftHorizontalFOV, finalRightHorizontalFOV, SelectedSurfaceSpatialRef);
-                        rangeFanGeomList.Add(geomRangeFan);
+                        if (geomRangeFan != null)
+                            rangeFanGeomList.Add(geomRangeFan);
 
                         double z1 = surface.GetElevation(observerPoint.Point) + finalObserverOffset;
 
@@ -538,7 +563,7 @@ namespace ArcMapAddinVisibility.ViewModels
                         {
                             // set the renderer
                             IFeatureRenderer featRend = UniqueValueRenderer(workspace, finalFc);
-                            IGeoFeatureLayer geoLayer = outputFeatureLayer as IGeoFeatureLayer;
+                            IGeoFeatureLayer geoLayer = (IGeoFeatureLayer)outputFeatureLayer;
                             geoLayer.Renderer = featRend;
                             geoLayer.Name = "RLOS_Visibility_" + RunCount.ToString();
 
@@ -562,8 +587,6 @@ namespace ArcMapAddinVisibility.ViewModels
                         System.Diagnostics.Debug.WriteLine(ex.Message);
                         System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
                     }
-
-                    //Reset(true);
                 }
             }
             catch(Exception ex)
@@ -1239,7 +1262,7 @@ namespace ArcMapAddinVisibility.ViewModels
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                System.Diagnostics.Debug.WriteLine(ex.Message);
             }
 
             return Math.Round(angularDistance, 1);

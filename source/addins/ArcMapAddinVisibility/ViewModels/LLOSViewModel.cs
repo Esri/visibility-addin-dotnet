@@ -66,8 +66,6 @@ namespace ArcMapAddinVisibility.ViewModels
 
             CreateMapElement();
 
-            //Reset(true);
-
             System.Windows.Forms.Cursor.Current = savedCursor;
         }
 
@@ -178,10 +176,7 @@ namespace ArcMapAddinVisibility.ViewModels
                 if (!CanCreateElement || ArcMap.Document == null || ArcMap.Document.FocusMap == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
                     return;
 
-                //base.CreateMapElement();
-
                 // take your observer and target points and get lines of sight
-
                 var surface = GetSurfaceFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
 
                 if (surface == null)
@@ -204,6 +199,12 @@ namespace ArcMapAddinVisibility.ViewModels
 
                 // Determine if selected surface is projected or geographic
                 var geoDataset = surfaceLayer as IGeoDataset;
+                if (geoDataset == null)
+                {
+                    System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.CaptionError);
+                    return;
+                }
+
                 SelectedSurfaceSpatialRef = geoDataset.SpatialReference;
 
                 if (SelectedSurfaceSpatialRef is IGeographicCoordinateSystem)

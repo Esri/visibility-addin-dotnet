@@ -123,7 +123,10 @@ namespace ArcMapAddinVisibility
 
                 Mediator.NotifyColleagues(Constants.NEW_MAP_POINT, point);
             }
-            catch (Exception ex) { Console.WriteLine(ex.Message); }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+            }
         }
 
         protected override void OnMouseMove(MouseEventArgs arg)

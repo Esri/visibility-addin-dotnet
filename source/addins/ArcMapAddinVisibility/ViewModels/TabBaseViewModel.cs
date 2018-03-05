@@ -781,7 +781,7 @@ namespace ArcMapAddinVisibility.ViewModels
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                System.Diagnostics.Debug.WriteLine(ex.Message);
             }
 
             return length;

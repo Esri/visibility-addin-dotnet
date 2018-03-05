@@ -62,6 +62,8 @@ namespace VisibilityLibrary.Models
 
         public void LoadConfiguration()
         {
+            TextReader tr = null;
+
             try
             {
                 var filename = GetConfigFilename();
@@ -70,7 +72,7 @@ namespace VisibilityLibrary.Models
                     return;
 
                 XmlSerializer x = new XmlSerializer(GetType());
-                TextReader tr = new StreamReader(filename);
+                tr = new StreamReader(filename);
                 var temp = x.Deserialize(tr) as VisibilityConfig;
 
                 if (temp == null)
@@ -81,6 +83,11 @@ namespace VisibilityLibrary.Models
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine(ex.Message);
+            }
+            finally
+            {
+                if (tr != null)
+                    tr.Close();
             }
         }
 

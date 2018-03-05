@@ -554,7 +554,7 @@ namespace ProAppVisibilityModule.ViewModels
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                System.Diagnostics.Debug.WriteLine(ex.Message);
             }
 
             return Math.Round(angularDistance, 1);

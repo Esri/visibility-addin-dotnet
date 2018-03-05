@@ -422,7 +422,14 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <returns>ISurface</returns>
         public ISurface GetSurfaceFromMapByName(IMap map, string name)
         {
+            if (map == null)
+                return null;
+
             var layers = map.get_Layers();
+
+            if (layers == null)
+                return null;
+
             var layer = layers.Next();
 
             while (layer != null)
@@ -439,17 +446,18 @@ namespace ArcMapAddinVisibility.ViewModels
                     return tin.Dataset as ISurface;
                 }
 
-                var rasterSurface = new RasterSurfaceClass() as IRasterSurface;
+                var rasterSurface = (IRasterSurface)new RasterSurfaceClass();
                 ISurface surface = null;
 
                 var mosaicLayer = layer as IMosaicLayer;
                 var rasterLayer = layer as IRasterLayer;
 
-                if (mosaicLayer != null && mosaicLayer.PreviewLayer != null && mosaicLayer.PreviewLayer.Raster != null)
+                if ((mosaicLayer != null) && (mosaicLayer.PreviewLayer != null) && 
+                    (mosaicLayer.PreviewLayer.Raster != null))
                 {
                     rasterSurface.PutRaster(mosaicLayer.PreviewLayer.Raster, 0);
                 }
-                else if (rasterLayer != null && rasterLayer.Raster != null)
+                else if ((rasterLayer != null) && (rasterLayer.Raster != null))
                 {
                     rasterSurface.PutRaster(rasterLayer.Raster, 0);
                 }
@@ -462,6 +470,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
             return null;
         }
+
         /// <summary>
         /// returns ILayer if found in the map layer collection
         /// </summary>
@@ -470,7 +479,14 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <returns></returns>
         public ILayer GetLayerFromMapByName(IMap map, string name)
         {
+            if (map == null)
+                return null;
+
             var layers = map.get_Layers();
+
+            if (layers == null)
+                return null;
+
             var layer = layers.Next();
 
             while (layer != null)
@@ -494,7 +510,14 @@ namespace ArcMapAddinVisibility.ViewModels
         {
             var list = new List<string>();
 
+            if (map == null)
+                return list;
+
             var layers = map.get_Layers();
+
+            if (layers == null)
+                return list;
+
             var layer = layers.Next();
 
             while(layer != null)
@@ -507,11 +530,12 @@ namespace ArcMapAddinVisibility.ViewModels
                     {
                         if (IncludeTinLayers)
                             list.Add(layer.Name);
+
                         layer = layers.Next();
                         continue;
                     }
 
-                    var rasterSurface = new RasterSurfaceClass() as IRasterSurface;
+                    var rasterSurface = (IRasterSurface)new RasterSurfaceClass();
                     ISurface surface = null;
 
                     var ml = layer as IMosaicLayer;
@@ -526,25 +550,27 @@ namespace ArcMapAddinVisibility.ViewModels
                             if (surface != null)
                                 list.Add(layer.Name);
                         }
+
                         layer = layers.Next();
                         continue;
                     }
 
                     var rasterLayer = layer as IRasterLayer;
-                    if (rasterLayer != null && rasterLayer.Raster != null)
+                    if ((rasterLayer != null) && (rasterLayer.Raster != null))
                     {
                         rasterSurface.PutRaster(rasterLayer.Raster, 0);
 
                         surface = rasterSurface as ISurface;
                         if (surface != null)
                             list.Add(layer.Name);
+
                         layer = layers.Next();
                         continue;
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex);
+                    System.Diagnostics.Debug.WriteLine(ex.Message);
                 }
 
                 layer = layers.Next();
