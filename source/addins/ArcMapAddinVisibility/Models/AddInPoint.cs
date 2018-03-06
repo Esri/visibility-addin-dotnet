@@ -50,9 +50,7 @@ namespace ArcMapAddinVisibility.Models
                 var pointStr = pointConverter.Convert(point as object, typeof(string), null, null) as string;
                 string outFormattedString = string.Empty;
                 CoordinateType ccType = ConversionUtils.GetCoordinateString(pointStr, out outFormattedString);
-                if (ccType != CoordinateType.Unknown)
-                    return outFormattedString;
-                return string.Empty;
+                return outFormattedString;
             }
         }
 
