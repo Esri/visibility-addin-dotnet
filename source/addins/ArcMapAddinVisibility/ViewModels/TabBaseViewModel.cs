@@ -336,12 +336,13 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <param name="obj"></param>
         private void OnClearGraphics(object obj)
         {
-            var mxdoc = ArcMap.Application.Document as IMxDocument;
-            if (mxdoc == null)
+            if ((ArcMap.Document == null) || (ArcMap.Document.FocusMap == null))
                 return;
-            var av = mxdoc.FocusMap as IActiveView;
+
+            var av = ArcMap.Document.FocusMap as IActiveView;
             if (av == null)
                 return;
+
             var gc = av as IGraphicsContainer;
             if (gc == null)
                 return;
@@ -349,7 +350,7 @@ namespace ArcMapAddinVisibility.ViewModels
             RemoveGraphics(gc, GraphicsList.Where(g => g.IsTemp == false).ToList());
 
             //av.PartialRefresh(esriViewDrawPhase.esriViewGraphics, null, null);
-            av.Refresh(); // sometimes a partial refresh is not working
+            av.Refresh(); // WORKAROUND: sometimes a partial refresh is not working
         }
 
         /// <summary>
@@ -401,10 +402,13 @@ namespace ArcMapAddinVisibility.ViewModels
             }
 
             // remove from master graphics list
-            foreach(var graphic in list)
+            lock (GraphicsList)
             {
-                if (GraphicsList.Contains(graphic))
-                    GraphicsList.Remove(graphic);
+                foreach (var graphic in list)
+                {
+                    if (GraphicsList.Contains(graphic))
+                        GraphicsList.Remove(graphic);
+                }
             }
             elementList.Clear();
             
@@ -523,6 +527,9 @@ namespace ArcMapAddinVisibility.ViewModels
         private string GetFormattedPoint(IPoint point)
         {
             var result = string.Format("{0:0.0} {1:0.0}", point.Y, point.X);
+
+            try
+            {
             var cn = point as IConversionNotation;
             if (cn != null)
             {
@@ -553,6 +560,12 @@ namespace ArcMapAddinVisibility.ViewModels
                         break;
                 }
             }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+            }
+
             return result;
         }
 
