@@ -1020,6 +1020,9 @@ namespace ProAppVisibilityModule.Helpers
                 GroupLayer groupLayer = LayerFactory.Instance.CreateGroupLayer(MapView.Active.Map, 0, groupLayerName);
 
                 var grpLayerDef = groupLayer.GetDefinition() as CIMGroupLayer;
+                if (grpLayerDef == null)
+                    return;
+
                 List<string> layerIds = new List<string>();
                 
                 foreach (Layer layer in layerList)

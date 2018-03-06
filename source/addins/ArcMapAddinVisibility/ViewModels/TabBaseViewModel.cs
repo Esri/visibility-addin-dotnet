@@ -388,7 +388,7 @@ namespace ArcMapAddinVisibility.ViewModels
             var element = gc.Next();
             while (element != null)
             {
-                var eleProps = element as IElementProperties;
+                var eleProps = (IElementProperties)element;
                 if(list.Any(g => g.UniqueId == eleProps.Name))
                 {
                     elementList.Add(element);

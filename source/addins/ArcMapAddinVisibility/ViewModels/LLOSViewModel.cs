@@ -213,7 +213,7 @@ namespace ArcMapAddinVisibility.ViewModels
                     return;
                 }
 
-                if (geoDataset != null && ArcMap.Document.FocusMap.SpatialReference.FactoryCode != geoDataset.SpatialReference.FactoryCode)
+                if (ArcMap.Document.FocusMap.SpatialReference.FactoryCode != geoDataset.SpatialReference.FactoryCode)
                 {
                     MessageBox.Show(VisibilityLibrary.Properties.Resources.LOSDataFrameMatch, VisibilityLibrary.Properties.Resources.LOSSpatialReferenceCaption);
                     return;
@@ -221,10 +221,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
                 SelectedSurfaceSpatialRef = geoDataset.SpatialReference;
 
-                var geoBridge = new GeoDatabaseHelperClass() as IGeoDatabaseBridge2;
-
-                if (geoBridge == null)
-                    return;
+                var geoBridge = (IGeoDatabaseBridge2)new GeoDatabaseHelperClass();
 
                 IPoint pointObstruction = null;
                 IPolyline polyVisible = null;

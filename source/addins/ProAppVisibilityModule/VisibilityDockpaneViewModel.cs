@@ -52,7 +52,9 @@ namespace ProAppVisibilityModule
 
                 selectedTab = value;
                 var tabItem = selectedTab as TabItem;
-                if (tabItem.Content != null && (tabItem.Content as UserControl).Content != null)
+
+                if ((tabItem != null) && ((tabItem.Content as UserControl) != null) &&
+                     ((tabItem.Content as UserControl).Content != null))
                     Mediator.NotifyColleagues(VisibilityLibrary.Constants.TAB_ITEM_SELECTED, ((tabItem.Content as UserControl).Content as UserControl).DataContext);
             }
         }
