@@ -405,7 +405,7 @@ namespace ProAppVisibilityModule.ViewModels
 
                 success = await FeatureClassHelper.CreateSightLines(ObserversLayerName,
                     TargetsLayerName,
-                    CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + SightLinesLayerName, 
+                    CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + SightLinesLayerName, 
                     VisibilityLibrary.Properties.Resources.OffsetWithZFieldName, 
                     VisibilityLibrary.Properties.Resources.OffsetWithZFieldName);
 
@@ -418,8 +418,8 @@ namespace ProAppVisibilityModule.ViewModels
                 GC.Collect();
 
                 success = await FeatureClassHelper.CreateLOS(SelectedSurfaceName,
-                    CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + SightLinesLayerName,
-                    CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + OutputLayerName);
+                    CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + SightLinesLayerName,
+                    CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + OutputLayerName);
 
                 if (!success)
                     return false;
@@ -430,9 +430,9 @@ namespace ProAppVisibilityModule.ViewModels
 
                 // join fields with sight lines
 
-                await FeatureClassHelper.JoinField(CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + SightLinesLayerName,
+                await FeatureClassHelper.JoinField(CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + SightLinesLayerName,
                                                     "OID",
-                                                    CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + OutputLayerName,
+                                                    CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + OutputLayerName,
                                                     "SourceOID",
                                                     new string[] { "TarIsVis" });
 

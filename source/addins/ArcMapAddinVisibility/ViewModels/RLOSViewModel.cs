@@ -519,8 +519,8 @@ namespace ArcMapAddinVisibility.ViewModels
 
                         IDataset ipDataset = (IDataset)pointFc;
                         string outputFcName = ipDataset.BrowseName + "_output";
-                        string strPath = ipDataset.Workspace.PathName + "\\" + ipDataset.BrowseName;
-                        string outPath = ipDataset.Workspace.PathName + "\\" + outputFcName;
+                        string strPath = ipDataset.Workspace.PathName + System.IO.Path.DirectorySeparatorChar + ipDataset.BrowseName;
+                        string outPath = ipDataset.Workspace.PathName + System.IO.Path.DirectorySeparatorChar + outputFcName;
 
                         IVariantArray parameters = new VarArrayClass();
                         parameters.Add(layerPath);
@@ -891,7 +891,7 @@ namespace ArcMapAddinVisibility.ViewModels
             // Run RasterToPolygon
             string inRaster = rasterLayer.FilePath;
             string outRasterToPolyFcName = ipDataset.BrowseName + "_rasterToPoly";
-            string outRasterToPolyPath = ipDataset.Workspace.PathName + "\\" + outRasterToPolyFcName;
+            string outRasterToPolyPath = ipDataset.Workspace.PathName + System.IO.Path.DirectorySeparatorChar + outRasterToPolyFcName;
             string field = "VALUE";
 
             IVariantArray rasterToPolyParams = new VarArrayClass();
@@ -911,7 +911,7 @@ namespace ArcMapAddinVisibility.ViewModels
                 if (ipResult.Status == esriJobStatus.esriJobSucceeded)
                 {
                     string outFcName = ipDataset.BrowseName + "_intersectRaster";
-                    string outPath = ipDataset.Workspace.PathName + "\\" + outFcName;
+                    string outPath = ipDataset.Workspace.PathName + System.IO.Path.DirectorySeparatorChar + outFcName;
 
                     // Add a mask to buffer the output to selected distance
                     string fcPath = SetGPMask(workspace, geomList, gp, "intersectMask");
@@ -957,7 +957,7 @@ namespace ArcMapAddinVisibility.ViewModels
                 ipFeature.Store();
             }
             IDataset ds = (IDataset)maskFc;
-            string path = ds.Workspace.PathName + "\\" + ds.BrowseName;
+            string path = ds.Workspace.PathName + System.IO.Path.DirectorySeparatorChar + ds.BrowseName;
             gp.SetEnvironmentValue("mask", path);
 
             return path;
