@@ -59,7 +59,7 @@ namespace ProAppVisibilityModule
             }
             catch (Exception ex)
             {
-                // do nothing
+                System.Diagnostics.Debug.WriteLine(ex.Message);
             }
 
             return base.OnSketchCompleteAsync(geometry);
@@ -82,7 +82,7 @@ namespace ProAppVisibilityModule
             }
             catch (Exception ex)
             {
-                // do nothing
+                System.Diagnostics.Debug.WriteLine(ex.Message);
             }
 
             base.OnToolMouseMove(e);

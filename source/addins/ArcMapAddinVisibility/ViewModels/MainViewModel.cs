@@ -107,6 +107,10 @@ namespace ArcMapAddinVisibility.ViewModels
 
                 selectedTab = value;
                 var tabItem = selectedTab as TabItem;
+
+                if (tabItem == null)
+                    return;
+
                 Mediator.NotifyColleagues(Constants.TAB_ITEM_SELECTED, ((tabItem.Content as UserControl).Content as UserControl).DataContext);
             }
         }

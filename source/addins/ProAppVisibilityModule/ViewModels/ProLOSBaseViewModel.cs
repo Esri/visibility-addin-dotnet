@@ -505,7 +505,7 @@ namespace ProAppVisibilityModule.ViewModels
             }
             catch(Exception ex)
             {
-
+                System.Diagnostics.Debug.WriteLine(ex.Message);
             }
         }
 
@@ -580,10 +580,10 @@ namespace ProAppVisibilityModule.ViewModels
             {
                 unit = sr.ZUnit;
             }
-            catch 
+            catch (Exception ex)
             {
-                // do nothing
-                // catching this since accessing the ZUnit crashes when not set
+                // do nothing - catching this since accessing the ZUnit crashes when not set
+                System.Diagnostics.Debug.WriteLine(ex.Message);
             }
 
             // default to map linear unit

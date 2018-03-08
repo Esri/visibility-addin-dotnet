@@ -292,6 +292,7 @@ namespace ProAppVisibilityModule.ViewModels
             }
             catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine(ex.Message);
                 ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.ExceptionSomethingWentWrong,
                                                                 VisibilityLibrary.Properties.Resources.CaptionError);
             }
@@ -368,10 +369,10 @@ namespace ProAppVisibilityModule.ViewModels
                 await CreateMask(RLOSMaskLayerName, minDistanceInMapUnits, maxDistanceInMapUnits, horizontalStartAngleInDegrees,
                     horizontalEndAngleInDegrees, surfaceSR);
 
-                string maxRangeMaskFeatureClassName = CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + RLOSMaskLayerName;
+                string maxRangeMaskFeatureClassName = CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + RLOSMaskLayerName;
                 var environments = Geoprocessing.MakeEnvironmentArray(mask: maxRangeMaskFeatureClassName, overwriteoutput: true);
 
-                var rlosOutputLayer = CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + RLOSOutputLayerName;
+                var rlosOutputLayer = CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + RLOSOutputLayerName;
 
                 success = await FeatureClassHelper.CreateVisibility(SelectedSurfaceName, ObserversLayerName,
                     rlosOutputLayer,
@@ -386,13 +387,13 @@ namespace ProAppVisibilityModule.ViewModels
                 if (!success)
                     return false;
 
-                var rlosConvertedPolygonsLayer = CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + RLOSConvertedPolygonsLayerName;
+                var rlosConvertedPolygonsLayer = CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + RLOSConvertedPolygonsLayerName;
 
                 string rangeFanMaskFeatureClassName = string.Empty;
                 if ((MinDistance > 0) || !((horizontalStartAngleInDegrees == 0.0) && (horizontalEndAngleInDegrees == 360.0)))
                 {
                     string RLOSRangeFanMaskLayerName = "RangeFan_" + RLOSMaskLayerName;
-                    rangeFanMaskFeatureClassName = CoreModule.CurrentProject.DefaultGeodatabasePath + "\\" + RLOSRangeFanMaskLayerName;
+                    rangeFanMaskFeatureClassName = CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + RLOSRangeFanMaskLayerName;
 
                     await CreateMask(RLOSRangeFanMaskLayerName, minDistanceInMapUnits, maxDistanceInMapUnits, horizontalStartAngleInDegrees,
                         horizontalEndAngleInDegrees, surfaceSR, true);
@@ -553,7 +554,7 @@ namespace ProAppVisibilityModule.ViewModels
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                System.Diagnostics.Debug.WriteLine(ex.Message);
             }
 
             return Math.Round(angularDistance, 1);

@@ -182,9 +182,8 @@ namespace ArcMapAddinVisibility.ViewModels
                 {
                     point1Formatted = value;
                     Point1 = point;
-                    //AddGraphicToMap(Point1, true);
-                    var mxdoc = ArcMap.Application.Document as IMxDocument;
-                    point.Project(mxdoc.FocusMap.SpatialReference);
+                    if ((ArcMap.Document != null) && (ArcMap.Document.FocusMap != null))
+                        point.Project(ArcMap.Document.FocusMap.SpatialReference);
                 }
                 else
                 {
@@ -239,9 +238,8 @@ namespace ArcMapAddinVisibility.ViewModels
                 {
                     point2Formatted = value;
                     Point2 = point;
-                    //AddGraphicToMap(Point2, true);
-                    var mxdoc = ArcMap.Application.Document as IMxDocument;
-                    Point2.Project(mxdoc.FocusMap.SpatialReference);
+                    if ((ArcMap.Document != null) && (ArcMap.Document.FocusMap != null))
+                        Point2.Project(ArcMap.Document.FocusMap.SpatialReference);
                 }
                 else
                 {
@@ -338,12 +336,13 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <param name="obj"></param>
         private void OnClearGraphics(object obj)
         {
-            var mxdoc = ArcMap.Application.Document as IMxDocument;
-            if (mxdoc == null)
+            if ((ArcMap.Document == null) || (ArcMap.Document.FocusMap == null))
                 return;
-            var av = mxdoc.FocusMap as IActiveView;
+
+            var av = ArcMap.Document.FocusMap as IActiveView;
             if (av == null)
                 return;
+
             var gc = av as IGraphicsContainer;
             if (gc == null)
                 return;
@@ -351,7 +350,7 @@ namespace ArcMapAddinVisibility.ViewModels
             RemoveGraphics(gc, GraphicsList.Where(g => g.IsTemp == false).ToList());
 
             //av.PartialRefresh(esriViewDrawPhase.esriViewGraphics, null, null);
-            av.Refresh(); // sometimes a partial refresh is not working
+            av.Refresh(); // WORKAROUND: sometimes a partial refresh is not working
         }
 
         /// <summary>
@@ -389,7 +388,7 @@ namespace ArcMapAddinVisibility.ViewModels
             var element = gc.Next();
             while (element != null)
             {
-                var eleProps = element as IElementProperties;
+                var eleProps = (IElementProperties)element;
                 if(list.Any(g => g.UniqueId == eleProps.Name))
                 {
                     elementList.Add(element);
@@ -403,10 +402,13 @@ namespace ArcMapAddinVisibility.ViewModels
             }
 
             // remove from master graphics list
-            foreach(var graphic in list)
+            lock (GraphicsList)
             {
-                if (GraphicsList.Contains(graphic))
-                    GraphicsList.Remove(graphic);
+                foreach (var graphic in list)
+                {
+                    if (GraphicsList.Contains(graphic))
+                        GraphicsList.Remove(graphic);
+                }
             }
             elementList.Clear();
             
@@ -525,6 +527,9 @@ namespace ArcMapAddinVisibility.ViewModels
         private string GetFormattedPoint(IPoint point)
         {
             var result = string.Format("{0:0.0} {1:0.0}", point.Y, point.X);
+
+            try
+            {
             var cn = point as IConversionNotation;
             if (cn != null)
             {
@@ -555,6 +560,12 @@ namespace ArcMapAddinVisibility.ViewModels
                         break;
                 }
             }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+            }
+
             return result;
         }
 
@@ -602,7 +613,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
             if (geom.GeometryType == esriGeometryType.esriGeometryPoint)
             {
-                var te = new TextElementClass() as ITextElement;
+                var te = (ITextElement)new TextElementClass();
                 te.Text = text;
 
                 var ts = new TextSymbolClass();
@@ -612,7 +623,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
                 te.Symbol = ts;
 
-                element = te as IElement;
+                element = (IElement)te;
             }
 
             if (element == null)
@@ -620,12 +631,11 @@ namespace ArcMapAddinVisibility.ViewModels
 
             element.Geometry = geom;
 
-            var mxdoc = ArcMap.Application.Document as IMxDocument;
-            var av = mxdoc.FocusMap as IActiveView;
-            var gc = av as IGraphicsContainer;
+            var av = (IActiveView)ArcMap.Document.FocusMap;
+            var gc = (IGraphicsContainer)av;
 
             // store guid
-            var eprop = element as IElementProperties;
+            var eprop = (IElementProperties)element;
             eprop.Name = Guid.NewGuid().ToString();
 
             GraphicsList.Add(new AMGraphic(eprop.Name, geom, IsTempGraphic));
@@ -656,22 +666,22 @@ namespace ArcMapAddinVisibility.ViewModels
             if (geom.GeometryType == esriGeometryType.esriGeometryPoint)
             {
                 // Marker symbols
-                var simpleMarkerSymbol = new SimpleMarkerSymbol() as ISimpleMarkerSymbol;
+                var simpleMarkerSymbol = (ISimpleMarkerSymbol)new SimpleMarkerSymbol();
                 simpleMarkerSymbol.Color = color;
                 simpleMarkerSymbol.Outline = true;
                 simpleMarkerSymbol.OutlineColor = color;
                 simpleMarkerSymbol.Size = size;
                 simpleMarkerSymbol.Style = markerStyle;
 
-                var markerElement = new MarkerElement() as IMarkerElement;
+                var markerElement = (IMarkerElement)new MarkerElement();
                 markerElement.Symbol = simpleMarkerSymbol;
-                element = markerElement as IElement;
+                element = (IElement)markerElement;
             }
             else if (geom.GeometryType == esriGeometryType.esriGeometryPolyline)
             {
                 // create graphic then add to map
-                var le = new LineElementClass() as ILineElement;
-                element = le as IElement;
+                var le = (ILineElement)new LineElementClass();
+                element = (IElement)le;
 
                 var lineSymbol = new SimpleLineSymbolClass();
                 lineSymbol.Color = color;
@@ -682,9 +692,9 @@ namespace ArcMapAddinVisibility.ViewModels
             else if (geom.GeometryType == esriGeometryType.esriGeometryPolygon)
             {
                 // create graphic then add to map
-                IPolygonElement pe = new PolygonElementClass() as IPolygonElement;
+                IPolygonElement pe = (IPolygonElement)new PolygonElementClass();
                 element = pe as IElement;
-                IFillShapeElement fe = pe as IFillShapeElement;
+                IFillShapeElement fe = (IFillShapeElement)pe;
                 
                 var fillSymbol = new SimpleFillSymbolClass();
                 RgbColor selectedColor = new RgbColorClass();
@@ -703,12 +713,11 @@ namespace ArcMapAddinVisibility.ViewModels
 
             element.Geometry = geom;
 
-            var mxdoc = ArcMap.Application.Document as IMxDocument;
-            var av = mxdoc.FocusMap as IActiveView;
-            var gc = av as IGraphicsContainer;
+            var av = (IActiveView)ArcMap.Document.FocusMap;
+            var gc = (IGraphicsContainer)av;
 
             // store guid
-            var eprop = element as IElementProperties;
+            var eprop = (IElementProperties)element;
             eprop.Name = Guid.NewGuid().ToString();
 
             GraphicsList.Add(new AMGraphic(eprop.Name, geom, IsTempGraphic)); 
@@ -785,7 +794,7 @@ namespace ArcMapAddinVisibility.ViewModels
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                System.Diagnostics.Debug.WriteLine(ex.Message);
             }
 
             return length;
@@ -811,11 +820,10 @@ namespace ArcMapAddinVisibility.ViewModels
 
         internal void ZoomToExtent(IGeometry geom)
         {
-            if (geom == null || ArcMap.Application.Document == null)
+            if ((geom == null) || (ArcMap.Document == null) || (ArcMap.Document.FocusMap == null))
                 return;
 
-            var mxdoc = ArcMap.Application.Document as IMxDocument;
-            var av = mxdoc.FocusMap as IActiveView;
+            var av = (IActiveView)ArcMap.Document.FocusMap;
 
             IEnvelope env = geom.Envelope;
 
@@ -842,13 +850,16 @@ namespace ArcMapAddinVisibility.ViewModels
             System.Object obj = Activator.CreateInstance(t);
             ISpatialReferenceFactory srFact = obj as ISpatialReferenceFactory;
 
+            if (srFact == null)
+                return null;
+
             // Use the enumeration to create an instance of the predefined object.
 
             IGeographicCoordinateSystem geographicCS =
                 srFact.CreateGeographicCoordinateSystem((int)
                 esriSRGeoCSType.esriSRGeoCS_WGS1984);
 
-            var point = new Point() as IPoint;
+            var point = (IPoint)new Point();
             point.SpatialReference = geographicCS;
             var cn = point as IConversionNotation;
 

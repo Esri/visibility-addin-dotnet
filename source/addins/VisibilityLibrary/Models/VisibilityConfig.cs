@@ -45,23 +45,32 @@ namespace VisibilityLibrary.Models
 
         public void SaveConfiguration()
         {
+            XmlWriter writer = null;
+
             try
             {
                 var filename = GetConfigFilename();
 
                 XmlSerializer x = new XmlSerializer(GetType());
-                XmlWriter writer = new XmlTextWriter(filename, Encoding.UTF8);
+                writer = new XmlTextWriter(filename, Encoding.UTF8);
 
                 x.Serialize(writer, this);
             }
             catch (Exception ex)
             {
-                // do nothing
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+            }
+            finally
+            {
+                if (writer != null)
+                    writer.Close();
             }
         }
 
         public void LoadConfiguration()
         {
+            TextReader tr = null;
+
             try
             {
                 var filename = GetConfigFilename();
@@ -70,7 +79,7 @@ namespace VisibilityLibrary.Models
                     return;
 
                 XmlSerializer x = new XmlSerializer(GetType());
-                TextReader tr = new StreamReader(filename);
+                tr = new StreamReader(filename);
                 var temp = x.Deserialize(tr) as VisibilityConfig;
 
                 if (temp == null)
@@ -80,7 +89,12 @@ namespace VisibilityLibrary.Models
             }
             catch (Exception ex)
             {
-                // do nothing
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+            }
+            finally
+            {
+                if (tr != null)
+                    tr.Close();
             }
         }
 

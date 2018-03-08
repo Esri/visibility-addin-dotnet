@@ -684,7 +684,7 @@ namespace ProAppVisibilityModule.Helpers
             }
             catch (Exception ex)
             {
-                // do nothing
+                System.Diagnostics.Debug.WriteLine(ex.Message);
             }
 
             return sourceOIDs;
@@ -731,7 +731,7 @@ namespace ProAppVisibilityModule.Helpers
             }
             catch (Exception ex)
             {
-                // do nothing
+                System.Diagnostics.Debug.WriteLine(ex.Message);
             }
 
             return visibilityStats;
@@ -1020,6 +1020,9 @@ namespace ProAppVisibilityModule.Helpers
                 GroupLayer groupLayer = LayerFactory.Instance.CreateGroupLayer(MapView.Active.Map, 0, groupLayerName);
 
                 var grpLayerDef = groupLayer.GetDefinition() as CIMGroupLayer;
+                if (grpLayerDef == null)
+                    return;
+
                 List<string> layerIds = new List<string>();
                 
                 foreach (Layer layer in layerList)
