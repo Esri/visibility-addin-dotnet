@@ -3,6 +3,8 @@ define({
     _widgetLabel: "Visibility", // Label of widget
     
     "observerLocation": "Observer Location",
+    "formatIconTooltip": "Format Input", // Shown as tooltip on the format input coordinate button
+    "addPointToolTip": "Add Observer Location", // Show as tooltip help on the draw point icon    
     "fieldOfView": "Field of View",
     "useMilsText": "Use mils for bearing angles",
     "observerHeight": "Observer Height",
@@ -21,6 +23,10 @@ define({
     "parseCoordinatesError": "Unable to parse coordinates. Please check your input.", //Shown as error message for unknown coordinates
     "cancelBtn": "Cancel", // Shown as label on cancel button
     "applyBtn": "Apply", // Shown as label on apply button
+    "invalidMessage": "Please enter a numeric value.",
+    "observerRangeMessage": "Invalid Observer Height",
+    "minimumRangeMessage": "Invalid Minimum Observable Range",
+    "maximumRangeMessage": "Maximum Observable Range must be greater than the Minimum Observable Range",
     
     // notation strings
     "DD": "DD", // Shown as DD label in coordinate type dropdown within format input settings
@@ -47,5 +53,40 @@ define({
     "USNGNotation": "USNG", // Shown as USNG label in confirm coordinate type dropdown
     "UTMBandNotation": "UTM - Band Letter", // Shown as UTM - Band Letter label in confirm coordinate type dropdown
     "UTMHemNotation": "UTM - Hemisphere (N/S)" // Shown as UTM - Hemisphere (N/S)de label in confirm coordinate type dropdown
-  })
+  }),
+  "ar": 1,
+  "bs": 1,
+  "cs": 1,
+  "da": 1,
+  "de": 1,
+  "el": 1,
+  "es": 1,
+  "et": 1,
+  "fi": 1,
+  "fr": 1,
+  "he": 1,
+  "hi": 1,
+  "hr": 1,
+  "it": 1,
+  "id": 1,
+  "ja": 1,
+  "ko": 1,
+  "lt": 1,
+  "lv": 1,
+  "nb": 1,
+  "nl": 1,
+  "pl": 1,
+  "pt-br": 1,
+  "pt-pt": 1,
+  "ro": 1,
+  "ru": 1,
+  "sl": 1,
+  "sr": 1,
+  "sv": 1,
+  "th": 1,
+  "tr": 1,
+  "vi": 1,
+  "zh-cn": 1,
+  "zh-hk": 1,
+  "zh-tw": 1
 });

@@ -44,7 +44,7 @@ wedge = arcpy.GetParameterAsText(7)
 fullwedge = arcpy.GetParameterAsText(8)
 
 # CHANGE PATH TO RASTER DATASET:
-elevation = r'D:\Workspace\Data\n36prj.tif'
+elevation = r'D:\data\elevation.tif'
 
 
 DEBUG = False

@@ -177,6 +177,9 @@ define([
   },
 
   getNotations: function () {
+  // The regex patterns cannot be split any further to make the lines smaller
+  // adding jshint ignore on this function
+  /* jshint ignore:start */
   var strs = [
   {
   name: "DD",
@@ -272,6 +275,7 @@ define([
   ];
 
   return strs;
+  /* jshint ignore:end */
   },
 
   getCoordinateType: function (fromInput) {

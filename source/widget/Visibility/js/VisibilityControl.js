@@ -176,8 +176,10 @@ define([
                   //set up observer input dijit
                   this.distanceUnit = this.distanceUnitDD.get('value');
                   this.observerHeightUnit = this.observerHeightDD.get('value');
-                  this.coordTool = new CoordInput({nls: this.nls,
-                      appConfig: this.appConfig}, this.observerCoords);      
+                  this.coordTool = new CoordInput({
+                     nls: this.nls,
+                     appConfig: this.appConfig,
+                     style: 'width: calc(100% - 44px)'}, this.observerCoords);      
                   this.coordTool.inputCoordinate.formatType = 'DD';
                   this.coordinateFormat = new dijitTooltipDialog({
                     content: new EditOutputCoordinate({nls: this.nls}),
@@ -545,7 +547,7 @@ define([
          */
         setCoordLabel: function (toType) {
           this.coordInputLabel.innerHTML = dojoString.substitute(
-            'Center Point (${crdType})', {
+            this.nls.observerLocation + ' (${crdType})', {
                 crdType: toType
             });
         },
@@ -554,7 +556,7 @@ define([
          *
          */
         feedbackDidComplete: function () {          
-          dojoDomClass.remove(this.addPointBtn, 'jimu-state-active');
+          dojoDomClass.remove(this.addPointBtn, 'jimu-edit-active');
           this.dt.deactivate();
           this.map.enableMapNavigation();
           this.enableFOVDial();
@@ -592,17 +594,22 @@ define([
          * Button click event, activate feedback tool
          */
         pointButtonWasClicked: function () {
-          this.coordTool.manualInput = false;
-          dojoTopic.publish('clear-points');
-          this.dt._setTooltipMessage(0);
-          
-          this.map.disableMapNavigation();          
-          this.dt.activate('point');
-          var tooltip = this.dt._tooltip;
-          if (tooltip) {
-            tooltip.innerHTML = 'Click to add observer location';
+          if(dojoDomClass.contains(this.addPointBtn,'jimu-edit-active')) {
+            //already selected so deactivate draw tool
+            this.dt.deactivate();
+            this.map.enableMapNavigation();
+          } else {
+            this.coordTool.manualInput = false;
+            dojoTopic.publish('clear-points');
+            this.dt._setTooltipMessage(0);            
+            this.map.disableMapNavigation();          
+            this.dt.activate('point');
+            var tooltip = this.dt._tooltip;
+            if (tooltip) {
+              tooltip.innerHTML = 'Click to add observer location';
+            }
           }
-          dojoDomClass.toggle(this.addPointBtn, 'jimu-state-active');
+          dojoDomClass.toggle(this.addPointBtn, 'jimu-edit-active');
         },
         
         /*

@@ -1,48 +1,32 @@
-.dijitSelect .dijitArrowButton 
-{
-    background-color: #fafafc;
-    border-color: #fafafc;
+.jimu-widget-visibility-control .controls {
+    display: table;
+    margin: 0 auto;
+    padding-bottom: 20px;
 }
 
-.jimu-widget-visibility .dijitSelect .dijitButtonContents
-{
-    background-color: transparent;
-    border-color: #fafafc;
+/* Buttons */
+.jimu-widget-visibility-control .settingBtn {
+    background: url(./images/settings_white.png);
 }
 
-.jimu-widget-visibility  .dijitSelectDisabled,
-.jimu-widget-visibility .dijitTextBoxDisabled,
-.jimu-widget-visibility .dijitTextBoxDisabled .dijitInputContainer ,
-.jimu-widget-visibility .dijitTextBoxDisabled {
-     background-color: #4c4c4c; 
+.jimu-widget-visibility-control .settingBtn:hover {
+    background: url('./images/settings_white_hover.png');
 }
 
-.claro .dartThemeClaroDijitTooltipContainerOverride .dijitTooltipContainer {
-    background-color: #4c4c4c;
-    background-image: -webkit-linear-gradient(bottom, rgb(76, 76, 76) 0px, #4c4c4c 10px);
-    border: 1px solid #ffffff;
-    color: #ffffff;
+.jimu-widget-visibility-control .editBtn {
+    background: url(./images/draw_white.png);
+    background-repeat: no-repeat;
 }
 
-
-.claro .dartThemeClaroDijitTooltipContainerOverride .dijitTooltipConnector {    
-    background-image: url(images/tooltip.png);    
+.jimu-widget-visibility-control .editBtn:hover {
+    background: url('./images/draw_white_hover.png');
+    background-repeat: no-repeat;
 }
 
-/* dojo color picker */
-
-.jimu-colorpalette  {
-  background-color: #4c4c4c;
+.jimu-widget-visibility-control .jimu-edit-active {
+    background: url('./images/draw_white_hover.png');
+    background-repeat: no-repeat;
 }
-
-.jimu-color-picker-dialog .dijitTooltipContainer {
-  background-color: #4c4c4c !important;
-}
-
-.claro .dojoxColorPicker, .claro .dijitColorPalette {
-    background: #4c4c4c;
-}
-
 
 /*dojo dialog box*/
 .claro .dijitDialog {
@@ -78,8 +62,6 @@
   float: right;
 }
 
-/*Button*/
-
 .claro .dijitButton .dijitButtonNode {
     color: #ffffff !important;
     border: 0px solid #000000;
@@ -90,86 +72,4 @@
 }
 .claro .dijitButtonHover  .dijitButtonNode {
   background-color: rgba(0, 0, 0, 0.75) !important;
-}
-
-.jimu-widget-visibility .settingBtn {
-    display: inline-block;
-    background: url(./images/settings_white.png);
-    background-repeat: no-repeat;
-    background-color: transparent;
-    width: 15px;
-    height: 15px;
-    margin-top: 7px;
-    margin-left: 5px;
-    margin-bottom: -3px;
-}
-
-.jimu-widget-visibility .settingBtn:hover {
-    background: url('./images/settings_white_hover.png');
-}
-
-.jimu-widget-visibility .editBtn {
-    display: right;
-    background: url(./images/draw_white.png);
-    background-repeat: no-repeat;
-    background-color: transparent;
-    width: 30px;
-    height: 30px;
-}
-
-.jimu-widget-visibility .editBtn:hover {
-    background: url('./images/draw_white_hover.png');
-    background-repeat: no-repeat;
-}
-
-.jimu-widget-visibility .jimu-edit-active {
-    background: url('./images/draw_white_hover.png');
-    background-repeat: no-repeat;
-    border: none;
-}
-
-.jimu-widget-visibility .polygonBtn {
-    display: inline-block;
-    background: url(./images/polygon_white.png);
-    background-repeat: no-repeat;
-    background-color: transparent;
-    width: 30px;
-    height: 30px;
-}
-
-.jimu-widget-visibility .polygonBtn:hover {
-    background: url('./images/polygon_white_hover.png');
-    background-repeat: no-repeat;
-}
-
-.jimu-widget-visibility .jimu-polygon-active {
-    background: url('./images/polygon_white_hover.png');
-    background-repeat: no-repeat;
-    border: none;
-}
-
-.jimu-widget-visibility .extentBtn {
-    display: inline-block;
-    background: url(./images/extent_white.png);
-    background-repeat: no-repeat;
-    background-color: transparent;
-    width: 30px;
-    height: 30px;
-}
-
-.jimu-widget-visibility .extentBtn:hover {
-    background: url('./images/extent_white_hover.png');
-    background-repeat: no-repeat;
-}
-
-.jimu-widget-visibility .jimu-extent-active {
-    background: url('./images/extent_white_hover.png');
-    background-repeat: no-repeat;
-    border: none;
-}
-
-
-.claro .dijitSliderImageHandle, .claro .dijitSliderImageHandle:after {
-    background: transparent;
-    margin-top: 0px;
 }
