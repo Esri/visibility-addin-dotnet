@@ -1,17 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
+    <CurrentYear>$([System.DateTime]::Now.Year)</CurrentYear>
+    <CurrentMonth>$([System.DateTime]::Now.Month)</CurrentMonth>
+    <CurrentDay>$([System.DateTime]::Now.Day)</CurrentDay>
+  </PropertyGroup>
+  <PropertyGroup>
     <BUILD_MAJOR Condition="'$(BUILD_MAJOR)' == ''">4</BUILD_MAJOR>
     <BUILD_MINOR Condition="'$(BUILD_MINOR)' == ''">0</BUILD_MINOR>
     <BUILD_PATCH Condition="'$(BUILD_PATCH)' == ''">0</BUILD_PATCH>
     <BUILD_NUMBER Condition="'$(BUILD_NUMBER)' == ''">0</BUILD_NUMBER>
+    <BUILD_DATE Condition="'$(BUILD_DATE)' == ''">$(CurrentMonth)/$(CurrentDay)/$(CurrentYear)</BUILD_DATE>
   </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{6A10F7BD-36D5-4262-85D8-DCBDAD5F27EB}</ProjectGuid>
+    <ProjectGuid>{C37767BB-18E6-4743-A5EC-1D7F2B38F487}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ArcMapAddinVisibility</RootNamespace>
@@ -134,7 +140,9 @@
   <ItemGroup>
     <Compile Include="CCUserControlProxy.cs" />
     <Compile Include="Config.Designer.cs">
-      <AutoGen>True</AutoGen>
+      <!-- IMPORTANT: this file has been manually changed so is no longer autogened -->
+      <!-- These manual changes were required to support accessing this addin from the external Toolbar -->
+      <!-- <AutoGen>True</AutoGen> -->
       <DependentUpon>Config.esriaddinx</DependentUpon>
     </Compile>
     <Compile Include="Models\AddInPoint.cs" />
@@ -143,9 +151,16 @@
   </ItemGroup>
   <ItemGroup>
     <AddInContent Include="Config.esriaddinx">
+      <SubType>Designer</SubType>
+    </AddInContent>
+    <!-- IMPORTANT: Config.Designer.cs no longer autogened by this file/tool-->
+    <!-- Original setting/tool: -->
+    <!-- 
+    <AddInContent Include="Config.esriaddinx">
       <Generator>ArcGISAddInHostGenerator</Generator>
       <LastGenOutput>Config1.Designer.cs</LastGenOutput>
     </AddInContent>
+    -->
   </ItemGroup>
   <ItemGroup>
     <AddInContent Include="Images\ArcMapAddinVisibility.png" />
@@ -240,6 +255,12 @@
     </XmlPeek>
     <Message Importance="High" Text="Old build number: @(Peeked) New build number: $(BUILD_MAJOR).$(BUILD_MINOR).$(BUILD_PATCH).$(BUILD_NUMBER)" />
     <XmlPoke XmlInputPath="Config.esriaddinx" Query="/x:ESRI.Configuration/x:Version" Namespaces="&lt;Namespace Prefix='x' Uri='http://schemas.esri.com/Desktop/AddIns' /&gt;" Value="$(BUILD_MAJOR).$(BUILD_MINOR).$(BUILD_PATCH).$(BUILD_NUMBER)" />
+    <!-- Set Date element in Config.esriaddinx -->
+    <XmlPeek XmlInputPath="Config.esriaddinx" Query="/x:ESRI.Configuration/x:Date/text()" Namespaces="&lt;Namespace Prefix='x' Uri='http://schemas.esri.com/Desktop/AddIns' /&gt;">
+      <Output TaskParameter="Result" ItemName="Peeked_Date" />
+    </XmlPeek>
+    <Message Importance="High" Text="Old build date: @(Peeked_Date) New build date: $(BUILD_DATE)" />
+    <XmlPoke XmlInputPath="Config.esriaddinx" Query="/x:ESRI.Configuration/x:Date" Namespaces="&lt;Namespace Prefix='x' Uri='http://schemas.esri.com/Desktop/AddIns' /&gt;" Value="$(BUILD_DATE)" />
   </Target>
   <Target Name="AfterBuild">
     <!-- Gives build warning when add-in targets file is not found. -->
