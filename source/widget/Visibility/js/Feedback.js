@@ -1,6 +1,6 @@
 
 ///////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ define([
       _setStartPoint: function (p){
         this._set('startPoint', p);
       },
-      
+
       addStartGraphic: function (fromGeometry, withSym) {
         this.removeStartGraphic();
         this.startGraphic = new EsriGraphic(fromGeometry, withSym);

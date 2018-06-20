@@ -1,5 +1,5 @@
 ﻿///////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,13 +17,13 @@
 
 define([
   'dojo/_base/declare',
-  'dojo/_base/lang',  
-  'dojo/topic',  
+  'dojo/_base/lang',
+  'dojo/topic',
   './Feedback'
 ], function (
   dojoDeclare,
   dojoLang,
-  dojoTopic,  
+  dojoTopic,
   drawFeedback
 ) {
     var clz = dojoDeclare([drawFeedback], {
@@ -32,9 +32,9 @@ define([
          **/
         constructor: function () {
             this.syncEvents();
-            this.inherited(arguments);            
+            this.inherited(arguments);
         },
-        
+
         /*
 
         */
@@ -43,13 +43,13 @@ define([
                 'visibility-observer-point-input',
                 dojoLang.hitch(this, this.onCenterPointManualInputHandler)
             );
-        
+
             dojoTopic.subscribe(
                 'clear-points',
                 dojoLang.hitch(this, this.clearPoints)
-            ); 
+            );
         },
-        
+
         /*
         Handler for clearing out points
         */
@@ -57,14 +57,14 @@ define([
             this._points = [];
             this.map.graphics.clear();
         },
-        
+
         /**
          *
          **/
         clearGraphics: function () {
             this.map.graphics.clear();
         },
-        
+
         /*
         Handler for the manual input of a center point
         */
@@ -86,7 +86,7 @@ define([
             var start = snapPoint || evt.mapPoint;
             this._points.push(start.offset(0, 0));
             this.set('startPoint', this._points[0]);
-            this._drawEnd(start);            
+            this._drawEnd(start);
         },
 
         /*
