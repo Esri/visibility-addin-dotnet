@@ -60,13 +60,8 @@ define([
 
       if (!this.validateOnInput) {
         return true;
-      }
-      //if (this.get('value').length < 4) return false;
-
-      this.inputCoordinate.set("inputString", value);
-
-      //this.inputCoordinate.set('formatString', 'YN XE');
-
+      }     
+      this.inputCoordinate.set("inputString", value);      
       this.set("invalidMessage", this.inputCoordinate.message);
       this.set("promptMessage", this.inputCoordinate.message);
 

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ define([
     'dijit/_WidgetsInTemplateMixin',
     'dijit/TooltipDialog',
     'dijit/popup',
-    'dojo/text!../templates/VisibilityControl.html',  
+    'dojo/text!../templates/VisibilityControl.html',
     'jimu/dijit/Message',
     './DrawFeedBack',
     'esri/dijit/util/busyIndicator',
@@ -53,7 +53,7 @@ define([
     './EditOutputCoordinate',
     'dijit/form/NumberTextBox',
     'jimu/dijit/CheckBox',
-    './jquery.knob.min'   
+    './jquery.knob.min'
 ], function (
     dojoDeclare,
     dojoDeferred,
@@ -68,7 +68,7 @@ define([
     dojoMouse,
     dojoAll,
     dijitWidgetBase,
-    dijitTemplatedMixin,    
+    dijitTemplatedMixin,
     dijitWidgetsInTemplate,
     dijitTooltipDialog,
     dijitPopup,
@@ -76,19 +76,19 @@ define([
     Message,
     DrawFeedBack,
     BusyIndicator,
-    WebMercatorUtils,    
+    WebMercatorUtils,
     Graphic,
-    GraphicsLayer, 
-    Geoprocessor, 
-    FeatureSet, 
+    GraphicsLayer,
+    Geoprocessor,
+    FeatureSet,
     graphicsUtils,
     Request,
-    SimpleFillSymbol, 
-    SimpleLineSymbol, 
-    SimpleMarkerSymbol, 
-    Color, 
+    SimpleFillSymbol,
+    SimpleLineSymbol,
+    SimpleMarkerSymbol,
+    Color,
     CoordInput,
-    EditOutputCoordinate   
+    EditOutputCoordinate
 ) {
     'use strict';
     return dojoDeclare([dijitWidgetBase, dijitTemplatedMixin, dijitWidgetsInTemplate], {
@@ -110,7 +110,7 @@ define([
             //Add options for distance dropdowns
             var options = [], option, dropDownOptions;
             dropDownOptions = ['meters','kilometers','miles',
-              'feet','yards','nauticalMiles'];            
+              'feet','yards','nauticalMiles'];
             dojoArray.forEach(dropDownOptions, dojoLang.hitch(this, function (type) {
               option = { value: type, label: window.jimuNls.units[type] };
               options.push(option);
@@ -119,18 +119,18 @@ define([
             this.distanceUnitDD.addOption(options);
             this.observerHeightDD.set('value','meters');
             this.distanceUnitDD.set('value','kilometers');
-          
+
             //check that the gpservice is valid for this widget
             var args = Request({
               url: this.viewshedService,
               content: {f: "json"},
               handleAs:"json",
               callbackParamName: "callback"
-            });            
-                     
+            });
+
             args.then(
               dojoLang.hitch(this, function(response) {
-                var validParameters = ["Input_Observer", 
+                var validParameters = ["Input_Observer",
                             "Maximum_Distance__RADIUS2_",
                             "Left_Azimuth__AZIMUTH1_",
                             "Right_Azimuth__AZIMUTH2_",
@@ -139,45 +139,47 @@ define([
                             "Output_Viewshed",
                             "Output_Wedge",
                             "Output_FullWedge"];
-                
+
                 if(response.executionType === 'esriExecutionTypeSynchronous') {
                   this.isSynchronous = true;
                 } else {
                   this.isSynchronous = false;
-                }              
+                }
                 var taskParameters = [];
                 dojoArray.forEach(response.parameters, function(param){
                   taskParameters.push(param.name);
                 });
-                
+
                 //convert both arrays to an ordered comma seperated list and compare
                 if(validParameters.sort().join(',') === taskParameters.sort().join(',')){
                   //set up symbology for input
                   this._ptSym = new SimpleMarkerSymbol(this.pointSymbol);
-                  
+
                   //set up symbology for output
                   this.visibleArea = new SimpleFillSymbol();
-                  this.visibleArea.setOutline(new 
+                  this.visibleArea.setOutline(new
                     SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([0, 0, 0, 0]), 1));
                   this.visibleArea.setColor(new Color([0, 255, 0, 0.5]));
                   this.notVisibleArea = new SimpleFillSymbol();
-                  this.notVisibleArea.setOutline(new 
+                  this.notVisibleArea.setOutline(new
                     SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([0, 0, 0, 0]), 1));
                   this.notVisibleArea.setColor(new Color([255, 0, 0, 0.5]));
                   this.fullWedge = new SimpleFillSymbol();
-                  this.fullWedge.setOutline(new 
+                  this.fullWedge.setOutline(new
                     SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH, new Color([0, 0, 0, 1]), 1));
                   this.fullWedge.setColor(new Color([0, 0, 0, 0]));
                   this.wedge = new SimpleFillSymbol();
-                  this.wedge.setOutline(new 
+                  this.wedge.setOutline(new
                     SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0, 1]), 1));
                   this.wedge.setColor(new Color([0, 0, 0, 0]));
 
                   //set up observer input dijit
                   this.distanceUnit = this.distanceUnitDD.get('value');
                   this.observerHeightUnit = this.observerHeightDD.get('value');
-                  this.coordTool = new CoordInput({nls: this.nls,
-                      appConfig: this.appConfig}, this.observerCoords);      
+                  this.coordTool = new CoordInput({
+                     nls: this.nls,
+                     appConfig: this.appConfig,
+                     style: 'width: calc(100% - 44px)'}, this.observerCoords);
                   this.coordTool.inputCoordinate.formatType = 'DD';
                   this.coordinateFormat = new dijitTooltipDialog({
                     content: new EditOutputCoordinate({nls: this.nls}),
@@ -186,37 +188,37 @@ define([
 
                   if(this.appConfig.theme.name === 'DartTheme')
                   {
-                    dojoDomClass.add(this.coordinateFormat.domNode, 
+                    dojoDomClass.add(this.coordinateFormat.domNode,
                       'dartThemeClaroDijitTooltipContainerOverride');
-                  }                  
-                  
+                  }
+
                   //initiate and add viewshed graphics layer
                   this._initGL();
-                  
+
                   // add extended toolbar
                   this.dt = new DrawFeedBack(this.map,this.coordTool.inputCoordinate.util);
-                  
+
                   //initiate synchronisation events
                   this._syncEvents();
-                    
+
                 } else {
                   this.gpTaskError(this.nls.taskURLInvalid);
                 }
               }), dojoLang.hitch(this, function() {
                 this.gpTaskError(this.nls.taskURLError);
               }));
-        },      
+        },
 
         startup: function(){
             this.busyIndicator = BusyIndicator.create({
-              target: this.domNode.parentNode.parentNode.parentNode, 
+              target: this.domNode.parentNode.parentNode.parentNode,
               backgroundOpacity: 0
             });
             var updateValues = dojoLang.hitch(this,function(a,b,c) {
               this.LA = this.angleUnits.checked?a/17.777777777778:a;
               this.FOV = Math.round(b);
-              this.tooltip.innerHTML = 
-                this.angleUnits.checked?c + " mils": c + " degrees";              
+              this.tooltip.innerHTML =
+                this.angleUnits.checked?c + " mils": c + " degrees";
             });
               $("input.fov").knob({
                 'min':0,
@@ -231,15 +233,15 @@ define([
             this.gp = new Geoprocessor(this.viewshedService);
             this.gp.setOutputSpatialReference({wkid: 102100});
         },
-        
+
         /*
          * initiate and add viewshed graphics layer to map
-         */        
-        _initGL: function () {        
+         */
+        _initGL: function () {
             this.graphicsLayer = new GraphicsLayer();
             this.graphicsLayer.name = "Viewshed Layer";
             this.map.addLayer(this.graphicsLayer);
-        },        
+        },
 
         /*
          * initiate synchronisation events
@@ -251,48 +253,48 @@ define([
                 r = ov = null;
                 if(!this.coordTool.manualInput){this.coordTool.set('value', nv);}
               })),
-            
+
               this.dt.watch('startPoint' , dojoLang.hitch(this, function (r, ov, nv) {
                 r = ov = null;
                 this.coordTool.inputCoordinate.set('coordinateEsriGeometry', nv);
                 this.dt.addStartGraphic(nv, this._ptSym);
-              })),            
-            
+              })),
+
               dojoOn(this.coordTool, 'keyup',dojoLang.hitch(this, this.coordToolKeyWasPressed)),
-              
+
               this.dt.on('draw-complete',dojoLang.hitch(this, this.feedbackDidComplete)),
-              
+
               dojoOn(this.coordinateFormatButton, 'click',dojoLang.hitch(
                 this, this.coordinateFormatButtonWasClicked)),
-              
+
               dojoOn(this.addPointBtn, 'click',dojoLang.hitch(this, this.pointButtonWasClicked)),
-              
+
               dojoOn(this.btnCreate, 'click',dojoLang.hitch(this, this.createButtonWasClicked)),
-              
+
               dojoOn(this.btnClear, "click", dojoLang.hitch(this, this.onClearBtnClicked)),
-              
+
               dojoOn(this.minObsRange,'keyup', dojoLang.hitch(this, this.minObsRangeKeyWasPressed)),
-              
+
               dojoOn(this.FOVInput,'mousemove', dojoLang.hitch(this, this.mouseMoveOverFOVInput)),
-              
+
               dojoOn(this.FOVInput,dojoMouse.leave, dojoLang.hitch(
                 this, this.mouseMoveOutFOVInput)),
-              
+
               dojoOn(this.FOVGroup,dojoMouse.leave, dojoLang.hitch(
                 this, function(){this.tooltip.hidden = true;})),
-              
+
               dojoOn(this.FOVGroup,dojoMouse.enter, dojoLang.hitch(
                 this, this.mouseMoveOverFOVGroup)),
-              
+
               dojoOn(this.FOVInput,dojoMouse.enter, dojoLang.hitch(this, function(){
                 this.tooltip.hidden = true;})),
-              
+
               this.angleUnits.on('change',dojoLang.hitch(this, this.angleUnitsDidChange)),
-              
+
               this.observerHeightDD.on('change',dojoLang.hitch(this, this.distanceUnitDDDidChange)),
-              
+
               this.distanceUnitDD.on('change',dojoLang.hitch(this, this.distanceUnitDDDidChange)),
-              
+
               dojoOn(this.coordinateFormat.content.applyButton, 'click', dojoLang.hitch(
                 this, function () {
                 var fs = this.coordinateFormat.content.formats[this.coordinateFormat.content.ct];
@@ -308,9 +310,9 @@ define([
                 this.coordTool.inputCoordinate.set('formatString', cfs);
                 this.coordTool.inputCoordinate.set('formatType', fv);
                 this.setCoordLabel(fv);
-                dijitPopup.close(this.coordinateFormat);                
+                dijitPopup.close(this.coordinateFormat);
               })),
-              
+
               dojoOn(this.coordinateFormat.content.cancelButton, 'click', dojoLang.hitch(
                 this, function () {
                 dijitPopup.close(this.coordinateFormat);
@@ -318,14 +320,14 @@ define([
             );
         },
 
-        
+
         /*
-         * 
+         *
          */
-        viewshed: function (gpParams) { 
+        viewshed: function (gpParams) {
             this.map.setMapCursor("wait");
 
-            if (!this.isNumeric(gpParams.Left_Azimuth__AZIMUTH1_) && 
+            if (!this.isNumeric(gpParams.Left_Azimuth__AZIMUTH1_) &&
               !this.isNumeric(gpParams.Right_Azimuth__AZIMUTH2_)) {
               var Azimuth1 = parseInt(this.LA - (this.FOV / 2),10);
               if(Azimuth1 < 0)
@@ -345,28 +347,28 @@ define([
               gpParams.Left_Azimuth__AZIMUTH1_ = Azimuth1;
               gpParams.Right_Azimuth__AZIMUTH2_ = Azimuth2;
             }
-            
+
             if(this.isSynchronous){
                 this.busyIndicator.show();
-                this.gp.execute(gpParams, dojoLang.hitch(this, this.synchronousCompleteCallback), 
+                this.gp.execute(gpParams, dojoLang.hitch(this, this.synchronousCompleteCallback),
                   dojoLang.hitch(this, this.gpError));
             } else {
                 this.busyIndicator.show();
-                this.gp.submitJob(gpParams, 
-                  dojoLang.hitch(this, this.aSynchronousCompleteCallback), 
-                  dojoLang.hitch(this, this.callBack), dojoLang.hitch(this, this.gpError)); 
+                this.gp.submitJob(gpParams,
+                  dojoLang.hitch(this, this.aSynchronousCompleteCallback),
+                  dojoLang.hitch(this, this.callBack), dojoLang.hitch(this, this.gpError));
             }
         },
-        
+
         /*
-         * 
+         *
          */
         callBack: function (jobInfo){
         },
-        
+
         /*
-         * 
-         */        
+         *
+         */
         drawWedge: function (graphics,symbol){
           var deferred = new dojoDeferred();
           for (var w = 0, wl = graphics.length; w < wl; w++) {
@@ -375,14 +377,14 @@ define([
               feature.geometry = WebMercatorUtils.webMercatorToGeographic(feature.geometry);
             }
             feature.setSymbol(symbol);
-            this.graphicsLayer.add(feature);                      
+            this.graphicsLayer.add(feature);
           }
           deferred.resolve("success");
           return deferred.promise;
         },
-        
+
         /*
-         * 
+         *
          */
         drawViewshed: function (graphics){
           var deferred = new dojoDeferred();
@@ -400,14 +402,14 @@ define([
             {
               feature.setSymbol(this.notVisibleArea);
               this.graphicsLayer.add(feature);
-            }            
+            }
           }
           deferred.resolve("success");
-          return deferred.promise;          
+          return deferred.promise;
         },
-        
+
         /*
-         * 
+         *
          */
         aSynchronousCompleteCallback: function (jobInfo) {
           if(jobInfo.jobStatus === 'esriJobSucceeded'){
@@ -424,19 +426,19 @@ define([
             this.busyIndicator.hide();
           }
         },
-        
+
         /*
-         * 
+         *
          */
-        synchronousCompleteCallback: function (results) { 
-          this.drawViewshed(results[0].value.features);           
+        synchronousCompleteCallback: function (results) {
+          this.drawViewshed(results[0].value.features);
           this.drawWedge(results[2].value.features,this.fullWedge);
           this.drawWedge(results[1].value.features,this.wedge);
           this.map.setExtent(graphicsUtils.graphicsExtent(this.graphicsLayer.graphics), true);
           this.map.setMapCursor("default");
-          this.busyIndicator.hide(); 
+          this.busyIndicator.hide();
         },
-        
+
         /*
          * catch key press in start point
          */
@@ -463,7 +465,7 @@ define([
             }));
           }
         },
-        
+
         /*
          * catch key press in min obs range, if valid, set max obs range min value accordingly
          */
@@ -471,21 +473,21 @@ define([
           if(this.minObsRange.isValid())
           {
             this.maxObsRange.constraints.min = Number(this.minObsRange.displayedValue) + 0.001;
-            this.maxObsRange.set('value',Number(this.minObsRange.displayedValue) + 1);            
+            this.maxObsRange.set('value',Number(this.minObsRange.displayedValue) + 1);
           }
-        },        
-        
+        },
+
         /*
-         * 
+         *
          */
         mouseMoveOverFOVGroup: function () {
-          if(this.FOVInput.disabled === false) {             
+          if(this.FOVInput.disabled === false) {
             this.tooltip.hidden = false;
-          }          
+          }
         },
-        
+
         /*
-         * 
+         *
          */
         mouseMoveOverFOVInput: function () {
           if(this.FOVInput.disabled === false)
@@ -496,17 +498,17 @@ define([
                      $('#tooltip').offset(cpos);
                   });
                 });
-          }            
+          }
         },
-        
+
         /*
-         * 
+         *
          */
         mouseMoveOutFOVInput: function () {
           this.tooltip.hidden = false;
           this.FOVInput.blur();
         },
-        
+
         /*
          *
          */
@@ -528,42 +530,42 @@ define([
                   "milsValue": 6400
               }
             );
-            $("input.fov").val(360).trigger('change');            
+            $("input.fov").val(360).trigger('change');
           }
         },
-        
+
         /*
          *
          */
         distanceUnitDDDidChange: function () {
           this.distanceUnit = this.distanceUnitDD.get('value');
-          this.observerHeightUnit = this.observerHeightDD.get('value'); 
+          this.observerHeightUnit = this.observerHeightDD.get('value');
         },
-        
+
         /*
          *
          */
         setCoordLabel: function (toType) {
           this.coordInputLabel.innerHTML = dojoString.substitute(
-            'Center Point (${crdType})', {
+            this.nls.observerLocation + ' (${crdType})', {
                 crdType: toType
             });
         },
-        
+
         /*
          *
          */
-        feedbackDidComplete: function () {          
-          dojoDomClass.remove(this.addPointBtn, 'jimu-state-active');
+        feedbackDidComplete: function () {
+          dojoDomClass.remove(this.addPointBtn, 'jimu-edit-active');
           this.dt.deactivate();
           this.map.enableMapNavigation();
           this.enableFOVDial();
         },
-        
+
         /*
          *
          */
-        enableFOVDial: function () { 
+        enableFOVDial: function () {
         if(this.FOVInput.disabled)
           {
           this.FOVInput.disabled = false;
@@ -571,12 +573,12 @@ define([
                 {
                     "fgColor":"#00ff66",
                     "bgColor":"#f37371",
-                    "inputColor":"#ccc"                     
+                    "inputColor":"#ccc"
                 }
             );
           }
         },
-        
+
         /*
          *
          */
@@ -587,31 +589,36 @@ define([
               around: this.coordinateFormatButton
           });
         },
-        
+
         /*
          * Button click event, activate feedback tool
          */
         pointButtonWasClicked: function () {
-          this.coordTool.manualInput = false;
-          dojoTopic.publish('clear-points');
-          this.dt._setTooltipMessage(0);
-          
-          this.map.disableMapNavigation();          
-          this.dt.activate('point');
-          var tooltip = this.dt._tooltip;
-          if (tooltip) {
-            tooltip.innerHTML = 'Click to add observer location';
+          if(dojoDomClass.contains(this.addPointBtn,'jimu-edit-active')) {
+            //already selected so deactivate draw tool
+            this.dt.deactivate();
+            this.map.enableMapNavigation();
+          } else {
+            this.coordTool.manualInput = false;
+            dojoTopic.publish('clear-points');
+            this.dt._setTooltipMessage(0);
+            this.map.disableMapNavigation();
+            this.dt.activate('point');
+            var tooltip = this.dt._tooltip;
+            if (tooltip) {
+              tooltip.innerHTML = 'Click to add observer location';
+            }
           }
-          dojoDomClass.toggle(this.addPointBtn, 'jimu-state-active');
+          dojoDomClass.toggle(this.addPointBtn, 'jimu-edit-active');
         },
-        
+
         /*
          * Button click event, send viewshed request
          */
         createButtonWasClicked: function () {
-          
-          if(this.dt.startGraphic && this.minObsRange.isValid() && 
-            this.maxObsRange.isValid() && this.observerHeight.isValid() && 
+
+          if(this.dt.startGraphic && this.minObsRange.isValid() &&
+            this.maxObsRange.isValid() && this.observerHeight.isValid() &&
             this.FOVInput.value !== 0)
           {
             var newObserver = new Graphic(this.coordTool.inputCoordinate.coordinateEsriGeometry);
@@ -620,17 +627,17 @@ define([
 
             var params = {
               "Input_Observer": featureSet,
-              "Near_Distance__RADIUS1_": 
+              "Near_Distance__RADIUS1_":
                 parseInt(this.coordTool.inputCoordinate.util.convertToMeters(
                   this.minObsRange.value, this.distanceUnit),10),
-              "Maximum_Distance__RADIUS2_": 
+              "Maximum_Distance__RADIUS2_":
                 parseInt(this.coordTool.inputCoordinate.util.convertToMeters(
                   this.maxObsRange.value, this.distanceUnit),10),
-              "Observer_Offset__OFFSETA_": 
+              "Observer_Offset__OFFSETA_":
                 parseInt(this.coordTool.inputCoordinate.util.convertToMeters(
                   this.observerHeight.value, this.observerHeightUnit),10)
             };
-          
+
             this.viewshed(params);
           } else {
             new Message({
@@ -640,7 +647,7 @@ define([
         },
 
         /*
-         * 
+         *
          */
         gpError: function () {
             new Message({
@@ -651,7 +658,7 @@ define([
         },
 
         /*
-         * 
+         *
          */
         gpTaskError: function (message) {
           dojoDomStyle.set(this.controls, 'display', 'none');
@@ -659,9 +666,9 @@ define([
           this.errorText.innerHTML = message;
           dojoDomStyle.set(this.errorText, 'display', '');
         },
-        
+
         /*
-         * 
+         *
          */
         onClearBtnClicked: function () {
             this.graphicsLayer.clear();
@@ -673,17 +680,17 @@ define([
                 {
                     "fgColor":"#ccc",
                     "bgColor":"#ccc",
-                    "inputColor":"#ccc"                     
+                    "inputColor":"#ccc"
                 }
             );
             this.tooltip.hidden = true;
         },
 
         /*
-         * 
+         *
          */
         isNumeric: function(n) {
             return !isNaN(parseFloat(n)) && isFinite(n);
-        }           
+        }
     });
 });

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ define([
         postCreate: function () {
           this.label1.innerHTML = this.numberOfInputs + " " + this.nls.notationsMatch;
           for (var i = 0; i < this.selectOptions.length; i++) {
-              this.comboOptions.addOption({ value: this.selectOptions[i].name , 
+              this.comboOptions.addOption({ value: this.selectOptions[i].name ,
                 label: this.selectOptions[i].notationType});
           }
        }

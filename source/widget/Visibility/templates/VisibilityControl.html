@@ -3,75 +3,86 @@
   <div class="controls" data-dojo-attach-point="controls">
     <div class="controlGroup">
       <label data-dojo-attach-point="coordInputLabel">${nls.observerLocation}</label>
-      <div class="controlItem">
-        <input class="jimu-input coordInput" data-dojo-attach-point="observerCoords" placeholder="Enter Coordinates" />
-        <div class="controlItem paddedLeft">
-          <div class='add-with-icon'>
-            <span title="Format Input" class="jimu-icon jimu-icon-setting" data-dojo-attach-point="coordinateFormatButton"></span>
-          </div>
-          <div class='add-with-icon'>
-            <div title="Add Observer" class="draw" data-dojo-attach-point="addPointBtn"></div>
-          </div>
-        </div>
-      </div>
+      <div>
+        <input class="jimu-input textInput" data-dojo-attach-point="observerCoords" />
+        <div title="${nls.formatIconTooltip}" class="jimu-icon settingBtn" 
+          data-dojo-attach-point="coordinateFormatButton"></div>
+        <div title="${nls.addPointToolTip}" class="jimu-icon editBtn" 
+          data-dojo-attach-point="addPointBtn"></div>
+      </div>        
     </div>
     <div class="controlGroup">
       <label data-dojo-attach-point="FOVLabel">${nls.fieldOfView}</label>
       <div class="center" data-dojo-attach-point="FOVGroup">
-        <input type="text" value="360" class="fov" data-displayInput="true"data-cursor="true" disabled="true" data-dojo-attach-point="FOVInput"/>
+        <input type="text" value="360" class="fov" 
+          data-displayInput="true"data-cursor="true" 
+          disabled="true" data-dojo-attach-point="FOVInput" />
         <p class="cusrortooltip" id="tooltip" data-dojo-attach-point="tooltip" hidden='true'></p>        
       </div>
     </div>
     <div class="controlGroup">
-      <div class="interactive-checkbox"
-                   data-dojo-attach-point="angleUnits" 
-                   data-dojo-type="jimu/dijit/CheckBox"
-                   data-dojo-props='checked:false' 
-                   label='${nls.useMilsText}'></div> 
+      <input class="switch-toggle" data-dojo-type="dijit/form/CheckBox" 
+        data-dojo-attach-point="angleUnits" checked="false" />
+      <label>${nls.useMilsText}</label>                  
     </div>
     <div class="controlGroup">
       <label>${nls.observerHeight}</label>
-        <div class="controlItem">
-          <input
-            data-dojo-type='dijit/form/NumberTextBox'
-            required="true" value="2" data-dojo-props="
-            constraints: {min: 0},
-            invalidMessage: 'Please enter a numeric value.',
-            rangeMessage: 'Invalid Observer Height'"
-            data-dojo-attach-point="observerHeight"></input>
-          <select style="width: 100px" class="controlSpace noResize" data-dojo-type="dijit/form/Select" data-dojo-attach-point="observerHeightDD"></select>          
-
-        </div>
-      </div>        
-      <div class="controlGroup">
-        <label>${nls.minObsDistance}</label>
-          <div class="controlItem">
-            <input
-              data-dojo-type='dijit/form/NumberTextBox'
-              required="true" value="3" data-dojo-props="
-              constraints: {min: 0},
-              invalidMessage: 'Please enter a numeric value.',
-              rangeMessage: 'Invalid Minimum Observable Range'"
-              data-dojo-attach-point="minObsRange"></input>
-            <select style="width: 100px" class="controlSpace noResize" data-dojo-type="dijit/form/Select" data-dojo-attach-point="distanceUnitDD"></select> 
-          </div>
-      </div>        
-      <div class="controlGroup">
-        <label>${nls.maxObsDistance}</label>
-          <div class="controlItem">
-            <input
-              data-dojo-type='dijit/form/NumberTextBox'
-              required="true" value="5" data-dojo-props="
-              constraints: {min: 0},
-              invalidMessage: 'Please enter a numeric value.',
-              rangeMessage: 'Maximum Observable Range must be greater than the Minimum Observable Range'"
-              data-dojo-attach-point="maxObsRange"></input>              
-          </div>
-      </div> 
-  </div>
-  <div class="buttonContainer" data-dojo-attach-point="buttonContainer">
-    <div class="jimu-btn" data-dojo-attach-point="btnCreate">${nls.createBtn}</div>
-    <div class="jimu-btn controlSpace" data-dojo-attach-point="btnClear">${nls.clearBtn}</div>
-  </div>      
+      <div>
+        <input
+          style='width: calc(100% - 105px)',
+          data-dojo-type='dijit/form/NumberTextBox'
+          required="true" value="2" data-dojo-props='
+          constraints: {min: 0},
+          invalidMessage: "${nls.invalidMessage}",
+          rangeMessage: "${nls.observerRangeMessage}"'
+          data-dojo-attach-point="observerHeight">
+        </input>
+        <select style="width: 100px" class="controlSpace noResize" 
+          data-dojo-type="dijit/form/Select" 
+          data-dojo-attach-point="observerHeightDD">
+        </select>
+      </div>
+    </div>
+    <div class="controlGroup">    
+      <label>${nls.minObsDistance}</label>          
+      <div>
+        <input
+          style='width: calc(100% - 105px)',
+          data-dojo-type='dijit/form/NumberTextBox'
+          required="true" value="3" data-dojo-props='
+          constraints: {min: 0},
+          invalidMessage: "${nls.invalidMessage}",
+          rangeMessage: "${nls.minimumRangeMessage}"'
+          data-dojo-attach-point="minObsRange">
+        </input>
+        <select style="width: 100px" class="controlSpace noResize" 
+          data-dojo-type="dijit/form/Select" 
+          data-dojo-attach-point="distanceUnitDD">
+        </select>
+      </div>
+    </div>
+    <div class="controlGroup">
+      <label>${nls.maxObsDistance}</label>          
+      <div>
+        <input
+          style='width: calc(100% - 105px)',
+          data-dojo-type='dijit/form/NumberTextBox'
+          required="true" value="5" data-dojo-props='
+          constraints: {min: 0},
+          invalidMessage: "${nls.invalidMessage}",
+          rangeMessage: "${nls.maximumRangeMessage}"'
+          data-dojo-attach-point="maxObsRange">
+        </input>
+      </div>
+    </div>   
+    <div class="buttonContainer">
+      <div class="btnContainer HalfWidthLeft">
+        <div class="jimu-btn" data-dojo-attach-point="btnCreate">${nls.createBtn}</div>
+      </div>
+      <div class="btnContainer HalfWidthRight">
+        <div class="jimu-btn controlSpace" data-dojo-attach-point="btnClear">${nls.clearBtn}</div>
+      </div>
+    </div>
+  </div>  
 </div>
 
