@@ -116,7 +116,12 @@ define([
               options.push(option);
             }));
             this.observerHeightDD.addOption(options);
-            this.distanceUnitDD.addOption(options);
+            /**
+             * Be sure to clone the options object so that each dijit has its own copy.
+             * Otherwise, unexpected things happen with the selected value.
+             * See https://github.com/Esri/visibility-addin-dotnet/issues/226 for details.
+             */
+            this.distanceUnitDD.addOption(dojoLang.clone(options));
             this.observerHeightDD.set('value','meters');
             this.distanceUnitDD.set('value','kilometers');
 
