@@ -44,6 +44,14 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
+                 <ProgressBar
+                    Name="pbStatus"
+                    Grid.ColumnSpan="3"
+                    Width="Auto"
+                    Margin="3,3,0,0"
+                    HorizontalAlignment="Stretch"
+                    IsIndeterminate="True"
+                    Visibility="{Binding DisplayProgressBarLLOS}" />
                 <TextBlock
                     Grid.ColumnSpan="3"
                     Margin="3,3,0,0"

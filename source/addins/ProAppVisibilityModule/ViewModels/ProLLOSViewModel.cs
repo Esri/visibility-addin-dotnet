@@ -41,7 +41,7 @@ namespace ProAppVisibilityModule.ViewModels
         {
             TargetAddInPoints = new ObservableCollection<AddInPoint>();
             IsActiveTab = true;
-
+            DisplayProgressBarLLOS = Visibility.Hidden;
             // commands
             SubmitCommand = new RelayCommand(async (obj) => 
             {
@@ -119,6 +119,20 @@ namespace ProAppVisibilityModule.ViewModels
             set { }
         }
 
+        private Visibility _displayProgressBar = Visibility.Collapsed;
+        public Visibility DisplayProgressBarLLOS
+        {
+            get
+            {
+                return _displayProgressBar;
+            }
+            set
+            {
+                _displayProgressBar = value;
+                RaisePropertyChanged(() => DisplayProgressBarLLOS);
+            }
+        }
+
         #endregion
 
         #region Commands
@@ -139,13 +153,17 @@ namespace ProAppVisibilityModule.ViewModels
                         // TODO udpate wait cursor/progressor
                         try
                         {
+                            DisplayProgressBarLLOS = Visibility.Visible;
                             await CreateMapElement();
-
                             //await Reset(true);
                         }
                         catch(Exception ex)
                         {
                             Debug.Print(ex.Message);
+                        }
+                        finally
+                        {
+                            DisplayProgressBarLLOS = Visibility.Hidden;
                         }
 
                     });
