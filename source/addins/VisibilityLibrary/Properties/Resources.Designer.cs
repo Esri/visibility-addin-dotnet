@@ -412,6 +412,15 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Import.
+        /// </summary>
+        public static string LabelImport {
+            get {
+                return ResourceManager.GetString("LabelImport", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Input Surface.
         /// </summary>
         public static string LabelInputSurface {
@@ -471,6 +480,15 @@ namespace VisibilityLibrary.Properties {
         public static string LabelOK {
             get {
                 return ResourceManager.GetString("LabelOK", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Paste.
+        /// </summary>
+        public static string LabelPaste {
+            get {
+                return ResourceManager.GetString("LabelPaste", resourceCulture);
             }
         }
         

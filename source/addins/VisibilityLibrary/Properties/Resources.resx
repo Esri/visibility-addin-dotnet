@@ -405,4 +405,10 @@
   <data name="MsgSurfaceLayerNotFound" xml:space="preserve">
     <value>The surface layer was not found. Please try again.</value>
   </data>
+  <data name="LabelImport" xml:space="preserve">
+    <value>Import</value>
+  </data>
+  <data name="LabelPaste" xml:space="preserve">
+    <value>Paste</value>
+  </data>
 </root>

@@ -44,7 +44,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                 <ProgressBar
+                <ProgressBar
                     Name="pbStatus"
                     Grid.ColumnSpan="3"
                     Width="Auto"
@@ -143,7 +143,15 @@
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                     <ListBox.ContextMenu>
-                        <ContextMenu DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Self}}">
+                        <ContextMenu DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Self}}">                           
+                            <MenuItem
+                                Command="{Binding DataContext.ImportCSVFileCommand}"
+                                CommandParameter="{x:Static prop:Resources.ToolModeObserver}"
+                                Header="{x:Static prop:Resources.LabelImport}"/>
+                            <MenuItem
+                                Command="{Binding DataContext.PasteCoordinatesCommand}"
+                                CommandParameter="{x:Static prop:Resources.ToolModeObserver}"
+                                Header="{x:Static prop:Resources.LabelPaste}"/>
                             <MenuItem
                                 Command="{Binding DataContext.DeletePointCommand}"
                                 CommandParameter="{Binding Path=SelectedItems}"
@@ -151,7 +159,7 @@
                             <MenuItem
                                 Command="{Binding DataContext.DeleteAllPointsCommand}"
                                 CommandParameter="{x:Static prop:Resources.ToolModeObserver}"
-                                Header="{x:Static prop:Resources.MenuLabelDeleteAll}" />
+                                Header="{x:Static prop:Resources.MenuLabelDeleteAll}" />                                                      
                         </ContextMenu>
                     </ListBox.ContextMenu>
                     <ListBox.InputBindings>
@@ -228,13 +236,21 @@
                     <ListBox.ContextMenu>
                         <ContextMenu DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Self}}">
                             <MenuItem
+                                Command="{Binding DataContext.ImportCSVFileCommand}"
+                                CommandParameter="{x:Static prop:Resources.ToolModeTarget}"
+                                Header="{x:Static prop:Resources.LabelImport}"/>
+                            <MenuItem
+                                Command="{Binding DataContext.PasteCoordinatesCommand}"
+                                CommandParameter="{x:Static prop:Resources.ToolModeTarget}"
+                                Header="{x:Static prop:Resources.LabelPaste}"/>
+                            <MenuItem
                                 Command="{Binding DataContext.DeletePointCommand}"
                                 CommandParameter="{Binding Path=SelectedItems}"
                                 Header="{x:Static prop:Resources.MenuLabelDelete}" />
                             <MenuItem
                                 Command="{Binding DataContext.DeleteAllPointsCommand}"
                                 CommandParameter="{x:Static prop:Resources.ToolModeTarget}"
-                                Header="{x:Static prop:Resources.MenuLabelDeleteAll}" />
+                                Header="{x:Static prop:Resources.MenuLabelDeleteAll}" />                            
                         </ContextMenu>
                     </ListBox.ContextMenu>
                     <ListBox.InputBindings>
@@ -243,7 +259,7 @@
                             Command="{Binding DeletePointCommand}"
                             CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}}, Path=SelectedItems}" />
                     </ListBox.InputBindings>
-                </ListBox>
+                </ListBox>              
                 <GroupBox
                     Grid.Row="8"
                     Grid.ColumnSpan="4"
@@ -277,7 +293,7 @@
                     Grid.Row="14"
                     Grid.ColumnSpan="3"
                     HorizontalAlignment="Right"
-                    Orientation="Horizontal">
+                    Orientation="Horizontal">                     
                     <Button
                         Grid.Row="14"
                         Grid.Column="0"

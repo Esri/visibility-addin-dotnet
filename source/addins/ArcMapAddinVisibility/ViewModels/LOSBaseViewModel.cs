@@ -1,4 +1,4 @@
-﻿// Copyright 2016 Esri 
+﻿// Copyright 2016 Esri
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,21 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Collections.ObjectModel;
-using System.Collections;
-using ESRI.ArcGIS.Carto;
-using ESRI.ArcGIS.Geodatabase;
+using ArcMapAddinVisibility.Models;
+using CoordinateConversionLibrary.Models;
 using ESRI.ArcGIS.Analyst3D;
-using ESRI.ArcGIS.Geometry;
+using ESRI.ArcGIS.Carto;
 using ESRI.ArcGIS.Display;
+using ESRI.ArcGIS.Geodatabase;
+using ESRI.ArcGIS.Geometry;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Windows;
 using VisibilityLibrary;
 using VisibilityLibrary.Helpers;
-using VisibilityLibrary.Views;
 using VisibilityLibrary.ViewModels;
-using ArcMapAddinVisibility.Models;
+using VisibilityLibrary.Views;
 
 namespace ArcMapAddinVisibility.ViewModels
 {
@@ -37,6 +41,7 @@ namespace ArcMapAddinVisibility.ViewModels
             ObserverOffset = 2.0;
             TargetOffset = 0.0;
             OffsetUnitType = DistanceTypes.Meters;
+            DistanceUnitType = DistanceTypes.Meters;
             AngularUnitType = AngularTypes.DEGREES;
 
             ObserverAddInPoints = new ObservableCollection<AddInPoint>();
@@ -50,12 +55,15 @@ namespace ArcMapAddinVisibility.ViewModels
 
             DeletePointCommand = new RelayCommand(OnDeletePointCommand);
             DeleteAllPointsCommand = new RelayCommand(OnDeleteAllPointsCommand);
+            PasteCoordinatesCommand = new RelayCommand(OnPasteCommand);
+            ImportCSVFileCommand = new RelayCommand(OnImportCSVFileCommand);
             EditPropertiesDialogCommand = new RelayCommand(OnEditPropertiesDialogCommand);
         }
 
         #region Properties
 
         private bool observerToolActive = false;
+
         public bool ObserverToolActive
         {
             get { return observerToolActive; }
@@ -67,6 +75,7 @@ namespace ArcMapAddinVisibility.ViewModels
         }
 
         private bool targetToolActive = false;
+
         public bool TargetToolActive
         {
             get { return targetToolActive; }
@@ -78,6 +87,7 @@ namespace ArcMapAddinVisibility.ViewModels
         }
 
         private bool isRunning = false;
+
         public bool IsRunning
         {
             get { return isRunning; }
@@ -89,6 +99,7 @@ namespace ArcMapAddinVisibility.ViewModels
         }
 
         private double? observerOffset;
+
         public double? ObserverOffset
         {
             get { return observerOffset; }
@@ -101,7 +112,9 @@ namespace ArcMapAddinVisibility.ViewModels
                     throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEInvalidInput);
             }
         }
+
         private double? targetOffset;
+
         public double? TargetOffset
         {
             get { return targetOffset; }
@@ -116,6 +129,7 @@ namespace ArcMapAddinVisibility.ViewModels
         }
 
         private MapPointToolMode toolMode;
+
         public MapPointToolMode ToolMode
         {
             get { return toolMode; }
@@ -146,8 +160,9 @@ namespace ArcMapAddinVisibility.ViewModels
         public ObservableCollection<string> SurfaceLayerNames { get; set; }
         public string SelectedSurfaceName { get; set; }
         public DistanceTypes OffsetUnitType { get; set; }
+        public DistanceTypes DistanceUnitType { get; set; }
         public AngularTypes AngularUnitType { get; set; }
-        
+
         #endregion
 
         #region Commands
@@ -155,6 +170,8 @@ namespace ArcMapAddinVisibility.ViewModels
         public RelayCommand DeletePointCommand { get; set; }
         public RelayCommand DeleteAllPointsCommand { get; set; }
         public RelayCommand EditPropertiesDialogCommand { get; set; }
+        public RelayCommand PasteCoordinatesCommand { get; set; }
+        public RelayCommand ImportCSVFileCommand { get; set; }
 
         /// <summary>
         /// Command method to delete points
@@ -189,6 +206,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
             dlg.ShowDialog();
         }
+
         private void DeletePoints(List<AddInPoint> observers)
         {
             if (observers == null || !observers.Any())
@@ -202,6 +220,104 @@ namespace ArcMapAddinVisibility.ViewModels
             {
                 ObserverAddInPoints.Remove(point);
             }
+        }
+
+        /// <summary>
+        /// Command method to import points from csv file.
+        /// </summary>
+        /// <param name="obj"></param>
+        public virtual void OnImportCSVFileCommand(object obj)
+        {
+            var mode = obj.ToString();
+            CoordinateConversionLibraryConfig.AddInConfig.DisplayAmbiguousCoordsDlg = false;
+
+            var fileDialog = new Microsoft.Win32.OpenFileDialog();
+            fileDialog.CheckFileExists = true;
+            fileDialog.CheckPathExists = true;
+            fileDialog.Filter = "csv files|*.csv";
+
+            // attemp to import
+            var fieldVM = new CoordinateConversionLibrary.ViewModels.SelectCoordinateFieldsViewModel();
+            var result = fileDialog.ShowDialog();
+            if (result.HasValue && result.Value == true)
+            {
+                var dlg = new CoordinateConversionLibrary.Views.SelectCoordinateFieldsView();
+                using (Stream s = new FileStream(fileDialog.FileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                {
+                    var headers = CoordinateConversionLibrary.Helpers.ImportCSV.GetHeaders(s);
+                    foreach (var header in headers)
+                    {
+                        fieldVM.AvailableFields.Add(header);
+                        System.Diagnostics.Debug.WriteLine("header : {0}", header);
+                    }
+                    dlg.DataContext = fieldVM;
+                }
+                if (dlg.ShowDialog() == true)
+                {
+                    using (Stream s = new FileStream(fileDialog.FileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                    {
+                        var lists = CoordinateConversionLibrary.Helpers.ImportCSV.Import<CoordinateConversionLibrary.ViewModels.ImportCoordinatesList>(s, fieldVM.SelectedFields.ToArray());
+                          
+                        foreach (var item in lists)
+                        {
+                            string outFormattedString = string.Empty;
+                            var sb = new StringBuilder();
+                            sb.Append(item.lat.Trim());
+                            if (fieldVM.UseTwoFields)
+                                sb.Append(string.Format(" {0}", item.lon.Trim()));
+
+                            string coordinate = sb.ToString();
+                            CoordinateConversionLibrary.Models.CoordinateType ccType = CoordinateConversionLibrary.Helpers.ConversionUtils.GetCoordinateString(coordinate, out outFormattedString);
+                            IPoint point = (ccType != CoordinateConversionLibrary.Models.CoordinateType.Unknown) ? GetPointFromString(outFormattedString) : null;
+                            if (mode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
+                            {
+                                ToolMode = MapPointToolMode.Observer;
+                                Point1 = point; 
+                                OnNewMapPointEvent(Point1);
+                            }
+                            else if (mode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
+                            {
+                                ToolMode = MapPointToolMode.Target;
+                                Point2 = point; 
+                                OnNewMapPointEvent(Point2);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Command method to paste points from clipboard.
+        /// </summary>
+        /// <param name="obj"></param>
+        internal virtual void OnPasteCommand(object obj)
+        {
+            var mode = obj.ToString();
+
+            if (string.IsNullOrWhiteSpace(mode))
+                return;
+
+            var input = Clipboard.GetText().Trim();
+            string[] lines = input.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+            var coordinates = new List<string>();
+            foreach (var item in lines)
+            {
+                string outFormattedString = string.Empty;
+                string coordinate = item.Trim().ToString();
+                CoordinateConversionLibrary.Models.CoordinateType ccType = CoordinateConversionLibrary.Helpers.ConversionUtils.GetCoordinateString(coordinate, out outFormattedString);
+                IPoint point = (ccType != CoordinateConversionLibrary.Models.CoordinateType.Unknown) ? GetPointFromString(outFormattedString) : null;
+                if (mode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
+                {
+                    ToolMode = MapPointToolMode.Observer;
+                    Point1 = point; OnNewMapPointEvent(Point1);
+                }
+                else if (mode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
+                {
+                    ToolMode = MapPointToolMode.Target;
+                    Point2 = point; OnNewMapPointEvent(Point2);
+                }
+            }           
         }
 
         #endregion
@@ -277,13 +393,14 @@ namespace ArcMapAddinVisibility.ViewModels
             {
                 // in tool mode "Observer" we add observer points
                 // otherwise ignore
-                
+
                 var color = new RgbColorClass() { Blue = 255 } as IColor;
                 var guid = AddGraphicToMap(point, color, true);
                 var addInPoint = new AddInPoint() { Point = point, GUID = guid };
                 ObserverAddInPoints.Insert(0, addInPoint);
             }
         }
+
         internal override void OnMouseMoveEvent(object obj)
         {
             if (!IsActiveTab)
@@ -294,17 +411,18 @@ namespace ArcMapAddinVisibility.ViewModels
             if (point == null)
                 return;
 
-            if(ToolMode == MapPointToolMode.Observer)
+            if (ToolMode == MapPointToolMode.Observer)
             {
                 Point1Formatted = string.Empty;
                 Point1 = point;
             }
-            else if(ToolMode == MapPointToolMode.Target)
+            else if (ToolMode == MapPointToolMode.Target)
             {
                 Point2Formatted = string.Empty;
                 Point2 = point;
             }
         }
+
         /// <summary>
         /// Handler for "Enter" key press
         /// If pressed when input textbox for observer or target is focused
@@ -316,7 +434,7 @@ namespace ArcMapAddinVisibility.ViewModels
         {
             var keyCommandMode = obj as string;
 
-            if(keyCommandMode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
+            if (keyCommandMode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
             {
                 ToolMode = MapPointToolMode.Observer;
                 OnNewMapPointEvent(Point1);
@@ -332,6 +450,7 @@ namespace ArcMapAddinVisibility.ViewModels
                 base.OnEnterKeyCommand(obj);
             }
         }
+
         /// <summary>
         /// Method to check to see point is withing the currently selected surface
         /// returns true if there is no surface selected or point is contained by layer AOI
@@ -452,7 +571,7 @@ namespace ArcMapAddinVisibility.ViewModels
                 var mosaicLayer = layer as IMosaicLayer;
                 var rasterLayer = layer as IRasterLayer;
 
-                if ((mosaicLayer != null) && (mosaicLayer.PreviewLayer != null) && 
+                if ((mosaicLayer != null) && (mosaicLayer.PreviewLayer != null) &&
                     (mosaicLayer.PreviewLayer.Raster != null))
                 {
                     rasterSurface.PutRaster(mosaicLayer.PreviewLayer.Raster, 0);
@@ -520,7 +639,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
             var layer = layers.Next();
 
-            while(layer != null)
+            while (layer != null)
             {
                 try
                 {
@@ -600,7 +719,7 @@ namespace ArcMapAddinVisibility.ViewModels
         }
 
         /// <summary>
-        /// Method used to reset the currently selected surfacename 
+        /// Method used to reset the currently selected surfacename
         /// Use when toc items or map changes, on tab selection changed, etc
         /// </summary>
         /// <param name="map">IMap</param>

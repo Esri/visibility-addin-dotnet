@@ -258,7 +258,7 @@ namespace ProAppVisibilityModule.ViewModels
         {
             base.OnDeleteAllPointsCommand(obj);
         }
-
+      
         public override bool CanCreateElement
         {
             get
