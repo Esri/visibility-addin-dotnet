@@ -565,6 +565,15 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to LLOS.
+        /// </summary>
+        public static string LLOSFeatureDatasetName {
+            get {
+                return ResourceManager.GetString("LLOSFeatureDatasetName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to LLOS_Observers.
         /// </summary>
         public static string LLOSObserversLayerName {
@@ -750,6 +759,15 @@ namespace VisibilityLibrary.Properties {
         public static string RLOSConvertedPolygonsLayerName {
             get {
                 return ResourceManager.GetString("RLOSConvertedPolygonsLayerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to RLOS.
+        /// </summary>
+        public static string RLOSFeatureDatasetName {
+            get {
+                return ResourceManager.GetString("RLOSFeatureDatasetName", resourceCulture);
             }
         }
         

@@ -43,11 +43,11 @@ namespace ProAppVisibilityModule.Helpers
         /// <item>POLYLINE</item>
         /// <item>POLYGON</item></list></param>
         /// <returns></returns>
-        public static async Task<bool> CreateLayer(string featureclassName, string featureclassType, bool zEnabled, bool addToMap)
+        public static async Task<bool> CreateLayer(string featureDatasetName, string featureclassName, string featureclassType, bool zEnabled, bool addToMap)
         {
             List<object> arguments = new List<object>();
             // store the results in the default geodatabase
-            arguments.Add(CoreModule.CurrentProject.DefaultGeodatabasePath);
+            arguments.Add(CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + featureDatasetName);
             // name of the feature class
             arguments.Add(featureclassName);
             // type of geometry
@@ -57,7 +57,7 @@ namespace ProAppVisibilityModule.Helpers
             // m values
             arguments.Add("DISABLED");
             // z values
-            if(zEnabled)
+            if (zEnabled)
                 arguments.Add("ENABLED");
             else
                 arguments.Add("DISABLED");
@@ -66,14 +66,37 @@ namespace ProAppVisibilityModule.Helpers
 
             var environments = Geoprocessing.MakeEnvironmentArray(overwriteoutput: true);
 
-            IGPResult result = await Geoprocessing.ExecuteToolAsync("CreateFeatureclass_management", 
-                Geoprocessing.MakeValueArray(arguments.ToArray()), 
-                environments, 
+            IGPResult result = await Geoprocessing.ExecuteToolAsync("CreateFeatureclass_management",
+                Geoprocessing.MakeValueArray(arguments.ToArray()),
+                environments,
                 null,
                 null,
                 addToMap ? GPExecuteToolFlags.Default : GPExecuteToolFlags.None);
 
             return isResultGoodAndReportMessages(result, "CreateFeatureclass_management", arguments);
+        }
+
+        public static async Task<bool> CreateFeatureDataset(string featureclassName)
+        {
+            List<object> arguments = new List<object>();
+            // store the results in the default geodatabase
+            arguments.Add(CoreModule.CurrentProject.DefaultGeodatabasePath);
+            // name of the feature class
+            arguments.Add(featureclassName);
+
+
+            arguments.Add(MapView.Active.Map.SpatialReference);
+
+            var environments = Geoprocessing.MakeEnvironmentArray();
+
+            IGPResult result = await Geoprocessing.ExecuteToolAsync("CreateFeatureDataset_management",
+                Geoprocessing.MakeValueArray(arguments.ToArray()),
+                environments,
+                null,
+                null,
+                GPExecuteToolFlags.None);
+
+            return isResultGoodAndReportMessages(result, "CreateFeatureDataset_management", arguments);
         }
 
         /// <summary>
@@ -109,7 +132,7 @@ namespace ProAppVisibilityModule.Helpers
 
             IGPResult result = await Geoprocessing.ExecuteToolAsync("AddField_management", Geoprocessing.MakeValueArray(arguments.ToArray()));
         }
-        public static async Task JoinField(string inData, string inField, string joinTable, string joinField, string [] fields)
+        public static async Task JoinField(string inData, string inField, string joinTable, string joinField, string[] fields)
         {
             List<object> arguments = new List<object>();
             // in_data
@@ -135,10 +158,10 @@ namespace ProAppVisibilityModule.Helpers
         /// <param name="observerOffsetFieldName"></param>
         /// <param name="targetOffsetFieldName"></param>
         /// <returns></returns>
-        public static async Task<bool> CreateSightLines(string observersFeatureLayer, 
-                                                    string targetsFeatureLayer, 
-                                                    string outLineFeatureLayer, 
-                                                    string observerOffsetFieldName, 
+        public static async Task<bool> CreateSightLines(string observersFeatureLayer,
+                                                    string targetsFeatureLayer,
+                                                    string outLineFeatureLayer,
+                                                    string observerOffsetFieldName,
                                                     string targetOffsetFieldName)
         {
             List<object> arguments = new List<object>();
@@ -205,8 +228,8 @@ namespace ProAppVisibilityModule.Helpers
         /// <param name="lineFeatureClassName"></param>
         /// <param name="outLOSFeatureClass"></param>
         /// <returns></returns>
-        public static async Task<bool> CreateLOS(string surfaceName, 
-                                            string lineFeatureClassName, 
+        public static async Task<bool> CreateLOS(string surfaceName,
+                                            string lineFeatureClassName,
                                             string outLOSFeatureClass)
         {
             List<object> arguments = new List<object>();
@@ -276,7 +299,7 @@ namespace ProAppVisibilityModule.Helpers
         /// <param name="rasterField">field from raster </param>
         /// <param name="intersectMaskFeatureClass">(Optional)If present, the layer to intersect with the output polygon layer</param>
         /// <returns>success</returns>
-        public static async Task<bool> IntersectOutput(string inputRasterLayer, string outputPolygonLayer, 
+        public static async Task<bool> IntersectOutput(string inputRasterLayer, string outputPolygonLayer,
             bool simplify, string rasterField, string intersectMaskFeatureClass = "")
         {
             if (string.IsNullOrEmpty(inputRasterLayer) || string.IsNullOrEmpty(outputPolygonLayer))
@@ -306,7 +329,7 @@ namespace ProAppVisibilityModule.Helpers
 
             var environments = Geoprocessing.MakeEnvironmentArray(overwriteoutput: true);
 
-            IGPResult result = await Geoprocessing.ExecuteToolAsync("RasterToPolygon_conversion", 
+            IGPResult result = await Geoprocessing.ExecuteToolAsync("RasterToPolygon_conversion",
                 Geoprocessing.MakeValueArray(arguments.ToArray()), environments,
                 null, null, addToMap ? GPExecuteToolFlags.Default : GPExecuteToolFlags.None);
 
@@ -325,10 +348,10 @@ namespace ProAppVisibilityModule.Helpers
             // out_polygon_features
             argumentsIntersect.Add(outputPolygonLayer);
             // Don't include FIDs in join (or they will both appear in output)
-            argumentsIntersect.Add("NO_FID"); 
+            argumentsIntersect.Add("NO_FID");
 
             // if non-empty, intersect with intersectMaskFeatureClass
-            result = await Geoprocessing.ExecuteToolAsync("Intersect_analysis", 
+            result = await Geoprocessing.ExecuteToolAsync("Intersect_analysis",
                 Geoprocessing.MakeValueArray(argumentsIntersect.ToArray()), environments);
 
             return isResultGoodAndReportMessages(result, "Intersect_analysis", arguments);
@@ -352,8 +375,8 @@ namespace ProAppVisibilityModule.Helpers
         /// <param name="environments">geoprocessing environments</param>
         /// <param name="addToMap">add to map or not</param>
         /// <returns></returns>
-        public static async Task<bool> CreateVisibility(string surfaceName, string observerFeatureClassName, string outRLOSFeatureClass, 
-                                                    double observerOffset, double surfaceOffset, 
+        public static async Task<bool> CreateVisibility(string surfaceName, string observerFeatureClassName, string outRLOSFeatureClass,
+                                                    double observerOffset, double surfaceOffset,
                                                     double minDistance, double maxDistance,
                                                     double horizontalStartAngle, double horizontalEndAngle,
                                                     double verticalUpperAngle, double verticalLowerAngle,
@@ -462,7 +485,7 @@ namespace ProAppVisibilityModule.Helpers
 
                 int cnt = 1;
                 foreach (var gc in gridcodeUniqueList)
-                {    
+                {
                     colors.MoveNext();
 
                     List<CIMUniqueValue> visValues = new List<CIMUniqueValue>();
@@ -475,7 +498,7 @@ namespace ProAppVisibilityModule.Helpers
                     string label = "Visible by " + cnt.ToString() + observerString;
                     var visClass = new CIMUniqueValueClass()
                     {
-                        Values = visValues.ToArray(),               
+                        Values = visValues.ToArray(),
                         Label = label,
                         Visible = true,
                         Editable = true,
@@ -996,16 +1019,18 @@ namespace ProAppVisibilityModule.Helpers
                 lc.SetExpressionEngine(LabelExpressionEngine.VBScript);
                 if (MapView.Active.Map.GetLabelEngine() == LabelEngine.Standard)
                 {
-                    lc.SetStandardLabelPlacementProperties(new CIMStandardLabelPlacementProperties() 
-                    { 
-                        PointPlacementMethod = StandardPointPlacementMethod.OnTopPoint, FeatureType = LabelFeatureType.Point
+                    lc.SetStandardLabelPlacementProperties(new CIMStandardLabelPlacementProperties()
+                    {
+                        PointPlacementMethod = StandardPointPlacementMethod.OnTopPoint,
+                        FeatureType = LabelFeatureType.Point
                     });
                 }
                 else
                 {
                     lc.SetMaplexLabelPlacementProperties(new CIMMaplexLabelPlacementProperties()
                     {
-                        PointPlacementMethod = MaplexPointPlacementMethod.CenteredOnPoint, FeatureType = LabelFeatureType.Point
+                        PointPlacementMethod = MaplexPointPlacementMethod.CenteredOnPoint,
+                        FeatureType = LabelFeatureType.Point
                     });
                 }
 
@@ -1024,7 +1049,7 @@ namespace ProAppVisibilityModule.Helpers
                     return;
 
                 List<string> layerIds = new List<string>();
-                
+
                 foreach (Layer layer in layerList)
                 {
                     var layerToAddDef = layer.GetDefinition();
@@ -1046,7 +1071,25 @@ namespace ProAppVisibilityModule.Helpers
                 }
 
                 mapDef.Layers = maplayerIds.ToArray();
-                MapView.Active.Map.SetDefinition(mapDef);   
+                MapView.Active.Map.SetDefinition(mapDef);
+            });
+        }
+
+        public static async Task MoveLayersToGroupLayer(List<Layer> layerList, string groupLayerName)
+        {
+            await QueuedTask.Run(() =>
+            {
+                GroupLayer groupLayer = LayerFactory.Instance.CreateGroupLayer(MapView.Active.Map,
+                                        0,  // add to the top ?
+                                        groupLayerName);
+                for (int i = layerList.Count - 1; i >= 0; i--)
+                {
+                    groupLayer.MoveLayer(layerList[i], 0);
+                }
+            });
+            await ArcGIS.Desktop.Framework.FrameworkApplication.Current.Dispatcher.Invoke(async () =>
+            {
+                await ArcGIS.Desktop.Core.Project.Current.SaveAsync();
             });
         }
 
@@ -1122,8 +1165,8 @@ namespace ProAppVisibilityModule.Helpers
             });
         }
 
-        public static async Task CreateVisCodeRenderer(FeatureLayer featureLayer, string visField, 
-                                                        int visCodeVisible, int visCodeNotVisible, 
+        public static async Task CreateVisCodeRenderer(FeatureLayer featureLayer, string visField,
+                                                        int visCodeVisible, int visCodeNotVisible,
                                                         CIMColor visibleColor, CIMColor notVisibleColor,
                                                         double visibleSize, double notVisibleSize)
         {

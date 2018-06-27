@@ -411,4 +411,10 @@
   <data name="LabelPaste" xml:space="preserve">
     <value>Paste</value>
   </data>
+  <data name="LLOSFeatureDatasetName" xml:space="preserve">
+    <value>LLOS</value>
+  </data>
+  <data name="RLOSFeatureDatasetName" xml:space="preserve">
+    <value>RLOS</value>
+  </data>
 </root>
