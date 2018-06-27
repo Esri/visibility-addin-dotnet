@@ -257,7 +257,7 @@ namespace ArcMapAddinVisibility.ViewModels
                     using (Stream s = new FileStream(fileDialog.FileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                     {
                         var lists = CoordinateConversionLibrary.Helpers.ImportCSV.Import<CoordinateConversionLibrary.ViewModels.ImportCoordinatesList>(s, fieldVM.SelectedFields.ToArray());
-                          
+
                         foreach (var item in lists)
                         {
                             string outFormattedString = string.Empty;
@@ -269,17 +269,24 @@ namespace ArcMapAddinVisibility.ViewModels
                             string coordinate = sb.ToString();
                             CoordinateConversionLibrary.Models.CoordinateType ccType = CoordinateConversionLibrary.Helpers.ConversionUtils.GetCoordinateString(coordinate, out outFormattedString);
                             IPoint point = (ccType != CoordinateConversionLibrary.Models.CoordinateType.Unknown) ? GetPointFromString(outFormattedString) : null;
-                            if (mode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
+                            if (point != null)
                             {
-                                ToolMode = MapPointToolMode.Observer;
-                                Point1 = point; 
-                                OnNewMapPointEvent(Point1);
-                            }
-                            else if (mode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
-                            {
-                                ToolMode = MapPointToolMode.Target;
-                                Point2 = point; 
-                                OnNewMapPointEvent(Point2);
+                                if (mode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
+                                {
+                                    ToolMode = MapPointToolMode.Observer;
+                                    Point1 = point;
+                                    if ((ArcMap.Document != null) && (ArcMap.Document.FocusMap != null))
+                                        point.Project(ArcMap.Document.FocusMap.SpatialReference);
+                                    OnNewMapPointEvent(Point1);
+                                }
+                                else if (mode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
+                                {
+                                    ToolMode = MapPointToolMode.Target;
+                                    Point2 = point;
+                                    if ((ArcMap.Document != null) && (ArcMap.Document.FocusMap != null))
+                                        point.Project(ArcMap.Document.FocusMap.SpatialReference);
+                                    OnNewMapPointEvent(Point2);
+                                }
                             }
                         }
                     }
@@ -307,20 +314,29 @@ namespace ArcMapAddinVisibility.ViewModels
                 string coordinate = item.Trim().ToString();
                 CoordinateConversionLibrary.Models.CoordinateType ccType = CoordinateConversionLibrary.Helpers.ConversionUtils.GetCoordinateString(coordinate, out outFormattedString);
                 IPoint point = (ccType != CoordinateConversionLibrary.Models.CoordinateType.Unknown) ? GetPointFromString(outFormattedString) : null;
-                if (mode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
+                if (point != null)
                 {
-                    ToolMode = MapPointToolMode.Observer;
-                    Point1 = point; OnNewMapPointEvent(Point1);
+                    if (mode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
+                    {
+                        ToolMode = MapPointToolMode.Observer;
+                        Point1 = point;
+                        if ((ArcMap.Document != null) && (ArcMap.Document.FocusMap != null))
+                            point.Project(ArcMap.Document.FocusMap.SpatialReference);
+                        OnNewMapPointEvent(Point1);
+                    }
+                    else if (mode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
+                    {
+                        ToolMode = MapPointToolMode.Target;
+                        Point2 = point;
+                        if ((ArcMap.Document != null) && (ArcMap.Document.FocusMap != null))
+                            point.Project(ArcMap.Document.FocusMap.SpatialReference);
+                        OnNewMapPointEvent(Point2);
+                    }
                 }
-                else if (mode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
-                {
-                    ToolMode = MapPointToolMode.Target;
-                    Point2 = point; OnNewMapPointEvent(Point2);
-                }
-            }           
+            }
         }
 
-        #endregion
+        #endregion 
 
         #region Event handlers
 
