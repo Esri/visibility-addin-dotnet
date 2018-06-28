@@ -26,6 +26,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows;
 using VisibilityLibrary;
 using VisibilityLibrary.Helpers;
@@ -268,6 +269,15 @@ namespace ArcMapAddinVisibility.ViewModels
 
                             string coordinate = sb.ToString();
                             CoordinateConversionLibrary.Models.CoordinateType ccType = CoordinateConversionLibrary.Helpers.ConversionUtils.GetCoordinateString(coordinate, out outFormattedString);
+                            if (ccType == CoordinateConversionLibrary.Models.CoordinateType.Unknown)
+                            {
+                                Regex regexMercator = new Regex(@"^(?<latitude>\-?\d+\.?\d*)[+,;:\s]*(?<longitude>\-?\d+\.?\d*)");
+                                var matchMercator = regexMercator.Match(coordinate);
+                                if (matchMercator.Success && matchMercator.Length == coordinate.Length)
+                                {
+                                    ccType = CoordinateType.DD; 
+                                }
+                            }
                             IPoint point = (ccType != CoordinateConversionLibrary.Models.CoordinateType.Unknown) ? GetPointFromString(outFormattedString) : null;
                             if (point != null)
                             {
@@ -313,6 +323,15 @@ namespace ArcMapAddinVisibility.ViewModels
                 string outFormattedString = string.Empty;
                 string coordinate = item.Trim().ToString();
                 CoordinateConversionLibrary.Models.CoordinateType ccType = CoordinateConversionLibrary.Helpers.ConversionUtils.GetCoordinateString(coordinate, out outFormattedString);
+                if (ccType == CoordinateConversionLibrary.Models.CoordinateType.Unknown)
+                {
+                    Regex regexMercator = new Regex(@"^(?<latitude>\-?\d+\.?\d*)[+,;:\s]*(?<longitude>\-?\d+\.?\d*)");
+                    var matchMercator = regexMercator.Match(coordinate);
+                    if (matchMercator.Success && matchMercator.Length == coordinate.Length)
+                    {
+                        ccType = CoordinateType.DD;
+                    }
+                }
                 IPoint point = (ccType != CoordinateConversionLibrary.Models.CoordinateType.Unknown) ? GetPointFromString(outFormattedString) : null;
                 if (point != null)
                 {
@@ -336,7 +355,7 @@ namespace ArcMapAddinVisibility.ViewModels
             }
         }
 
-        #endregion 
+        #endregion
 
         #region Event handlers
 

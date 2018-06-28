@@ -26,6 +26,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using VisibilityLibrary;
@@ -271,6 +272,15 @@ namespace ProAppVisibilityModule.ViewModels
 
                             string coordinate = sb.ToString();
                             CoordinateConversionLibrary.Models.CoordinateType ccType = CoordinateConversionLibrary.Helpers.ConversionUtils.GetCoordinateString(coordinate, out outFormattedString);
+                            if (ccType == CoordinateConversionLibrary.Models.CoordinateType.Unknown)
+                            {
+                                Regex regexMercator = new Regex(@"^(?<latitude>\-?\d+\.?\d*)[+,;:\s]*(?<longitude>\-?\d+\.?\d*)");
+                                var matchMercator = regexMercator.Match(coordinate);
+                                if (matchMercator.Success && matchMercator.Length == coordinate.Length)
+                                {
+                                    ccType = CoordinateConversionLibrary.Models.CoordinateType.DD;
+                                }
+                            }
                             MapPoint point = (ccType != CoordinateConversionLibrary.Models.CoordinateType.Unknown) ? GetMapPointFromString(outFormattedString) : null;
                             if (point != null)
                             {
@@ -308,6 +318,15 @@ namespace ProAppVisibilityModule.ViewModels
                 string outFormattedString = string.Empty;
                 string coordinate = item.Trim().ToString();
                 CoordinateConversionLibrary.Models.CoordinateType ccType = CoordinateConversionLibrary.Helpers.ConversionUtils.GetCoordinateString(coordinate, out outFormattedString);
+                if (ccType == CoordinateConversionLibrary.Models.CoordinateType.Unknown)
+                {
+                    Regex regexMercator = new Regex(@"^(?<latitude>\-?\d+\.?\d*)[+,;:\s]*(?<longitude>\-?\d+\.?\d*)");
+                    var matchMercator = regexMercator.Match(coordinate);
+                    if (matchMercator.Success && matchMercator.Length == coordinate.Length)
+                    {
+                        ccType = CoordinateConversionLibrary.Models.CoordinateType.DD;
+                    }
+                }
                 MapPoint point = (ccType != CoordinateConversionLibrary.Models.CoordinateType.Unknown) ? GetMapPointFromString(outFormattedString) : null;
                 if (point != null)
                 {
