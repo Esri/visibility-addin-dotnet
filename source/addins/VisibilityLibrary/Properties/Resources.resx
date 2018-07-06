@@ -417,4 +417,7 @@
   <data name="RLOSFeatureDatasetName" xml:space="preserve">
     <value>RLOS</value>
   </data>
+  <data name="MsgNoDataFound" xml:space="preserve">
+    <value>No data found</value>
+  </data>
 </root>

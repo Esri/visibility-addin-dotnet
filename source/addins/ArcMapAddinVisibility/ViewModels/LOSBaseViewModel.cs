@@ -1,4 +1,4 @@
-﻿// Copyright 2016 Esri
+﻿// Copyright 2016 Esri 
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -246,12 +246,20 @@ namespace ArcMapAddinVisibility.ViewModels
                 using (Stream s = new FileStream(fileDialog.FileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
                     var headers = CoordinateConversionLibrary.Helpers.ImportCSV.GetHeaders(s);
-                    foreach (var header in headers)
+                    if (headers != null)
                     {
-                        fieldVM.AvailableFields.Add(header);
-                        System.Diagnostics.Debug.WriteLine("header : {0}", header);
+                        foreach (var header in headers)
+                        {
+                            fieldVM.AvailableFields.Add(header);
+                            System.Diagnostics.Debug.WriteLine("header : {0}", header);
+                        }
+                        dlg.DataContext = fieldVM;
                     }
-                    dlg.DataContext = fieldVM;
+                    else
+                    {
+                        System.Windows.Forms.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgNoDataFound);
+                        return;
+                    }
                 }
                 if (dlg.ShowDialog() == true)
                 {
@@ -275,7 +283,7 @@ namespace ArcMapAddinVisibility.ViewModels
                                 var matchMercator = regexMercator.Match(coordinate);
                                 if (matchMercator.Success && matchMercator.Length == coordinate.Length)
                                 {
-                                    ccType = CoordinateType.DD; 
+                                    ccType = CoordinateType.DD;
                                 }
                             }
                             IPoint point = (ccType != CoordinateConversionLibrary.Models.CoordinateType.Unknown) ? GetPointFromString(outFormattedString) : null;
@@ -754,7 +762,7 @@ namespace ArcMapAddinVisibility.ViewModels
         }
 
         /// <summary>
-        /// Method used to reset the currently selected surfacename
+        /// Method used to reset the currently selected surfacename 
         /// Use when toc items or map changes, on tab selection changed, etc
         /// </summary>
         /// <param name="map">IMap</param>

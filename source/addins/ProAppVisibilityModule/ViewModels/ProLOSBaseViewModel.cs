@@ -1,4 +1,4 @@
-﻿// Copyright 2016 Esri
+﻿// Copyright 2016 Esri 
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -248,12 +248,21 @@ namespace ProAppVisibilityModule.ViewModels
                 using (Stream s = new FileStream(fileDialog.FileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
                     var headers = CoordinateConversionLibrary.Helpers.ImportCSV.GetHeaders(s);
-                    foreach (var header in headers)
+                    if (headers != null)
                     {
-                        fieldVM.AvailableFields.Add(header);
-                        System.Diagnostics.Debug.WriteLine("header : {0}", header);
+                        foreach (var header in headers)
+                        {
+                            fieldVM.AvailableFields.Add(header);
+                            System.Diagnostics.Debug.WriteLine("header : {0}", header);
+                        }
+                        dlg.DataContext = fieldVM;
                     }
-                    dlg.DataContext = fieldVM;
+                    else
+                    {
+                        ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgNoDataFound,
+                                                                      VisibilityLibrary.Properties.Resources.CaptionError);
+                        return;
+                    }
                 }
                 if (dlg.ShowDialog() == true)
                 {
@@ -446,9 +455,9 @@ namespace ProAppVisibilityModule.ViewModels
                 var guid = await AddGraphicToMap(point, ColorFactory.Instance.BlueRGB, true, 5.0);
                 var addInPoint = new AddInPoint() { Point = point, GUID = guid };
                 Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        ObserverAddInPoints.Insert(0, addInPoint);
-                    });
+                {
+                    ObserverAddInPoints.Insert(0, addInPoint);
+                });
             }
         }
 
@@ -496,7 +505,7 @@ namespace ProAppVisibilityModule.ViewModels
 
                 // WORKAROUND/BUG:
                 // QueryExtent() is taking several minutes to return from this call with ImageServiceLayer
-                // during which MCT can't do anything, so for now just return true,
+                // during which MCT can't do anything, so for now just return true, 
                 // fix this in the future when QueryExtent() or alternate works with ImageServiceLayer
                 if (layer is ImageServiceLayer)
                 {
@@ -539,11 +548,11 @@ namespace ProAppVisibilityModule.ViewModels
         internal async Task<bool> IsPointWithinExtent(MapPoint point, Envelope env)
         {
             var result = await QueuedTask.Run(() =>
-                {
-                    Geometry projectedPoint = GeometryEngine.Instance.Project(point, env.SpatialReference);
+            {
+                Geometry projectedPoint = GeometryEngine.Instance.Project(point, env.SpatialReference);
 
-                    return GeometryEngine.Instance.Contains(env, projectedPoint);
-                });
+                return GeometryEngine.Instance.Contains(env, projectedPoint);
+            });
 
             return result;
         }
@@ -553,7 +562,7 @@ namespace ProAppVisibilityModule.ViewModels
         /// </summary>
         /// <param name="name">string name of layer</param>
         /// <returns>Layer</returns>
-        ///
+        /// 
         internal Layer GetLayerFromMapByName(string name)
         {
             var layer = MapView.Active.Map.GetLayersAsFlattenedList().FirstOrDefault(l => l.Name == name);
@@ -569,20 +578,20 @@ namespace ProAppVisibilityModule.ViewModels
             var layerList = MapView.Active.Map.GetLayersAsFlattenedList();
 
             var elevationSurfaceList = await QueuedTask.Run(() =>
+            {
+                var list = new List<Layer>();
+                foreach (var layer in layerList)
                 {
-                    var list = new List<Layer>();
-                    foreach (var layer in layerList)
+                    var def = layer.GetDefinition();
+                    if (def != null && def.LayerType == ArcGIS.Core.CIM.MapLayerType.Operational &&
+                        (def is CIMRasterLayer || def is CIMTinLayer || def is CIMLASDatasetLayer || def is CIMMosaicLayer))
                     {
-                        var def = layer.GetDefinition();
-                        if (def != null && def.LayerType == ArcGIS.Core.CIM.MapLayerType.Operational &&
-                            (def is CIMRasterLayer || def is CIMTinLayer || def is CIMLASDatasetLayer || def is CIMMosaicLayer))
-                        {
-                            list.Add(layer);
-                        }
+                        list.Add(layer);
                     }
+                }
 
-                    return list;
-                });
+                return list;
+            });
 
             var sortedList = elevationSurfaceList.Select(l => l.Name).ToList();
             sortedList.Sort();
@@ -629,12 +638,12 @@ namespace ProAppVisibilityModule.ViewModels
                 // reset surface names OC
                 await ResetSurfaceNames();
                 Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        // reset observer points
-                        ObserverAddInPoints.Clear();
+                {
+                    // reset observer points
+                    ObserverAddInPoints.Clear();
 
-                        ClearTempGraphics();
-                    });
+                    ClearTempGraphics();
+                });
             }
             catch (Exception ex)
             {
@@ -643,7 +652,7 @@ namespace ProAppVisibilityModule.ViewModels
         }
 
         /// <summary>
-        /// Method used to reset the currently selected surfacename
+        /// Method used to reset the currently selected surfacename 
         /// Use when toc items or map changes, on tab selection changed, etc
         /// </summary>
         internal async Task ResetSurfaceNames()
@@ -659,9 +668,9 @@ namespace ProAppVisibilityModule.ViewModels
                 var tempName = SelectedSurfaceName;
 
                 Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        SurfaceLayerNames.Clear();
-                    });
+                {
+                    SurfaceLayerNames.Clear();
+                });
 
                 Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -742,9 +751,9 @@ namespace ProAppVisibilityModule.ViewModels
             if (mapUnit == null)
                 return result;
 
-            var offsetLinearUnit = GetLinearUnit(DistanceUnitType);
+            var distanceLinearUnit = GetLinearUnit(DistanceUnitType);
 
-            result = offsetLinearUnit.ConvertTo(value, mapUnit);
+            result = distanceLinearUnit.ConvertTo(value, mapUnit);
 
             return result;
         }
@@ -787,23 +796,18 @@ namespace ProAppVisibilityModule.ViewModels
                 case DistanceTypes.Feet:
                     result = LinearUnit.Feet;
                     break;
-
                 case DistanceTypes.Kilometers:
                     result = LinearUnit.Kilometers;
                     break;
-
                 case DistanceTypes.Miles:
                     result = LinearUnit.Miles;
                     break;
-
                 case DistanceTypes.NauticalMile:
                     result = LinearUnit.NauticalMiles;
                     break;
-
                 case DistanceTypes.Yards:
                     result = LinearUnit.Yards;
                     break;
-
                 case DistanceTypes.Meters:
                 default:
                     result = LinearUnit.Meters;

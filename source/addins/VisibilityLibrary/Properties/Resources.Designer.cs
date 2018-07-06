@@ -700,6 +700,15 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No data found.
+        /// </summary>
+        public static string MsgNoDataFound {
+            get {
+                return ResourceManager.GetString("MsgNoDataFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Point does not fall within the input extent..
         /// </summary>
         public static string MsgOutOfAOI {
