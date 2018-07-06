@@ -45,19 +45,6 @@ namespace ArcMapAddinVisibility.ViewModels
         }
 
         #region Properties
-        private Visibility _displayProgressBarLLOS;
-        public Visibility DisplayProgressBarLLOS
-        {
-            get
-            {
-                return _displayProgressBarLLOS;
-            }
-            set
-            {
-                _displayProgressBarLLOS = value;
-                RaisePropertyChanged(() => DisplayProgressBarLLOS);
-            }
-        }
 
         public ObservableCollection<AddInPoint> TargetAddInPoints { get; set; }
 
