@@ -37,7 +37,6 @@ namespace ArcMapAddinVisibility.ViewModels
         public LLOSViewModel()
         {
             TargetAddInPoints = new ObservableCollection<AddInPoint>();
-            DisplayProgressBarLLOS = Visibility.Hidden;
             // commands
             SubmitCommand = new RelayCommand(OnSubmitCommand);
 
@@ -77,9 +76,7 @@ namespace ArcMapAddinVisibility.ViewModels
             var savedCursor = System.Windows.Forms.Cursor.Current;
             System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
             System.Windows.Forms.Application.DoEvents();
-            DisplayProgressBarLLOS = Visibility.Visible;
             CreateMapElement();
-            DisplayProgressBarLLOS = Visibility.Hidden;
             System.Windows.Forms.Cursor.Current = savedCursor;
         }
 
