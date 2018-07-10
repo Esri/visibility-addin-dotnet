@@ -580,7 +580,7 @@ namespace ProAppVisibilityModule.ViewModels
                         var Lon = Double.Parse(matchMercator.Groups["longitude"].Value);
                         point = QueuedTask.Run(() =>
                             {
-                                return MapPointBuilder.CreateMapPoint(Lon, Lat);
+                                return MapPointBuilder.CreateMapPoint(Lon, Lat, MapView.Active.Map.SpatialReference);
                             }).Result;
                         return point;
                     }

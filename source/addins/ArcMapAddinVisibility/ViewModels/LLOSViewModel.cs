@@ -37,11 +37,11 @@ namespace ArcMapAddinVisibility.ViewModels
         public LLOSViewModel()
         {
             TargetAddInPoints = new ObservableCollection<AddInPoint>();
-
             // commands
             SubmitCommand = new RelayCommand(OnSubmitCommand);
 
             ClearGraphicsVisible = true;
+            
         }
 
         #region Properties
@@ -63,9 +63,7 @@ namespace ArcMapAddinVisibility.ViewModels
             var savedCursor = System.Windows.Forms.Cursor.Current;
             System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
             System.Windows.Forms.Application.DoEvents();
-
             CreateMapElement();
-
             System.Windows.Forms.Cursor.Current = savedCursor;
         }
 

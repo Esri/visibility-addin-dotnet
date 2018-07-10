@@ -147,6 +147,14 @@
                     <ListBox.ContextMenu>
                         <ContextMenu DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Self}}">
                             <MenuItem
+                                Command="{Binding DataContext.ImportCSVFileCommand}"
+                                CommandParameter="{x:Static prop:Resources.ToolModeObserver}"
+                                Header="{x:Static prop:Resources.LabelImport}"/>
+                            <MenuItem
+                                Command="{Binding DataContext.PasteCoordinatesCommand}"
+                                CommandParameter="{x:Static prop:Resources.ToolModeObserver}"
+                                  Header="{x:Static prop:Resources.LabelPaste}"/>
+                            <MenuItem
                                 Command="{Binding DataContext.DeletePointCommand}"
                                 CommandParameter="{Binding Path=SelectedItems}"
                                 Header="{x:Static prop:Resources.MenuLabelDelete}" />
@@ -341,13 +349,14 @@
                             Grid.Row="5"
                             Grid.ColumnSpan="4"
                             Header="{x:Static prop:Resources.LabelDistance}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <TextBox
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox
                                     x:Name="tbMinDistance"
                                     Grid.Column="0"
                                     Margin="3,3,0,0"
@@ -355,17 +364,17 @@
                                     Style="{StaticResource textboxStyle}"
                                     Text="{Binding MinDistance, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
                                     Validation.ErrorTemplate="{StaticResource errorTemplate}">
-                                    <TextBox.InputBindings>
-                                        <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
-                                    </TextBox.InputBindings>
-                                </TextBox>
-                                <TextBlock
+                                        <TextBox.InputBindings>
+                                            <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
+                                        </TextBox.InputBindings>
+                                    </TextBox>
+                                    <TextBlock
                                     Grid.Column="1"
                                     Margin="3,3,0,0"
                                     HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
                                     Text="{x:Static prop:Resources.LabelTo}" />
-                                <TextBox
+                                    <TextBox
                                     x:Name="tbMaxDistance"
                                     Grid.Column="2"
                                     Margin="3,3,0,0"
@@ -373,11 +382,20 @@
                                     Style="{StaticResource textboxStyle}"
                                     Text="{Binding MaxDistance, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
                                     Validation.ErrorTemplate="{StaticResource errorTemplate}">
-                                    <TextBox.InputBindings>
-                                        <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
-                                    </TextBox.InputBindings>
-                                </TextBox>
-                            </Grid>
+                                        <TextBox.InputBindings>
+                                            <KeyBinding Key="Enter" Command="{Binding EnterKeyCommand}" />
+                                        </TextBox.InputBindings>
+                                    </TextBox>
+                                </Grid>
+                                <ComboBox
+                                    x:Name="cmbDistanceUnitType"
+                                    Width="Auto"
+                                    Height="Auto"
+                                    Margin="3,3,0,0"
+                                    ItemsSource="{Binding Source={StaticResource lineDistanceData}}"
+                                    SelectedItem="{Binding Path=DistanceUnitType, Mode=TwoWay}">
+                                </ComboBox>
+                            </StackPanel>
                         </GroupBox>
 
                         <GroupBox

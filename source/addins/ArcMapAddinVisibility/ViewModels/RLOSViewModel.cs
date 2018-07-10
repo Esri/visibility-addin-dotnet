@@ -427,18 +427,18 @@ namespace ArcMapAddinVisibility.ViewModels
                     //unit of raster
                     DistanceTypes srUnit = GetMTUnitFromEsriUnit(unitString);
                     //get distance in map units
-                    double muMaxDist = GetDistanceFromTo(OffsetUnitType, srUnit, MaxDistance);
-                    double muMinDist = GetDistanceFromTo(OffsetUnitType, srUnit, MinDistance);
+                    double muMaxDist = GetDistanceFromTo(DistanceUnitType, srUnit, MaxDistance);
+                    double muMinDist = GetDistanceFromTo(DistanceUnitType, srUnit, MinDistance);
                     //Distance in meters
                     double convertedMinDistance = MinDistance * conversionFactor;
                     double convertedMaxDistance = MaxDistance * conversionFactor;
 
                     double finalMinDistance;
                     double finalMaxDistance;
-                    if (srUnit.ToString() != OffsetUnitType.ToString())
+                    if (srUnit.ToString() != DistanceUnitType.ToString())
                     {
-                        finalMinDistance = GetLinearDistance(ArcMap.Document.FocusMap, convertedMinDistance, OffsetUnitType);
-                        finalMaxDistance = GetLinearDistance(ArcMap.Document.FocusMap, convertedMaxDistance, OffsetUnitType);
+                        finalMinDistance = GetLinearDistance(ArcMap.Document.FocusMap, convertedMinDistance, DistanceUnitType);
+                        finalMaxDistance = GetLinearDistance(ArcMap.Document.FocusMap, convertedMaxDistance, DistanceUnitType);
                     }
                     else
                     {

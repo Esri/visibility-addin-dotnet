@@ -32,6 +32,8 @@ using ArcGIS.Desktop.Mapping;
 using ProAppVisibilityModule.Helpers;
 using ProAppVisibilityModule.Models;
 using VisibilityLibrary.Helpers;
+using ArcGIS.Core.Data;
+using System.Text.RegularExpressions;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -41,15 +43,15 @@ namespace ProAppVisibilityModule.ViewModels
         {
             TargetAddInPoints = new ObservableCollection<AddInPoint>();
             IsActiveTab = true;
-
+            DisplayProgressBarLLOS = Visibility.Hidden;
             // commands
-            SubmitCommand = new RelayCommand(async (obj) => 
+            SubmitCommand = new RelayCommand(async (obj) =>
             {
                 try
                 {
                     await OnSubmitCommand(obj);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Debug.Print(ex.Message);
                 }
@@ -62,7 +64,7 @@ namespace ProAppVisibilityModule.ViewModels
         public ObservableCollection<AddInPoint> TargetAddInPoints { get; set; }
 
         private int executionCounter = 0;
-        
+
         private string _ObserversLayerName = VisibilityLibrary.Properties.Resources.LLOSObserversLayerName;
         public string ObserversLayerName
         {
@@ -119,6 +121,34 @@ namespace ProAppVisibilityModule.ViewModels
             set { }
         }
 
+        private Visibility _displayProgressBar = Visibility.Collapsed;
+        public Visibility DisplayProgressBarLLOS
+        {
+            get
+            {
+                return _displayProgressBar;
+            }
+            set
+            {
+                _displayProgressBar = value;
+                RaisePropertyChanged(() => DisplayProgressBarLLOS);
+            }
+        }
+
+        private string _FeatureDatasetName = VisibilityLibrary.Properties.Resources.LLOSFeatureDatasetName;
+        public string FeatureDatasetName
+        {
+            get
+            {
+                if (executionCounter > 0)
+                {
+                    _FeatureDatasetName = string.Format("{0}_{1}", VisibilityLibrary.Properties.Resources.LLOSFeatureDatasetName, executionCounter);
+                }
+                return _FeatureDatasetName;
+            }
+            set { }
+        }
+
         #endregion
 
         #region Commands
@@ -139,18 +169,22 @@ namespace ProAppVisibilityModule.ViewModels
                         // TODO udpate wait cursor/progressor
                         try
                         {
+                            DisplayProgressBarLLOS = Visibility.Visible;
                             await CreateMapElement();
-
                             //await Reset(true);
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             Debug.Print(ex.Message);
+                        }
+                        finally
+                        {
+                            DisplayProgressBarLLOS = Visibility.Hidden;
                         }
 
                     });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Debug.Print(ex.Message);
             }
@@ -263,7 +297,7 @@ namespace ProAppVisibilityModule.ViewModels
                     TargetAddInPoints.Clear();
                 });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Debug.Print(ex.Message);
             }
@@ -277,8 +311,8 @@ namespace ProAppVisibilityModule.ViewModels
         {
             get
             {
-                return (!string.IsNullOrWhiteSpace(SelectedSurfaceName) 
-                    && ObserverAddInPoints.Any() 
+                return (!string.IsNullOrWhiteSpace(SelectedSurfaceName)
+                    && ObserverAddInPoints.Any()
                     && TargetAddInPoints.Any()
                     && TargetOffset.HasValue
                     && ObserverOffset.HasValue);
@@ -311,7 +345,7 @@ namespace ProAppVisibilityModule.ViewModels
 
                 //await base.CreateMapElement();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine(ex.Message);
                 ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.ExceptionSomethingWentWrong,
@@ -334,7 +368,7 @@ namespace ProAppVisibilityModule.ViewModels
                 if (surfaceSR == null || !surfaceSR.IsProjected)
                 {
                     MessageBox.Show(VisibilityLibrary.Properties.Resources.RLOSUserPrompt, VisibilityLibrary.Properties.Resources.RLOSUserPromptCaption);
-                    
+
                     Application.Current.Dispatcher.Invoke(() =>
                     {
                         TargetAddInPoints.Clear();
@@ -343,7 +377,7 @@ namespace ProAppVisibilityModule.ViewModels
                     });
 
                     await Reset(true);
-                    
+
                     return false;
                 }
 
@@ -361,7 +395,36 @@ namespace ProAppVisibilityModule.ViewModels
                     }
                 }
 
-                success = await FeatureClassHelper.CreateLayer(ObserversLayerName, "POINT", true, true);
+                //Validate Dataframe Spatial reference with surface spatial reference
+                if (MapView.Active.Map.SpatialReference.Wkid != surfaceSR.Wkid)
+                {
+                    MessageBox.Show(VisibilityLibrary.Properties.Resources.LOSDataFrameMatch, VisibilityLibrary.Properties.Resources.LOSSpatialReferenceCaption);
+                    return false;
+                }
+
+                using (Geodatabase geodatabase = new Geodatabase(new FileGeodatabaseConnectionPath(new Uri(CoreModule.CurrentProject.DefaultGeodatabasePath))))
+                {
+                    executionCounter = 0;
+                    var enterpriseDefinitionNames = geodatabase.GetDefinitions<FeatureDatasetDefinition>().Where(i => i.GetName().StartsWith(VisibilityLibrary.Properties.Resources.LLOSFeatureDatasetName)).Select(i => i.GetName()).ToList();
+                    foreach (var defName in enterpriseDefinitionNames)
+                    {
+                        int n;
+                        bool isNumeric = int.TryParse(Regex.Match(defName, @"\d+$").Value, out n);
+                        if (isNumeric)
+                            executionCounter = executionCounter < n ? n : executionCounter;
+                    }
+                    executionCounter = enterpriseDefinitionNames.Count > 0 ? executionCounter + 1 : 0;
+                }
+
+                //Create Feature dataset
+                success = await FeatureClassHelper.CreateFeatureDataset(FeatureDatasetName);
+                if (!success)
+                    return false;
+
+                success = await FeatureClassHelper.CreateLayer(FeatureDatasetName, ObserversLayerName, "POINT", true, true);
+
+                if (!success)
+                    return false;
 
                 // add fields for observer offset
 
@@ -369,7 +432,7 @@ namespace ProAppVisibilityModule.ViewModels
                 await FeatureClassHelper.AddFieldToLayer(ObserversLayerName, VisibilityLibrary.Properties.Resources.OffsetWithZFieldName, "DOUBLE");
                 await FeatureClassHelper.AddFieldToLayer(ObserversLayerName, VisibilityLibrary.Properties.Resources.TarIsVisFieldName, "SHORT");
 
-                success = await FeatureClassHelper.CreateLayer(TargetsLayerName, "POINT", true, true);
+                success = await FeatureClassHelper.CreateLayer(FeatureDatasetName, TargetsLayerName, "POINT", true, true);
 
                 if (!success)
                     return false;
@@ -405,8 +468,8 @@ namespace ProAppVisibilityModule.ViewModels
 
                 success = await FeatureClassHelper.CreateSightLines(ObserversLayerName,
                     TargetsLayerName,
-                    CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + SightLinesLayerName, 
-                    VisibilityLibrary.Properties.Resources.OffsetWithZFieldName, 
+                    CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + FeatureDatasetName + System.IO.Path.DirectorySeparatorChar + SightLinesLayerName,
+                    VisibilityLibrary.Properties.Resources.OffsetWithZFieldName,
                     VisibilityLibrary.Properties.Resources.OffsetWithZFieldName);
 
                 if (!success)
@@ -418,8 +481,8 @@ namespace ProAppVisibilityModule.ViewModels
                 GC.Collect();
 
                 success = await FeatureClassHelper.CreateLOS(SelectedSurfaceName,
-                    CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + SightLinesLayerName,
-                    CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + OutputLayerName);
+                    CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + FeatureDatasetName + System.IO.Path.DirectorySeparatorChar + SightLinesLayerName,
+                    CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + FeatureDatasetName + System.IO.Path.DirectorySeparatorChar + OutputLayerName);
 
                 if (!success)
                     return false;
@@ -430,9 +493,9 @@ namespace ProAppVisibilityModule.ViewModels
 
                 // join fields with sight lines
 
-                await FeatureClassHelper.JoinField(CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + SightLinesLayerName,
+                await FeatureClassHelper.JoinField(CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + FeatureDatasetName + System.IO.Path.DirectorySeparatorChar + SightLinesLayerName,
                                                     "OID",
-                                                    CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + OutputLayerName,
+                                                    CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + FeatureDatasetName + System.IO.Path.DirectorySeparatorChar + OutputLayerName,
                                                     "SourceOID",
                                                     new string[] { "TarIsVis" });
 
@@ -441,9 +504,9 @@ namespace ProAppVisibilityModule.ViewModels
 
                 //if (sourceOIDs.Count > 0)
                 //{
-                    var visStats = await FeatureClassHelper.GetVisibilityStats(sourceOIDs, SightLinesLayerName);
+                var visStats = await FeatureClassHelper.GetVisibilityStats(sourceOIDs, SightLinesLayerName);
 
-                    await FeatureClassHelper.UpdateLayersWithVisibilityStats(visStats, ObserversLayerName, TargetsLayerName);
+                await FeatureClassHelper.UpdateLayersWithVisibilityStats(visStats, ObserversLayerName, TargetsLayerName);
 
                 //}
 
@@ -487,9 +550,17 @@ namespace ProAppVisibilityModule.ViewModels
 
                     // for now we are not resetting after a run of the tool
                     //await Reset(true);
+
+
+                    List<Layer> lyrList = new List<Layer>();
+                    lyrList.Add(observersLayer);
+                    lyrList.Add(targetsLayer);
+                    lyrList.Add(sightLinesLayer);
+                    lyrList.Add(outputLayer);
+
+                    await FeatureClassHelper.MoveLayersToGroupLayer(lyrList, FeatureDatasetName);
                     var envelope = await QueuedTask.Run(() => outputLayer.QueryExtent());
                     await ZoomToExtent(envelope);
-                    executionCounter++;
 
                     success = true;
                 }
@@ -498,7 +569,7 @@ namespace ProAppVisibilityModule.ViewModels
                     success = false;
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 success = false;
                 Debug.Print(ex.Message);
