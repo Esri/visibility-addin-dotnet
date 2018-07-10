@@ -12,27 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using ArcGIS.Core.CIM;
-using ArcGIS.Core.Geometry;
-using ArcGIS.Desktop.Framework.Threading.Tasks;
-using ArcGIS.Desktop.Mapping;
-using ArcGIS.Desktop.Mapping.Events;
-using ProAppVisibilityModule.Models;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+using System.Collections.ObjectModel;
+using System.Collections;
 using System.Windows;
+using System.Threading.Tasks;
+using System.Diagnostics;
+using ArcGIS.Core.Geometry;
+using ArcGIS.Desktop.Mapping;
+using ArcGIS.Desktop.Framework.Threading.Tasks;
+using ArcGIS.Desktop.Mapping.Events;
 using VisibilityLibrary;
 using VisibilityLibrary.Helpers;
-using VisibilityLibrary.ViewModels;
 using VisibilityLibrary.Views;
+using VisibilityLibrary.ViewModels;
+using ProAppVisibilityModule.Models;
+using ArcGIS.Core.CIM;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -43,11 +40,10 @@ namespace ProAppVisibilityModule.ViewModels
             ObserverOffset = 2.0;
             TargetOffset = 0.0;
             OffsetUnitType = DistanceTypes.Meters;
-            DistanceUnitType = DistanceTypes.Meters;
             AngularUnitType = AngularTypes.DEGREES;
 
             ObserverAddInPoints = new ObservableCollection<AddInPoint>();
-
+            
             ToolMode = MapPointToolMode.Unknown;
             SurfaceLayerNames = new ObservableCollection<string>();
             SelectedSurfaceName = string.Empty;
@@ -57,8 +53,6 @@ namespace ProAppVisibilityModule.ViewModels
             DeletePointCommand = new RelayCommand(OnDeletePointCommand);
             DeleteAllPointsCommand = new RelayCommand(OnDeleteAllPointsCommand);
             EditPropertiesDialogCommand = new RelayCommand(OnEditPropertiesDialogCommand);
-            ImportCSVFileCommand = new RelayCommand(OnImportCSVFileCommand);
-            PasteCoordinatesCommand = new RelayCommand(OnPasteCommand);
 
             // subscribe to some mapping events
             ActiveMapViewChangedEvent.Subscribe(OnActiveMapViewChanged);
@@ -86,7 +80,6 @@ namespace ProAppVisibilityModule.ViewModels
         }
 
         private bool observerToolActive = false;
-
         public bool ObserverToolActive
         {
             get { return observerToolActive; }
@@ -98,7 +91,6 @@ namespace ProAppVisibilityModule.ViewModels
         }
 
         private bool targetToolActive = false;
-
         public bool TargetToolActive
         {
             get { return targetToolActive; }
@@ -110,7 +102,6 @@ namespace ProAppVisibilityModule.ViewModels
         }
 
         private bool isRunning = false;
-
         public bool IsRunning
         {
             get { return isRunning; }
@@ -122,7 +113,6 @@ namespace ProAppVisibilityModule.ViewModels
         }
 
         private double? observerOffset;
-
         public double? ObserverOffset
         {
             get { return observerOffset; }
@@ -135,9 +125,7 @@ namespace ProAppVisibilityModule.ViewModels
                     throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEInvalidInput);
             }
         }
-
         private double? targetOffset;
-
         public double? TargetOffset
         {
             get { return targetOffset; }
@@ -152,7 +140,6 @@ namespace ProAppVisibilityModule.ViewModels
         }
 
         private MapPointToolMode toolMode;
-
         public MapPointToolMode ToolMode
         {
             get { return toolMode; }
@@ -183,7 +170,6 @@ namespace ProAppVisibilityModule.ViewModels
         public ObservableCollection<string> SurfaceLayerNames { get; set; }
         public string SelectedSurfaceName { get; set; }
         public DistanceTypes OffsetUnitType { get; set; }
-        public DistanceTypes DistanceUnitType { get; set; }
         public AngularTypes AngularUnitType { get; set; }
 
         #endregion
@@ -193,8 +179,6 @@ namespace ProAppVisibilityModule.ViewModels
         public RelayCommand DeletePointCommand { get; set; }
         public RelayCommand DeleteAllPointsCommand { get; set; }
         public RelayCommand EditPropertiesDialogCommand { get; set; }
-        public RelayCommand ImportCSVFileCommand { get; set; }
-        public RelayCommand PasteCoordinatesCommand { get; set; }
 
         /// <summary>
         /// Command method to delete points
@@ -230,132 +214,6 @@ namespace ProAppVisibilityModule.ViewModels
             dlg.ShowDialog();
         }
 
-        public virtual void OnImportCSVFileCommand(object obj)
-        {
-            var mode = obj as string;
-            CoordinateConversionLibrary.Models.CoordinateConversionLibraryConfig.AddInConfig.DisplayAmbiguousCoordsDlg = false;
-            var fileDialog = new Microsoft.Win32.OpenFileDialog();
-            fileDialog.CheckFileExists = true;
-            fileDialog.CheckPathExists = true;
-            fileDialog.Filter = "csv files|*.csv";
-
-            // attemp to import
-            var fieldVM = new CoordinateConversionLibrary.ViewModels.SelectCoordinateFieldsViewModel();
-            var result = fileDialog.ShowDialog();
-            if (result.HasValue && result.Value == true)
-            {
-                var dlg = new CoordinateConversionLibrary.Views.ProSelectCoordinateFieldsView();
-                using (Stream s = new FileStream(fileDialog.FileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                {
-                    var headers = CoordinateConversionLibrary.Helpers.ImportCSV.GetHeaders(s);
-                    if (headers != null)
-                    {
-                        foreach (var header in headers)
-                        {
-                            fieldVM.AvailableFields.Add(header);
-                            System.Diagnostics.Debug.WriteLine("header : {0}", header);
-                        }
-                        dlg.DataContext = fieldVM;
-                    }
-                    else
-                    {
-                        ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgNoDataFound,
-                                                                      VisibilityLibrary.Properties.Resources.CaptionError);
-                        return;
-                    }
-                }
-                if (dlg.ShowDialog() == true)
-                {
-                    using (Stream s = new FileStream(fileDialog.FileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                    {
-                        var lists = CoordinateConversionLibrary.Helpers.ImportCSV.Import<CoordinateConversionLibrary.ViewModels.ImportCoordinatesList>(s, fieldVM.SelectedFields.ToArray());
-
-                        foreach (var item in lists)
-                        {
-                            string outFormattedString = string.Empty;
-
-                            var sb = new StringBuilder();
-                            sb.Append(item.lat.Trim());
-                            if (fieldVM.UseTwoFields)
-                                sb.Append(string.Format(" {0}", item.lon.Trim()));
-
-                            string coordinate = sb.ToString();
-                            CoordinateConversionLibrary.Models.CoordinateType ccType = CoordinateConversionLibrary.Helpers.ConversionUtils.GetCoordinateString(coordinate, out outFormattedString);
-                            if (ccType == CoordinateConversionLibrary.Models.CoordinateType.Unknown)
-                            {
-                                Regex regexMercator = new Regex(@"^(?<latitude>\-?\d+\.?\d*)[+,;:\s]*(?<longitude>\-?\d+\.?\d*)");
-                                var matchMercator = regexMercator.Match(coordinate);
-                                if (matchMercator.Success && matchMercator.Length == coordinate.Length)
-                                {
-                                    ccType = CoordinateConversionLibrary.Models.CoordinateType.DD;
-                                }
-                            }
-                            MapPoint point = (ccType != CoordinateConversionLibrary.Models.CoordinateType.Unknown) ? GetMapPointFromString(outFormattedString) : null;
-                            if (point != null)
-                            {
-                                if (mode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
-                                {
-                                    ToolMode = MapPointToolMode.Observer;
-                                    Point1 = point;
-                                    OnNewMapPointEvent(Point1);
-                                }
-                                else if (mode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
-                                {
-                                    ToolMode = MapPointToolMode.Target;
-                                    Point2 = point;
-                                    OnNewMapPointEvent(Point2);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        internal virtual void OnPasteCommand(object obj)
-        {
-            var mode = obj.ToString();
-
-            if (string.IsNullOrWhiteSpace(mode))
-                return;
-
-            var input = Clipboard.GetText().Trim();
-            string[] lines = input.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
-            var coordinates = new List<string>();
-            foreach (var item in lines)
-            {
-                string outFormattedString = string.Empty;
-                string coordinate = item.Trim().ToString();
-                CoordinateConversionLibrary.Models.CoordinateType ccType = CoordinateConversionLibrary.Helpers.ConversionUtils.GetCoordinateString(coordinate, out outFormattedString);
-                if (ccType == CoordinateConversionLibrary.Models.CoordinateType.Unknown)
-                {
-                    Regex regexMercator = new Regex(@"^(?<latitude>\-?\d+\.?\d*)[+,;:\s]*(?<longitude>\-?\d+\.?\d*)");
-                    var matchMercator = regexMercator.Match(coordinate);
-                    if (matchMercator.Success && matchMercator.Length == coordinate.Length)
-                    {
-                        ccType = CoordinateConversionLibrary.Models.CoordinateType.DD;
-                    }
-                }
-                MapPoint point = (ccType != CoordinateConversionLibrary.Models.CoordinateType.Unknown) ? GetMapPointFromString(outFormattedString) : null;
-                if (point != null)
-                {
-                    if (mode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
-                    {
-                        ToolMode = MapPointToolMode.Observer;
-                        Point1 = point;
-                        OnNewMapPointEvent(Point1);
-                    }
-                    else if (mode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
-                    {
-                        ToolMode = MapPointToolMode.Target;
-                        Point2 = point;
-                        OnNewMapPointEvent(Point2);
-                    }
-                }
-            }
-        }
-
-
         /// <summary>
         /// Method used to delete points frome the view's observer listbox
         /// </summary>
@@ -388,7 +246,7 @@ namespace ProAppVisibilityModule.ViewModels
         {
             var keyCommandMode = obj as string;
 
-            if (keyCommandMode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
+            if(keyCommandMode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
             {
                 ToolMode = MapPointToolMode.Observer;
                 OnNewMapPointEvent(Point1);
@@ -455,9 +313,9 @@ namespace ProAppVisibilityModule.ViewModels
                 var guid = await AddGraphicToMap(point, ColorFactory.Instance.BlueRGB, true, 5.0);
                 var addInPoint = new AddInPoint() { Point = point, GUID = guid };
                 Application.Current.Dispatcher.Invoke(() =>
-                {
-                    ObserverAddInPoints.Insert(0, addInPoint);
-                });
+                    {
+                        ObserverAddInPoints.Insert(0, addInPoint);
+                    });
             }
         }
 
@@ -548,11 +406,11 @@ namespace ProAppVisibilityModule.ViewModels
         internal async Task<bool> IsPointWithinExtent(MapPoint point, Envelope env)
         {
             var result = await QueuedTask.Run(() =>
-            {
-                Geometry projectedPoint = GeometryEngine.Instance.Project(point, env.SpatialReference);
+                {
+                    Geometry projectedPoint = GeometryEngine.Instance.Project(point, env.SpatialReference);
 
-                return GeometryEngine.Instance.Contains(env, projectedPoint);
-            });
+                    return GeometryEngine.Instance.Contains(env, projectedPoint);
+                });
 
             return result;
         }
@@ -578,20 +436,20 @@ namespace ProAppVisibilityModule.ViewModels
             var layerList = MapView.Active.Map.GetLayersAsFlattenedList();
 
             var elevationSurfaceList = await QueuedTask.Run(() =>
-            {
-                var list = new List<Layer>();
-                foreach (var layer in layerList)
                 {
-                    var def = layer.GetDefinition();
-                    if (def != null && def.LayerType == ArcGIS.Core.CIM.MapLayerType.Operational &&
-                        (def is CIMRasterLayer || def is CIMTinLayer || def is CIMLASDatasetLayer || def is CIMMosaicLayer))
+                    var list = new List<Layer>();
+                    foreach(var layer in layerList)
                     {
-                        list.Add(layer);
+                        var def = layer.GetDefinition();
+                        if(def != null && def.LayerType == ArcGIS.Core.CIM.MapLayerType.Operational && 
+                            (def is CIMRasterLayer || def is CIMTinLayer || def is CIMLASDatasetLayer || def is CIMMosaicLayer))
+                        {
+                            list.Add(layer);
+                        }
                     }
-                }
 
-                return list;
-            });
+                    return list;
+                });
 
             var sortedList = elevationSurfaceList.Select(l => l.Name).ToList();
             sortedList.Sort();
@@ -638,14 +496,14 @@ namespace ProAppVisibilityModule.ViewModels
                 // reset surface names OC
                 await ResetSurfaceNames();
                 Application.Current.Dispatcher.Invoke(() =>
-                {
-                    // reset observer points
-                    ObserverAddInPoints.Clear();
-
-                    ClearTempGraphics();
-                });
+                    {
+                        // reset observer points
+                        ObserverAddInPoints.Clear();
+                    
+                        ClearTempGraphics();
+                    });
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine(ex.Message);
             }
@@ -668,9 +526,9 @@ namespace ProAppVisibilityModule.ViewModels
                 var tempName = SelectedSurfaceName;
 
                 Application.Current.Dispatcher.Invoke(() =>
-                {
-                    SurfaceLayerNames.Clear();
-                });
+                    {
+                        SurfaceLayerNames.Clear();
+                    });
 
                 Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -686,7 +544,7 @@ namespace ProAppVisibilityModule.ViewModels
 
                 RaisePropertyChanged(() => SelectedSurfaceName);
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 Debug.Print(ex.Message);
             }
@@ -751,9 +609,9 @@ namespace ProAppVisibilityModule.ViewModels
             if (mapUnit == null)
                 return result;
 
-            var distanceLinearUnit = GetLinearUnit(DistanceUnitType);
+            var offsetLinearUnit = GetLinearUnit(OffsetUnitType);
 
-            result = distanceLinearUnit.ConvertTo(value, mapUnit);
+            result = offsetLinearUnit.ConvertTo(value, mapUnit);
 
             return result;
         }
@@ -775,6 +633,7 @@ namespace ProAppVisibilityModule.ViewModels
         {
             await ResetSurfaceNames();
         }
+
 
         private async void OnMapPropertyChanged(MapPropertyChangedEventArgs obj)
         {
@@ -815,5 +674,6 @@ namespace ProAppVisibilityModule.ViewModels
             }
             return result;
         }
+
     }
 }
