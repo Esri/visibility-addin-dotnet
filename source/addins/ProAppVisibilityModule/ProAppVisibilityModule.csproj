@@ -112,7 +112,9 @@
     <Compile Include="Helpers\GeometryHelper.cs" />
     <Compile Include="Helpers\MapPointHelper.cs" />
     <Compile Include="Models\AddInPoint.cs" />
-    <Compile Include="Models\AddInPointX.cs" />
+    <Compile Include="Models\AddInPointObject.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Models\ProGraphic.cs" />
     <Compile Include="ViewModels\ProLLOSViewModel.cs" />
     <Compile Include="ViewModels\ProLOSBaseViewModel.cs" />
