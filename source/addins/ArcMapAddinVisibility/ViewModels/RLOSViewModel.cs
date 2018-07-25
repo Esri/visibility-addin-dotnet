@@ -32,6 +32,8 @@ using ESRI.ArcGIS.Geoprocessing;
 // Solution
 using VisibilityLibrary.Helpers;
 using VisibilityLibrary;
+using System.Collections.ObjectModel;
+using ArcMapAddinVisibility.Models;
 
 namespace ArcMapAddinVisibility.ViewModels
 {
@@ -215,11 +217,13 @@ namespace ArcMapAddinVisibility.ViewModels
         internal override void OnDeletePointCommand(object obj)
         {
             base.OnDeletePointCommand(obj);
+            ValidateRLOS_LayerSelection();
         }
 
         internal override void OnDeleteAllPointsCommand(object obj)
         {
             base.OnDeleteAllPointsCommand(obj);
+            ValidateRLOS_LayerSelection();
         }
 
         public override bool CanCreateElement
@@ -227,7 +231,7 @@ namespace ArcMapAddinVisibility.ViewModels
             get
             {
                 return (!string.IsNullOrWhiteSpace(SelectedSurfaceName)
-                    && ObserverAddInPoints.Any());
+                    && (ObserverAddInPoints.Any() || RLOS_ObserversInExtent.Any() || RLOS_ObserversOutOfExtent.Any()));
             }
         }
 
@@ -344,11 +348,13 @@ namespace ArcMapAddinVisibility.ViewModels
             try
             {
                 IsRunning = true;
-
-                if (!CanCreateElement || ArcMap.Document == null || ArcMap.Document.FocusMap == null 
+                var selectedLayer = SelectedRLOS_ObserverLyrName;
+                ReadSelectedLayerPoints();
+                if (!CanCreateElement || ArcMap.Document == null || ArcMap.Document.FocusMap == null
                     || string.IsNullOrWhiteSpace(SelectedSurfaceName))
                     return;
 
+                var observerPoints = RLOS_ObserversInExtent.Select(x => x.AddInPoint).Union(ObserverAddInPoints);
                 var surface = GetSurfaceFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
                 if (surface == null)
                 {
@@ -427,18 +433,18 @@ namespace ArcMapAddinVisibility.ViewModels
                     //unit of raster
                     DistanceTypes srUnit = GetMTUnitFromEsriUnit(unitString);
                     //get distance in map units
-                    double muMaxDist = GetDistanceFromTo(OffsetUnitType, srUnit, MaxDistance);
-                    double muMinDist = GetDistanceFromTo(OffsetUnitType, srUnit, MinDistance);
+                    double muMaxDist = GetDistanceFromTo(DistanceUnitType, srUnit, MaxDistance);
+                    double muMinDist = GetDistanceFromTo(DistanceUnitType, srUnit, MinDistance);
                     //Distance in meters
                     double convertedMinDistance = MinDistance * conversionFactor;
                     double convertedMaxDistance = MaxDistance * conversionFactor;
 
                     double finalMinDistance;
                     double finalMaxDistance;
-                    if (srUnit.ToString() != OffsetUnitType.ToString())
+                    if (srUnit.ToString() != DistanceUnitType.ToString())
                     {
-                        finalMinDistance = GetLinearDistance(ArcMap.Document.FocusMap, convertedMinDistance, OffsetUnitType);
-                        finalMaxDistance = GetLinearDistance(ArcMap.Document.FocusMap, convertedMaxDistance, OffsetUnitType);
+                        finalMinDistance = GetLinearDistance(ArcMap.Document.FocusMap, convertedMinDistance, DistanceUnitType);
+                        finalMaxDistance = GetLinearDistance(ArcMap.Document.FocusMap, convertedMaxDistance, DistanceUnitType);
                     }
                     else
                     {
@@ -455,7 +461,7 @@ namespace ArcMapAddinVisibility.ViewModels
                     List<IGeometry> maxRangeBufferGeomList = new List<IGeometry>();
                     List<IGeometry> rangeFanGeomList = new List<IGeometry>();
 
-                    foreach (var observerPoint in ObserverAddInPoints)
+                    foreach (var observerPoint in observerPoints)
                     {
                         if ((observerPoint == null) || (observerPoint.Point == null))
                             continue;
@@ -469,7 +475,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
                         IGeometry geomBuffer = topologicalOperator.Buffer(muMaxDist);
 
-                        maxRangeBufferGeomList.Add(geomBuffer);      
+                        maxRangeBufferGeomList.Add(geomBuffer);
 
                         IGeometry geomRangeFan = ConstructRangeFan(observerPoint.Point, muMinDist, muMaxDist,
                             finalLeftHorizontalFOV, finalRightHorizontalFOV, SelectedSurfaceSpatialRef);
@@ -482,7 +488,7 @@ namespace ArcMapAddinVisibility.ViewModels
                         IFeature ipFeature = pointFc.CreateFeature();
 
                         // Set the field values for the feature
-                        SetFieldValues(finalObserverOffset, finalSurfaceOffset,muMinDist, muMaxDist, finalLeftHorizontalFOV,
+                        SetFieldValues(finalObserverOffset, finalSurfaceOffset, muMinDist, muMaxDist, finalLeftHorizontalFOV,
                             finalRightHorizontalFOV, finalBottomVerticalFOV, finalTopVerticalFOV, ipFeature);
 
                         if (double.IsNaN(z1))
@@ -587,9 +593,18 @@ namespace ArcMapAddinVisibility.ViewModels
                         System.Diagnostics.Debug.WriteLine(ex.Message);
                         System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
                     }
+
+                    DisplayOutOfExtentMsg(selectedLayer);
+                    //display point present out of extent
+                    var colorObserver = new RgbColorClass() { Red = 255 };
+                    var colorBorder = new RgbColorClass() { Red = 0, Blue = 0, Green = 0 };
+                    foreach (var point in RLOS_ObserversOutOfExtent)
+                    {
+                        AddGraphicToMap(point.AddInPoint.Point, colorObserver, markerStyle: esriSimpleMarkerStyle.esriSMSX, size: 10, borderColor: colorBorder);
+                    }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine(ex.Message);
                 System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
@@ -597,6 +612,9 @@ namespace ArcMapAddinVisibility.ViewModels
             finally
             {
                 IsRunning = false;
+                IsRLOSValidSelection = false;
+                ClearRLOSCollections();
+                ValidateRLOS_LayerSelection();
             }
         }
 
@@ -650,29 +668,29 @@ namespace ArcMapAddinVisibility.ViewModels
                 outlineSymbol.Style = esriSimpleLineStyle.esriSLSSolid;
 
                 if (ShowNonVisibleData == true)
-                {                  
+                {
                     fillSymbol.Color = new RgbColorClass() { Red = 255 } as IColor;
                     fillSymbol.Outline = outlineSymbol;
                     uvRenderer.AddValue("0", "", fillSymbol as ISymbol);
-                    uvRenderer.set_Label("0", "Non-Visible");    
+                    uvRenderer.set_Label("0", "Non-Visible");
                 }
-                    fillSymbol2.Color = new RgbColorClass() { Green = 255 } as IColor;
-                    fillSymbol2.Outline = outlineSymbol;
-                    uvRenderer.AddValue("1", "", fillSymbol2 as ISymbol);
-                    uvRenderer.set_Label("1", "Visible by 1 Observer");
+                fillSymbol2.Color = new RgbColorClass() { Green = 255 } as IColor;
+                fillSymbol2.Outline = outlineSymbol;
+                uvRenderer.AddValue("1", "", fillSymbol2 as ISymbol);
+                uvRenderer.set_Label("1", "Visible by 1 Observer");
 
-                    int field = ipTable.FindField("gridcode");
-                    uvRenderer.set_Field(0, "gridcode");
+                int field = ipTable.FindField("gridcode");
+                uvRenderer.set_Field(0, "gridcode");
 
-                    for (int i = 2; i < uniqueValues; i++)
-                    {
-                        ISimpleFillSymbol newFillSymbol = new SimpleFillSymbolClass();
-                        newFillSymbol.Color = colorRamp.get_Color(i);
-                        newFillSymbol.Outline = outlineSymbol;
-                        uvRenderer.AddValue(i.ToString(), "", newFillSymbol as ISymbol);
-                        string label = "Visible by " + i.ToString() + " Observers";
-                        uvRenderer.set_Label(i.ToString(), label);
-                    }
+                for (int i = 2; i < uniqueValues; i++)
+                {
+                    ISimpleFillSymbol newFillSymbol = new SimpleFillSymbolClass();
+                    newFillSymbol.Color = colorRamp.get_Color(i);
+                    newFillSymbol.Outline = outlineSymbol;
+                    uvRenderer.AddValue(i.ToString(), "", newFillSymbol as ISymbol);
+                    string label = "Visible by " + i.ToString() + " Observers";
+                    uvRenderer.set_Label(i.ToString(), label);
+                }
 
                 return featRenderer;
             }
@@ -716,7 +734,7 @@ namespace ArcMapAddinVisibility.ViewModels
                     throw (ex);
                 }
             }
-            
+
             return blnWasSuccessful;
         }
 
@@ -1119,7 +1137,7 @@ namespace ArcMapAddinVisibility.ViewModels
             if (ipSpatialReference is IGeographicCoordinateSystem)
             {
                 IAngularUnit ipAngularUnit = ((IGeographicCoordinateSystem)ipSpatialReference).CoordinateUnit;
-                String name= ipAngularUnit.Name;
+                String name = ipAngularUnit.Name;
                 dConversionFactor = ipAngularUnit.ConversionFactor;
             }
             else
@@ -1138,13 +1156,13 @@ namespace ArcMapAddinVisibility.ViewModels
             {
                 IAngularUnit ipAngularUnit = ((IGeographicCoordinateSystem)ipSpatialReference).CoordinateUnit;
                 name = ipAngularUnit.Name;
-                
+
             }
             else
             {
                 ILinearUnit ipLinearUnit = ((IProjectedCoordinateSystem)ipSpatialReference).CoordinateUnit;
                 name = ipLinearUnit.Name;
-                
+
             }
             return name;
         }
@@ -1152,9 +1170,9 @@ namespace ArcMapAddinVisibility.ViewModels
         private static DistanceTypes GetMTUnitFromEsriUnit(String esriUnit)
         {
             DistanceTypes outUnit = DistanceTypes.Meters; ;
-            switch(esriUnit)
+            switch (esriUnit)
             {
-                
+
                 case "Foot_US":
                 case "Foot":
                     outUnit = DistanceTypes.Feet;
@@ -1279,7 +1297,7 @@ namespace ArcMapAddinVisibility.ViewModels
             {
                 IImageServerLayer mlayer = layer as IImageServerLayer;
                 return mlayer.Name;
-            } 
+            }
             else if (layer is IRasterLayer)
             {
                 IRasterLayer rlayer = layer as IRasterLayer;
@@ -1292,6 +1310,50 @@ namespace ArcMapAddinVisibility.ViewModels
             }
 
             return null;
+        }
+
+        private void ReadSelectedLayerPoints()
+        {
+
+            var surface = GetSurfaceFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
+            double finalObserverOffset = GetOffsetInZUnits(ObserverOffset.Value, surface.ZFactor, OffsetUnitType);
+
+            var observerColor = new RgbColor() { Blue = 255 } as IColor;
+            ReadSelectedLyrPoints(RLOS_ObserversInExtent,RLOS_ObserversOutOfExtent,SelectedRLOS_ObserverLyrName, observerColor);
+        }
+
+
+        private void DisplayOutOfExtentMsg(string selectedLayer)
+        {
+            var observerIDCollection = RLOS_ObserversOutOfExtent.Select(x=>x.ID).ToList<int>();
+            var observerString = string.Empty;
+            var targetString = string.Empty;
+            foreach (var item in observerIDCollection)
+            {
+                if (observerString == "")
+                    observerString = item.ToString();
+                else
+                    observerString = observerString + "," + item.ToString();
+            }
+            if (observerIDCollection.Any())
+            {
+                if (observerIDCollection.Count <= 10)
+                {
+                    var msgString = string.Empty;
+                    if (observerIDCollection.Any())
+                    {
+                        msgString = "Observers lying outside the extent of elevation surface are: " + observerString;
+                    }
+                    System.Windows.MessageBox.Show(msgString,
+                                                "Unable To Process For Few Locations");
+                }
+                else
+                {
+                    System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.LLOSPointsOutsideOfSurfaceExtent,
+                    VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+                }
+
+            }
         }
 
         #endregion

@@ -36,17 +36,29 @@ namespace ArcMapAddinVisibility.ViewModels
     {
         public LLOSViewModel()
         {
-            TargetAddInPoints = new ObservableCollection<AddInPoint>();
-
+            DisplayProgressBarLLOS = Visibility.Hidden;
             // commands
             SubmitCommand = new RelayCommand(OnSubmitCommand);
 
             ClearGraphicsVisible = true;
+
         }
 
         #region Properties
 
-        public ObservableCollection<AddInPoint> TargetAddInPoints { get; set; }
+        private Visibility _displayProgressBarLLOS;
+        public Visibility DisplayProgressBarLLOS
+        {
+            get
+            {
+                return _displayProgressBarLLOS;
+            }
+            set
+            {
+                _displayProgressBarLLOS = value;
+                RaisePropertyChanged(() => DisplayProgressBarLLOS);
+            }
+        }
 
         #endregion
 
@@ -98,6 +110,8 @@ namespace ArcMapAddinVisibility.ViewModels
             {
                 TargetAddInPoints.Remove(obj);
             }
+
+            ValidateLLOS_LayerSelection();
         }
 
         internal override void OnDeleteAllPointsCommand(object obj)
@@ -111,6 +125,8 @@ namespace ArcMapAddinVisibility.ViewModels
                 base.OnDeleteAllPointsCommand(obj);
             else if (mode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
                 DeleteTargetPoints(TargetAddInPoints.ToList());
+
+            ValidateLLOS_LayerSelection();
         }
 
         #endregion
@@ -134,6 +150,8 @@ namespace ArcMapAddinVisibility.ViewModels
                 var addInPoint = new AddInPoint() { Point = point, GUID = guid };
                 TargetAddInPoints.Insert(0, addInPoint);
             }
+
+            ValidateLLOS_LayerSelection();
         }
 
         internal override void Reset(bool toolReset)
@@ -151,9 +169,9 @@ namespace ArcMapAddinVisibility.ViewModels
         {
             get
             {
-                return (!string.IsNullOrWhiteSpace(SelectedSurfaceName) 
-                    && ObserverAddInPoints.Any() 
-                    && TargetAddInPoints.Any()
+                return (!string.IsNullOrWhiteSpace(SelectedSurfaceName)
+                    && (ObserverAddInPoints.Any() || LLOS_ObserversInExtent.Any() || LLOS_ObserversOutOfExtent.Any())
+                    && (TargetAddInPoints.Any() || LLOS_TargetsInExtent.Any() || LLOS_TargetsOutOfExtent.Any())
                     && TargetOffset.HasValue);
             }
         }
@@ -173,10 +191,13 @@ namespace ArcMapAddinVisibility.ViewModels
                 IsRunning = true;
                 IPolyline longestLine = new PolylineClass();
 
+                ReadSelectedLayerPoints();
                 if (!CanCreateElement || ArcMap.Document == null || ArcMap.Document.FocusMap == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
                     return;
 
                 // take your observer and target points and get lines of sight
+                var observerPoints = new ObservableCollection<AddInPoint>(LLOS_ObserversInExtent.Select(x => x.AddInPoint).Union(ObserverAddInPoints));
+                var targetPoints = new ObservableCollection<AddInPoint>(LLOS_TargetsInExtent.Select(x => x.AddInPoint).Union(TargetAddInPoints));
                 var surface = GetSurfaceFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
 
                 if (surface == null)
@@ -233,7 +254,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
                 var DictionaryTargetObserverCount = new Dictionary<IPoint, int>();
 
-                foreach (var observerPoint in ObserverAddInPoints)
+                foreach (var observerPoint in observerPoints)
                 {
                     // keep track of visible targets for this observer
                     var CanSeeAtLeastOneTarget = false;
@@ -245,8 +266,8 @@ namespace ArcMapAddinVisibility.ViewModels
                         System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.LLOSPointsOutsideOfSurfaceExtent, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
                         return;
                     }
-                    
-                    foreach (var targetPoint in TargetAddInPoints)
+
+                    foreach (var targetPoint in targetPoints)
                     {
                         var z2 = surface.GetElevation(targetPoint.Point) + finalTargetOffset;
 
@@ -280,7 +301,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
                         // First Add "SightLine" so it appears behind others
                         // Black = Not visible -or- White = Visible
-                        if (targetIsVisible)                            
+                        if (targetIsVisible)
                             AddGraphicToMap(pcolPolyline, new RgbColorClass() { RGB = 0xFFFFFF }, false,
                                 size: 6); //  white line
                         else
@@ -298,7 +319,7 @@ namespace ArcMapAddinVisibility.ViewModels
                         }
 
                         if (polyVisible == null && polyInvisible == null)
-                        {                           
+                        {
                             if (targetIsVisible)
                                 AddGraphicToMap(pcol as IPolyline, new RgbColorClass() { Green = 255 }, size: 3);
                             else
@@ -323,10 +344,32 @@ namespace ArcMapAddinVisibility.ViewModels
                     }
                 }
 
-                VisualizeTargets(DictionaryTargetObserverCount);
-                ZoomToExtent(longestLine);
+                VisualizeTargets(DictionaryTargetObserverCount, targetPoints);
+
+                if ((ObserverAddInPoints.Any() || LLOS_ObserversInExtent.Any())
+                    && (TargetAddInPoints.Any() || LLOS_TargetsInExtent.Any()))
+                {
+                    ZoomToExtent(longestLine);
+                }
+
+                DisplayOutOfExtentMsg();
+
+                //display points present out of extent
+                var colorObserver = new RgbColorClass() { Blue = 255 };
+                var colorTarget = new RgbColorClass() { Red = 255 };
+                var colorObserverBorder = new RgbColorClass() { Red = 255, Blue = 255, Green = 255 };
+                var colorTargetBorder = new RgbColorClass() { Red = 0, Blue = 0, Green = 0 };
+                foreach (var point in LLOS_ObserversOutOfExtent)
+                {
+                    AddGraphicToMap(point.AddInPoint.Point, colorObserver, markerStyle: esriSimpleMarkerStyle.esriSMSX, size: 10, borderColor: colorObserverBorder);
+                }
+                foreach (var point in LLOS_TargetsOutOfExtent)
+                {
+                    AddGraphicToMap(point.AddInPoint.Point, colorTarget, markerStyle: esriSimpleMarkerStyle.esriSMSX, size: 10, borderColor: colorTargetBorder);
+                }
+
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine(ex.Message);
                 System.Windows.Forms.MessageBox.Show(VisibilityLibrary.Properties.Resources.ExceptionSomethingWentWrong,
@@ -335,13 +378,62 @@ namespace ArcMapAddinVisibility.ViewModels
             finally
             {
                 IsRunning = false;
+                ClearLLOSCollections();
+                ValidateLLOS_LayerSelection();
             }
         }
 
-        private void VisualizeTargets(Dictionary<IPoint, int> dict)
+        private void DisplayOutOfExtentMsg()
+        {
+            var observerIDCollection = LLOS_ObserversOutOfExtent.Select(x=>x.ID).ToList<int>();
+            var targetIDCollection = LLOS_TargetsOutOfExtent.Select(x => x.ID).ToList<int>();
+            var observerString = string.Empty;
+            var targetString = string.Empty;
+            foreach (var item in observerIDCollection)
+            {
+                if (observerString == "")
+                    observerString = item.ToString();
+                else
+                    observerString = observerString + "," + item.ToString();
+            }
+            foreach (var item in targetIDCollection)
+            {
+                if (targetString == "")
+                    targetString = item.ToString();
+                else
+                    targetString = targetString + "," + item.ToString();
+            }
+            if (observerIDCollection.Any() || targetIDCollection.Any())
+            {
+                if ((observerIDCollection.Count + targetIDCollection.Count) <= 10)
+                {
+                    var msgString = string.Empty;
+                    if (observerIDCollection.Any())
+                    {
+                        msgString = "Observers lying outside the extent of elevation surface are: " + observerString;
+                    }
+                    if (targetIDCollection.Any())
+                    {
+                        if (msgString != "")
+                            msgString = msgString + "\n";
+                        msgString = msgString + "Targets lying outside the extent of elevation surface are: " + targetString;
+                    }
+                    System.Windows.MessageBox.Show(msgString,
+                                                "Unable To Process For Few Locations");
+                }
+                else
+                {
+                    System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.LLOSPointsOutsideOfSurfaceExtent,
+                    VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+                }
+
+            }
+        }
+
+        private void VisualizeTargets(Dictionary<IPoint, int> dict, ObservableCollection<AddInPoint> targetPoints)
         {
             // visualize targets
-            foreach (var targetPoint in TargetAddInPoints)
+            foreach (var targetPoint in targetPoints)
             {
                 if (dict.ContainsKey(targetPoint.Point))
                 {
@@ -379,6 +471,20 @@ namespace ArcMapAddinVisibility.ViewModels
 
             // and update observers
             base.OnDisplayCoordinateTypeChanged(obj);
+        }
+
+        private void ReadSelectedLayerPoints()
+        {
+            LLOS_ObserversInExtent.Clear();
+            LLOS_ObserversOutOfExtent.Clear();
+            LLOS_TargetsInExtent.Clear();
+            LLOS_TargetsOutOfExtent.Clear();
+
+            var observerColor = new RgbColor() { Blue = 255 } as IColor;
+            ReadSelectedLyrPoints(LLOS_ObserversInExtent, LLOS_ObserversOutOfExtent, SelectedLLOS_ObserverLyrName, observerColor);
+
+            var targetColor = new RgbColor() { Red = 255 } as IColor;
+            ReadSelectedLyrPoints(LLOS_TargetsInExtent, LLOS_TargetsOutOfExtent, SelectedLLOS_TargetLyrName, observerColor);            
         }
     }
 }

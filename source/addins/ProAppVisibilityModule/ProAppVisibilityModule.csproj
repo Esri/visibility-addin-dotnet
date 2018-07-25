@@ -53,6 +53,12 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ESRI.ArcGIS.Display, Version=10.3.0.0, Culture=neutral, PublicKeyToken=8fc3cc631e44ad86, processorArchitecture=MSIL">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="ESRI.ArcGIS.GraphicsSymbols, Version=10.3.0.0, Culture=neutral, PublicKeyToken=8fc3cc631e44ad86, processorArchitecture=MSIL">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -106,6 +112,9 @@
     <Compile Include="Helpers\GeometryHelper.cs" />
     <Compile Include="Helpers\MapPointHelper.cs" />
     <Compile Include="Models\AddInPoint.cs" />
+    <Compile Include="Models\AddInPointObject.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Models\ProGraphic.cs" />
     <Compile Include="ViewModels\ProLLOSViewModel.cs" />
     <Compile Include="ViewModels\ProLOSBaseViewModel.cs" />
@@ -113,6 +122,10 @@
     <Compile Include="ViewModels\ProTabBaseViewModel.cs" />
     <Compile Include="Views\ProEditPropertiesView.xaml.cs">
       <DependentUpon>ProEditPropertiesView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ProSelectCoordinateFieldsView.xaml.cs">
+      <DependentUpon>ProSelectCoordinateFieldsView.xaml</DependentUpon>
+      <SubType>Code</SubType>
     </Compile>
     <Compile Include="VisibilityMapTool.cs" />
     <Compile Include="PropertiesButton.cs" />
@@ -127,6 +140,10 @@
     <Page Include="Views\ProEditPropertiesView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\ProSelectCoordinateFieldsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="VisibilityDockpane.xaml">
       <SubType>Designer</SubType>
@@ -180,9 +197,10 @@
     </XmlPeek>
     <Message Importance="High" Text="old build number @(Peeked) new build number $(BUILD_MAJOR).$(BUILD_MINOR).$(BUILD_PATCH).$(BUILD_NUMBER)" />
     <XmlPoke XmlInputPath="Config.daml" Query="//@version[1]" Value="$(BUILD_MAJOR).$(BUILD_MINOR).$(BUILD_PATCH).$(BUILD_NUMBER)" />
-    <XmlPeek XmlInputPath="Config.daml" Query="/x:ArcGIS/x:AddInInfo/x:Date/text()" Namespaces="&lt;Namespace Prefix='x' Uri='http://schemas.esri.com/DADF/Registry' /&gt;"> <Output TaskParameter="Result" ItemName="Peeked_Date" />
+    <XmlPeek XmlInputPath="Config.daml" Query="/x:ArcGIS/x:AddInInfo/x:Date/text()" Namespaces="&lt;Namespace Prefix='x' Uri='http://schemas.esri.com/DADF/Registry' /&gt;">
+      <Output TaskParameter="Result" ItemName="Peeked_Date" />
     </XmlPeek>
     <Message Importance="High" Text="Old build date @(Peeked_Date) New build date $(BUILD_DATE)" />
-    <XmlPoke XmlInputPath="Config.daml" Query="/x:ArcGIS/x:AddInInfo/x:Date" Namespaces="&lt;Namespace Prefix='x' Uri='http://schemas.esri.com/DADF/Registry' /&gt;" Value="$(BUILD_DATE)"/>
+    <XmlPoke XmlInputPath="Config.daml" Query="/x:ArcGIS/x:AddInInfo/x:Date" Namespaces="&lt;Namespace Prefix='x' Uri='http://schemas.esri.com/DADF/Registry' /&gt;" Value="$(BUILD_DATE)" />
   </Target>
 </Project>

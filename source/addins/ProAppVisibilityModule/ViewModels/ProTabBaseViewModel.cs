@@ -322,7 +322,7 @@ namespace ProAppVisibilityModule.ViewModels
                 {
                     await Reset(true);
                 });
-                
+
                 isActiveTab = value;
                 RaisePropertyChanged(() => IsActiveTab);
             }
@@ -488,7 +488,7 @@ namespace ProAppVisibilityModule.ViewModels
 
             RaisePropertyChanged(() => HasMapGraphics);
         }
-        
+
         /// <summary>
         /// Method used to totally reset the tool
         /// reset points, feedback
@@ -580,7 +580,7 @@ namespace ProAppVisibilityModule.ViewModels
                         var Lon = Double.Parse(matchMercator.Groups["longitude"].Value);
                         point = QueuedTask.Run(() =>
                             {
-                                return MapPointBuilder.CreateMapPoint(Lon, Lat);
+                                return MapPointBuilder.CreateMapPoint(Lon, Lat, MapView.Active.Map.SpatialReference);
                             }).Result;
                         return point;
                     }
@@ -613,7 +613,7 @@ namespace ProAppVisibilityModule.ViewModels
                 await QueuedTask.Run(() =>
                 {
                     // TODO add text graphic
-                    //var tg = new CIMTextGraphic() { Placement = Anchor.CenterPoint, Text = text};
+                    //var tg = new CIMTextGraphic() { Placement = Anchor.CenterPoint, Text = text};                    
                 });
             }
             else if (geom.GeometryType == GeometryType.Point)
