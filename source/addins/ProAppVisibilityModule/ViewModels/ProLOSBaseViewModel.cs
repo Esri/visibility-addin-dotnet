@@ -1,4 +1,4 @@
-﻿// Copyright 2016 Esri 
+﻿// Copyright 2016 Esri
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,24 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Collections.ObjectModel;
-using System.Collections;
-using System.Windows;
-using System.Threading.Tasks;
-using System.Diagnostics;
+using ArcGIS.Core.CIM;
 using ArcGIS.Core.Geometry;
-using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
+using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Mapping.Events;
+using ProAppVisibilityModule.Models;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using System.Windows;
 using VisibilityLibrary;
 using VisibilityLibrary.Helpers;
-using VisibilityLibrary.Views;
 using VisibilityLibrary.ViewModels;
-using ProAppVisibilityModule.Models;
-using ArcGIS.Core.CIM;
+using VisibilityLibrary.Views;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -40,10 +43,21 @@ namespace ProAppVisibilityModule.ViewModels
             ObserverOffset = 2.0;
             TargetOffset = 0.0;
             OffsetUnitType = DistanceTypes.Meters;
+            DistanceUnitType = DistanceTypes.Meters;
             AngularUnitType = AngularTypes.DEGREES;
+            EnterManullyOption = VisibilityLibrary.Properties.Resources.EnterManuallyOption;
 
             ObserverAddInPoints = new ObservableCollection<AddInPoint>();
-            
+            LLOS_ObserversInExtent = new ObservableCollection<AddInPointObject>();
+            LLOS_ObserversOutOfExtent = new ObservableCollection<AddInPointObject>();
+            LLOS_TargetsInExtent = new ObservableCollection<AddInPointObject>();
+            LLOS_TargetsOutOfExtent = new ObservableCollection<AddInPointObject>();
+            RLOS_ObserversInExtent = new ObservableCollection<AddInPointObject>();
+            RLOS_ObserversOutOfExtent = new ObservableCollection<AddInPointObject>();
+            LLOS_ObserverLyrNames = new ObservableCollection<string>();
+            LLOS_TargetLyrNames = new ObservableCollection<string>();
+            RLOS_ObserverLyrNames = new ObservableCollection<string>();
+
             ToolMode = MapPointToolMode.Unknown;
             SurfaceLayerNames = new ObservableCollection<string>();
             SelectedSurfaceName = string.Empty;
@@ -53,6 +67,8 @@ namespace ProAppVisibilityModule.ViewModels
             DeletePointCommand = new RelayCommand(OnDeletePointCommand);
             DeleteAllPointsCommand = new RelayCommand(OnDeleteAllPointsCommand);
             EditPropertiesDialogCommand = new RelayCommand(OnEditPropertiesDialogCommand);
+            ImportCSVFileCommand = new RelayCommand(OnImportCSVFileCommand);
+            PasteCoordinatesCommand = new RelayCommand(OnPasteCommand);
 
             // subscribe to some mapping events
             ActiveMapViewChangedEvent.Subscribe(OnActiveMapViewChanged);
@@ -125,6 +141,7 @@ namespace ProAppVisibilityModule.ViewModels
                     throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEInvalidInput);
             }
         }
+
         private double? targetOffset;
         public double? TargetOffset
         {
@@ -166,10 +183,97 @@ namespace ProAppVisibilityModule.ViewModels
             }
         }
 
+        public string EnterManullyOption { get; set; }
+
+        public bool _isLLOSValidSelection { get; set; }
+        public bool IsLLOSValidSelection
+        {
+            get
+            {
+                return _isLLOSValidSelection;
+            }
+            set
+            {
+                _isLLOSValidSelection = value;
+                RaisePropertyChanged(() => IsLLOSValidSelection);
+            }
+        }
+
+        private bool _isRLOSValidSelection { get; set; }
+        public bool IsRLOSValidSelection
+        {
+            get
+            {
+                return _isRLOSValidSelection;
+            }
+            set
+            {
+                _isRLOSValidSelection = value;
+                RaisePropertyChanged(() => IsRLOSValidSelection);
+            }
+        }
+
+        private string _selectedLLOS_TargetLyrName;
+        public string SelectedLLOS_TargetLyrName
+        {
+            get
+            {
+                return _selectedLLOS_TargetLyrName;
+            }
+            set
+            {
+                _selectedLLOS_TargetLyrName = value;
+                ValidateLLOS_LayerSelection();
+                RaisePropertyChanged(() => SelectedLLOS_TargetLyrName);
+            }
+        }
+
+        private string _selectedLLOS_ObserverLyrName;
+        public string SelectedLLOS_ObserverLyrName
+        {
+            get
+            {
+                return _selectedLLOS_ObserverLyrName;
+            }
+            set
+            {
+                _selectedLLOS_ObserverLyrName = value;
+                ValidateLLOS_LayerSelection();
+                RaisePropertyChanged(() => SelectedLLOS_ObserverLyrName);
+            }
+        }
+
+        private string _selectedRLOS_ObserverLyrName;
+        public string SelectedRLOS_ObserverLyrName
+        {
+            get
+            {
+                return _selectedRLOS_ObserverLyrName;
+            }
+            set
+            {
+                _selectedRLOS_ObserverLyrName = value;
+                ValidateRLOS_LayerSelection();
+                RaisePropertyChanged(() => SelectedRLOS_ObserverLyrName);
+            }
+        }
+
+        public ObservableCollection<string> LLOS_ObserverLyrNames { get; set; }
+        public ObservableCollection<string> LLOS_TargetLyrNames { get; set; }
+        public ObservableCollection<string> RLOS_ObserverLyrNames { get; set; }
+        public ObservableCollection<AddInPointObject> LLOS_TargetsInExtent { get; set; }
+        public ObservableCollection<AddInPointObject> LLOS_TargetsOutOfExtent { get; set; }
+        public ObservableCollection<AddInPointObject> LLOS_ObserversInExtent { get; set; }
+        public ObservableCollection<AddInPointObject> LLOS_ObserversOutOfExtent { get; set; }
+        public ObservableCollection<AddInPointObject> RLOS_ObserversInExtent { get; set; }
+        public ObservableCollection<AddInPointObject> RLOS_ObserversOutOfExtent { get; set; }
+
         public ObservableCollection<AddInPoint> ObserverAddInPoints { get; set; }
+        public ObservableCollection<AddInPoint> TargetAddInPoints { get; set; }
         public ObservableCollection<string> SurfaceLayerNames { get; set; }
         public string SelectedSurfaceName { get; set; }
         public DistanceTypes OffsetUnitType { get; set; }
+        public DistanceTypes DistanceUnitType { get; set; }
         public AngularTypes AngularUnitType { get; set; }
 
         #endregion
@@ -179,6 +283,8 @@ namespace ProAppVisibilityModule.ViewModels
         public RelayCommand DeletePointCommand { get; set; }
         public RelayCommand DeleteAllPointsCommand { get; set; }
         public RelayCommand EditPropertiesDialogCommand { get; set; }
+        public RelayCommand ImportCSVFileCommand { get; set; }
+        public RelayCommand PasteCoordinatesCommand { get; set; }
 
         /// <summary>
         /// Command method to delete points
@@ -214,6 +320,132 @@ namespace ProAppVisibilityModule.ViewModels
             dlg.ShowDialog();
         }
 
+        public virtual void OnImportCSVFileCommand(object obj)
+        {
+            var mode = obj as string;
+            CoordinateConversionLibrary.Models.CoordinateConversionLibraryConfig.AddInConfig.DisplayAmbiguousCoordsDlg = false;
+            var fileDialog = new Microsoft.Win32.OpenFileDialog();
+            fileDialog.CheckFileExists = true;
+            fileDialog.CheckPathExists = true;
+            fileDialog.Filter = "csv files|*.csv";
+
+            // attemp to import
+            var fieldVM = new CoordinateConversionLibrary.ViewModels.SelectCoordinateFieldsViewModel();
+            var result = fileDialog.ShowDialog();
+            if (result.HasValue && result.Value == true)
+            {
+                var dlg = new CoordinateConversionLibrary.Views.ProSelectCoordinateFieldsView();
+                using (Stream s = new FileStream(fileDialog.FileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                {
+                    var headers = CoordinateConversionLibrary.Helpers.ImportCSV.GetHeaders(s);
+                    if (headers != null)
+                    {
+                        foreach (var header in headers)
+                        {
+                            fieldVM.AvailableFields.Add(header);
+                            System.Diagnostics.Debug.WriteLine("header : {0}", header);
+                        }
+                        dlg.DataContext = fieldVM;
+                    }
+                    else
+                    {
+                        ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgNoDataFound,
+                                                                      VisibilityLibrary.Properties.Resources.CaptionError);
+                        return;
+                    }
+                }
+                if (dlg.ShowDialog() == true)
+                {
+                    using (Stream s = new FileStream(fileDialog.FileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                    {
+                        var lists = CoordinateConversionLibrary.Helpers.ImportCSV.Import<CoordinateConversionLibrary.ViewModels.ImportCoordinatesList>(s, fieldVM.SelectedFields.ToArray());
+
+                        foreach (var item in lists)
+                        {
+                            string outFormattedString = string.Empty;
+
+                            var sb = new StringBuilder();
+                            sb.Append(item.lat.Trim());
+                            if (fieldVM.UseTwoFields)
+                                sb.Append(string.Format(" {0}", item.lon.Trim()));
+
+                            string coordinate = sb.ToString();
+                            CoordinateConversionLibrary.Models.CoordinateType ccType = CoordinateConversionLibrary.Helpers.ConversionUtils.GetCoordinateString(coordinate, out outFormattedString);
+                            if (ccType == CoordinateConversionLibrary.Models.CoordinateType.Unknown)
+                            {
+                                Regex regexMercator = new Regex(@"^(?<latitude>\-?\d+\.?\d*)[+,;:\s]*(?<longitude>\-?\d+\.?\d*)");
+                                var matchMercator = regexMercator.Match(coordinate);
+                                if (matchMercator.Success && matchMercator.Length == coordinate.Length)
+                                {
+                                    ccType = CoordinateConversionLibrary.Models.CoordinateType.DD;
+                                }
+                            }
+                            MapPoint point = (ccType != CoordinateConversionLibrary.Models.CoordinateType.Unknown) ? GetMapPointFromString(outFormattedString) : null;
+                            if (point != null)
+                            {
+                                if (mode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
+                                {
+                                    ToolMode = MapPointToolMode.Observer;
+                                    Point1 = point;
+                                    OnNewMapPointEvent(Point1);
+                                }
+                                else if (mode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
+                                {
+                                    ToolMode = MapPointToolMode.Target;
+                                    Point2 = point;
+                                    OnNewMapPointEvent(Point2);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        internal virtual void OnPasteCommand(object obj)
+        {
+            var mode = obj.ToString();
+
+            if (string.IsNullOrWhiteSpace(mode))
+                return;
+
+            var input = Clipboard.GetText().Trim();
+            string[] lines = input.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+            var coordinates = new List<string>();
+            foreach (var item in lines)
+            {
+                string outFormattedString = string.Empty;
+                string coordinate = item.Trim().ToString();
+                CoordinateConversionLibrary.Models.CoordinateType ccType = CoordinateConversionLibrary.Helpers.ConversionUtils.GetCoordinateString(coordinate, out outFormattedString);
+                if (ccType == CoordinateConversionLibrary.Models.CoordinateType.Unknown)
+                {
+                    Regex regexMercator = new Regex(@"^(?<latitude>\-?\d+\.?\d*)[+,;:\s]*(?<longitude>\-?\d+\.?\d*)");
+                    var matchMercator = regexMercator.Match(coordinate);
+                    if (matchMercator.Success && matchMercator.Length == coordinate.Length)
+                    {
+                        ccType = CoordinateConversionLibrary.Models.CoordinateType.DD;
+                    }
+                }
+                MapPoint point = (ccType != CoordinateConversionLibrary.Models.CoordinateType.Unknown) ? GetMapPointFromString(outFormattedString) : null;
+                if (point != null)
+                {
+                    if (mode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
+                    {
+                        ToolMode = MapPointToolMode.Observer;
+                        Point1 = point;
+                        OnNewMapPointEvent(Point1);
+                    }
+                    else if (mode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
+                    {
+                        ToolMode = MapPointToolMode.Target;
+                        Point2 = point;
+                        OnNewMapPointEvent(Point2);
+                    }
+                }
+            }
+        }
+
+
         /// <summary>
         /// Method used to delete points frome the view's observer listbox
         /// </summary>
@@ -246,7 +478,7 @@ namespace ProAppVisibilityModule.ViewModels
         {
             var keyCommandMode = obj as string;
 
-            if(keyCommandMode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
+            if (keyCommandMode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
             {
                 ToolMode = MapPointToolMode.Observer;
                 OnNewMapPointEvent(Point1);
@@ -363,7 +595,7 @@ namespace ProAppVisibilityModule.ViewModels
 
                 // WORKAROUND/BUG:
                 // QueryExtent() is taking several minutes to return from this call with ImageServiceLayer
-                // during which MCT can't do anything, so for now just return true, 
+                // during which MCT can't do anything, so for now just return true,
                 // fix this in the future when QueryExtent() or alternate works with ImageServiceLayer
                 if (layer is ImageServiceLayer)
                 {
@@ -420,7 +652,7 @@ namespace ProAppVisibilityModule.ViewModels
         /// </summary>
         /// <param name="name">string name of layer</param>
         /// <returns>Layer</returns>
-        /// 
+        ///
         internal Layer GetLayerFromMapByName(string name)
         {
             var layer = MapView.Active.Map.GetLayersAsFlattenedList().FirstOrDefault(l => l.Name == name);
@@ -438,10 +670,10 @@ namespace ProAppVisibilityModule.ViewModels
             var elevationSurfaceList = await QueuedTask.Run(() =>
                 {
                     var list = new List<Layer>();
-                    foreach(var layer in layerList)
+                    foreach (var layer in layerList)
                     {
                         var def = layer.GetDefinition();
-                        if(def != null && def.LayerType == ArcGIS.Core.CIM.MapLayerType.Operational && 
+                        if (def != null && def.LayerType == ArcGIS.Core.CIM.MapLayerType.Operational &&
                             (def is CIMRasterLayer || def is CIMTinLayer || def is CIMLASDatasetLayer || def is CIMMosaicLayer))
                         {
                             list.Add(layer);
@@ -499,18 +731,18 @@ namespace ProAppVisibilityModule.ViewModels
                     {
                         // reset observer points
                         ObserverAddInPoints.Clear();
-                    
+
                         ClearTempGraphics();
                     });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine(ex.Message);
             }
         }
 
         /// <summary>
-        /// Method used to reset the currently selected surfacename 
+        /// Method used to reset the currently selected surfacename
         /// Use when toc items or map changes, on tab selection changed, etc
         /// </summary>
         internal async Task ResetSurfaceNames()
@@ -542,12 +774,87 @@ namespace ProAppVisibilityModule.ViewModels
                 else
                     SelectedSurfaceName = string.Empty;
 
+                await ResetLayerNames();
                 RaisePropertyChanged(() => SelectedSurfaceName);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Debug.Print(ex.Message);
             }
+        }
+
+        private async Task ResetLayerNames()
+        {
+            var layerNames = await GetLayerNamesFromMap();
+
+            var tempSelectedLLOS_ObserverLyr = SelectedLLOS_ObserverLyrName;
+            var tempLLOS_TargetLyrNames = SelectedLLOS_TargetLyrName;
+            var tempRLOS_ObserverLyrNames = SelectedRLOS_ObserverLyrName;
+
+            ResetLayerNameCollections(layerNames);
+
+            ResetSelectedLyrName(tempSelectedLLOS_ObserverLyr, tempLLOS_TargetLyrNames, tempRLOS_ObserverLyrNames);
+        }
+
+        private void ResetSelectedLyrName(string tempSelectedLLOS_ObserverLyr, string tempLLOS_TargetLyrNames, string tempRLOS_ObserverLyrNames)
+        {
+            if (LLOS_ObserverLyrNames.Contains(tempSelectedLLOS_ObserverLyr))
+                SelectedLLOS_ObserverLyrName = tempSelectedLLOS_ObserverLyr;
+            else if (LLOS_ObserverLyrNames.Any())
+                SelectedLLOS_ObserverLyrName = LLOS_ObserverLyrNames[0];
+            else
+                SelectedLLOS_ObserverLyrName = string.Empty;
+
+            if (LLOS_TargetLyrNames.Contains(tempLLOS_TargetLyrNames))
+                SelectedLLOS_TargetLyrName = tempLLOS_TargetLyrNames;
+            else if (LLOS_TargetLyrNames.Any())
+                SelectedLLOS_TargetLyrName = LLOS_TargetLyrNames[0];
+            else
+                SelectedLLOS_TargetLyrName = string.Empty;
+
+            if (RLOS_ObserverLyrNames.Contains(tempRLOS_ObserverLyrNames))
+                SelectedRLOS_ObserverLyrName = tempRLOS_ObserverLyrNames;
+            else if (RLOS_ObserverLyrNames.Any())
+                SelectedRLOS_ObserverLyrName = RLOS_ObserverLyrNames[0];
+            else
+                SelectedRLOS_ObserverLyrName = string.Empty;
+        }
+
+        private void ResetLayerNameCollections(List<string> layerNames)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                LLOS_ObserverLyrNames.Clear();
+                LLOS_TargetLyrNames.Clear();
+                RLOS_ObserverLyrNames.Clear();
+
+                LLOS_ObserverLyrNames.Add(EnterManullyOption);
+                LLOS_TargetLyrNames.Add(EnterManullyOption);
+                RLOS_ObserverLyrNames.Add(EnterManullyOption);
+
+                foreach (var name in layerNames)
+                {
+                    LLOS_ObserverLyrNames.Add(name);
+                    LLOS_TargetLyrNames.Add(name);
+                    RLOS_ObserverLyrNames.Add(name);
+                }
+            });
+        }
+
+        private Task<List<string>> GetLayerNamesFromMap()
+        {
+            return QueuedTask.Run(() =>
+                {
+                    var layer = new List<string>();
+                    try
+                    {
+                        layer = MapView.Active.Map.GetLayersAsFlattenedList().OfType<FeatureLayer>()
+                                         .Where(l => l.ShapeType == esriGeometryType.esriGeometryPoint)
+                                         .Select(x => x.ToString()).ToList();
+                    }
+                    catch (Exception) { }
+                    return layer;
+                });
         }
 
         /// <summary>
@@ -609,7 +916,7 @@ namespace ProAppVisibilityModule.ViewModels
             if (mapUnit == null)
                 return result;
 
-            var offsetLinearUnit = GetLinearUnit(OffsetUnitType);
+            var offsetLinearUnit = GetLinearUnit(DistanceUnitType);
 
             result = offsetLinearUnit.ConvertTo(value, mapUnit);
 
@@ -633,7 +940,6 @@ namespace ProAppVisibilityModule.ViewModels
         {
             await ResetSurfaceNames();
         }
-
 
         private async void OnMapPropertyChanged(MapPropertyChangedEventArgs obj)
         {
@@ -675,5 +981,95 @@ namespace ProAppVisibilityModule.ViewModels
             return result;
         }
 
+        internal void ValidateLLOS_LayerSelection()
+        {
+            IsLLOSValidSelection = (
+                ((SelectedLLOS_ObserverLyrName == EnterManullyOption || string.IsNullOrWhiteSpace(SelectedLLOS_ObserverLyrName))
+                && ObserverAddInPoints.Count == 0 && LLOS_ObserversInExtent.Count == 0 && LLOS_ObserversOutOfExtent.Count == 0)
+                ||
+                ((SelectedLLOS_TargetLyrName == EnterManullyOption || string.IsNullOrWhiteSpace(SelectedLLOS_TargetLyrName))
+                && TargetAddInPoints.Count == 0 && LLOS_TargetsInExtent.Count == 0 && LLOS_TargetsOutOfExtent.Count == 0)
+                ) ? false : true;
+        }
+
+        internal void ValidateRLOS_LayerSelection()
+        {
+            IsRLOSValidSelection =
+                ((SelectedRLOS_ObserverLyrName == EnterManullyOption || string.IsNullOrWhiteSpace(SelectedRLOS_ObserverLyrName))
+                && ObserverAddInPoints.Count == 0 && RLOS_ObserversInExtent.Count == 0 && RLOS_ObserversOutOfExtent.Count == 0) ? false : true;
+        }
+
+        internal async Task<Envelope> GetSurfaceEnvelope()
+        {
+            if (!string.IsNullOrWhiteSpace(SelectedSurfaceName) && MapView.Active != null && MapView.Active.Map != null)
+            {
+                var selectedSurface = GetLayerFromMapByName(SelectedSurfaceName);
+
+                // WORKAROUND/BUG:
+                // QueryExtent() is taking several minutes to return from this call with ImageServiceLayer
+                // during which MCT can't do anything, so for now just return true,
+                // fix this in the future when QueryExtent() or alternate works with ImageServiceLayer
+                if (selectedSurface is ImageServiceLayer)
+                {
+                    return null;
+                }
+
+                var envelope = await QueuedTask.Run(() =>
+                {
+                    return selectedSurface.QueryExtent();
+                });
+                return envelope;
+            }
+            return null;
+        }
+
+        internal async void ReadPointFromLayer(Envelope surfaceEnvelope, ObservableCollection<AddInPointObject> inExtentPoints, ObservableCollection<AddInPointObject> outOfExtentPoints, string selectedLayerName)
+        {
+            if (selectedLayerName != EnterManullyOption && !string.IsNullOrWhiteSpace(selectedLayerName))
+            {
+                var layer = MapView.Active.Map.GetLayersAsFlattenedList().OfType<FeatureLayer>()
+                .Where(lyr => lyr.Name == selectedLayerName && lyr.ShapeType == esriGeometryType.esriGeometryPoint).FirstOrDefault();
+                var cursor = layer.GetFeatureClass().Search();
+                while (cursor.MoveNext())
+                {
+                    var point = (MapPoint)cursor.Current["Shape"];
+                    var guid = await AddGraphicToMap(point, ColorFactory.Instance.RedRGB, true, 5.0, markerStyle: SimpleMarkerStyle.Square, tag: "target");
+                    var addInPoint = new AddInPoint { Point = point, GUID = guid };
+                    var objectId = -1;
+                    var FID = -1;
+                    try
+                    {
+                        objectId = Convert.ToInt32(cursor.Current["ObjectId"]);
+                    }
+                    catch (Exception) { }
+                    try
+                    {
+                        FID = Convert.ToInt32(cursor.Current["FID"]);
+                    }
+                    catch (Exception) { }
+
+                    var ID = objectId != -1 ? objectId : FID;
+                    var isWithinEntent = await IsPointWithinExtent(point, surfaceEnvelope);
+                    if (isWithinEntent)
+                        inExtentPoints.Add(new AddInPointObject() { ID = ID, AddInPoint = addInPoint });
+                    else
+                        outOfExtentPoints.Add(new AddInPointObject() { ID = ID, AddInPoint = addInPoint });
+                }
+            }
+        }
+
+        internal void ClearLLOSCollections()
+        {
+            LLOS_TargetsInExtent.Clear();
+            LLOS_TargetsOutOfExtent.Clear();
+            LLOS_ObserversInExtent.Clear();
+            LLOS_ObserversOutOfExtent.Clear();
+        }
+
+        internal void ClearRLOSCollections()
+        {
+            RLOS_ObserversInExtent.Clear();
+            RLOS_ObserversOutOfExtent.Clear();
+        }
     }
 }

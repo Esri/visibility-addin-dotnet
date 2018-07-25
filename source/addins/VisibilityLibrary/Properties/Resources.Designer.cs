@@ -151,6 +151,15 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Enter Manually.
+        /// </summary>
+        public static string EnterManuallyOption {
+            get {
+                return ResourceManager.GetString("EnterManuallyOption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to DD.
         /// </summary>
         public static string EnumCTDD {
@@ -358,6 +367,24 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to gridcode.
+        /// </summary>
+        public static string GridCodeFieldName {
+            get {
+                return ResourceManager.GetString("GridCodeFieldName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to IsOutOfExtent.
+        /// </summary>
+        public static string IsOutOfExtentFieldName {
+            get {
+                return ResourceManager.GetString("IsOutOfExtentFieldName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cancel.
         /// </summary>
         public static string LabelCancel {
@@ -408,6 +435,15 @@ namespace VisibilityLibrary.Properties {
         public static string LabelHorizontalFOV {
             get {
                 return ResourceManager.GetString("LabelHorizontalFOV", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Import.
+        /// </summary>
+        public static string LabelImport {
+            get {
+                return ResourceManager.GetString("LabelImport", resourceCulture);
             }
         }
         
@@ -471,6 +507,15 @@ namespace VisibilityLibrary.Properties {
         public static string LabelOK {
             get {
                 return ResourceManager.GetString("LabelOK", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Paste.
+        /// </summary>
+        public static string LabelPaste {
+            get {
+                return ResourceManager.GetString("LabelPaste", resourceCulture);
             }
         }
         
@@ -543,6 +588,15 @@ namespace VisibilityLibrary.Properties {
         public static string LabelVerticalFOV {
             get {
                 return ResourceManager.GetString("LabelVerticalFOV", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to LLOS.
+        /// </summary>
+        public static string LLOSFeatureDatasetName {
+            get {
+                return ResourceManager.GetString("LLOSFeatureDatasetName", resourceCulture);
             }
         }
         
@@ -673,6 +727,15 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No data found.
+        /// </summary>
+        public static string MsgNoDataFound {
+            get {
+                return ResourceManager.GetString("MsgNoDataFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Point does not fall within the input extent..
         /// </summary>
         public static string MsgOutOfAOI {
@@ -732,6 +795,15 @@ namespace VisibilityLibrary.Properties {
         public static string RLOSConvertedPolygonsLayerName {
             get {
                 return ResourceManager.GetString("RLOSConvertedPolygonsLayerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to RLOS.
+        /// </summary>
+        public static string RLOSFeatureDatasetName {
+            get {
+                return ResourceManager.GetString("RLOSFeatureDatasetName", resourceCulture);
             }
         }
         

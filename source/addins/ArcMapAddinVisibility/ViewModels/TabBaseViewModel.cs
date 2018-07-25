@@ -68,7 +68,7 @@ namespace ArcMapAddinVisibility.ViewModels
         {
             string currentActiveToolName = obj as string;
 
-            if ((currentActiveToolName == ThisAddIn.IDs.MapPointTool))   
+            if ((currentActiveToolName == ThisAddIn.IDs.MapPointTool))
                 return;
 
             lastActiveToolName = currentActiveToolName;
@@ -411,7 +411,7 @@ namespace ArcMapAddinVisibility.ViewModels
                 }
             }
             elementList.Clear();
-            
+
             RaisePropertyChanged(() => HasMapGraphics);
         }
 
@@ -502,11 +502,11 @@ namespace ArcMapAddinVisibility.ViewModels
                 return;
             }
 
-            if ((ArcMap.Application.CurrentTool != null) && 
+            if ((ArcMap.Application.CurrentTool != null) &&
                 (ArcMap.Application.CurrentTool.Name.Equals(toolName)))
-                    // Tricky: Check if tool already active - because setting CurrentTool again will 
-                    //         cause Activate/Deactive to be called by ArcGIS framework
-                    return;
+                // Tricky: Check if tool already active - because setting CurrentTool again will 
+                //         cause Activate/Deactive to be called by ArcGIS framework
+                return;
 
             ESRI.ArcGIS.Framework.ICommandBars commandBars = ArcMap.Application.Document.CommandBars;
             ESRI.ArcGIS.esriSystem.UID commandID = new ESRI.ArcGIS.esriSystem.UIDClass();
@@ -530,36 +530,36 @@ namespace ArcMapAddinVisibility.ViewModels
 
             try
             {
-            var cn = point as IConversionNotation;
-            if (cn != null)
-            {
-                switch (VisibilityConfig.AddInConfig.DisplayCoordinateType)
+                var cn = point as IConversionNotation;
+                if (cn != null)
                 {
-                    case CoordinateTypes.DD:
-                        result = cn.GetDDFromCoords(6);
-                        break;
-                    case CoordinateTypes.DDM:
-                        result = cn.GetDDMFromCoords(4);
-                        break;
-                    case CoordinateTypes.DMS:
-                        result = cn.GetDMSFromCoords(2);
-                        break;
-                    //case CoordinateTypes.GARS:
-                    //    result = cn.GetGARSFromCoords();
-                    //    break;
-                    case CoordinateTypes.MGRS:
-                        result = cn.CreateMGRS(5, true, esriMGRSModeEnum.esriMGRSMode_Automatic);
-                        break;
-                    case CoordinateTypes.USNG:
-                        result = cn.GetUSNGFromCoords(5, true, true);
-                        break;
-                    case CoordinateTypes.UTM:
-                        result = cn.GetUTMFromCoords(esriUTMConversionOptionsEnum.esriUTMAddSpaces | esriUTMConversionOptionsEnum.esriUTMUseNS);
-                        break;
-                    default:
-                        break;
+                    switch (VisibilityConfig.AddInConfig.DisplayCoordinateType)
+                    {
+                        case CoordinateTypes.DD:
+                            result = cn.GetDDFromCoords(6);
+                            break;
+                        case CoordinateTypes.DDM:
+                            result = cn.GetDDMFromCoords(4);
+                            break;
+                        case CoordinateTypes.DMS:
+                            result = cn.GetDMSFromCoords(2);
+                            break;
+                        //case CoordinateTypes.GARS:
+                        //    result = cn.GetGARSFromCoords();
+                        //    break;
+                        case CoordinateTypes.MGRS:
+                            result = cn.CreateMGRS(5, true, esriMGRSModeEnum.esriMGRSMode_Automatic);
+                            break;
+                        case CoordinateTypes.USNG:
+                            result = cn.GetUSNGFromCoords(5, true, true);
+                            break;
+                        case CoordinateTypes.UTM:
+                            result = cn.GetUTMFromCoords(esriUTMConversionOptionsEnum.esriUTMAddSpaces | esriUTMConversionOptionsEnum.esriUTMUseNS);
+                            break;
+                        default:
+                            break;
+                    }
                 }
-            }
             }
             catch (Exception ex)
             {
@@ -653,9 +653,12 @@ namespace ArcMapAddinVisibility.ViewModels
         /// Adds a graphic element to the map graphics container
         /// </summary>
         /// <param name="geom">IGeometry</param>
-        internal string AddGraphicToMap(IGeometry geom, IColor color, bool IsTempGraphic = false, 
-            esriSimpleMarkerStyle markerStyle = esriSimpleMarkerStyle.esriSMSCircle, int size = 5)
+        internal string AddGraphicToMap(IGeometry geom, IColor color, bool IsTempGraphic = false,
+            esriSimpleMarkerStyle markerStyle = esriSimpleMarkerStyle.esriSMSCircle, int size = 5, IColor borderColor = null)
         {
+            if (borderColor == null)
+                borderColor = color;
+
             if (geom == null || ArcMap.Document == null || ArcMap.Document.FocusMap == null)
                 return string.Empty;
 
@@ -669,7 +672,7 @@ namespace ArcMapAddinVisibility.ViewModels
                 var simpleMarkerSymbol = (ISimpleMarkerSymbol)new SimpleMarkerSymbol();
                 simpleMarkerSymbol.Color = color;
                 simpleMarkerSymbol.Outline = true;
-                simpleMarkerSymbol.OutlineColor = color;
+                simpleMarkerSymbol.OutlineColor = borderColor;
                 simpleMarkerSymbol.Size = size;
                 simpleMarkerSymbol.Style = markerStyle;
 
@@ -695,7 +698,7 @@ namespace ArcMapAddinVisibility.ViewModels
                 IPolygonElement pe = (IPolygonElement)new PolygonElementClass();
                 element = pe as IElement;
                 IFillShapeElement fe = (IFillShapeElement)pe;
-                
+
                 var fillSymbol = new SimpleFillSymbolClass();
                 RgbColor selectedColor = new RgbColorClass();
                 selectedColor.Red = 0;
@@ -703,8 +706,8 @@ namespace ArcMapAddinVisibility.ViewModels
                 selectedColor.Blue = 0;
 
                 selectedColor.Transparency = (byte)0;
-                fillSymbol.Color = selectedColor;  
-                
+                fillSymbol.Color = selectedColor;
+
                 fe.Symbol = fillSymbol;
             }
 
@@ -720,7 +723,7 @@ namespace ArcMapAddinVisibility.ViewModels
             var eprop = (IElementProperties)element;
             eprop.Name = Guid.NewGuid().ToString();
 
-            GraphicsList.Add(new AMGraphic(eprop.Name, geom, IsTempGraphic)); 
+            GraphicsList.Add(new AMGraphic(eprop.Name, geom, IsTempGraphic));
 
             gc.AddElement(element, 0);
 
@@ -732,7 +735,7 @@ namespace ArcMapAddinVisibility.ViewModels
         }
 
         internal DistanceTypes GetDistanceType(int linearUnitFactoryCode)
-        { 
+        {
             DistanceTypes distanceType = DistanceTypes.Meters;
             switch (linearUnitFactoryCode)
             {
@@ -826,7 +829,7 @@ namespace ArcMapAddinVisibility.ViewModels
             var av = (IActiveView)ArcMap.Document.FocusMap;
 
             IEnvelope env = geom.Envelope;
-
+            
             double extentPercent = (env.XMax - env.XMin) > (env.YMax - env.YMin) ? (env.XMax - env.XMin) * .3 : (env.YMax - env.YMin) * .3;
             env.XMax = env.XMax + extentPercent;
             env.XMin = env.XMin - extentPercent;

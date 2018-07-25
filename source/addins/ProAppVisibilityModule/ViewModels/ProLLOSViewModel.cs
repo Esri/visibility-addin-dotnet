@@ -32,6 +32,10 @@ using ArcGIS.Desktop.Mapping;
 using ProAppVisibilityModule.Helpers;
 using ProAppVisibilityModule.Models;
 using VisibilityLibrary.Helpers;
+using ArcGIS.Core.Data;
+using System.Text.RegularExpressions;
+using ArcGIS.Core.CIM;
+using ESRI.ArcGIS.Display;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -41,15 +45,15 @@ namespace ProAppVisibilityModule.ViewModels
         {
             TargetAddInPoints = new ObservableCollection<AddInPoint>();
             IsActiveTab = true;
-
+            DisplayProgressBarLLOS = Visibility.Hidden;
             // commands
-            SubmitCommand = new RelayCommand(async (obj) => 
+            SubmitCommand = new RelayCommand(async (obj) =>
             {
                 try
                 {
                     await OnSubmitCommand(obj);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Debug.Print(ex.Message);
                 }
@@ -59,10 +63,9 @@ namespace ProAppVisibilityModule.ViewModels
 
         #region Properties
 
-        public ObservableCollection<AddInPoint> TargetAddInPoints { get; set; }
 
         private int executionCounter = 0;
-        
+
         private string _ObserversLayerName = VisibilityLibrary.Properties.Resources.LLOSObserversLayerName;
         public string ObserversLayerName
         {
@@ -119,6 +122,34 @@ namespace ProAppVisibilityModule.ViewModels
             set { }
         }
 
+        private Visibility _displayProgressBar = Visibility.Collapsed;
+        public Visibility DisplayProgressBarLLOS
+        {
+            get
+            {
+                return _displayProgressBar;
+            }
+            set
+            {
+                _displayProgressBar = value;
+                RaisePropertyChanged(() => DisplayProgressBarLLOS);
+            }
+        }
+
+        private string _FeatureDatasetName = VisibilityLibrary.Properties.Resources.LLOSFeatureDatasetName;
+        public string FeatureDatasetName
+        {
+            get
+            {
+                if (executionCounter > 0)
+                {
+                    _FeatureDatasetName = string.Format("{0}_{1}", VisibilityLibrary.Properties.Resources.LLOSFeatureDatasetName, executionCounter);
+                }
+                return _FeatureDatasetName;
+            }
+            set { }
+        }
+
         #endregion
 
         #region Commands
@@ -139,18 +170,23 @@ namespace ProAppVisibilityModule.ViewModels
                         // TODO udpate wait cursor/progressor
                         try
                         {
+                            DisplayProgressBarLLOS = Visibility.Visible;
+                            IsRunning = true;
                             await CreateMapElement();
-
                             //await Reset(true);
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             Debug.Print(ex.Message);
+                        }
+                        finally
+                        {
+                            DisplayProgressBarLLOS = Visibility.Hidden;
                         }
 
                     });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Debug.Print(ex.Message);
             }
@@ -174,6 +210,7 @@ namespace ProAppVisibilityModule.ViewModels
                 return;
 
             DeleteTargetPoints(targets);
+            ValidateLLOS_LayerSelection();
         }
 
         /// <summary>
@@ -212,6 +249,8 @@ namespace ProAppVisibilityModule.ViewModels
                 base.OnDeleteAllPointsCommand(obj);
             else if (mode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
                 DeleteTargetPoints(TargetAddInPoints.ToList());
+
+            ValidateLLOS_LayerSelection();
         }
 
         #endregion
@@ -242,6 +281,8 @@ namespace ProAppVisibilityModule.ViewModels
                         TargetAddInPoints.Insert(0, addInPoint);
                     });
             }
+
+            ValidateLLOS_LayerSelection();
         }
 
         /// <summary>
@@ -263,7 +304,7 @@ namespace ProAppVisibilityModule.ViewModels
                     TargetAddInPoints.Clear();
                 });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Debug.Print(ex.Message);
             }
@@ -277,9 +318,9 @@ namespace ProAppVisibilityModule.ViewModels
         {
             get
             {
-                return (!string.IsNullOrWhiteSpace(SelectedSurfaceName) 
-                    && ObserverAddInPoints.Any() 
-                    && TargetAddInPoints.Any()
+                return (!string.IsNullOrWhiteSpace(SelectedSurfaceName)
+                    && (ObserverAddInPoints.Any() || LLOS_ObserversInExtent.Any() || LLOS_ObserversOutOfExtent.Any())
+                    && (TargetAddInPoints.Any() || LLOS_TargetsInExtent.Any() || LLOS_TargetsOutOfExtent.Any())
                     && TargetOffset.HasValue
                     && ObserverOffset.HasValue);
             }
@@ -292,7 +333,7 @@ namespace ProAppVisibilityModule.ViewModels
         {
             try
             {
-                IsRunning = true;
+                await ReadSelectedLayers();
 
                 if (!CanCreateElement || MapView.Active == null || MapView.Active.Map == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
                     return;
@@ -311,7 +352,7 @@ namespace ProAppVisibilityModule.ViewModels
 
                 //await base.CreateMapElement();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine(ex.Message);
                 ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.ExceptionSomethingWentWrong,
@@ -320,6 +361,7 @@ namespace ProAppVisibilityModule.ViewModels
             finally
             {
                 IsRunning = false;
+                ClearLLOSCollections();
             }
         }
 
@@ -334,7 +376,7 @@ namespace ProAppVisibilityModule.ViewModels
                 if (surfaceSR == null || !surfaceSR.IsProjected)
                 {
                     MessageBox.Show(VisibilityLibrary.Properties.Resources.RLOSUserPrompt, VisibilityLibrary.Properties.Resources.RLOSUserPromptCaption);
-                    
+
                     Application.Current.Dispatcher.Invoke(() =>
                     {
                         TargetAddInPoints.Clear();
@@ -343,10 +385,12 @@ namespace ProAppVisibilityModule.ViewModels
                     });
 
                     await Reset(true);
-                    
+
                     return false;
                 }
 
+                var observerPoints = new ObservableCollection<AddInPoint>(LLOS_ObserversInExtent.Select(x => x.AddInPoint).Union(ObserverAddInPoints));
+                var targetPoints = new ObservableCollection<AddInPoint>(LLOS_TargetsInExtent.Select(x => x.AddInPoint).Union(TargetAddInPoints));
                 // Warn if Image Service layer
                 Layer surfaceLayer = GetLayerFromMapByName(SelectedSurfaceName);
                 if (surfaceLayer is ImageServiceLayer)
@@ -361,7 +405,39 @@ namespace ProAppVisibilityModule.ViewModels
                     }
                 }
 
-                success = await FeatureClassHelper.CreateLayer(ObserversLayerName, "POINT", true, true);
+                //Validate Dataframe Spatial reference with surface spatial reference
+                if (MapView.Active.Map.SpatialReference.Wkid != surfaceSR.Wkid)
+                {
+                    MessageBox.Show(VisibilityLibrary.Properties.Resources.LOSDataFrameMatch, VisibilityLibrary.Properties.Resources.LOSSpatialReferenceCaption);
+                    return false;
+                }
+
+                await ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(() =>
+                {
+                    using (Geodatabase geodatabase = new Geodatabase(new FileGeodatabaseConnectionPath(new Uri(CoreModule.CurrentProject.DefaultGeodatabasePath))))
+                    {
+                        executionCounter = 0;
+                        var enterpriseDefinitionNames = geodatabase.GetDefinitions<FeatureDatasetDefinition>().Where(i => i.GetName().StartsWith(VisibilityLibrary.Properties.Resources.LLOSFeatureDatasetName)).Select(i => i.GetName()).ToList();
+                        foreach (var defName in enterpriseDefinitionNames)
+                        {
+                            int n;
+                            bool isNumeric = int.TryParse(Regex.Match(defName, @"\d+$").Value, out n);
+                            if (isNumeric)
+                                executionCounter = executionCounter < n ? n : executionCounter;
+                        }
+                        executionCounter = enterpriseDefinitionNames.Count > 0 ? executionCounter + 1 : 0;
+                    }
+                });
+
+                //Create Feature dataset
+                success = await FeatureClassHelper.CreateFeatureDataset(FeatureDatasetName);
+                if (!success)
+                    return false;
+
+                success = await FeatureClassHelper.CreateLayer(FeatureDatasetName, ObserversLayerName, "POINT", true, true);
+
+                if (!success)
+                    return false;
 
                 // add fields for observer offset
 
@@ -369,7 +445,7 @@ namespace ProAppVisibilityModule.ViewModels
                 await FeatureClassHelper.AddFieldToLayer(ObserversLayerName, VisibilityLibrary.Properties.Resources.OffsetWithZFieldName, "DOUBLE");
                 await FeatureClassHelper.AddFieldToLayer(ObserversLayerName, VisibilityLibrary.Properties.Resources.TarIsVisFieldName, "SHORT");
 
-                success = await FeatureClassHelper.CreateLayer(TargetsLayerName, "POINT", true, true);
+                success = await FeatureClassHelper.CreateLayer(FeatureDatasetName, TargetsLayerName, "POINT", true, true);
 
                 if (!success)
                     return false;
@@ -381,10 +457,10 @@ namespace ProAppVisibilityModule.ViewModels
                 await FeatureClassHelper.AddFieldToLayer(TargetsLayerName, VisibilityLibrary.Properties.Resources.NumOfObserversFieldName, "SHORT");
 
                 // add observer points to feature layer
-                await FeatureClassHelper.CreatingFeatures(ObserversLayerName, ObserverAddInPoints, GetAsMapZUnits(surfaceSR, ObserverOffset.Value));
+                await FeatureClassHelper.CreatingFeatures(ObserversLayerName, observerPoints, GetAsMapZUnits(surfaceSR, ObserverOffset.Value));
 
                 // add target points to feature layer
-                await FeatureClassHelper.CreatingFeatures(TargetsLayerName, TargetAddInPoints, GetAsMapZUnits(surfaceSR, TargetOffset.Value));
+                await FeatureClassHelper.CreatingFeatures(TargetsLayerName, targetPoints, GetAsMapZUnits(surfaceSR, TargetOffset.Value));
 
                 // update with surface information
                 success = await FeatureClassHelper.AddSurfaceInformation(ObserversLayerName, SelectedSurfaceName, VisibilityLibrary.Properties.Resources.ZFieldName);
@@ -405,8 +481,8 @@ namespace ProAppVisibilityModule.ViewModels
 
                 success = await FeatureClassHelper.CreateSightLines(ObserversLayerName,
                     TargetsLayerName,
-                    CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + SightLinesLayerName, 
-                    VisibilityLibrary.Properties.Resources.OffsetWithZFieldName, 
+                    CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + FeatureDatasetName + System.IO.Path.DirectorySeparatorChar + SightLinesLayerName,
+                    VisibilityLibrary.Properties.Resources.OffsetWithZFieldName,
                     VisibilityLibrary.Properties.Resources.OffsetWithZFieldName);
 
                 if (!success)
@@ -418,8 +494,8 @@ namespace ProAppVisibilityModule.ViewModels
                 GC.Collect();
 
                 success = await FeatureClassHelper.CreateLOS(SelectedSurfaceName,
-                    CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + SightLinesLayerName,
-                    CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + OutputLayerName);
+                    CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + FeatureDatasetName + System.IO.Path.DirectorySeparatorChar + SightLinesLayerName,
+                    CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + FeatureDatasetName + System.IO.Path.DirectorySeparatorChar + OutputLayerName);
 
                 if (!success)
                     return false;
@@ -430,9 +506,9 @@ namespace ProAppVisibilityModule.ViewModels
 
                 // join fields with sight lines
 
-                await FeatureClassHelper.JoinField(CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + SightLinesLayerName,
+                await FeatureClassHelper.JoinField(CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + FeatureDatasetName + System.IO.Path.DirectorySeparatorChar + SightLinesLayerName,
                                                     "OID",
-                                                    CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + OutputLayerName,
+                                                    CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + FeatureDatasetName + System.IO.Path.DirectorySeparatorChar + OutputLayerName,
                                                     "SourceOID",
                                                     new string[] { "TarIsVis" });
 
@@ -441,9 +517,9 @@ namespace ProAppVisibilityModule.ViewModels
 
                 //if (sourceOIDs.Count > 0)
                 //{
-                    var visStats = await FeatureClassHelper.GetVisibilityStats(sourceOIDs, SightLinesLayerName);
+                var visStats = await FeatureClassHelper.GetVisibilityStats(sourceOIDs, SightLinesLayerName);
 
-                    await FeatureClassHelper.UpdateLayersWithVisibilityStats(visStats, ObserversLayerName, TargetsLayerName);
+                await FeatureClassHelper.UpdateLayersWithVisibilityStats(visStats, ObserversLayerName, TargetsLayerName);
 
                 //}
 
@@ -451,6 +527,14 @@ namespace ProAppVisibilityModule.ViewModels
                 var targetsLayer = GetLayerFromMapByName(TargetsLayerName) as FeatureLayer;
                 var sightLinesLayer = GetLayerFromMapByName(SightLinesLayerName) as FeatureLayer;
                 var outputLayer = GetLayerFromMapByName(OutputLayerName) as FeatureLayer;
+
+                var observerOutOfExtent = new ObservableCollection<AddInPoint>(LLOS_ObserversOutOfExtent.Select(x => x.AddInPoint));
+                // add observer points present out of extent to feature layer
+                await FeatureClassHelper.CreatingFeatures(ObserversLayerName, observerOutOfExtent, GetAsMapZUnits(surfaceSR, TargetOffset.Value), VisibilityLibrary.Properties.Resources.TarIsVisFieldName);
+
+                var targetOutOfExtent = new ObservableCollection<AddInPoint>(LLOS_TargetsOutOfExtent.Select(x => x.AddInPoint));
+                // add target points present out of extent to feature layer
+                await FeatureClassHelper.CreatingFeatures(TargetsLayerName, targetOutOfExtent, GetAsMapZUnits(surfaceSR, TargetOffset.Value), VisibilityLibrary.Properties.Resources.NumOfObserversFieldName);
 
                 if (observersLayer != null && targetsLayer != null && sightLinesLayer != null && outputLayer != null)
                 {
@@ -487,10 +571,20 @@ namespace ProAppVisibilityModule.ViewModels
 
                     // for now we are not resetting after a run of the tool
                     //await Reset(true);
+
+
+                    List<Layer> lyrList = new List<Layer>();
+                    lyrList.Add(observersLayer);
+                    lyrList.Add(targetsLayer);
+                    lyrList.Add(sightLinesLayer);
+                    lyrList.Add(outputLayer);
+
+                    await FeatureClassHelper.MoveLayersToGroupLayer(lyrList, FeatureDatasetName);
                     var envelope = await QueuedTask.Run(() => outputLayer.QueryExtent());
                     await ZoomToExtent(envelope);
-                    executionCounter++;
 
+                    var surfaceEnvelope = await GetSurfaceEnvelope();
+                    await DisplayOutOfExtentMsg(surfaceEnvelope);
                     success = true;
                 }
                 else
@@ -498,7 +592,7 @@ namespace ProAppVisibilityModule.ViewModels
                     success = false;
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 success = false;
                 Debug.Print(ex.Message);
@@ -506,6 +600,75 @@ namespace ProAppVisibilityModule.ViewModels
 
             return success;
         }
+
+        private async Task DisplayOutOfExtentMsg(Envelope surfaceEnvelope)
+        {
+            await QueuedTask.Run(() =>
+            {
+                var observerIDCollection = LLOS_ObserversOutOfExtent.Select(x => x.ID).ToList<int>();
+                var targetIDCollection = LLOS_TargetsOutOfExtent.Select(x => x.ID).ToList<int>();
+                var observerString = string.Empty;
+                var targetString = string.Empty;
+                foreach (var item in observerIDCollection)
+                {
+                    if (observerString == "")
+                        observerString = item.ToString();
+                    else
+                        observerString = observerString + "," + item.ToString();
+                }
+                foreach (var item in targetIDCollection)
+                {
+                    if (targetString == "")
+                        targetString = item.ToString();
+                    else
+                        targetString = targetString + "," + item.ToString();
+                }
+                if (observerIDCollection.Any() || targetIDCollection.Any())
+                {
+                    if ((observerIDCollection.Count + targetIDCollection.Count) <= 10)
+                    {
+                        var msgString = string.Empty;
+                        if (observerIDCollection.Any())
+                        {
+                            msgString = "Observers lying outside the extent of elevation surface are: " + observerString;
+                        }
+                        if (targetIDCollection.Any())
+                        {
+                            if (msgString != "")
+                                msgString = msgString + "\n";
+                            msgString = msgString + "Targets lying outside the extent of elevation surface are: " + targetString;
+                        }
+                        ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(msgString,
+                                                    "Unable To Process For Few Locations");
+                    }
+                    else
+                    {
+                        ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.LLOSPointsOutsideOfSurfaceExtent,
+                        VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+                    }
+                }
+            });
+        }
+
+        private async Task ReadSelectedLayers()
+        {
+            LLOS_ObserversInExtent.Clear();
+            LLOS_ObserversOutOfExtent.Clear();
+            LLOS_TargetsInExtent.Clear();
+            LLOS_TargetsOutOfExtent.Clear();
+
+            var surfaceEnvelope = await GetSurfaceEnvelope();
+            await QueuedTask.Run(() =>
+            {
+                ReadPointFromLayer(surfaceEnvelope, LLOS_ObserversInExtent, LLOS_ObserversOutOfExtent, SelectedLLOS_ObserverLyrName);
+            });
+            await QueuedTask.Run(() =>
+            {
+                ReadPointFromLayer(surfaceEnvelope, LLOS_TargetsInExtent, LLOS_TargetsOutOfExtent, SelectedLLOS_TargetLyrName);
+            });
+        }
+
+
 
         internal override void OnDisplayCoordinateTypeChanged(object obj)
         {
