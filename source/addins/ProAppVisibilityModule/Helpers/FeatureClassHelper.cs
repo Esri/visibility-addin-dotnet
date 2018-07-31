@@ -961,14 +961,14 @@ namespace ProAppVisibilityModule.Helpers
                 uniqueValueRenderer.Groups = new CIMUniqueValueGroup[] { groupOne };
 
                 //Draw the rest with the default symbol
-                uniqueValueRenderer.UseDefaultSymbol = true;
-                uniqueValueRenderer.DefaultLabel = "All other values";
+                //uniqueValueRenderer.UseDefaultSymbol = true;
+                //uniqueValueRenderer.DefaultLabel = "All other values";
 
-                var defaultColor = CIMColor.CreateRGBColor(215, 215, 215);
-                uniqueValueRenderer.DefaultSymbol = new CIMSymbolReference()
-                {
-                    Symbol = SymbolFactory.Instance.ConstructPointSymbol(defaultColor)
-                };
+                //var defaultColor = CIMColor.CreateRGBColor(215, 215, 215);
+                //uniqueValueRenderer.DefaultSymbol = new CIMSymbolReference()
+                //{
+                //    Symbol = SymbolFactory.Instance.ConstructPointSymbol(defaultColor)
+                //};
 
                 //var renderer = featureLayer.CreateRenderer(uniqueValueRenderer);
                 featureLayer.SetRenderer(uniqueValueRenderer);

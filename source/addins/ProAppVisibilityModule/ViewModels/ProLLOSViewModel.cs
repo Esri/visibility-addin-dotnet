@@ -35,7 +35,6 @@ using VisibilityLibrary.Helpers;
 using ArcGIS.Core.Data;
 using System.Text.RegularExpressions;
 using ArcGIS.Core.CIM;
-using ESRI.ArcGIS.Display;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -576,8 +575,8 @@ namespace ProAppVisibilityModule.ViewModels
                     List<Layer> lyrList = new List<Layer>();
                     lyrList.Add(observersLayer);
                     lyrList.Add(targetsLayer);
-                    lyrList.Add(sightLinesLayer);
                     lyrList.Add(outputLayer);
+                    lyrList.Add(sightLinesLayer);
 
                     await FeatureClassHelper.MoveLayersToGroupLayer(lyrList, FeatureDatasetName);
                     var envelope = await QueuedTask.Run(() => outputLayer.QueryExtent());
