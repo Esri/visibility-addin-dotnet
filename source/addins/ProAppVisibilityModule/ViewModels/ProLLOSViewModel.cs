@@ -416,15 +416,23 @@ namespace ProAppVisibilityModule.ViewModels
                     using (Geodatabase geodatabase = new Geodatabase(new FileGeodatabaseConnectionPath(new Uri(CoreModule.CurrentProject.DefaultGeodatabasePath))))
                     {
                         executionCounter = 0;
+                        int featureDataSetSuffix = 0;
                         var enterpriseDefinitionNames = geodatabase.GetDefinitions<FeatureDatasetDefinition>().Where(i => i.GetName().StartsWith(VisibilityLibrary.Properties.Resources.LLOSFeatureDatasetName)).Select(i => i.GetName()).ToList();
                         foreach (var defName in enterpriseDefinitionNames)
                         {
                             int n;
                             bool isNumeric = int.TryParse(Regex.Match(defName, @"\d+$").Value, out n);
                             if (isNumeric)
-                                executionCounter = executionCounter < n ? n : executionCounter;
+                                featureDataSetSuffix = featureDataSetSuffix < n ? n : featureDataSetSuffix;
                         }
-                        executionCounter = enterpriseDefinitionNames.Count > 0 ? executionCounter + 1 : 0;
+                        featureDataSetSuffix = enterpriseDefinitionNames.Count > 0 ? featureDataSetSuffix + 1 : 0;
+                        
+                        var observerLyrSuffix = GetLayerSuffix(VisibilityLibrary.Properties.Resources.LLOSObserversLayerName, geodatabase);
+                        var targetLyrSuffix = GetLayerSuffix(VisibilityLibrary.Properties.Resources.LLOSTargetsLayerName, geodatabase);
+                        var sightLinesLyrSuffix = GetLayerSuffix(VisibilityLibrary.Properties.Resources.LLOSSightLinesLayerName, geodatabase);
+                        var outputLyrSuffix = GetLayerSuffix(VisibilityLibrary.Properties.Resources.LLOSOutputLayerName, geodatabase);
+
+                        executionCounter = new List<int> { featureDataSetSuffix, observerLyrSuffix, targetLyrSuffix, sightLinesLyrSuffix, outputLyrSuffix }.Max();
                     }
                 });
 
@@ -598,6 +606,21 @@ namespace ProAppVisibilityModule.ViewModels
             }
 
             return success;
+        }
+
+        private int GetLayerSuffix(string layerName, Geodatabase geodatabase)
+        {
+            int counter = 0;
+            var enterpriseFCNames = geodatabase.GetDefinitions<FeatureClassDefinition>().Where(i => i.GetName().StartsWith(layerName)).Select(i => i.GetName()).ToList();
+             foreach (var fcName in enterpriseFCNames)
+            {
+                int n;
+                bool isNumeric = int.TryParse(Regex.Match(fcName, @"\d+$").Value, out n);
+                if (isNumeric)
+                    counter = counter < n ? n : counter;
+            }
+            counter = enterpriseFCNames.Count > 0 ? counter + 1 : 0;
+            return counter;
         }
 
         private async Task DisplayOutOfExtentMsg(Envelope surfaceEnvelope)
