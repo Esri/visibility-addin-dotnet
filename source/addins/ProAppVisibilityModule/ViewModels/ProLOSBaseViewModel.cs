@@ -1023,7 +1023,8 @@ namespace ProAppVisibilityModule.ViewModels
             return null;
         }
 
-        internal async void ReadPointFromLayer(Envelope surfaceEnvelope, ObservableCollection<AddInPointObject> inExtentPoints, ObservableCollection<AddInPointObject> outOfExtentPoints, string selectedLayerName)
+        internal async void ReadPointFromLayer(Envelope surfaceEnvelope, ObservableCollection<AddInPointObject> inExtentPoints,
+            ObservableCollection<AddInPointObject> outOfExtentPoints, string selectedLayerName, List<long> selectedFeaturesCollections)
         {
             if (selectedLayerName != EnterManullyOption && !string.IsNullOrWhiteSpace(selectedLayerName))
             {
@@ -1050,10 +1051,14 @@ namespace ProAppVisibilityModule.ViewModels
 
                     var ID = objectId != -1 ? objectId : FID;
                     var isWithinEntent = await IsPointWithinExtent(point, surfaceEnvelope);
-                    if (isWithinEntent)
-                        inExtentPoints.Add(new AddInPointObject() { ID = ID, AddInPoint = addInPoint });
-                    else
-                        outOfExtentPoints.Add(new AddInPointObject() { ID = ID, AddInPoint = addInPoint });
+                    if (selectedFeaturesCollections == null || !selectedFeaturesCollections.Any() ||
+                        (selectedFeaturesCollections.Any() && selectedFeaturesCollections.Where(x => Convert.ToInt32(x) == ID).Any()))
+                    {
+                        if (isWithinEntent)
+                            inExtentPoints.Add(new AddInPointObject() { ID = ID, AddInPoint = addInPoint });
+                        else
+                            outOfExtentPoints.Add(new AddInPointObject() { ID = ID, AddInPoint = addInPoint });
+                    }
                 }
             }
         }

@@ -316,11 +316,16 @@ namespace ProAppVisibilityModule.ViewModels
                 if (!CanCreateElement || MapView.Active == null || MapView.Active.Map == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
                     return;
 
-                bool success = await ExecuteVisibilityRLOS();
+                //if (RLOS_ObserversInExtent.Any() || ObserverAddInPoints.Any())
+                    bool success = await ExecuteVisibilityRLOS();
 
-                if (!success)
+                    if (!success)
                     MessageBox.Show("RLOS computations did not complete correctly.\nPlease check your parameters and try again.",
                         VisibilityLibrary.Properties.Resources.CaptionError);
+                //else
+                //{
+                //    //display validation msg
+                //}
 
                 DeactivateTool(VisibilityMapTool.ToolId);
 
@@ -511,12 +516,12 @@ namespace ProAppVisibilityModule.ViewModels
                 List<Layer> layerList = new List<Layer>();
                 var observersLayerFromMap = GetLayerFromMapByName(ObserversLayerName);
                 var RLOSConvertedPolygonsLayer = GetLayerFromMapByName(RLOSConvertedPolygonsLayerName);
-                
+
                 if (observersLayerFromMap != null)
                     layerList.Add(observersLayerFromMap);
                 if (RLOSConvertedPolygonsLayer != null)
                     layerList.Add(GetLayerFromMapByName(RLOSConvertedPolygonsLayerName));
-                
+
                 await FeatureClassHelper.MoveLayersToGroupLayer(layerList, FeatureDatasetName);
 
                 //string groupName = "RLOS Group";
@@ -725,9 +730,12 @@ namespace ProAppVisibilityModule.ViewModels
             RLOS_ObserversOutOfExtent.Clear();
 
             var surfaceEnvelope = await GetSurfaceEnvelope();
+            var selectedFeatures = await QueuedTask.Run(() => { return MapView.Active.Map.GetSelection(); });
             await QueuedTask.Run(() =>
             {
-                ReadPointFromLayer(surfaceEnvelope, RLOS_ObserversInExtent, RLOS_ObserversOutOfExtent, SelectedRLOS_ObserverLyrName);
+                var selectedFeaturesCollections = selectedFeatures.Where(x => x.Key.Name == SelectedRLOS_ObserverLyrName)
+                                            .Select(x => x.Value).FirstOrDefault();
+                ReadPointFromLayer(surfaceEnvelope, RLOS_ObserversInExtent, RLOS_ObserversOutOfExtent, SelectedRLOS_ObserverLyrName, selectedFeaturesCollections);
             });
         }
 

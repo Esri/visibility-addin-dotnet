@@ -353,7 +353,8 @@ namespace ArcMapAddinVisibility.ViewModels
                 if (!CanCreateElement || ArcMap.Document == null || ArcMap.Document.FocusMap == null
                     || string.IsNullOrWhiteSpace(SelectedSurfaceName))
                     return;
-
+                //if (RLOS_ObserversInExtent.Any() || ObserverAddInPoints.Any())
+                //{
                 var observerPoints = RLOS_ObserversInExtent.Select(x => x.AddInPoint).Union(ObserverAddInPoints);
                 var surface = GetSurfaceFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
                 if (surface == null)
@@ -603,6 +604,11 @@ namespace ArcMapAddinVisibility.ViewModels
                         AddGraphicToMap(point.AddInPoint.Point, colorObserver, markerStyle: esriSimpleMarkerStyle.esriSMSX, size: 10, borderColor: colorBorder);
                     }
                 }
+                //}
+                //else
+                //{
+                ////display validation msg
+                //}
             }
             catch (Exception ex)
             {
@@ -1319,13 +1325,13 @@ namespace ArcMapAddinVisibility.ViewModels
             double finalObserverOffset = GetOffsetInZUnits(ObserverOffset.Value, surface.ZFactor, OffsetUnitType);
 
             var observerColor = new RgbColor() { Blue = 255 } as IColor;
-            ReadSelectedLyrPoints(RLOS_ObserversInExtent,RLOS_ObserversOutOfExtent,SelectedRLOS_ObserverLyrName, observerColor);
+            ReadSelectedLyrPoints(RLOS_ObserversInExtent, RLOS_ObserversOutOfExtent, SelectedRLOS_ObserverLyrName, observerColor);
         }
 
 
         private void DisplayOutOfExtentMsg(string selectedLayer)
         {
-            var observerIDCollection = RLOS_ObserversOutOfExtent.Select(x=>x.ID).ToList<int>();
+            var observerIDCollection = RLOS_ObserversOutOfExtent.Select(x => x.ID).ToList<int>();
             var observerString = string.Empty;
             var targetString = string.Empty;
             foreach (var item in observerIDCollection)

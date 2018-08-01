@@ -337,11 +337,17 @@ namespace ProAppVisibilityModule.ViewModels
                 if (!CanCreateElement || MapView.Active == null || MapView.Active.Map == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
                     return;
 
-                bool success = await ExecuteVisibilityLLOS();
 
+                //if((LLOS_ObserversInExtent.Any()||ObserverAddInPoints.Any())
+                //    && LLOS_TargetsInExtent.Any()||TargetAddInPoints.Any())
+                bool success = await ExecuteVisibilityLLOS();
                 if (!success)
                     MessageBox.Show("LLOS computations did not complete correctly.\nPlease check your parameters and try again.",
                         VisibilityLibrary.Properties.Resources.CaptionError);
+                //else
+                //{
+                //    //display validation msg
+                //}
 
                 DeactivateTool(VisibilityMapTool.ToolId);
 
@@ -426,7 +432,7 @@ namespace ProAppVisibilityModule.ViewModels
                                 featureDataSetSuffix = featureDataSetSuffix < n ? n : featureDataSetSuffix;
                         }
                         featureDataSetSuffix = enterpriseDefinitionNames.Count > 0 ? featureDataSetSuffix + 1 : 0;
-                        
+
                         var observerLyrSuffix = GetLayerSuffix(VisibilityLibrary.Properties.Resources.LLOSObserversLayerName, geodatabase);
                         var targetLyrSuffix = GetLayerSuffix(VisibilityLibrary.Properties.Resources.LLOSTargetsLayerName, geodatabase);
                         var sightLinesLyrSuffix = GetLayerSuffix(VisibilityLibrary.Properties.Resources.LLOSSightLinesLayerName, geodatabase);
@@ -612,7 +618,7 @@ namespace ProAppVisibilityModule.ViewModels
         {
             int counter = 0;
             var enterpriseFCNames = geodatabase.GetDefinitions<FeatureClassDefinition>().Where(i => i.GetName().StartsWith(layerName)).Select(i => i.GetName()).ToList();
-             foreach (var fcName in enterpriseFCNames)
+            foreach (var fcName in enterpriseFCNames)
             {
                 int n;
                 bool isNumeric = int.TryParse(Regex.Match(fcName, @"\d+$").Value, out n);
@@ -680,17 +686,20 @@ namespace ProAppVisibilityModule.ViewModels
             LLOS_TargetsOutOfExtent.Clear();
 
             var surfaceEnvelope = await GetSurfaceEnvelope();
+            var selectedFeatures = await QueuedTask.Run(() => { return MapView.Active.Map.GetSelection(); });
             await QueuedTask.Run(() =>
             {
-                ReadPointFromLayer(surfaceEnvelope, LLOS_ObserversInExtent, LLOS_ObserversOutOfExtent, SelectedLLOS_ObserverLyrName);
+                var selectedFeaturesCollections = selectedFeatures.Where(x => x.Key.Name == SelectedLLOS_ObserverLyrName)
+                                            .Select(x => x.Value).FirstOrDefault();
+                ReadPointFromLayer(surfaceEnvelope, LLOS_ObserversInExtent, LLOS_ObserversOutOfExtent, SelectedLLOS_ObserverLyrName, selectedFeaturesCollections);
             });
             await QueuedTask.Run(() =>
             {
-                ReadPointFromLayer(surfaceEnvelope, LLOS_TargetsInExtent, LLOS_TargetsOutOfExtent, SelectedLLOS_TargetLyrName);
+                var selectedFeaturesCollections = selectedFeatures.Where(x => x.Key.Name == SelectedLLOS_TargetLyrName)
+                                            .Select(x => x.Value).FirstOrDefault();
+                ReadPointFromLayer(surfaceEnvelope, LLOS_TargetsInExtent, LLOS_TargetsOutOfExtent, SelectedLLOS_TargetLyrName, selectedFeaturesCollections);
             });
         }
-
-
 
         internal override void OnDisplayCoordinateTypeChanged(object obj)
         {

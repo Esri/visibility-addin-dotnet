@@ -214,7 +214,7 @@ namespace ArcMapAddinVisibility.ViewModels
         public ObservableCollection<string> LLOS_ObserverLyrNames { get; set; }
         public ObservableCollection<string> LLOS_TargetLyrNames { get; set; }
         public ObservableCollection<string> RLOS_ObserverLyrNames { get; set; }
-        
+
         private bool _isLLOSValidSelection { get; set; }
         public bool IsLLOSValidSelection
         {
@@ -228,7 +228,7 @@ namespace ArcMapAddinVisibility.ViewModels
                 RaisePropertyChanged(() => IsLLOSValidSelection);
             }
         }
-        
+
         private bool _isRLOSValidSelection { get; set; }
         public bool IsRLOSValidSelection
         {
@@ -242,7 +242,7 @@ namespace ArcMapAddinVisibility.ViewModels
                 RaisePropertyChanged(() => IsRLOSValidSelection);
             }
         }
-        
+
         public string EnterManullyOption { get; set; }
         public ObservableCollection<AddInPointObject> LLOS_ObserversInExtent { get; set; }
         public ObservableCollection<AddInPointObject> LLOS_ObserversOutOfExtent { get; set; }
@@ -1049,6 +1049,7 @@ namespace ArcMapAddinVisibility.ViewModels
                     var cursor = FLayer.FeatureClass.Search(null, false);
                     var surface = GetSurfaceFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
                     double finalObserverOffset = GetOffsetInZUnits(ObserverOffset.Value, surface.ZFactor, OffsetUnitType);
+                    var selectedFeaturesCollections = GetSelectedFeaturesCollections(layer);
                     while ((feature = cursor.NextFeature()) != null)
                     {
                         var value = feature.get_Value(FLayer.FeatureClass.FindField("Shape"));
@@ -1060,14 +1061,33 @@ namespace ArcMapAddinVisibility.ViewModels
                         var id = Convert.ToInt32(feature.get_Value(idIndex));
                         var z1 = surface.GetElevation(point) + finalObserverOffset;
                         var addInPoint = new AddInPoint() { Point = point, GUID = guid };
-                        if (double.IsNaN(z1))
-                            outOfExtentPoints.Add(new AddInPointObject() { AddInPoint = addInPoint, ID = id });
-                        else
-                            inExtentPoints.Add(new AddInPointObject() { AddInPoint = addInPoint, ID = id });
+                        if (selectedFeaturesCollections==null|| !selectedFeaturesCollections.Any()||
+                            (selectedFeaturesCollections.Any() && selectedFeaturesCollections.Where(x => x == id).Any()))
+                        {
+                            if (double.IsNaN(z1))
+                                outOfExtentPoints.Add(new AddInPointObject() { AddInPoint = addInPoint, ID = id });
+                            else
+                                inExtentPoints.Add(new AddInPointObject() { AddInPoint = addInPoint, ID = id });
+                        }
                     }
                 }
                 layer = layers.Next();
             }
+        }
+
+        private static List<int> GetSelectedFeaturesCollections(ILayer layer)
+        {
+            var selectedFeatureCollections = new List<int>();
+            var selectedFeature = ((IFeatureSelection)layer).SelectionSet;
+            var enumFeature = ((IEnumIDs)(((ISelectionSet)(selectedFeature)).IDs));
+            enumFeature.Reset();
+            int selfeature = enumFeature.Next();
+            while (selfeature != -1)
+            {
+                selectedFeatureCollections.Add(selfeature);
+                selfeature = enumFeature.Next();
+            }
+            return selectedFeatureCollections;
         }
 
         internal void ClearLLOSCollections()
