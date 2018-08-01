@@ -48,6 +48,8 @@ namespace ProAppVisibilityModule.ViewModels
             EnterManullyOption = VisibilityLibrary.Properties.Resources.EnterManuallyOption;
 
             ObserverAddInPoints = new ObservableCollection<AddInPoint>();
+            ObserverInExtentPoints = new ObservableCollection<AddInPoint>();
+            ObserverOutExtentPoints = new ObservableCollection<AddInPoint>();
             LLOS_ObserversInExtent = new ObservableCollection<AddInPointObject>();
             LLOS_ObserversOutOfExtent = new ObservableCollection<AddInPointObject>();
             LLOS_TargetsInExtent = new ObservableCollection<AddInPointObject>();
@@ -256,7 +258,7 @@ namespace ProAppVisibilityModule.ViewModels
                 ValidateRLOS_LayerSelection();
                 RaisePropertyChanged(() => SelectedRLOS_ObserverLyrName);
             }
-        }
+        }         
 
         public ObservableCollection<string> LLOS_ObserverLyrNames { get; set; }
         public ObservableCollection<string> LLOS_TargetLyrNames { get; set; }
@@ -269,12 +271,16 @@ namespace ProAppVisibilityModule.ViewModels
         public ObservableCollection<AddInPointObject> RLOS_ObserversOutOfExtent { get; set; }
 
         public ObservableCollection<AddInPoint> ObserverAddInPoints { get; set; }
+        public ObservableCollection<AddInPoint> ObserverInExtentPoints { get; set; }
+        public ObservableCollection<AddInPoint> ObserverOutExtentPoints { get; set; }
         public ObservableCollection<AddInPoint> TargetAddInPoints { get; set; }
+        public ObservableCollection<AddInPoint> TargetInExtentPoints { get; set; }
+        public ObservableCollection<AddInPoint> TargetOutExtentPoints { get; set; }
         public ObservableCollection<string> SurfaceLayerNames { get; set; }
         public string SelectedSurfaceName { get; set; }
         public DistanceTypes OffsetUnitType { get; set; }
         public DistanceTypes DistanceUnitType { get; set; }
-        public AngularTypes AngularUnitType { get; set; }
+        public AngularTypes AngularUnitType { get; set; }       
 
         #endregion
 
@@ -463,6 +469,8 @@ namespace ProAppVisibilityModule.ViewModels
             foreach (var point in observers)
             {
                 ObserverAddInPoints.Remove(point);
+                ObserverInExtentPoints.Remove(point);
+                ObserverOutExtentPoints.Remove(point);
             }
         }
 
@@ -474,17 +482,23 @@ namespace ProAppVisibilityModule.ViewModels
         /// Override OnKeyKeyCommand to handle manual input
         /// </summary>
         /// <param name="obj"></param>
-        internal override void OnEnterKeyCommand(object obj)
+        internal async override void OnEnterKeyCommand(object obj)
         {
             var keyCommandMode = obj as string;
 
             if (keyCommandMode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
             {
+                if (!(await IsValidPoint(Point1, true)))
+                    return;
+
                 ToolMode = MapPointToolMode.Observer;
                 OnNewMapPointEvent(Point1);
             }
             else if (keyCommandMode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
             {
+                if (!(await IsValidPoint(Point2, true)))
+                    return;
+
                 ToolMode = MapPointToolMode.Target;
                 OnNewMapPointEvent(Point2);
             }
@@ -532,25 +546,42 @@ namespace ProAppVisibilityModule.ViewModels
                 return;
 
             var point = obj as MapPoint;
-
-            if (point == null || !(await IsValidPoint(point, true)))
-                return;
-
+           
             // ok, we have a point
-            if (ToolMode == MapPointToolMode.Observer)
+            if (point != null && ToolMode == MapPointToolMode.Observer)
             {
+                if (IsMapToolPointEnable)
+                {
+                    if (!(await IsValidPoint(point, true)))
+                    {
+                        IsMapToolPointEnable = false;
+                        return;
+                    }             
+                }
                 // in tool mode "Observer" we add observer points
                 // otherwise ignore
 
                 var guid = await AddGraphicToMap(point, ColorFactory.Instance.BlueRGB, true, 5.0);
                 var addInPoint = new AddInPoint() { Point = point, GUID = guid };
+                bool isValid = await IsValidPoint(point, false);
                 Application.Current.Dispatcher.Invoke(() =>
                     {
+                        if (!isValid)
+                        {
+                            ObserverOutExtentPoints.Insert(0, addInPoint);
+                        }
+                        else
+                        {
+                            ObserverInExtentPoints.Insert(0, addInPoint);
+                        }
+
                         ObserverAddInPoints.Insert(0, addInPoint);
                     });
+                IsMapToolPointEnable = false;
             }
+           
         }
-
+         
         /// <summary>
         /// Method to update manual input boxes on mouse movement
         /// </summary>
@@ -610,8 +641,7 @@ namespace ProAppVisibilityModule.ViewModels
                 validPoint = await IsPointWithinExtent(point, env);
 
                 if (validPoint == false && showPopup)
-                    ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgOutOfAOI,
-                                                                        VisibilityLibrary.Properties.Resources.CaptionError);
+                    ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgOutOfAOI, VisibilityLibrary.Properties.Resources.CaptionError);
             }
 
             return validPoint;
@@ -731,7 +761,8 @@ namespace ProAppVisibilityModule.ViewModels
                     {
                         // reset observer points
                         ObserverAddInPoints.Clear();
-
+                        ObserverInExtentPoints.Clear();
+                        ObserverOutExtentPoints.Clear();
                         ClearTempGraphics();
                     });
             }
@@ -865,9 +896,21 @@ namespace ProAppVisibilityModule.ViewModels
         internal virtual void OnDisplayCoordinateTypeChanged(object obj)
         {
             var list = ObserverAddInPoints.ToList();
+            var inExtentList = ObserverInExtentPoints.ToList();
+            var outExtentList = ObserverOutExtentPoints.ToList();
             ObserverAddInPoints.Clear();
+            ObserverInExtentPoints.Clear();
+            ObserverOutExtentPoints.Clear();
+
             foreach (var item in list)
                 ObserverAddInPoints.Add(item);
+
+            foreach (var item in inExtentList)
+                ObserverInExtentPoints.Add(item);
+
+            foreach (var item in outExtentList)
+                ObserverOutExtentPoints.Add(item);
+
             RaisePropertyChanged(() => HasMapGraphics);
         }
 

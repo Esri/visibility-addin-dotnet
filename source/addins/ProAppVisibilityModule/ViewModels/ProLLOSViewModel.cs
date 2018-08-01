@@ -43,6 +43,8 @@ namespace ProAppVisibilityModule.ViewModels
         public ProLLOSViewModel()
         {
             TargetAddInPoints = new ObservableCollection<AddInPoint>();
+            TargetInExtentPoints = new ObservableCollection<AddInPoint>();
+            TargetOutExtentPoints = new ObservableCollection<AddInPoint>();
             IsActiveTab = true;
             DisplayProgressBarLLOS = Visibility.Hidden;
             // commands
@@ -229,6 +231,8 @@ namespace ProAppVisibilityModule.ViewModels
             foreach (var obj in targets)
             {
                 TargetAddInPoints.Remove(obj);
+                TargetInExtentPoints.Remove(obj);
+                TargetOutExtentPoints.Remove(obj);
             }
         }
 
@@ -268,22 +272,49 @@ namespace ProAppVisibilityModule.ViewModels
 
             var point = obj as MapPoint;
 
-            if (point == null || !(await IsValidPoint(point)))
-                return;
-
-            if (ToolMode == MapPointToolMode.Target)
+            if (point != null && ToolMode == MapPointToolMode.Target)
             {
+                if (IsMapToolPointEnable)
+                {
+                    if (!(await IsValidPoint(point, true)))
+                    {
+                        IsMapToolPointEnable = false;
+                        return;
+                    }
+                }
                 var guid = await AddGraphicToMap(point, ColorFactory.Instance.RedRGB, true, 5.0, markerStyle: SimpleMarkerStyle.Square, tag: "target");
                 var addInPoint = new AddInPoint() { Point = point, GUID = guid };
+                bool isValid = await IsValidPoint(point, false);
                 Application.Current.Dispatcher.Invoke(() =>
                     {
+                        if (!isValid)
+                        {
+                            TargetOutExtentPoints.Insert(0, addInPoint);
+                        }
+                        else
+                        {
+                            TargetInExtentPoints.Insert(0, addInPoint);
+                        }
+
                         TargetAddInPoints.Insert(0, addInPoint);
                     });
+                IsMapToolPointEnable = false;
             }
 
             ValidateLLOS_LayerSelection();
+            
         }
+        //internal override async void OnNewMapPointHandler(object obj)
+        //{
+        //    var point = obj as MapPoint;
 
+        //    bool isValid = await IsValidPoint(point, true);
+
+        //    if (!isValid)
+        //        return;
+
+        //    OnNewMapPointEvent(obj);
+        //}
         /// <summary>
         /// Method override reset to include TargetAddInPoints
         /// </summary>
@@ -301,6 +332,8 @@ namespace ProAppVisibilityModule.ViewModels
                 {
                     // reset target points
                     TargetAddInPoints.Clear();
+                    TargetInExtentPoints.Clear();
+                    TargetOutExtentPoints.Clear();
                 });
             }
             catch (Exception ex)
@@ -332,6 +365,7 @@ namespace ProAppVisibilityModule.ViewModels
         {
             try
             {
+
                 await ReadSelectedLayers();
 
                 if (!CanCreateElement || MapView.Active == null || MapView.Active.Map == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
@@ -386,6 +420,10 @@ namespace ProAppVisibilityModule.ViewModels
                     {
                         TargetAddInPoints.Clear();
                         ObserverAddInPoints.Clear();
+                        ObserverInExtentPoints.Clear();
+                        TargetInExtentPoints.Clear();
+                        ObserverOutExtentPoints.Clear();
+                        TargetOutExtentPoints.Clear();
                         ClearTempGraphics();
                     });
 
@@ -394,8 +432,8 @@ namespace ProAppVisibilityModule.ViewModels
                     return false;
                 }
 
-                var observerPoints = new ObservableCollection<AddInPoint>(LLOS_ObserversInExtent.Select(x => x.AddInPoint).Union(ObserverAddInPoints));
-                var targetPoints = new ObservableCollection<AddInPoint>(LLOS_TargetsInExtent.Select(x => x.AddInPoint).Union(TargetAddInPoints));
+                var observerPoints = new ObservableCollection<AddInPoint>(LLOS_ObserversInExtent.Select(x => x.AddInPoint).Union(ObserverInExtentPoints));
+                var targetPoints = new ObservableCollection<AddInPoint>(LLOS_TargetsInExtent.Select(x => x.AddInPoint).Union(TargetInExtentPoints));
                 // Warn if Image Service layer
                 Layer surfaceLayer = GetLayerFromMapByName(SelectedSurfaceName);
                 if (surfaceLayer is ImageServiceLayer)
@@ -541,11 +579,11 @@ namespace ProAppVisibilityModule.ViewModels
                 var sightLinesLayer = GetLayerFromMapByName(SightLinesLayerName) as FeatureLayer;
                 var outputLayer = GetLayerFromMapByName(OutputLayerName) as FeatureLayer;
 
-                var observerOutOfExtent = new ObservableCollection<AddInPoint>(LLOS_ObserversOutOfExtent.Select(x => x.AddInPoint));
+                var observerOutOfExtent = new ObservableCollection<AddInPoint>(LLOS_ObserversOutOfExtent.Select(x => x.AddInPoint).Union(ObserverOutExtentPoints));
                 // add observer points present out of extent to feature layer
                 await FeatureClassHelper.CreatingFeatures(ObserversLayerName, observerOutOfExtent, GetAsMapZUnits(surfaceSR, TargetOffset.Value), VisibilityLibrary.Properties.Resources.TarIsVisFieldName);
 
-                var targetOutOfExtent = new ObservableCollection<AddInPoint>(LLOS_TargetsOutOfExtent.Select(x => x.AddInPoint));
+                var targetOutOfExtent = new ObservableCollection<AddInPoint>(LLOS_TargetsOutOfExtent.Select(x => x.AddInPoint).Union(TargetOutExtentPoints));
                 // add target points present out of extent to feature layer
                 await FeatureClassHelper.CreatingFeatures(TargetsLayerName, targetOutOfExtent, GetAsMapZUnits(surfaceSR, TargetOffset.Value), VisibilityLibrary.Properties.Resources.NumOfObserversFieldName);
 
@@ -704,9 +742,21 @@ namespace ProAppVisibilityModule.ViewModels
         internal override void OnDisplayCoordinateTypeChanged(object obj)
         {
             var list = TargetAddInPoints.ToList();
+            var inExtentList = TargetInExtentPoints.ToList();
+            var outExtentList = TargetOutExtentPoints.ToList();
+
             TargetAddInPoints.Clear();
+            TargetInExtentPoints.Clear();
+            TargetOutExtentPoints.Clear();
+
             foreach (var item in list)
                 TargetAddInPoints.Add(item);
+
+            foreach (var item in inExtentList)
+                TargetInExtentPoints.Add(item);
+
+            foreach (var item in outExtentList)
+                TargetOutExtentPoints.Add(item);
 
             // and update observers
             base.OnDisplayCoordinateTypeChanged(obj);

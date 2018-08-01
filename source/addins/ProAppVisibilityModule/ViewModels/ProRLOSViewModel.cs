@@ -317,9 +317,9 @@ namespace ProAppVisibilityModule.ViewModels
                     return;
 
                 //if (RLOS_ObserversInExtent.Any() || ObserverAddInPoints.Any())
-                    bool success = await ExecuteVisibilityRLOS();
+                bool success = await ExecuteVisibilityRLOS();
 
-                    if (!success)
+                if (!success)
                     MessageBox.Show("RLOS computations did not complete correctly.\nPlease check your parameters and try again.",
                         VisibilityLibrary.Properties.Resources.CaptionError);
                 //else
@@ -368,7 +368,7 @@ namespace ProAppVisibilityModule.ViewModels
                     return false;
                 }
 
-                var observerPoints = new ObservableCollection<AddInPoint>(RLOS_ObserversInExtent.Select(x => x.AddInPoint).Union(ObserverAddInPoints));
+                var observerPoints = new ObservableCollection<AddInPoint>(RLOS_ObserversInExtent.Select(x => x.AddInPoint).Union(ObserverInExtentPoints));
                 // Warn if Image Service layer
                 Layer surfaceLayer = GetLayerFromMapByName(SelectedSurfaceName);
                 if (surfaceLayer is ImageServiceLayer)
@@ -434,7 +434,7 @@ namespace ProAppVisibilityModule.ViewModels
                 await FeatureClassHelper.CreatingFeatures(ObserversLayerName, observerPoints, GetAsMapZUnits(surfaceSR, ObserverOffset.Value));
 
                 //execute only if points are available in surface extent
-                if (ObserverAddInPoints.Any() || RLOS_ObserversInExtent.Any())
+                if (ObserverInExtentPoints.Any() || RLOS_ObserversInExtent.Any())
                 {
                     // update with surface information
                     success = await FeatureClassHelper.AddSurfaceInformation(ObserversLayerName, SelectedSurfaceName, VisibilityLibrary.Properties.Resources.ZFieldName);
@@ -494,7 +494,7 @@ namespace ProAppVisibilityModule.ViewModels
                 }
 
                 // add observer points present out of extent to feature layer
-                var outOfExtent = new ObservableCollection<AddInPoint>(RLOS_ObserversOutOfExtent.Select(x => x.AddInPoint));
+                var outOfExtent = new ObservableCollection<AddInPoint>(RLOS_ObserversOutOfExtent.Select(x => x.AddInPoint).Union(ObserverOutExtentPoints));
                 await FeatureClassHelper.CreatingFeatures(ObserversLayerName, outOfExtent, GetAsMapZUnits(surfaceSR, ObserverOffset.Value), VisibilityLibrary.Properties.Resources.IsOutOfExtentFieldName);
 
                 await FeatureClassHelper.CreateUniqueValueRenderer(GetLayerFromMapByName(RLOSConvertedPolygonsLayerName) as FeatureLayer, ShowNonVisibleData, RLOSConvertedPolygonsLayerName);
@@ -516,12 +516,12 @@ namespace ProAppVisibilityModule.ViewModels
                 List<Layer> layerList = new List<Layer>();
                 var observersLayerFromMap = GetLayerFromMapByName(ObserversLayerName);
                 var RLOSConvertedPolygonsLayer = GetLayerFromMapByName(RLOSConvertedPolygonsLayerName);
-
+                
                 if (observersLayerFromMap != null)
                     layerList.Add(observersLayerFromMap);
                 if (RLOSConvertedPolygonsLayer != null)
                     layerList.Add(GetLayerFromMapByName(RLOSConvertedPolygonsLayerName));
-
+                
                 await FeatureClassHelper.MoveLayersToGroupLayer(layerList, FeatureDatasetName);
 
                 //string groupName = "RLOS Group";
