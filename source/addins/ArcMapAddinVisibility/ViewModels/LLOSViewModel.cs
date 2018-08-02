@@ -145,11 +145,11 @@ namespace ArcMapAddinVisibility.ViewModels
 
             if (point != null && ToolMode == MapPointToolMode.Target)
             {
-                if (IsMapToolPointEnable)
+                if (IsMapClick)
                 {
                     if (!(IsValidPoint(point, true)))
                     {
-                        IsMapToolPointEnable = false;
+                        IsMapClick = false;
                         return;
                     }
                 }
@@ -168,7 +168,7 @@ namespace ArcMapAddinVisibility.ViewModels
                 }
 
                 TargetAddInPoints.Insert(0, addInPoint);
-                IsMapToolPointEnable = false;
+                IsMapClick = false;
             }
 
             ValidateLLOS_LayerSelection();

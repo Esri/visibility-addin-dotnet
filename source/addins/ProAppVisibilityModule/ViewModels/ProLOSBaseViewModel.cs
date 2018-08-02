@@ -550,11 +550,11 @@ namespace ProAppVisibilityModule.ViewModels
             // ok, we have a point
             if (point != null && ToolMode == MapPointToolMode.Observer)
             {
-                if (IsMapToolPointEnable)
+                if (IsMapClick)
                 {
                     if (!(await IsValidPoint(point, true)))
                     {
-                        IsMapToolPointEnable = false;
+                        IsMapClick = false;
                         return;
                     }             
                 }
@@ -577,7 +577,7 @@ namespace ProAppVisibilityModule.ViewModels
 
                         ObserverAddInPoints.Insert(0, addInPoint);
                     });
-                IsMapToolPointEnable = false;
+                IsMapClick = false;
             }
            
         }

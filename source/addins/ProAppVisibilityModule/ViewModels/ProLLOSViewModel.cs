@@ -274,11 +274,11 @@ namespace ProAppVisibilityModule.ViewModels
 
             if (point != null && ToolMode == MapPointToolMode.Target)
             {
-                if (IsMapToolPointEnable)
+                if (IsMapClick)
                 {
                     if (!(await IsValidPoint(point, true)))
                     {
-                        IsMapToolPointEnable = false;
+                        IsMapClick = false;
                         return;
                     }
                 }
@@ -298,7 +298,7 @@ namespace ProAppVisibilityModule.ViewModels
 
                         TargetAddInPoints.Insert(0, addInPoint);
                     });
-                IsMapToolPointEnable = false;
+                IsMapClick = false;
             }
 
             ValidateLLOS_LayerSelection();

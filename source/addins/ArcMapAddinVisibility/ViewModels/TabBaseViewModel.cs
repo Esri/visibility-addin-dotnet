@@ -42,7 +42,7 @@ namespace ArcMapAddinVisibility.ViewModels
             CancelCommand = new RelayCommand(OnCancelCommand);
 
             // Mediator
-            Mediator.Register(Constants.NEW_MAP_POINT, OnMapPointHandler);
+            Mediator.Register(Constants.NEW_MAP_POINT, OnMapClickEvent);
             Mediator.Register(Constants.NEW_MAP_POINT, OnNewMapPointEvent);
             Mediator.Register(Constants.MOUSE_MOVE_POINT, OnMouseMoveEvent);
             Mediator.Register(Constants.TAB_ITEM_SELECTED, OnTabItemSelected);
@@ -293,7 +293,7 @@ namespace ArcMapAddinVisibility.ViewModels
         public VisibilityLibrary.Helpers.RelayCommand ActivateToolCommand { get; set; }
         public VisibilityLibrary.Helpers.RelayCommand EnterKeyCommand { get; set; }
         public VisibilityLibrary.Helpers.RelayCommand CancelCommand { get; set; }
-        public bool IsMapToolPointEnable { get; set; }
+        public bool IsMapClick { get; set; }
 
         internal void OnCancelCommand(object obj)
         {
@@ -476,9 +476,9 @@ namespace ArcMapAddinVisibility.ViewModels
             // do nothing
         }
 
-        internal virtual void OnMapPointHandler(object obj)
+        internal virtual void OnMapClickEvent(object obj)
         {
-            IsMapToolPointEnable = true;
+            IsMapClick = true;
         } 
 
         #endregion
@@ -608,7 +608,7 @@ namespace ArcMapAddinVisibility.ViewModels
                 return;
 
             IsActiveTab = (obj == this);
-            IsMapToolPointEnable = false;
+            IsMapClick = false;
         }
 
         internal string AddTextToMap(string text, IGeometry geom, IColor color, bool IsTempGraphic = false, int size = 12)

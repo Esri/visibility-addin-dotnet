@@ -50,7 +50,7 @@ namespace ProAppVisibilityModule.ViewModels
             CancelCommand = new VisibilityLibrary.Helpers.RelayCommand(OnCancelCommand);
 
             // Mediator
-            Mediator.Register(VisibilityLibrary.Constants.NEW_MAP_POINT, OnMapPointHandler);
+            Mediator.Register(VisibilityLibrary.Constants.NEW_MAP_POINT, OnMapClickEvent);
             Mediator.Register(VisibilityLibrary.Constants.NEW_MAP_POINT, OnNewMapPointEvent);           
             Mediator.Register(VisibilityLibrary.Constants.MOUSE_MOVE_POINT, OnMouseMoveEvent);
             Mediator.Register(VisibilityLibrary.Constants.TAB_ITEM_SELECTED, OnTabItemSelected);
@@ -348,7 +348,7 @@ namespace ProAppVisibilityModule.ViewModels
         public VisibilityLibrary.Helpers.RelayCommand EnterKeyCommand { get; set; }
         public VisibilityLibrary.Helpers.RelayCommand CancelCommand { get; set; }
         public VisibilityLibrary.Helpers.RelayCommand ActivateToolCommand { get; set; }
-        public bool IsMapToolPointEnable { get; set; }
+        public bool IsMapClick { get; set; }
 
         /// <summary>
         /// Clears all the graphics from the maps graphic container
@@ -438,9 +438,9 @@ namespace ProAppVisibilityModule.ViewModels
             // do nothing
         }
 
-        internal virtual void OnMapPointHandler(object obj)
+        internal virtual void OnMapClickEvent(object obj)
         {
-            IsMapToolPointEnable = true;
+            IsMapClick = true;
         }
  
         #endregion
@@ -711,7 +711,7 @@ namespace ProAppVisibilityModule.ViewModels
                 return;
 
             IsActiveTab = (obj == this);
-            IsMapToolPointEnable = false;
+            IsMapClick = false;
         }
 
         /// <summary>

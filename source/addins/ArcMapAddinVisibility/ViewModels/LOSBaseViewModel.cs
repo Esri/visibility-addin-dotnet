@@ -536,11 +536,11 @@ namespace ArcMapAddinVisibility.ViewModels
             // ok, we have a point
             if (ToolMode == MapPointToolMode.Observer)
             {
-                if (IsMapToolPointEnable)
+                if (IsMapClick)
                 {
                     if (!(IsValidPoint(point, true)))
                     {
-                        IsMapToolPointEnable = false;
+                        IsMapClick = false;
                         return;
                     }
                 }
@@ -562,7 +562,7 @@ namespace ArcMapAddinVisibility.ViewModels
                 }
 
                 ObserverAddInPoints.Insert(0, addInPoint);
-                IsMapToolPointEnable = false;
+                IsMapClick = false;
             }
         }
 
