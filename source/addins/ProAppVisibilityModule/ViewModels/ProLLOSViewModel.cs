@@ -375,6 +375,7 @@ namespace ProAppVisibilityModule.ViewModels
                 if ((LLOS_ObserversInExtent.Any() || ObserverAddInPoints.Any())
                     && LLOS_TargetsInExtent.Any() || TargetAddInPoints.Any())
                 {
+                    OnMapPointToolDeactivated(null);
                     bool success = await ExecuteVisibilityLLOS();
                     if (!success)
                         MessageBox.Show("LLOS computations did not complete correctly.\nPlease check your parameters and try again.",
