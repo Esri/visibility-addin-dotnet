@@ -304,17 +304,7 @@ namespace ProAppVisibilityModule.ViewModels
             ValidateLLOS_LayerSelection();
             
         }
-        //internal override async void OnNewMapPointHandler(object obj)
-        //{
-        //    var point = obj as MapPoint;
 
-        //    bool isValid = await IsValidPoint(point, true);
-
-        //    if (!isValid)
-        //        return;
-
-        //    OnNewMapPointEvent(obj);
-        //}
         /// <summary>
         /// Method override reset to include TargetAddInPoints
         /// </summary>
@@ -375,7 +365,6 @@ namespace ProAppVisibilityModule.ViewModels
                 if ((LLOS_ObserversInExtent.Any() || ObserverAddInPoints.Any())
                     && LLOS_TargetsInExtent.Any() || TargetAddInPoints.Any())
                 {
-                    OnMapPointToolDeactivated(null);
                     bool success = await ExecuteVisibilityLLOS();
                     if (!success)
                         MessageBox.Show("LLOS computations did not complete correctly.\nPlease check your parameters and try again.",
@@ -738,7 +727,7 @@ namespace ProAppVisibilityModule.ViewModels
             {
                 var selectedFeaturesCollections = selectedFeatures.Where(x => x.Key.Name == SelectedLLOS_TargetLyrName)
                                             .Select(x => x.Value).FirstOrDefault();
-                ReadPointFromLayer(surfaceEnvelope, LLOS_TargetsInExtent, LLOS_TargetsOutOfExtent, SelectedLLOS_TargetLyrName, selectedFeaturesCollections);
+                ReadPointFromLayer(surfaceEnvelope, LLOS_TargetsInExtent, LLOS_TargetsOutOfExtent, SelectedLLOS_TargetLyrName, selectedFeaturesCollections, "target");
             });
         }
 

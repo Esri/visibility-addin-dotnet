@@ -328,7 +328,7 @@ namespace ProAppVisibilityModule.ViewModels
                 {
                     ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.OutOfExtentMsg, VisibilityLibrary.Properties.Resources.OutOfExtentHeader);
                 }
-                OnMapPointToolDeactivated(null);
+
                 DeactivateTool(VisibilityMapTool.ToolId);
 
                 //await base.CreateMapElement();

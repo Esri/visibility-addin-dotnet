@@ -1067,17 +1067,28 @@ namespace ProAppVisibilityModule.ViewModels
         }
 
         internal async void ReadPointFromLayer(Envelope surfaceEnvelope, ObservableCollection<AddInPointObject> inExtentPoints,
-            ObservableCollection<AddInPointObject> outOfExtentPoints, string selectedLayerName, List<long> selectedFeaturesCollections)
+            ObservableCollection<AddInPointObject> outOfExtentPoints, string selectedLayerName, List<long> selectedFeaturesCollections, string tag = "")
         {
             if (selectedLayerName != EnterManullyOption && !string.IsNullOrWhiteSpace(selectedLayerName))
             {
                 var layer = MapView.Active.Map.GetLayersAsFlattenedList().OfType<FeatureLayer>()
                 .Where(lyr => lyr.Name == selectedLayerName && lyr.ShapeType == esriGeometryType.esriGeometryPoint).FirstOrDefault();
                 var cursor = layer.GetFeatureClass().Search();
+
+                //define specific color for observer and target
+                SimpleMarkerStyle ms = SimpleMarkerStyle.Circle;
+                CIMColor color = ColorFactory.Instance.BlueRGB;
+
+                if (tag == "target")
+                {
+                    ms = SimpleMarkerStyle.Square;
+                    color = ColorFactory.Instance.RedRGB;
+                }
+
                 while (cursor.MoveNext())
                 {
                     var point = (MapPoint)cursor.Current["Shape"];
-                    var guid = await AddGraphicToMap(point, ColorFactory.Instance.RedRGB, true, 5.0, markerStyle: SimpleMarkerStyle.Square, tag: "target");
+                    var guid = await AddGraphicToMap(point, color, true, 5.0, markerStyle: ms, tag: tag);
                     var addInPoint = new AddInPoint { Point = point, GUID = guid };
                     var objectId = -1;
                     var FID = -1;
