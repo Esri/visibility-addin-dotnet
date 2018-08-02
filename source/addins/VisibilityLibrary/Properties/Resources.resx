@@ -429,4 +429,10 @@
   <data name="GridCodeFieldName" xml:space="preserve">
     <value>gridcode</value>
   </data>
+  <data name="OutOfExtentHeader" xml:space="preserve">
+    <value>No Data</value>
+  </data>
+  <data name="OutOfExtentMsg" xml:space="preserve">
+    <value>No data in side the surface extent to process.</value>
+  </data>
 </root>

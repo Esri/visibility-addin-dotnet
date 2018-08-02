@@ -372,16 +372,18 @@ namespace ProAppVisibilityModule.ViewModels
                     return;
 
 
-                //if((LLOS_ObserversInExtent.Any()||ObserverAddInPoints.Any())
-                //    && LLOS_TargetsInExtent.Any()||TargetAddInPoints.Any())
-                bool success = await ExecuteVisibilityLLOS();
-                if (!success)
-                    MessageBox.Show("LLOS computations did not complete correctly.\nPlease check your parameters and try again.",
-                        VisibilityLibrary.Properties.Resources.CaptionError);
-                //else
-                //{
-                //    //display validation msg
-                //}
+                if ((LLOS_ObserversInExtent.Any() || ObserverAddInPoints.Any())
+                    && LLOS_TargetsInExtent.Any() || TargetAddInPoints.Any())
+                {
+                    bool success = await ExecuteVisibilityLLOS();
+                    if (!success)
+                        MessageBox.Show("LLOS computations did not complete correctly.\nPlease check your parameters and try again.",
+                            VisibilityLibrary.Properties.Resources.CaptionError);
+                }
+                else
+                {
+                    ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.OutOfExtentMsg, VisibilityLibrary.Properties.Resources.OutOfExtentHeader);
+                }
 
                 DeactivateTool(VisibilityMapTool.ToolId);
 

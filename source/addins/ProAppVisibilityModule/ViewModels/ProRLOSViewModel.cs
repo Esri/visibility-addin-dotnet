@@ -316,16 +316,18 @@ namespace ProAppVisibilityModule.ViewModels
                 if (!CanCreateElement || MapView.Active == null || MapView.Active.Map == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
                     return;
 
-                //if (RLOS_ObserversInExtent.Any() || ObserverAddInPoints.Any())
-                bool success = await ExecuteVisibilityRLOS();
+                if (RLOS_ObserversInExtent.Any() || ObserverAddInPoints.Any())
+                {
+                    bool success = await ExecuteVisibilityRLOS();
 
-                if (!success)
-                    MessageBox.Show("RLOS computations did not complete correctly.\nPlease check your parameters and try again.",
-                        VisibilityLibrary.Properties.Resources.CaptionError);
-                //else
-                //{
-                //    //display validation msg
-                //}
+                    if (!success)
+                        MessageBox.Show("RLOS computations did not complete correctly.\nPlease check your parameters and try again.",
+                            VisibilityLibrary.Properties.Resources.CaptionError);
+                }
+                else
+                {
+                    ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.OutOfExtentMsg, VisibilityLibrary.Properties.Resources.OutOfExtentHeader);
+                }
 
                 DeactivateTool(VisibilityMapTool.ToolId);
 

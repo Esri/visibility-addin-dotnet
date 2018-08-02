@@ -790,6 +790,24 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No Data.
+        /// </summary>
+        public static string OutOfExtentHeader {
+            get {
+                return ResourceManager.GetString("OutOfExtentHeader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No data in side the surface extent to process..
+        /// </summary>
+        public static string OutOfExtentMsg {
+            get {
+                return ResourceManager.GetString("OutOfExtentMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to RLOS_Visibility.
         /// </summary>
         public static string RLOSConvertedPolygonsLayerName {
