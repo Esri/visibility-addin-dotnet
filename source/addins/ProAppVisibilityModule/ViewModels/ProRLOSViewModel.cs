@@ -316,11 +316,18 @@ namespace ProAppVisibilityModule.ViewModels
                 if (!CanCreateElement || MapView.Active == null || MapView.Active.Map == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
                     return;
 
-                bool success = await ExecuteVisibilityRLOS();
+                if (RLOS_ObserversInExtent.Any() || ObserverAddInPoints.Any())
+                {
+                    bool success = await ExecuteVisibilityRLOS();
 
-                if (!success)
-                    MessageBox.Show("RLOS computations did not complete correctly.\nPlease check your parameters and try again.",
-                        VisibilityLibrary.Properties.Resources.CaptionError);
+                    if (!success)
+                        MessageBox.Show("RLOS computations did not complete correctly.\nPlease check your parameters and try again.",
+                            VisibilityLibrary.Properties.Resources.CaptionError);
+                }
+                else
+                {
+                    ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.OutOfExtentMsg, VisibilityLibrary.Properties.Resources.OutOfExtentHeader);
+                }
 
                 DeactivateTool(VisibilityMapTool.ToolId);
 
@@ -363,7 +370,7 @@ namespace ProAppVisibilityModule.ViewModels
                     return false;
                 }
 
-                var observerPoints = new ObservableCollection<AddInPoint>(RLOS_ObserversInExtent.Select(x => x.AddInPoint).Union(ObserverAddInPoints));
+                var observerPoints = new ObservableCollection<AddInPoint>(RLOS_ObserversInExtent.Select(x => x.AddInPoint).Union(ObserverInExtentPoints));
                 // Warn if Image Service layer
                 Layer surfaceLayer = GetLayerFromMapByName(SelectedSurfaceName);
                 if (surfaceLayer is ImageServiceLayer)
@@ -390,15 +397,23 @@ namespace ProAppVisibilityModule.ViewModels
                     using (Geodatabase geodatabase = new Geodatabase(new FileGeodatabaseConnectionPath(new Uri(CoreModule.CurrentProject.DefaultGeodatabasePath))))
                     {
                         executionCounter = 0;
+                        int featureDataSetSuffix = 0;
                         var enterpriseDefinitionNames = geodatabase.GetDefinitions<FeatureDatasetDefinition>().Where(i => i.GetName().StartsWith(VisibilityLibrary.Properties.Resources.RLOSFeatureDatasetName)).Select(i => i.GetName()).ToList();
                         foreach (var defName in enterpriseDefinitionNames)
                         {
                             int n;
                             bool isNumeric = int.TryParse(Regex.Match(defName, @"\d+$").Value, out n);
                             if (isNumeric)
-                                executionCounter = executionCounter < n ? n : executionCounter;
+                                featureDataSetSuffix = featureDataSetSuffix < n ? n : featureDataSetSuffix;
                         }
-                        executionCounter = enterpriseDefinitionNames.Count > 0 ? executionCounter + 1 : 0;
+                        featureDataSetSuffix = enterpriseDefinitionNames.Count > 0 ? featureDataSetSuffix + 1 : 0;
+
+                        var observerLyrSuffix = GetLayerSuffix(VisibilityLibrary.Properties.Resources.LLOSObserversLayerName, geodatabase);
+                        var convertedPolygonLyrSuffix = GetLayerSuffix(VisibilityLibrary.Properties.Resources.RLOSConvertedPolygonsLayerName, geodatabase);
+                        var outputLyrSuffix = GetLayerSuffix(VisibilityLibrary.Properties.Resources.RLOSOutputLayerName, geodatabase);
+                        var maskLyrSuffix = GetLayerSuffix(VisibilityLibrary.Properties.Resources.RLOSMaskLayerName, geodatabase);
+
+                        executionCounter = new List<int> { featureDataSetSuffix, observerLyrSuffix, convertedPolygonLyrSuffix, outputLyrSuffix, maskLyrSuffix }.Max();
                     }
                 });
 
@@ -421,7 +436,7 @@ namespace ProAppVisibilityModule.ViewModels
                 await FeatureClassHelper.CreatingFeatures(ObserversLayerName, observerPoints, GetAsMapZUnits(surfaceSR, ObserverOffset.Value));
 
                 //execute only if points are available in surface extent
-                if (ObserverAddInPoints.Any() || RLOS_ObserversInExtent.Any())
+                if (ObserverInExtentPoints.Any() || RLOS_ObserversInExtent.Any())
                 {
                     // update with surface information
                     success = await FeatureClassHelper.AddSurfaceInformation(ObserversLayerName, SelectedSurfaceName, VisibilityLibrary.Properties.Resources.ZFieldName);
@@ -481,7 +496,7 @@ namespace ProAppVisibilityModule.ViewModels
                 }
 
                 // add observer points present out of extent to feature layer
-                var outOfExtent = new ObservableCollection<AddInPoint>(RLOS_ObserversOutOfExtent.Select(x => x.AddInPoint));
+                var outOfExtent = new ObservableCollection<AddInPoint>(RLOS_ObserversOutOfExtent.Select(x => x.AddInPoint).Union(ObserverOutExtentPoints));
                 await FeatureClassHelper.CreatingFeatures(ObserversLayerName, outOfExtent, GetAsMapZUnits(surfaceSR, ObserverOffset.Value), VisibilityLibrary.Properties.Resources.IsOutOfExtentFieldName);
 
                 await FeatureClassHelper.CreateUniqueValueRenderer(GetLayerFromMapByName(RLOSConvertedPolygonsLayerName) as FeatureLayer, ShowNonVisibleData, RLOSConvertedPolygonsLayerName);
@@ -541,6 +556,20 @@ namespace ProAppVisibilityModule.ViewModels
             return success;
         }
 
+        private int GetLayerSuffix(string layerName, Geodatabase geodatabase)
+        {
+            int counter = 0;
+            var enterpriseFCNames = geodatabase.GetDefinitions<FeatureClassDefinition>().Where(i => i.GetName().StartsWith(layerName)).Select(i => i.GetName()).ToList();
+            foreach (var fcName in enterpriseFCNames)
+            {
+                int n;
+                bool isNumeric = int.TryParse(Regex.Match(fcName, @"\d+$").Value, out n);
+                if (isNumeric)
+                    counter = counter < n ? n : counter;
+            }
+            counter = enterpriseFCNames.Count > 0 ? counter + 1 : 0;
+            return counter;
+        }
 
         private async Task DisplayOutOfExtentMsg()
         {
@@ -703,9 +732,12 @@ namespace ProAppVisibilityModule.ViewModels
             RLOS_ObserversOutOfExtent.Clear();
 
             var surfaceEnvelope = await GetSurfaceEnvelope();
+            var selectedFeatures = await QueuedTask.Run(() => { return MapView.Active.Map.GetSelection(); });
             await QueuedTask.Run(() =>
             {
-                ReadPointFromLayer(surfaceEnvelope, RLOS_ObserversInExtent, RLOS_ObserversOutOfExtent, SelectedRLOS_ObserverLyrName);
+                var selectedFeaturesCollections = selectedFeatures.Where(x => x.Key.Name == SelectedRLOS_ObserverLyrName)
+                                            .Select(x => x.Value).FirstOrDefault();
+                ReadPointFromLayer(surfaceEnvelope, RLOS_ObserversInExtent, RLOS_ObserversOutOfExtent, SelectedRLOS_ObserverLyrName, selectedFeaturesCollections);
             });
         }
 

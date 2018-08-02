@@ -47,7 +47,11 @@ namespace ArcMapAddinVisibility.ViewModels
             AngularUnitType = AngularTypes.DEGREES;
 
             ObserverAddInPoints = new ObservableCollection<AddInPoint>();
+            ObserverInExtentPoints = new ObservableCollection<AddInPoint>();
+            ObserverOutExtentPoints = new ObservableCollection<AddInPoint>();
             TargetAddInPoints = new ObservableCollection<AddInPoint>();
+            TargetInExtentPoints = new ObservableCollection<AddInPoint>();
+            TargetOutExtentPoints = new ObservableCollection<AddInPoint>();
             LLOS_ObserversInExtent = new ObservableCollection<AddInPointObject>();
             LLOS_ObserversOutOfExtent = new ObservableCollection<AddInPointObject>();
             LLOS_TargetsInExtent = new ObservableCollection<AddInPointObject>();
@@ -252,7 +256,11 @@ namespace ArcMapAddinVisibility.ViewModels
         public ObservableCollection<AddInPointObject> RLOS_ObserversOutOfExtent { get; set; }
 
         public ObservableCollection<AddInPoint> ObserverAddInPoints { get; set; }
+        public ObservableCollection<AddInPoint> ObserverInExtentPoints { get; set; }
+        public ObservableCollection<AddInPoint> ObserverOutExtentPoints { get; set; }
         public ObservableCollection<AddInPoint> TargetAddInPoints { get; set; }
+        public ObservableCollection<AddInPoint> TargetInExtentPoints { get; set; }
+        public ObservableCollection<AddInPoint> TargetOutExtentPoints { get; set; }
         public ObservableCollection<string> SurfaceLayerNames { get; set; }
         public string SelectedSurfaceName { get; set; }
         public DistanceTypes OffsetUnitType { get; set; }
@@ -315,6 +323,8 @@ namespace ArcMapAddinVisibility.ViewModels
             foreach (var point in observers)
             {
                 ObserverAddInPoints.Remove(point);
+                ObserverInExtentPoints.Remove(point);
+                ObserverOutExtentPoints.Remove(point);
             }
         }
 
@@ -521,21 +531,38 @@ namespace ArcMapAddinVisibility.ViewModels
             if (!IsActiveTab)
                 return;
 
-            var point = obj as IPoint;
-
-            if (point == null || !IsValidPoint(point, true))
-                return;
+            var point = obj as IPoint;             
 
             // ok, we have a point
             if (ToolMode == MapPointToolMode.Observer)
             {
+                if (IsMapClick)
+                {
+                    if (!(IsValidPoint(point, true)))
+                    {
+                        IsMapClick = false;
+                        return;
+                    }
+                }
                 // in tool mode "Observer" we add observer points
                 // otherwise ignore
 
                 var color = new RgbColorClass() { Blue = 255 } as IColor;
                 var guid = AddGraphicToMap(point, color, true);
                 var addInPoint = new AddInPoint() { Point = point, GUID = guid };
+                bool isValid = IsValidPoint(point, false);
+                if (!isValid)
+                {
+
+                    ObserverOutExtentPoints.Insert(0, addInPoint);
+                }
+                else
+                {
+                    ObserverInExtentPoints.Insert(0, addInPoint);
+                }
+
                 ObserverAddInPoints.Insert(0, addInPoint);
+                IsMapClick = false;
             }
         }
 
@@ -574,11 +601,17 @@ namespace ArcMapAddinVisibility.ViewModels
 
             if (keyCommandMode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
             {
+                if (!IsValidPoint(Point1, true))
+                    return;
+
                 ToolMode = MapPointToolMode.Observer;
                 OnNewMapPointEvent(Point1);
             }
             else if (keyCommandMode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
             {
+                if (!IsValidPoint(Point2, true))
+                    return;
+
                 ToolMode = MapPointToolMode.Target;
                 OnNewMapPointEvent(Point2);
             }
@@ -852,6 +885,8 @@ namespace ArcMapAddinVisibility.ViewModels
 
             // reset observer points
             ObserverAddInPoints.Clear();
+            ObserverInExtentPoints.Clear();
+            ObserverOutExtentPoints.Clear();
 
             ClearTempGraphics();
         }
@@ -945,9 +980,21 @@ namespace ArcMapAddinVisibility.ViewModels
         internal virtual void OnDisplayCoordinateTypeChanged(object obj)
         {
             var list = ObserverAddInPoints.ToList();
+            var inExtentList = ObserverInExtentPoints.ToList();
+            var outExtentList = ObserverOutExtentPoints.ToList();
+            
             ObserverAddInPoints.Clear();
+            ObserverInExtentPoints.Clear();
+            ObserverOutExtentPoints.Clear();
+
             foreach (var item in list)
                 ObserverAddInPoints.Add(item);
+
+            foreach (var item in inExtentList)
+                ObserverInExtentPoints.Add(item);
+
+            foreach (var item in outExtentList)
+                ObserverOutExtentPoints.Add(item);
             RaisePropertyChanged(() => HasMapGraphics);
         }
 
@@ -1049,6 +1096,7 @@ namespace ArcMapAddinVisibility.ViewModels
                     var cursor = FLayer.FeatureClass.Search(null, false);
                     var surface = GetSurfaceFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
                     double finalObserverOffset = GetOffsetInZUnits(ObserverOffset.Value, surface.ZFactor, OffsetUnitType);
+                    var selectedFeaturesCollections = GetSelectedFeaturesCollections(layer);
                     while ((feature = cursor.NextFeature()) != null)
                     {
                         var value = feature.get_Value(FLayer.FeatureClass.FindField("Shape"));
@@ -1060,14 +1108,33 @@ namespace ArcMapAddinVisibility.ViewModels
                         var id = Convert.ToInt32(feature.get_Value(idIndex));
                         var z1 = surface.GetElevation(point) + finalObserverOffset;
                         var addInPoint = new AddInPoint() { Point = point, GUID = guid };
-                        if (double.IsNaN(z1))
-                            outOfExtentPoints.Add(new AddInPointObject() { AddInPoint = addInPoint, ID = id });
-                        else
-                            inExtentPoints.Add(new AddInPointObject() { AddInPoint = addInPoint, ID = id });
+                        if (selectedFeaturesCollections == null || !selectedFeaturesCollections.Any() ||
+                            (selectedFeaturesCollections.Any() && selectedFeaturesCollections.Where(x => x == id).Any()))
+                        {
+                            if (double.IsNaN(z1))
+                                outOfExtentPoints.Add(new AddInPointObject() { AddInPoint = addInPoint, ID = id });
+                            else
+                                inExtentPoints.Add(new AddInPointObject() { AddInPoint = addInPoint, ID = id });
+                        }
                     }
                 }
                 layer = layers.Next();
             }
+         }
+
+        private static List<int> GetSelectedFeaturesCollections(ILayer layer)
+        {
+            var selectedFeatureCollections = new List<int>();
+            var selectedFeature = ((IFeatureSelection)layer).SelectionSet;
+            var enumFeature = ((IEnumIDs)(((ISelectionSet)(selectedFeature)).IDs));
+            enumFeature.Reset();
+            int selfeature = enumFeature.Next();
+            while (selfeature != -1)
+            {
+                selectedFeatureCollections.Add(selfeature);
+                selfeature = enumFeature.Next();
+            }
+            return selectedFeatureCollections;
         }
 
         internal void ClearLLOSCollections()

@@ -50,7 +50,8 @@ namespace ProAppVisibilityModule.ViewModels
             CancelCommand = new VisibilityLibrary.Helpers.RelayCommand(OnCancelCommand);
 
             // Mediator
-            Mediator.Register(VisibilityLibrary.Constants.NEW_MAP_POINT, OnNewMapPointEvent);
+            Mediator.Register(VisibilityLibrary.Constants.NEW_MAP_POINT, OnMapClickEvent);
+            Mediator.Register(VisibilityLibrary.Constants.NEW_MAP_POINT, OnNewMapPointEvent);           
             Mediator.Register(VisibilityLibrary.Constants.MOUSE_MOVE_POINT, OnMouseMoveEvent);
             Mediator.Register(VisibilityLibrary.Constants.TAB_ITEM_SELECTED, OnTabItemSelected);
 
@@ -347,6 +348,7 @@ namespace ProAppVisibilityModule.ViewModels
         public VisibilityLibrary.Helpers.RelayCommand EnterKeyCommand { get; set; }
         public VisibilityLibrary.Helpers.RelayCommand CancelCommand { get; set; }
         public VisibilityLibrary.Helpers.RelayCommand ActivateToolCommand { get; set; }
+        public bool IsMapClick { get; set; }
 
         /// <summary>
         /// Clears all the graphics from the maps graphic container
@@ -371,7 +373,7 @@ namespace ProAppVisibilityModule.ViewModels
 
                 RaisePropertyChanged(() => HasMapGraphics);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Debug.Print(ex.Message);
             }
@@ -436,6 +438,11 @@ namespace ProAppVisibilityModule.ViewModels
             // do nothing
         }
 
+        internal virtual void OnMapClickEvent(object obj)
+        {
+            IsMapClick = true;
+        }
+ 
         #endregion
 
         #region Internal Methods
@@ -449,7 +456,7 @@ namespace ProAppVisibilityModule.ViewModels
             var list = ProGraphicsList.Where(g => guidList.Contains(g.GUID)).ToList();
             foreach (var graphic in list)
             {
-                if(graphic.Disposable != null)
+                if (graphic.Disposable != null)
                     graphic.Disposable.Dispose();
                 ProGraphicsList.Remove(graphic);
             }
@@ -704,6 +711,7 @@ namespace ProAppVisibilityModule.ViewModels
                 return;
 
             IsActiveTab = (obj == this);
+            IsMapClick = false;
         }
 
         /// <summary>

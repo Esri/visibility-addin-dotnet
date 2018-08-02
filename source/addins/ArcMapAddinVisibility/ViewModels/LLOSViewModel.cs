@@ -109,6 +109,8 @@ namespace ArcMapAddinVisibility.ViewModels
             foreach (var obj in targets)
             {
                 TargetAddInPoints.Remove(obj);
+                TargetInExtentPoints.Remove(obj);
+                TargetOutExtentPoints.Remove(obj);
             }
 
             ValidateLLOS_LayerSelection();
@@ -140,15 +142,33 @@ namespace ArcMapAddinVisibility.ViewModels
 
             var point = obj as IPoint;
 
-            if (point == null || !IsValidPoint(point))
-                return;
 
-            if (ToolMode == MapPointToolMode.Target)
+            if (point != null && ToolMode == MapPointToolMode.Target)
             {
+                if (IsMapClick)
+                {
+                    if (!(IsValidPoint(point, true)))
+                    {
+                        IsMapClick = false;
+                        return;
+                    }
+                }
+
                 var color = new RgbColorClass() { Red = 255 } as IColor;
                 var guid = AddGraphicToMap(point, color, true, esriSimpleMarkerStyle.esriSMSSquare);
                 var addInPoint = new AddInPoint() { Point = point, GUID = guid };
+                bool isValid = IsValidPoint(point, false);
+                if (!isValid)
+                {
+                    TargetOutExtentPoints.Insert(0, addInPoint);
+                }
+                else
+                {
+                    TargetInExtentPoints.Insert(0, addInPoint);
+                }
+
                 TargetAddInPoints.Insert(0, addInPoint);
+                IsMapClick = false;
             }
 
             ValidateLLOS_LayerSelection();
@@ -163,6 +183,8 @@ namespace ArcMapAddinVisibility.ViewModels
 
             // reset target points
             TargetAddInPoints.Clear();
+            TargetInExtentPoints.Clear();
+            TargetOutExtentPoints.Clear();
         }
 
         public override bool CanCreateElement
@@ -195,179 +217,189 @@ namespace ArcMapAddinVisibility.ViewModels
                 if (!CanCreateElement || ArcMap.Document == null || ArcMap.Document.FocusMap == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
                     return;
 
-                // take your observer and target points and get lines of sight
-                var observerPoints = new ObservableCollection<AddInPoint>(LLOS_ObserversInExtent.Select(x => x.AddInPoint).Union(ObserverAddInPoints));
-                var targetPoints = new ObservableCollection<AddInPoint>(LLOS_TargetsInExtent.Select(x => x.AddInPoint).Union(TargetAddInPoints));
-                var surface = GetSurfaceFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
-
-                if (surface == null)
-                    return;
-
-                ILayer surfaceLayer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
-
-                // Issue warning if layer is ImageServerLayer
-                if (surfaceLayer is IImageServerLayer)
+                if ((LLOS_ObserversInExtent.Any() || ObserverAddInPoints.Any())
+                   && LLOS_TargetsInExtent.Any() || TargetAddInPoints.Any())
                 {
-                    MessageBoxResult mbr = MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgLayerIsImageService,
-                        VisibilityLibrary.Properties.Resources.CaptionLayerIsImageService, MessageBoxButton.YesNo);
+                    // take your observer and target points and get lines of sight
+                    var observerPoints = new ObservableCollection<AddInPoint>(LLOS_ObserversInExtent.Select(x => x.AddInPoint).Union(ObserverInExtentPoints));
+                    var targetPoints = new ObservableCollection<AddInPoint>(LLOS_TargetsInExtent.Select(x => x.AddInPoint).Union(TargetInExtentPoints));
+                    var surface = GetSurfaceFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
 
-                    if (mbr == MessageBoxResult.No)
-                    {
-                        System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+                    if (surface == null)
                         return;
-                    }
-                }
 
-                // Determine if selected surface is projected or geographic
-                var geoDataset = surfaceLayer as IGeoDataset;
-                if (geoDataset == null)
-                {
-                    System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.CaptionError);
-                    return;
-                }
+                    ILayer surfaceLayer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
 
-                SelectedSurfaceSpatialRef = geoDataset.SpatialReference;
-
-                if (SelectedSurfaceSpatialRef is IGeographicCoordinateSystem)
-                {
-                    MessageBox.Show(VisibilityLibrary.Properties.Resources.LLOSUserPrompt, VisibilityLibrary.Properties.Resources.LLOSUserPromptCaption);
-                    return;
-                }
-
-                if (ArcMap.Document.FocusMap.SpatialReference.FactoryCode != geoDataset.SpatialReference.FactoryCode)
-                {
-                    MessageBox.Show(VisibilityLibrary.Properties.Resources.LOSDataFrameMatch, VisibilityLibrary.Properties.Resources.LOSSpatialReferenceCaption);
-                    return;
-                }
-
-                SelectedSurfaceSpatialRef = geoDataset.SpatialReference;
-
-                var geoBridge = (IGeoDatabaseBridge2)new GeoDatabaseHelperClass();
-
-                IPoint pointObstruction = null;
-                IPolyline polyVisible = null;
-                IPolyline polyInvisible = null;
-                bool targetIsVisible = false;
-
-                double finalObserverOffset = GetOffsetInZUnits(ObserverOffset.Value, surface.ZFactor, OffsetUnitType);
-                double finalTargetOffset = GetOffsetInZUnits(TargetOffset.Value, surface.ZFactor, OffsetUnitType);
-
-                var DictionaryTargetObserverCount = new Dictionary<IPoint, int>();
-
-                foreach (var observerPoint in observerPoints)
-                {
-                    // keep track of visible targets for this observer
-                    var CanSeeAtLeastOneTarget = false;
-
-                    var z1 = surface.GetElevation(observerPoint.Point) + finalObserverOffset;
-
-                    if (double.IsNaN(z1))
+                    // Issue warning if layer is ImageServerLayer
+                    if (surfaceLayer is IImageServerLayer)
                     {
-                        System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.LLOSPointsOutsideOfSurfaceExtent, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+                        MessageBoxResult mbr = MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgLayerIsImageService,
+                            VisibilityLibrary.Properties.Resources.CaptionLayerIsImageService, MessageBoxButton.YesNo);
+
+                        if (mbr == MessageBoxResult.No)
+                        {
+                            System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+                            return;
+                        }
+                    }
+
+                    // Determine if selected surface is projected or geographic
+                    var geoDataset = surfaceLayer as IGeoDataset;
+                    if (geoDataset == null)
+                    {
+                        System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.CaptionError);
                         return;
                     }
 
-                    foreach (var targetPoint in targetPoints)
-                    {
-                        var z2 = surface.GetElevation(targetPoint.Point) + finalTargetOffset;
+                    SelectedSurfaceSpatialRef = geoDataset.SpatialReference;
 
-                        if (double.IsNaN(z2))
+                    if (SelectedSurfaceSpatialRef is IGeographicCoordinateSystem)
+                    {
+                        MessageBox.Show(VisibilityLibrary.Properties.Resources.LLOSUserPrompt, VisibilityLibrary.Properties.Resources.LLOSUserPromptCaption);
+                        return;
+                    }
+
+                    if (ArcMap.Document.FocusMap.SpatialReference.FactoryCode != geoDataset.SpatialReference.FactoryCode)
+                    {
+                        MessageBox.Show(VisibilityLibrary.Properties.Resources.LOSDataFrameMatch, VisibilityLibrary.Properties.Resources.LOSSpatialReferenceCaption);
+                        return;
+                    }
+
+                    SelectedSurfaceSpatialRef = geoDataset.SpatialReference;
+
+                    var geoBridge = (IGeoDatabaseBridge2)new GeoDatabaseHelperClass();
+
+                    IPoint pointObstruction = null;
+                    IPolyline polyVisible = null;
+                    IPolyline polyInvisible = null;
+                    bool targetIsVisible = false;
+
+                    double finalObserverOffset = GetOffsetInZUnits(ObserverOffset.Value, surface.ZFactor, OffsetUnitType);
+                    double finalTargetOffset = GetOffsetInZUnits(TargetOffset.Value, surface.ZFactor, OffsetUnitType);
+
+                    var DictionaryTargetObserverCount = new Dictionary<IPoint, int>();
+
+                    foreach (var observerPoint in observerPoints)
+                    {
+                        // keep track of visible targets for this observer
+                        var CanSeeAtLeastOneTarget = false;
+
+                        var z1 = surface.GetElevation(observerPoint.Point) + finalObserverOffset;
+
+                        if (double.IsNaN(z1))
                         {
                             System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.LLOSPointsOutsideOfSurfaceExtent, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
                             return;
                         }
 
-                        var fromPoint = new PointClass() { Z = z1, X = observerPoint.Point.X, Y = observerPoint.Point.Y, ZAware = true } as IPoint;
-                        var toPoint = new PointClass() { Z = z2, X = targetPoint.Point.X, Y = targetPoint.Point.Y, ZAware = true } as IPoint;
-
-                        geoBridge.GetLineOfSight(surface, fromPoint, toPoint,
-                            out pointObstruction, out polyVisible, out polyInvisible, out targetIsVisible, false, false);
-
-                        var pcol = new PolylineClass() as IPointCollection;
-                        pcol.AddPoint(fromPoint);
-                        pcol.AddPoint(toPoint);
-                        IPolyline pcolPolyline = pcol as IPolyline;
-
-                        longestLine = (longestLine != null && longestLine.Length < pcolPolyline.Length) ? pcolPolyline : longestLine;
-
-                        // set the flag if we can see at least one target
-                        if (targetIsVisible)
+                        foreach (var targetPoint in targetPoints)
                         {
-                            CanSeeAtLeastOneTarget = true;
+                            var z2 = surface.GetElevation(targetPoint.Point) + finalTargetOffset;
 
-                            // update target observer count
-                            UpdateTargetObserverCount(DictionaryTargetObserverCount, targetPoint.Point);
-                        }
+                            if (double.IsNaN(z2))
+                            {
+                                System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.LLOSPointsOutsideOfSurfaceExtent, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+                                return;
+                            }
 
-                        // First Add "SightLine" so it appears behind others
-                        // Black = Not visible -or- White = Visible
-                        if (targetIsVisible)
-                            AddGraphicToMap(pcolPolyline, new RgbColorClass() { RGB = 0xFFFFFF }, false,
-                                size: 6); //  white line
-                        else
-                            AddGraphicToMap(pcolPolyline, new RgbColorClass() { RGB = 0x000000 }, false,
-                                size: 6); //  black line
+                            var fromPoint = new PointClass() { Z = z1, X = observerPoint.Point.X, Y = observerPoint.Point.Y, ZAware = true } as IPoint;
+                            var toPoint = new PointClass() { Z = z2, X = targetPoint.Point.X, Y = targetPoint.Point.Y, ZAware = true } as IPoint;
 
-                        if (polyVisible != null)
-                        {
-                            AddGraphicToMap(polyVisible, new RgbColorClass() { Green = 255 }, size: 5);
-                        }
+                            geoBridge.GetLineOfSight(surface, fromPoint, toPoint,
+                                out pointObstruction, out polyVisible, out polyInvisible, out targetIsVisible, false, false);
 
-                        if (polyInvisible != null)
-                        {
-                            AddGraphicToMap(polyInvisible, new RgbColorClass() { Red = 255 }, size: 3);
-                        }
+                            var pcol = new PolylineClass() as IPointCollection;
+                            pcol.AddPoint(fromPoint);
+                            pcol.AddPoint(toPoint);
+                            IPolyline pcolPolyline = pcol as IPolyline;
 
-                        if (polyVisible == null && polyInvisible == null)
-                        {
+                            longestLine = (longestLine != null && longestLine.Length < pcolPolyline.Length) ? pcolPolyline : longestLine;
+
+                            // set the flag if we can see at least one target
                             if (targetIsVisible)
-                                AddGraphicToMap(pcol as IPolyline, new RgbColorClass() { Green = 255 }, size: 3);
+                            {
+                                CanSeeAtLeastOneTarget = true;
+
+                                // update target observer count
+                                UpdateTargetObserverCount(DictionaryTargetObserverCount, targetPoint.Point);
+                            }
+
+                            // First Add "SightLine" so it appears behind others
+                            // Black = Not visible -or- White = Visible
+                            if (targetIsVisible)
+                                AddGraphicToMap(pcolPolyline, new RgbColorClass() { RGB = 0xFFFFFF }, false,
+                                    size: 6); //  white line
                             else
-                                AddGraphicToMap(pcol as IPolyline, new RgbColorClass() { Red = 255 }, size: 3);
+                                AddGraphicToMap(pcolPolyline, new RgbColorClass() { RGB = 0x000000 }, false,
+                                    size: 6); //  black line
+
+                            if (polyVisible != null)
+                            {
+                                AddGraphicToMap(polyVisible, new RgbColorClass() { Green = 255 }, size: 5);
+                            }
+
+                            if (polyInvisible != null)
+                            {
+                                AddGraphicToMap(polyInvisible, new RgbColorClass() { Red = 255 }, size: 3);
+                            }
+
+                            if (polyVisible == null && polyInvisible == null)
+                            {
+                                if (targetIsVisible)
+                                    AddGraphicToMap(pcol as IPolyline, new RgbColorClass() { Green = 255 }, size: 3);
+                                else
+                                    AddGraphicToMap(pcol as IPolyline, new RgbColorClass() { Red = 255 }, size: 3);
+                            }
+                        }
+
+                        // visualize observer
+
+                        // add blue dot
+                        AddGraphicToMap(observerPoint.Point, new RgbColorClass() { Blue = 255 }, size: 10);
+
+                        if (CanSeeAtLeastOneTarget)
+                        {
+                            // add green dot
+                            AddGraphicToMap(observerPoint.Point, new RgbColorClass() { Green = 255 });
+                        }
+                        else
+                        {
+                            // add red dot
+                            AddGraphicToMap(observerPoint.Point, new RgbColorClass() { Red = 255 });
                         }
                     }
 
-                    // visualize observer
+                    VisualizeTargets(DictionaryTargetObserverCount, targetPoints);
 
-                    // add blue dot
-                    AddGraphicToMap(observerPoint.Point, new RgbColorClass() { Blue = 255 }, size: 10);
-
-                    if (CanSeeAtLeastOneTarget)
+                    if ((ObserverInExtentPoints.Any() || LLOS_ObserversInExtent.Any())
+                        && (TargetInExtentPoints.Any() || LLOS_TargetsInExtent.Any()))
                     {
-                        // add green dot
-                        AddGraphicToMap(observerPoint.Point, new RgbColorClass() { Green = 255 });
+                        ZoomToExtent(longestLine);
                     }
-                    else
+
+                    DisplayOutOfExtentMsg();
+
+                    //display points present out of extent
+                    var colorObserver = new RgbColorClass() { Blue = 255 };
+                    var colorTarget = new RgbColorClass() { Red = 255 };
+                    var colorObserverBorder = new RgbColorClass() { Red = 255, Blue = 255, Green = 255 };
+                    var colorTargetBorder = new RgbColorClass() { Red = 0, Blue = 0, Green = 0 };
+                    var observerOutOfExtent = new ObservableCollection<AddInPoint>(LLOS_ObserversOutOfExtent.Select(x => x.AddInPoint).Union(ObserverOutExtentPoints));
+                    foreach (var point in observerOutOfExtent)
                     {
-                        // add red dot
-                        AddGraphicToMap(observerPoint.Point, new RgbColorClass() { Red = 255 });
+                        AddGraphicToMap(point.Point, colorObserver, markerStyle: esriSimpleMarkerStyle.esriSMSX, size: 10, borderColor: colorObserverBorder);
                     }
+                    var targetOutOfExtent = new ObservableCollection<AddInPoint>(LLOS_TargetsOutOfExtent.Select(x => x.AddInPoint).Union(TargetOutExtentPoints));
+                    foreach (var point in targetOutOfExtent)
+                    {
+                        AddGraphicToMap(point.Point, colorTarget, markerStyle: esriSimpleMarkerStyle.esriSMSX, size: 10, borderColor: colorTargetBorder);
+                    }
+
                 }
-
-                VisualizeTargets(DictionaryTargetObserverCount, targetPoints);
-
-                if ((ObserverAddInPoints.Any() || LLOS_ObserversInExtent.Any())
-                    && (TargetAddInPoints.Any() || LLOS_TargetsInExtent.Any()))
+                else
                 {
-                    ZoomToExtent(longestLine);
+                    System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.OutOfExtentMsg, VisibilityLibrary.Properties.Resources.OutOfExtentHeader);
                 }
-
-                DisplayOutOfExtentMsg();
-
-                //display points present out of extent
-                var colorObserver = new RgbColorClass() { Blue = 255 };
-                var colorTarget = new RgbColorClass() { Red = 255 };
-                var colorObserverBorder = new RgbColorClass() { Red = 255, Blue = 255, Green = 255 };
-                var colorTargetBorder = new RgbColorClass() { Red = 0, Blue = 0, Green = 0 };
-                foreach (var point in LLOS_ObserversOutOfExtent)
-                {
-                    AddGraphicToMap(point.AddInPoint.Point, colorObserver, markerStyle: esriSimpleMarkerStyle.esriSMSX, size: 10, borderColor: colorObserverBorder);
-                }
-                foreach (var point in LLOS_TargetsOutOfExtent)
-                {
-                    AddGraphicToMap(point.AddInPoint.Point, colorTarget, markerStyle: esriSimpleMarkerStyle.esriSMSX, size: 10, borderColor: colorTargetBorder);
-                }
-
             }
             catch (Exception ex)
             {
@@ -385,7 +417,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
         private void DisplayOutOfExtentMsg()
         {
-            var observerIDCollection = LLOS_ObserversOutOfExtent.Select(x=>x.ID).ToList<int>();
+            var observerIDCollection = LLOS_ObserversOutOfExtent.Select(x => x.ID).ToList<int>();
             var targetIDCollection = LLOS_TargetsOutOfExtent.Select(x => x.ID).ToList<int>();
             var observerString = string.Empty;
             var targetString = string.Empty;
@@ -465,9 +497,21 @@ namespace ArcMapAddinVisibility.ViewModels
         internal override void OnDisplayCoordinateTypeChanged(object obj)
         {
             var list = TargetAddInPoints.ToList();
+            var inExtentList = TargetInExtentPoints.ToList();
+            var outExtentList = TargetOutExtentPoints.ToList();
+
             TargetAddInPoints.Clear();
+            TargetInExtentPoints.Clear();
+            TargetOutExtentPoints.Clear();
+
             foreach (var item in list)
                 TargetAddInPoints.Add(item);
+
+            foreach (var item in inExtentList)
+                TargetInExtentPoints.Add(item);
+
+            foreach (var item in outExtentList)
+                TargetOutExtentPoints.Add(item);
 
             // and update observers
             base.OnDisplayCoordinateTypeChanged(obj);
@@ -484,7 +528,7 @@ namespace ArcMapAddinVisibility.ViewModels
             ReadSelectedLyrPoints(LLOS_ObserversInExtent, LLOS_ObserversOutOfExtent, SelectedLLOS_ObserverLyrName, observerColor);
 
             var targetColor = new RgbColor() { Red = 255 } as IColor;
-            ReadSelectedLyrPoints(LLOS_TargetsInExtent, LLOS_TargetsOutOfExtent, SelectedLLOS_TargetLyrName, observerColor);            
+            ReadSelectedLyrPoints(LLOS_TargetsInExtent, LLOS_TargetsOutOfExtent, SelectedLLOS_TargetLyrName, observerColor);
         }
     }
 }
