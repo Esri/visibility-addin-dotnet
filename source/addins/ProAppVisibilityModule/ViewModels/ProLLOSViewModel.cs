@@ -376,6 +376,7 @@ namespace ProAppVisibilityModule.ViewModels
                 }
 
                 DeactivateTool(VisibilityMapTool.ToolId);
+                OnMapPointToolDeactivated(null);
 
                 GC.Collect();
                 GC.WaitForPendingFinalizers();

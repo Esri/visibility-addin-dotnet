@@ -330,6 +330,7 @@ namespace ProAppVisibilityModule.ViewModels
                 }
 
                 DeactivateTool(VisibilityMapTool.ToolId);
+                OnMapPointToolDeactivated(null);
 
                 //await base.CreateMapElement();
             }
