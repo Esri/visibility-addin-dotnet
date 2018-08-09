@@ -1075,20 +1075,9 @@ namespace ProAppVisibilityModule.ViewModels
                 .Where(lyr => lyr.Name == selectedLayerName && lyr.ShapeType == esriGeometryType.esriGeometryPoint).FirstOrDefault();
                 var cursor = layer.GetFeatureClass().Search();
 
-                //define specific color for observer and target
-                //SimpleMarkerStyle ms = SimpleMarkerStyle.Circle;
-                //CIMColor color = ColorFactory.Instance.BlueRGB;
-
-                //if (tag == "target")
-                //{
-                //    ms = SimpleMarkerStyle.Square;
-                //    color = ColorFactory.Instance.RedRGB;
-                //}
-
                 while (cursor.MoveNext())
                 {
                     var point = (MapPoint)cursor.Current["Shape"];
-                    //var guid = await AddGraphicToMap(point, color, true, 5.0, markerStyle: ms, tag: tag);
                     var addInPoint = new AddInPoint { Point = point, GUID = Guid.NewGuid().ToString() };
                     var objectId = -1;
                     var FID = -1;
