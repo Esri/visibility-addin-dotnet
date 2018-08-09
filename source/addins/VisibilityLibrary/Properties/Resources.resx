@@ -405,4 +405,34 @@
   <data name="MsgSurfaceLayerNotFound" xml:space="preserve">
     <value>The surface layer was not found. Please try again.</value>
   </data>
+  <data name="LabelImport" xml:space="preserve">
+    <value>Import</value>
+  </data>
+  <data name="LabelPaste" xml:space="preserve">
+    <value>Paste</value>
+  </data>
+  <data name="LLOSFeatureDatasetName" xml:space="preserve">
+    <value>LLOS</value>
+  </data>
+  <data name="RLOSFeatureDatasetName" xml:space="preserve">
+    <value>RLOS</value>
+  </data>
+  <data name="MsgNoDataFound" xml:space="preserve">
+    <value>No data found</value>
+  </data>
+  <data name="EnterManuallyOption" xml:space="preserve">
+    <value>Enter Manually</value>
+  </data>
+  <data name="IsOutOfExtentFieldName" xml:space="preserve">
+    <value>IsOutOfExtent</value>
+  </data>
+  <data name="GridCodeFieldName" xml:space="preserve">
+    <value>gridcode</value>
+  </data>
+  <data name="OutOfExtentHeader" xml:space="preserve">
+    <value>No Data</value>
+  </data>
+  <data name="OutOfExtentMsg" xml:space="preserve">
+    <value>No data in side the surface extent to process.</value>
+  </data>
 </root>

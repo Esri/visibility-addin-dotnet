@@ -28,6 +28,10 @@ using ArcGIS.Desktop.Core.Geoprocessing;
 using ArcGIS.Core.Data;
 using ArcGIS.Desktop.Editing;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
+using System.Text.RegularExpressions;
+using System.Collections.ObjectModel;
+using ProAppVisibilityModule.Models;
+using ArcGIS.Core.CIM;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -35,27 +39,47 @@ namespace ProAppVisibilityModule.ViewModels
     {
         #region Properties
 
-        private int executionCounter = 1;
+        private int executionCounter = 0;
         private string _ObserversLayerName = VisibilityLibrary.Properties.Resources.RLOSObserversLayerName;
         public string ObserversLayerName
         {
-            get 
+            get
             {
-                _ObserversLayerName = string.Format("{0}_{1}", VisibilityLibrary.Properties.Resources.RLOSObserversLayerName, executionCounter);
+                if (executionCounter > 0)
+                {
+                    _ObserversLayerName = string.Format("{0}_{1}", VisibilityLibrary.Properties.Resources.RLOSObserversLayerName, executionCounter);
+                }
                 return _ObserversLayerName;
             }
-            set {}
+            set { }
+        }
+
+        private string _FeatureDatasetName = VisibilityLibrary.Properties.Resources.RLOSFeatureDatasetName;
+        public string FeatureDatasetName
+        {
+            get
+            {
+                if (executionCounter > 0)
+                {
+                    _FeatureDatasetName = string.Format("{0}_{1}", VisibilityLibrary.Properties.Resources.RLOSFeatureDatasetName, executionCounter);
+                }
+                return _FeatureDatasetName;
+            }
+            set { }
         }
 
         private string _RLOSConvertedPolygonsLayerName = VisibilityLibrary.Properties.Resources.RLOSConvertedPolygonsLayerName;
         public string RLOSConvertedPolygonsLayerName
         {
-             get 
+            get
             {
-                _RLOSConvertedPolygonsLayerName = string.Format("{0}_{1}", VisibilityLibrary.Properties.Resources.RLOSConvertedPolygonsLayerName, executionCounter);
+                if (executionCounter > 0)
+                {
+                    _RLOSConvertedPolygonsLayerName = string.Format("{0}_{1}", VisibilityLibrary.Properties.Resources.RLOSConvertedPolygonsLayerName, executionCounter);
+                }
                 return _RLOSConvertedPolygonsLayerName;
             }
-            set {}
+            set { }
         }
 
         private string _RLOSOutputLayerName = VisibilityLibrary.Properties.Resources.RLOSOutputLayerName;
@@ -63,7 +87,10 @@ namespace ProAppVisibilityModule.ViewModels
         {
             get
             {
-                _RLOSOutputLayerName = string.Format("{0}_{1}", VisibilityLibrary.Properties.Resources.RLOSOutputLayerName, executionCounter);
+                if (executionCounter > 0)
+                {
+                    _RLOSOutputLayerName = string.Format("{0}_{1}", VisibilityLibrary.Properties.Resources.RLOSOutputLayerName, executionCounter);
+                }
                 return _RLOSOutputLayerName;
             }
             set { }
@@ -74,19 +101,22 @@ namespace ProAppVisibilityModule.ViewModels
         {
             get
             {
-                _RLOSMaskLayerName = string.Format("{0}_{1}", VisibilityLibrary.Properties.Resources.RLOSMaskLayerName, executionCounter);
+                if (executionCounter > 0)
+                {
+                    _RLOSMaskLayerName = string.Format("{0}_{1}", VisibilityLibrary.Properties.Resources.RLOSMaskLayerName, executionCounter);
+                }
                 return _RLOSMaskLayerName;
             }
             set { }
         }
 
         private double _SurfaceOffset = 0.0;
-        public double SurfaceOffset 
+        public double SurfaceOffset
         {
             get { return _SurfaceOffset; }
             set
             {
-                if(value < 0.0)
+                if (value < 0.0)
                     throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEMustBePositive);
 
                 _SurfaceOffset = value;
@@ -95,15 +125,15 @@ namespace ProAppVisibilityModule.ViewModels
         }
 
         private double _MinDistance = 0.0;
-        public double MinDistance 
+        public double MinDistance
         {
             get { return _MinDistance; }
             set
             {
-                if(value < 0.0)
+                if (value < 0.0)
                     throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEMustBePositive);
 
-                if(value > MaxDistance)
+                if (value > MaxDistance)
                     throw new ArgumentException(VisibilityLibrary.Properties.Resources.AENumMustBeLess);
 
                 _MinDistance = value;
@@ -112,12 +142,12 @@ namespace ProAppVisibilityModule.ViewModels
         }
 
         private double _MaxDistance = 1000.0;
-        public double MaxDistance 
+        public double MaxDistance
         {
             get { return _MaxDistance; }
             set
             {
-                if(value < 0.0)
+                if (value < 0.0)
                     throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEMustBePositive);
 
                 if (value < MinDistance)
@@ -130,7 +160,7 @@ namespace ProAppVisibilityModule.ViewModels
 
         private double _LeftHorizontalFOV = 0.0;
         public double LeftHorizontalFOV
-        { 
+        {
             get { return _LeftHorizontalFOV; }
             set
             {
@@ -144,7 +174,7 @@ namespace ProAppVisibilityModule.ViewModels
             }
         }
         private double _RightHorizontalFOV = 360.0;
-        public double RightHorizontalFOV 
+        public double RightHorizontalFOV
         {
             get { return _RightHorizontalFOV; }
             set
@@ -175,7 +205,7 @@ namespace ProAppVisibilityModule.ViewModels
         }
 
         private double _TopVerticalFOV = 90.0;
-        public double TopVerticalFOV 
+        public double TopVerticalFOV
         {
             get { return _TopVerticalFOV; }
             set
@@ -216,6 +246,7 @@ namespace ProAppVisibilityModule.ViewModels
         private async void OnSubmitCommand(object obj)
         {
             DisplayProgressBar = Visibility.Visible;
+            IsRLOSValidSelection = false;
             await CreateMapElement();
             DisplayProgressBar = Visibility.Hidden;
         }
@@ -252,11 +283,13 @@ namespace ProAppVisibilityModule.ViewModels
         internal override void OnDeletePointCommand(object obj)
         {
             base.OnDeletePointCommand(obj);
+            ValidateRLOS_LayerSelection();
         }
 
         internal override void OnDeleteAllPointsCommand(object obj)
         {
             base.OnDeleteAllPointsCommand(obj);
+            ValidateRLOS_LayerSelection();
         }
 
         public override bool CanCreateElement
@@ -264,7 +297,9 @@ namespace ProAppVisibilityModule.ViewModels
             get
             {
                 return (!string.IsNullOrWhiteSpace(SelectedSurfaceName)
-                    && ObserverAddInPoints.Any());
+                    && (ObserverAddInPoints.Any()
+                    || RLOS_ObserversInExtent.Any()
+                    || RLOS_ObserversOutOfExtent.Any()));
             }
         }
 
@@ -276,17 +311,26 @@ namespace ProAppVisibilityModule.ViewModels
             try
             {
                 IsRunning = true;
+                await ReadSelectedLayers();
 
                 if (!CanCreateElement || MapView.Active == null || MapView.Active.Map == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
                     return;
 
-                bool success = await ExecuteVisibilityRLOS();
+                if (RLOS_ObserversInExtent.Any() || ObserverAddInPoints.Any())
+                {
+                    bool success = await ExecuteVisibilityRLOS();
 
-                if (!success)
-                    MessageBox.Show("LLOS computations did not complete correctly.\nPlease check your parameters and try again.",
-                        VisibilityLibrary.Properties.Resources.CaptionError);
+                    if (!success)
+                        MessageBox.Show("RLOS computations did not complete correctly.\nPlease check your parameters and try again.",
+                            VisibilityLibrary.Properties.Resources.CaptionError);
+                }
+                else
+                {
+                    ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.OutOfExtentMsg, VisibilityLibrary.Properties.Resources.OutOfExtentHeader);
+                }
 
                 DeactivateTool(VisibilityMapTool.ToolId);
+                OnMapPointToolDeactivated(null);
 
                 //await base.CreateMapElement();
             }
@@ -299,6 +343,13 @@ namespace ProAppVisibilityModule.ViewModels
             finally
             {
                 IsRunning = false;
+                if (ObserverAddInPoints.Count == 0)
+                    IsRLOSValidSelection = false;
+                else
+                    IsRLOSValidSelection = true;
+
+                ClearRLOSCollections();
+                ValidateRLOS_LayerSelection();
             }
         }
 
@@ -314,12 +365,13 @@ namespace ProAppVisibilityModule.ViewModels
             {
                 // Check surface spatial reference
                 var surfaceSR = await GetSpatialReferenceFromLayer(SelectedSurfaceName);
-                if(surfaceSR == null || !surfaceSR.IsProjected)
+                if (surfaceSR == null || !surfaceSR.IsProjected)
                 {
                     MessageBox.Show(VisibilityLibrary.Properties.Resources.RLOSUserPrompt, VisibilityLibrary.Properties.Resources.RLOSUserPromptCaption);
                     return false;
                 }
 
+                var observerPoints = new ObservableCollection<AddInPoint>(RLOS_ObserversInExtent.Select(x => x.AddInPoint).Union(ObserverInExtentPoints));
                 // Warn if Image Service layer
                 Layer surfaceLayer = GetLayerFromMapByName(SelectedSurfaceName);
                 if (surfaceLayer is ImageServiceLayer)
@@ -334,7 +386,44 @@ namespace ProAppVisibilityModule.ViewModels
                     }
                 }
 
-                success = await FeatureClassHelper.CreateLayer(ObserversLayerName, "POINT", true, true);
+                //Validate Dataframe Spatial reference with surface spatial reference
+                if (MapView.Active.Map.SpatialReference.Wkid != surfaceSR.Wkid)
+                {
+                    MessageBox.Show(VisibilityLibrary.Properties.Resources.LOSDataFrameMatch, VisibilityLibrary.Properties.Resources.LOSSpatialReferenceCaption);
+                    return false;
+                }
+
+                await ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(() =>
+                {
+                    using (Geodatabase geodatabase = new Geodatabase(new FileGeodatabaseConnectionPath(new Uri(CoreModule.CurrentProject.DefaultGeodatabasePath))))
+                    {
+                        executionCounter = 0;
+                        int featureDataSetSuffix = 0;
+                        var enterpriseDefinitionNames = geodatabase.GetDefinitions<FeatureDatasetDefinition>().Where(i => i.GetName().StartsWith(VisibilityLibrary.Properties.Resources.RLOSFeatureDatasetName)).Select(i => i.GetName()).ToList();
+                        foreach (var defName in enterpriseDefinitionNames)
+                        {
+                            int n;
+                            bool isNumeric = int.TryParse(Regex.Match(defName, @"\d+$").Value, out n);
+                            if (isNumeric)
+                                featureDataSetSuffix = featureDataSetSuffix < n ? n : featureDataSetSuffix;
+                        }
+                        featureDataSetSuffix = enterpriseDefinitionNames.Count > 0 ? featureDataSetSuffix + 1 : 0;
+
+                        var observerLyrSuffix = GetLayerSuffix(VisibilityLibrary.Properties.Resources.LLOSObserversLayerName, geodatabase);
+                        var convertedPolygonLyrSuffix = GetLayerSuffix(VisibilityLibrary.Properties.Resources.RLOSConvertedPolygonsLayerName, geodatabase);
+                        var outputLyrSuffix = GetLayerSuffix(VisibilityLibrary.Properties.Resources.RLOSOutputLayerName, geodatabase);
+                        var maskLyrSuffix = GetLayerSuffix(VisibilityLibrary.Properties.Resources.RLOSMaskLayerName, geodatabase);
+
+                        executionCounter = new List<int> { featureDataSetSuffix, observerLyrSuffix, convertedPolygonLyrSuffix, outputLyrSuffix, maskLyrSuffix }.Max();
+                    }
+                });
+
+                //Create Feature dataset
+                success = await FeatureClassHelper.CreateFeatureDataset(FeatureDatasetName);
+                if (!success)
+                    return false;
+
+                success = await FeatureClassHelper.CreateLayer(FeatureDatasetName, ObserversLayerName, "POINT", true, true);
                 if (!success)
                     return false;
 
@@ -342,77 +431,102 @@ namespace ProAppVisibilityModule.ViewModels
 
                 await FeatureClassHelper.AddFieldToLayer(ObserversLayerName, VisibilityLibrary.Properties.Resources.OffsetFieldName, "DOUBLE");
                 await FeatureClassHelper.AddFieldToLayer(ObserversLayerName, VisibilityLibrary.Properties.Resources.OffsetWithZFieldName, "DOUBLE");
+                await FeatureClassHelper.AddFieldToLayer(ObserversLayerName, VisibilityLibrary.Properties.Resources.IsOutOfExtentFieldName, "SHORT");
 
                 // add observer points to feature layer
+                await FeatureClassHelper.CreatingFeatures(ObserversLayerName, observerPoints, GetAsMapZUnits(surfaceSR, ObserverOffset.Value));
 
-                await FeatureClassHelper.CreatingFeatures(ObserversLayerName, ObserverAddInPoints, GetAsMapZUnits(surfaceSR, ObserverOffset.Value));
-
-                // update with surface information
-
-                success = await FeatureClassHelper.AddSurfaceInformation(ObserversLayerName, SelectedSurfaceName, VisibilityLibrary.Properties.Resources.ZFieldName);
-                if (!success)
-                    return false;
-
-                // Visibility
-
-                var observerOffsetInMapZUnits = GetAsMapZUnits(surfaceSR, ObserverOffset.Value);
-                var surfaceOffsetInMapZUnits = GetAsMapZUnits(surfaceSR, SurfaceOffset);
-                var minDistanceInMapUnits = GetAsMapUnits(surfaceSR, MinDistance);
-                var maxDistanceInMapUnits = GetAsMapUnits(surfaceSR, MaxDistance);
-                var horizontalStartAngleInDegrees = GetAngularDistanceFromTo(AngularUnitType, AngularTypes.DEGREES, LeftHorizontalFOV);
-                var horizontalEndAngleInDegrees = GetAngularDistanceFromTo(AngularUnitType, AngularTypes.DEGREES, RightHorizontalFOV);
-                var verticalUpperAngleInDegrees = GetAngularDistanceFromTo(AngularUnitType, AngularTypes.DEGREES, TopVerticalFOV);
-                var verticalLowerAngleInDegrees = GetAngularDistanceFromTo(AngularUnitType, AngularTypes.DEGREES, BottomVerticalFOV);
-
-                await FeatureClassHelper.UpdateShapeWithZ(ObserversLayerName, VisibilityLibrary.Properties.Resources.ZFieldName, observerOffsetInMapZUnits);
-
-                await CreateMask(RLOSMaskLayerName, minDistanceInMapUnits, maxDistanceInMapUnits, horizontalStartAngleInDegrees,
-                    horizontalEndAngleInDegrees, surfaceSR);
-
-                string maxRangeMaskFeatureClassName = CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + RLOSMaskLayerName;
-                var environments = Geoprocessing.MakeEnvironmentArray(mask: maxRangeMaskFeatureClassName, overwriteoutput: true);
-
-                var rlosOutputLayer = CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + RLOSOutputLayerName;
-
-                success = await FeatureClassHelper.CreateVisibility(SelectedSurfaceName, ObserversLayerName,
-                    rlosOutputLayer,
-                    observerOffsetInMapZUnits, surfaceOffsetInMapZUnits,
-                    minDistanceInMapUnits, maxDistanceInMapUnits,
-                    horizontalStartAngleInDegrees, horizontalEndAngleInDegrees,
-                    verticalUpperAngleInDegrees, verticalLowerAngleInDegrees,
-                    ShowNonVisibleData,
-                    environments,
-                    false);
-
-                if (!success)
-                    return false;
-
-                var rlosConvertedPolygonsLayer = CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + RLOSConvertedPolygonsLayerName;
-
-                string rangeFanMaskFeatureClassName = string.Empty;
-                if ((MinDistance > 0) || !((horizontalStartAngleInDegrees == 0.0) && (horizontalEndAngleInDegrees == 360.0)))
+                //execute only if points are available in surface extent
+                if (ObserverInExtentPoints.Any() || RLOS_ObserversInExtent.Any())
                 {
-                    string RLOSRangeFanMaskLayerName = "RangeFan_" + RLOSMaskLayerName;
-                    rangeFanMaskFeatureClassName = CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + RLOSRangeFanMaskLayerName;
+                    // update with surface information
+                    success = await FeatureClassHelper.AddSurfaceInformation(ObserversLayerName, SelectedSurfaceName, VisibilityLibrary.Properties.Resources.ZFieldName);
+                    if (!success)
+                        return false;
 
-                    await CreateMask(RLOSRangeFanMaskLayerName, minDistanceInMapUnits, maxDistanceInMapUnits, horizontalStartAngleInDegrees,
-                        horizontalEndAngleInDegrees, surfaceSR, true);
+                    // Visibility
+
+                    var observerOffsetInMapZUnits = GetAsMapZUnits(surfaceSR, ObserverOffset.Value);
+                    var surfaceOffsetInMapZUnits = GetAsMapZUnits(surfaceSR, SurfaceOffset);
+                    var minDistanceInMapUnits = GetAsMapUnits(surfaceSR, MinDistance);
+                    var maxDistanceInMapUnits = GetAsMapUnits(surfaceSR, MaxDistance);
+                    var horizontalStartAngleInDegrees = GetAngularDistanceFromTo(AngularUnitType, AngularTypes.DEGREES, LeftHorizontalFOV);
+                    var horizontalEndAngleInDegrees = GetAngularDistanceFromTo(AngularUnitType, AngularTypes.DEGREES, RightHorizontalFOV);
+                    var verticalUpperAngleInDegrees = GetAngularDistanceFromTo(AngularUnitType, AngularTypes.DEGREES, TopVerticalFOV);
+                    var verticalLowerAngleInDegrees = GetAngularDistanceFromTo(AngularUnitType, AngularTypes.DEGREES, BottomVerticalFOV);
+
+                    await FeatureClassHelper.UpdateShapeWithZ(ObserversLayerName, VisibilityLibrary.Properties.Resources.ZFieldName, observerOffsetInMapZUnits);
+
+                    await CreateMask(RLOSMaskLayerName, minDistanceInMapUnits, maxDistanceInMapUnits, horizontalStartAngleInDegrees,
+                        horizontalEndAngleInDegrees, surfaceSR, observerPoints);
+
+                    string maxRangeMaskFeatureClassName = CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + FeatureDatasetName + System.IO.Path.DirectorySeparatorChar + RLOSMaskLayerName;
+                    var environments = Geoprocessing.MakeEnvironmentArray(mask: maxRangeMaskFeatureClassName, overwriteoutput: true);
+
+                    var rlosOutputLayer = CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + RLOSOutputLayerName;
+
+
+                    success = await FeatureClassHelper.CreateVisibility(SelectedSurfaceName, ObserversLayerName,
+                        rlosOutputLayer,
+                        observerOffsetInMapZUnits, surfaceOffsetInMapZUnits,
+                        minDistanceInMapUnits, maxDistanceInMapUnits,
+                        horizontalStartAngleInDegrees, horizontalEndAngleInDegrees,
+                        verticalUpperAngleInDegrees, verticalLowerAngleInDegrees,
+                        ShowNonVisibleData,
+                        environments,
+                        false);
+
+                    if (!success)
+                        return false;
+
+                    var rlosConvertedPolygonsLayer = CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + FeatureDatasetName + System.IO.Path.DirectorySeparatorChar + RLOSConvertedPolygonsLayerName;
+
+                    string rangeFanMaskFeatureClassName = string.Empty;
+                    if ((MinDistance > 0) || !((horizontalStartAngleInDegrees == 0.0) && (horizontalEndAngleInDegrees == 360.0)))
+                    {
+                        string RLOSRangeFanMaskLayerName = "RangeFan_" + RLOSMaskLayerName;
+                        rangeFanMaskFeatureClassName = CoreModule.CurrentProject.DefaultGeodatabasePath + System.IO.Path.DirectorySeparatorChar + FeatureDatasetName + System.IO.Path.DirectorySeparatorChar + RLOSRangeFanMaskLayerName;
+
+                        await CreateMask(RLOSRangeFanMaskLayerName, minDistanceInMapUnits, maxDistanceInMapUnits, horizontalStartAngleInDegrees,
+                            horizontalEndAngleInDegrees, surfaceSR, observerPoints, true);
+                    }
+
+                    success = await FeatureClassHelper.IntersectOutput(rlosOutputLayer, rlosConvertedPolygonsLayer, false, "Value", rangeFanMaskFeatureClassName);
+                    if (!success)
+                        return false;
                 }
 
-                success = await FeatureClassHelper.IntersectOutput(rlosOutputLayer, rlosConvertedPolygonsLayer, false, "Value", rangeFanMaskFeatureClassName);
-                if (!success)
-                    return false;
+                // add observer points present out of extent to feature layer
+                var outOfExtent = new ObservableCollection<AddInPoint>(RLOS_ObserversOutOfExtent.Select(x => x.AddInPoint).Union(ObserverOutExtentPoints));
+                await FeatureClassHelper.CreatingFeatures(ObserversLayerName, outOfExtent, GetAsMapZUnits(surfaceSR, ObserverOffset.Value), VisibilityLibrary.Properties.Resources.IsOutOfExtentFieldName);
 
                 await FeatureClassHelper.CreateUniqueValueRenderer(GetLayerFromMapByName(RLOSConvertedPolygonsLayerName) as FeatureLayer, ShowNonVisibleData, RLOSConvertedPolygonsLayerName);
+
+                var observersLayer = GetLayerFromMapByName(ObserversLayerName) as FeatureLayer;
+
+                if (observersLayer != null)
+                {
+                    await FeatureClassHelper.CreateRLOSObserversRenderer(observersLayer as FeatureLayer);
+                }
+
+                await FeatureClassHelper.Delete(RLOSOutputLayerName);
+                //await FeatureClassHelper.Delete(RLOSMaskLayerName);
 
                 // Eventually we will add the new layers to a new group layer for each run
                 // Currently not working in current release of Pro.  
                 // From Roshan Herbert - I just spoke with the Dev who wrote the MoveLayer method. Apparently this a known issue. 
                 //                       We have bug to fix this and plan to fix it in the next release.
                 List<Layer> layerList = new List<Layer>();
-                layerList.Add(GetLayerFromMapByName(ObserversLayerName));
-                //layerList.Add(GetLayerFromMapByName(RLOSConvertedPolygonsLayerName));
+                var observersLayerFromMap = GetLayerFromMapByName(ObserversLayerName);
+                var RLOSConvertedPolygonsLayer = GetLayerFromMapByName(RLOSConvertedPolygonsLayerName);
                 
+                if (observersLayerFromMap != null)
+                    layerList.Add(observersLayerFromMap);
+                if (RLOSConvertedPolygonsLayer != null)
+                    layerList.Add(GetLayerFromMapByName(RLOSConvertedPolygonsLayerName));
+                
+                await FeatureClassHelper.MoveLayersToGroupLayer(layerList, FeatureDatasetName);
+
                 //string groupName = "RLOS Group";
                 //if (executionCounter > 0)
                 //    groupName = string.Format("{0}_{1}", groupName, executionCounter.ToString());
@@ -430,8 +544,8 @@ namespace ProAppVisibilityModule.ViewModels
                     await ZoomToExtent(envelope);
                 }
 
-                executionCounter++;
-
+                var surfaceEnvelope = await GetSurfaceEnvelope();
+                await DisplayOutOfExtentMsg();
                 success = true;
             }
             catch (Exception ex)
@@ -443,6 +557,57 @@ namespace ProAppVisibilityModule.ViewModels
             return success;
         }
 
+        private int GetLayerSuffix(string layerName, Geodatabase geodatabase)
+        {
+            int counter = 0;
+            var enterpriseFCNames = geodatabase.GetDefinitions<FeatureClassDefinition>().Where(i => i.GetName().StartsWith(layerName)).Select(i => i.GetName()).ToList();
+            foreach (var fcName in enterpriseFCNames)
+            {
+                int n;
+                bool isNumeric = int.TryParse(Regex.Match(fcName, @"\d+$").Value, out n);
+                if (isNumeric)
+                    counter = counter < n ? n : counter;
+            }
+            counter = enterpriseFCNames.Count > 0 ? counter + 1 : 0;
+            return counter;
+        }
+
+        private async Task DisplayOutOfExtentMsg()
+        {
+            await QueuedTask.Run(() =>
+            {
+                var observerIDCollection = RLOS_ObserversOutOfExtent.Select(x => x.ID).ToList<int>();
+                var observerString = string.Empty;
+                var targetString = string.Empty;
+                foreach (var item in observerIDCollection)
+                {
+                    if (observerString == "")
+                        observerString = item.ToString();
+                    else
+                        observerString = observerString + "," + item.ToString();
+                }
+                if (observerIDCollection.Any())
+                {
+                    if (observerIDCollection.Count <= 10)
+                    {
+                        var msgString = string.Empty;
+                        if (observerIDCollection.Any())
+                        {
+                            msgString = "Observers lying outside the extent of elevation surface are: " + observerString;
+                        }
+                        ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(msgString,
+                                                    "Unable To Process For Few Locations");
+                    }
+                    else
+                    {
+                        ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.LLOSPointsOutsideOfSurfaceExtent,
+                        VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+                    }
+
+                }
+            });
+        }
+
         /// <summary>
         /// Method used to create a mask for geoprocessing environment
         /// Will buffer around each observer at the max distance to create mask
@@ -450,13 +615,14 @@ namespace ProAppVisibilityModule.ViewModels
         /// <param name="maskFeatureClassName"></param>
         /// <param name="bufferDistance"></param>
         /// <returns>Task</returns>
-        private async Task CreateMask(string maskFeatureClassName, 
-            double minDistanceInMapUnits, double maxDistanceInMapUnits, 
-            double horizontalStartAngleInDegrees, double horizontalEndAngleInDegrees, 
-            SpatialReference surfaceSR, bool constructRangeFans = false)
+        private async Task CreateMask(string maskFeatureClassName,
+            double minDistanceInMapUnits, double maxDistanceInMapUnits,
+            double horizontalStartAngleInDegrees, double horizontalEndAngleInDegrees,
+            SpatialReference surfaceSR, ObservableCollection<AddInPoint> observerPoints,
+            bool constructRangeFans = false)
         {
             // create new
-            await FeatureClassHelper.CreateLayer(maskFeatureClassName, "POLYGON", false, false);
+            await FeatureClassHelper.CreateLayer(FeatureDatasetName, maskFeatureClassName, "POLYGON", false, false);
 
             try
             {
@@ -471,42 +637,42 @@ namespace ProAppVisibilityModule.ViewModels
                         EditOperation editOperation = new EditOperation();
                         editOperation.Callback(context =>
                         {
-                        try
-                        {
-                            var shapeFieldName = fcDefinition.GetShapeField();
-
-                            foreach (var observer in ObserverAddInPoints)
+                            try
                             {
-                                using (var rowBuffer = enterpriseFeatureClass.CreateRowBuffer())
+                                var shapeFieldName = fcDefinition.GetShapeField();
+
+                                foreach (var observer in observerPoints)
                                 {
-                                    // Either the field index or the field name can be used in the indexer.
-                                    // project the point here or the buffer tool may use an angular unit and run forever
-                                    var point = GeometryEngine.Instance.Project(observer.Point, surfaceSR);
-                                    Geometry polygon = null;
-
-                                    if (constructRangeFans)
+                                    using (var rowBuffer = enterpriseFeatureClass.CreateRowBuffer())
                                     {
-                                        polygon = GeometryHelper.ConstructRangeFan(point as MapPoint,
-                                            minDistanceInMapUnits, maxDistanceInMapUnits, horizontalStartAngleInDegrees,
-                                            horizontalEndAngleInDegrees, surfaceSR);                                       
-                                    }
-                                    else
-                                    {
-                                        polygon = GeometryEngine.Instance.Buffer(point, maxDistanceInMapUnits);
-                                    }
+                                        // Either the field index or the field name can be used in the indexer.
+                                        // project the point here or the buffer tool may use an angular unit and run forever
+                                        var point = GeometryEngine.Instance.Project(observer.Point, surfaceSR);
+                                        Geometry polygon = null;
 
-                                    rowBuffer[shapeFieldName] = polygon;
+                                        if (constructRangeFans)
+                                        {
+                                            polygon = GeometryHelper.ConstructRangeFan(point as MapPoint,
+                                                minDistanceInMapUnits, maxDistanceInMapUnits, horizontalStartAngleInDegrees,
+                                                horizontalEndAngleInDegrees, surfaceSR);
+                                        }
+                                        else
+                                        {
+                                            polygon = GeometryEngine.Instance.Buffer(point, maxDistanceInMapUnits);
+                                        }
 
-                                    Feature feature = enterpriseFeatureClass.CreateRow(rowBuffer);
-                                    feature.Store();
-                                    context.Invalidate(feature);
-                                } // using
-                            } // for each 
-                        }
-                        catch (GeodatabaseException exObj)
-                        {
-                            message = exObj.Message;
-                        }
+                                        rowBuffer[shapeFieldName] = polygon;
+
+                                        Feature feature = enterpriseFeatureClass.CreateRow(rowBuffer);
+                                        feature.Store();
+                                        context.Invalidate(feature);
+                                    } // using
+                                } // for each 
+                            }
+                            catch (GeodatabaseException exObj)
+                            {
+                                message = exObj.Message;
+                            }
                         }, enterpriseFeatureClass);
 
                         creationResult = await editOperation.ExecuteAsync();
@@ -558,6 +724,22 @@ namespace ProAppVisibilityModule.ViewModels
             }
 
             return Math.Round(angularDistance, 1);
+        }
+
+        private async Task ReadSelectedLayers()
+        {
+            var observerPoints = new ObservableCollection<MapPoint>();
+            RLOS_ObserversInExtent.Clear();
+            RLOS_ObserversOutOfExtent.Clear();
+
+            var surfaceEnvelope = await GetSurfaceEnvelope();
+            var selectedFeatures = await QueuedTask.Run(() => { return MapView.Active.Map.GetSelection(); });
+            await QueuedTask.Run(() =>
+            {
+                var selectedFeaturesCollections = selectedFeatures.Where(x => x.Key.Name == SelectedRLOS_ObserverLyrName)
+                                            .Select(x => x.Value).FirstOrDefault();
+                ReadPointFromLayer(surfaceEnvelope, RLOS_ObserversInExtent, RLOS_ObserversOutOfExtent, SelectedRLOS_ObserverLyrName, selectedFeaturesCollections);
+            });
         }
 
         #endregion Private

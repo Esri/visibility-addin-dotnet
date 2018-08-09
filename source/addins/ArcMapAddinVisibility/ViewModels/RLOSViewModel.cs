@@ -32,6 +32,8 @@ using ESRI.ArcGIS.Geoprocessing;
 // Solution
 using VisibilityLibrary.Helpers;
 using VisibilityLibrary;
+using System.Collections.ObjectModel;
+using ArcMapAddinVisibility.Models;
 
 namespace ArcMapAddinVisibility.ViewModels
 {
@@ -215,11 +217,13 @@ namespace ArcMapAddinVisibility.ViewModels
         internal override void OnDeletePointCommand(object obj)
         {
             base.OnDeletePointCommand(obj);
+            ValidateRLOS_LayerSelection();
         }
 
         internal override void OnDeleteAllPointsCommand(object obj)
         {
             base.OnDeleteAllPointsCommand(obj);
+            ValidateRLOS_LayerSelection();
         }
 
         public override bool CanCreateElement
@@ -227,7 +231,7 @@ namespace ArcMapAddinVisibility.ViewModels
             get
             {
                 return (!string.IsNullOrWhiteSpace(SelectedSurfaceName)
-                    && ObserverAddInPoints.Any());
+                    && (ObserverAddInPoints.Any() || RLOS_ObserversInExtent.Any() || RLOS_ObserversOutOfExtent.Any()));
             }
         }
 
@@ -344,252 +348,271 @@ namespace ArcMapAddinVisibility.ViewModels
             try
             {
                 IsRunning = true;
-
-                if (!CanCreateElement || ArcMap.Document == null || ArcMap.Document.FocusMap == null 
+                var selectedLayer = SelectedRLOS_ObserverLyrName;
+                ReadSelectedLayerPoints();
+                if (!CanCreateElement || ArcMap.Document == null || ArcMap.Document.FocusMap == null
                     || string.IsNullOrWhiteSpace(SelectedSurfaceName))
                     return;
-
-                var surface = GetSurfaceFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
-                if (surface == null)
+                if (RLOS_ObserversInExtent.Any() || ObserverAddInPoints.Any())
                 {
-                    System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.CaptionError);
-                    return;
-                }
 
-                bool spatialAnalystAvailable = IsSpatialAnalystAvailable();
-                if (!spatialAnalystAvailable)
-                {
-                    System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.LOSSpatialAnalystLicenseInvalid, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
-                    return;
-                }
-
-                ILayer surfaceLayer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
-                // Issue warning if layer is ImageServerLayer
-                if (surfaceLayer is IImageServerLayer)
-                {
-                    MessageBoxResult mbr = MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgLayerIsImageService,
-                        VisibilityLibrary.Properties.Resources.CaptionLayerIsImageService, MessageBoxButton.YesNo);
-
-                    if (mbr == MessageBoxResult.No)
-                    {
-                        System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
-                        return;
-                    }
-                }
-
-                // Determine if selected surface is projected or geographic
-                var geoDataset = surfaceLayer as IGeoDataset;
-                if (geoDataset == null)
-                {
-                    System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.CaptionError);
-                    return;
-                }
-
-                SelectedSurfaceSpatialRef = geoDataset.SpatialReference;
-
-                if (SelectedSurfaceSpatialRef is IGeographicCoordinateSystem)
-                {
-                    MessageBox.Show(VisibilityLibrary.Properties.Resources.RLOSUserPrompt, VisibilityLibrary.Properties.Resources.RLOSUserPromptCaption);
-                    return;
-                }
-
-                if (ArcMap.Document.FocusMap.SpatialReference.FactoryCode != geoDataset.SpatialReference.FactoryCode)
-                {
-                    MessageBox.Show(VisibilityLibrary.Properties.Resources.LOSDataFrameMatch, VisibilityLibrary.Properties.Resources.LOSSpatialReferenceCaption);
-                    return;
-                }
-
-                using (ComReleaser oComReleaser = new ComReleaser())
-                {
-                    // Create feature workspace
-                    IFeatureWorkspace workspace = CreateFeatureWorkspace("tempWorkspace");
-                    if (workspace == null)
+                    var observerPoints = RLOS_ObserversInExtent.Select(x => x.AddInPoint).Union(ObserverInExtentPoints);
+                    var surface = GetSurfaceFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
+                    if (surface == null)
                     {
                         System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.CaptionError);
                         return;
                     }
 
-                    StartEditOperation((IWorkspace)workspace);
-
-                    // Create feature class
-                    IFeatureClass pointFc = CreateObserversFeatureClass(workspace, SelectedSurfaceSpatialRef, "Output" + RunCount.ToString());
-                    if (pointFc == null)
+                    bool spatialAnalystAvailable = IsSpatialAnalystAvailable();
+                    if (!spatialAnalystAvailable)
                     {
-                        System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.CaptionError);
+                        System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.LOSSpatialAnalystLicenseInvalid, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
                         return;
                     }
 
-                    double finalObserverOffset = GetOffsetInZUnits(ObserverOffset.Value, surface.ZFactor, OffsetUnitType);
-                    double finalSurfaceOffset = GetOffsetInZUnits(SurfaceOffset, surface.ZFactor, OffsetUnitType);
-
-                    double conversionFactor = GetConversionFactor(SelectedSurfaceSpatialRef);
-                    string unitString = GetUnitString(SelectedSurfaceSpatialRef);
-                    //unit of raster
-                    DistanceTypes srUnit = GetMTUnitFromEsriUnit(unitString);
-                    //get distance in map units
-                    double muMaxDist = GetDistanceFromTo(OffsetUnitType, srUnit, MaxDistance);
-                    double muMinDist = GetDistanceFromTo(OffsetUnitType, srUnit, MinDistance);
-                    //Distance in meters
-                    double convertedMinDistance = MinDistance * conversionFactor;
-                    double convertedMaxDistance = MaxDistance * conversionFactor;
-
-                    double finalMinDistance;
-                    double finalMaxDistance;
-                    if (srUnit.ToString() != OffsetUnitType.ToString())
+                    ILayer surfaceLayer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
+                    // Issue warning if layer is ImageServerLayer
+                    if (surfaceLayer is IImageServerLayer)
                     {
-                        finalMinDistance = GetLinearDistance(ArcMap.Document.FocusMap, convertedMinDistance, OffsetUnitType);
-                        finalMaxDistance = GetLinearDistance(ArcMap.Document.FocusMap, convertedMaxDistance, OffsetUnitType);
-                    }
-                    else
-                    {
-                        finalMinDistance = GetDistanceFromTo(DistanceTypes.Meters, srUnit, convertedMinDistance);
-                        finalMaxDistance = GetDistanceFromTo(DistanceTypes.Meters, srUnit, convertedMaxDistance);
-                    }
+                        MessageBoxResult mbr = MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgLayerIsImageService,
+                            VisibilityLibrary.Properties.Resources.CaptionLayerIsImageService, MessageBoxButton.YesNo);
 
-                    double finalLeftHorizontalFOV = GetAngularDistance(ArcMap.Document.FocusMap, LeftHorizontalFOV, AngularUnitType);
-                    double finalRightHorizontalFOV = GetAngularDistance(ArcMap.Document.FocusMap, RightHorizontalFOV, AngularUnitType);
-                    double finalBottomVerticalFOV = GetAngularDistance(ArcMap.Document.FocusMap, BottomVerticalFOV, AngularUnitType);
-                    double finalTopVerticalFOV = GetAngularDistance(ArcMap.Document.FocusMap, TopVerticalFOV, AngularUnitType);
-
-                    // Output radius geometries
-                    List<IGeometry> maxRangeBufferGeomList = new List<IGeometry>();
-                    List<IGeometry> rangeFanGeomList = new List<IGeometry>();
-
-                    foreach (var observerPoint in ObserverAddInPoints)
-                    {
-                        if ((observerPoint == null) || (observerPoint.Point == null))
-                            continue;
-
-                        // Create 2 clipping geometries:
-                        // 1. maxRangeBufferGeomList - is used to clip the viz GP output because 2. doesn't work directly
-                        // 2. rangeFanGeomList - this is the range fan input by the user
-                        ITopologicalOperator topologicalOperator = observerPoint.Point as ITopologicalOperator;
-                        if (topologicalOperator == null)
-                            continue;
-
-                        IGeometry geomBuffer = topologicalOperator.Buffer(muMaxDist);
-
-                        maxRangeBufferGeomList.Add(geomBuffer);      
-
-                        IGeometry geomRangeFan = ConstructRangeFan(observerPoint.Point, muMinDist, muMaxDist,
-                            finalLeftHorizontalFOV, finalRightHorizontalFOV, SelectedSurfaceSpatialRef);
-                        if (geomRangeFan != null)
-                            rangeFanGeomList.Add(geomRangeFan);
-
-                        double z1 = surface.GetElevation(observerPoint.Point) + finalObserverOffset;
-
-                        //create a new point feature
-                        IFeature ipFeature = pointFc.CreateFeature();
-
-                        // Set the field values for the feature
-                        SetFieldValues(finalObserverOffset, finalSurfaceOffset,muMinDist, muMaxDist, finalLeftHorizontalFOV,
-                            finalRightHorizontalFOV, finalBottomVerticalFOV, finalTopVerticalFOV, ipFeature);
-
-                        if (double.IsNaN(z1))
+                        if (mbr == MessageBoxResult.No)
                         {
-                            System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.RLOSPointsOutsideOfSurfaceExtent, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+                            System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+                            return;
+                        }
+                    }
+
+                    // Determine if selected surface is projected or geographic
+                    var geoDataset = surfaceLayer as IGeoDataset;
+                    if (geoDataset == null)
+                    {
+                        System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.CaptionError);
+                        return;
+                    }
+
+                    SelectedSurfaceSpatialRef = geoDataset.SpatialReference;
+
+                    if (SelectedSurfaceSpatialRef is IGeographicCoordinateSystem)
+                    {
+                        MessageBox.Show(VisibilityLibrary.Properties.Resources.RLOSUserPrompt, VisibilityLibrary.Properties.Resources.RLOSUserPromptCaption);
+                        return;
+                    }
+
+                    if (ArcMap.Document.FocusMap.SpatialReference.FactoryCode != geoDataset.SpatialReference.FactoryCode)
+                    {
+                        MessageBox.Show(VisibilityLibrary.Properties.Resources.LOSDataFrameMatch, VisibilityLibrary.Properties.Resources.LOSSpatialReferenceCaption);
+                        return;
+                    }
+
+                    using (ComReleaser oComReleaser = new ComReleaser())
+                    {
+                        // Create feature workspace
+                        IFeatureWorkspace workspace = CreateFeatureWorkspace("tempWorkspace");
+                        if (workspace == null)
+                        {
+                            System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.CaptionError);
                             return;
                         }
 
-                        //Create shape 
-                        IPoint point = new PointClass() { Z = z1, X = observerPoint.Point.X, Y = observerPoint.Point.Y, ZAware = true };
-                        ipFeature.Shape = point;
-                        ipFeature.Store();
-                    }
+                        StartEditOperation((IWorkspace)workspace);
 
-                    IFeatureClassDescriptor fd = new FeatureClassDescriptorClass();
-                    fd.Create(pointFc, null, "OBJECTID");
-
-                    StopEditOperation((IWorkspace)workspace);
-
-                    try
-                    {
-                        ILayer layer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
-                        string layerPath = GetLayerPath(layer);
-
-                        if (string.IsNullOrEmpty(layerPath))
+                        // Create feature class
+                        IFeatureClass pointFc = CreateObserversFeatureClass(workspace, SelectedSurfaceSpatialRef, "Output" + RunCount.ToString());
+                        if (pointFc == null)
                         {
-                            // if layer path didn't resolve, issue error and stop
-                            System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgSurfaceLayerNotFound, VisibilityLibrary.Properties.Resources.AEInvalidInput);
-                            throw new Exception(VisibilityLibrary.Properties.Resources.MsgSurfaceLayerNotFound);
+                            System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.CaptionError);
+                            return;
                         }
 
-                        IFeatureLayer ipFeatureLayer = new FeatureLayerClass();
-                        ipFeatureLayer.FeatureClass = pointFc;
+                        double finalObserverOffset = GetOffsetInZUnits(ObserverOffset.Value, surface.ZFactor, OffsetUnitType);
+                        double finalSurfaceOffset = GetOffsetInZUnits(SurfaceOffset, surface.ZFactor, OffsetUnitType);
 
-                        IDataset ipDataset = (IDataset)pointFc;
-                        string outputFcName = ipDataset.BrowseName + "_output";
-                        string strPath = ipDataset.Workspace.PathName + System.IO.Path.DirectorySeparatorChar + ipDataset.BrowseName;
-                        string outPath = ipDataset.Workspace.PathName + System.IO.Path.DirectorySeparatorChar + outputFcName;
+                        double conversionFactor = GetConversionFactor(SelectedSurfaceSpatialRef);
+                        string unitString = GetUnitString(SelectedSurfaceSpatialRef);
+                        //unit of raster
+                        DistanceTypes srUnit = GetMTUnitFromEsriUnit(unitString);
+                        //get distance in map units
+                        double muMaxDist = GetDistanceFromTo(DistanceUnitType, srUnit, MaxDistance);
+                        double muMinDist = GetDistanceFromTo(DistanceUnitType, srUnit, MinDistance);
+                        //Distance in meters
+                        double convertedMinDistance = MinDistance * conversionFactor;
+                        double convertedMaxDistance = MaxDistance * conversionFactor;
 
-                        IVariantArray parameters = new VarArrayClass();
-                        parameters.Add(layerPath);
-                        parameters.Add(strPath);
-                        parameters.Add(outPath);
-
-                        IGeoProcessor2 gp = new GeoProcessorClass();
-
-                        gp.AddOutputsToMap = false;
-
-                        // Add a mask to buffer the output to selected distance
-                        SetGPMask(workspace, maxRangeBufferGeomList, gp, "radiusMask");
-
-                        object oResult = gp.Execute("Visibility_sa", parameters, null);
-                        IGeoProcessorResult ipResult = (IGeoProcessorResult)oResult;
-
-                        ComReleaser.ReleaseCOMObject(gp);
-                        gp = null;
-                        GC.Collect();
-
-                        // Add the range fan geometries to the map
-                        foreach (IGeometry geom in rangeFanGeomList)
+                        double finalMinDistance;
+                        double finalMaxDistance;
+                        if (srUnit.ToString() != DistanceUnitType.ToString())
                         {
-                            var color = new RgbColorClass() { Blue = 255 } as IColor;
-                            AddGraphicToMap(geom, color, true);
+                            finalMinDistance = GetLinearDistance(ArcMap.Document.FocusMap, convertedMinDistance, DistanceUnitType);
+                            finalMaxDistance = GetLinearDistance(ArcMap.Document.FocusMap, convertedMaxDistance, DistanceUnitType);
+                        }
+                        else
+                        {
+                            finalMinDistance = GetDistanceFromTo(DistanceTypes.Meters, srUnit, convertedMinDistance);
+                            finalMaxDistance = GetDistanceFromTo(DistanceTypes.Meters, srUnit, convertedMaxDistance);
                         }
 
-                        IRasterLayer outputRasterLayer = new RasterLayerClass();
-                        outputRasterLayer.CreateFromFilePath(outPath);
+                        double finalLeftHorizontalFOV = GetAngularDistance(ArcMap.Document.FocusMap, LeftHorizontalFOV, AngularUnitType);
+                        double finalRightHorizontalFOV = GetAngularDistance(ArcMap.Document.FocusMap, RightHorizontalFOV, AngularUnitType);
+                        double finalBottomVerticalFOV = GetAngularDistance(ArcMap.Document.FocusMap, BottomVerticalFOV, AngularUnitType);
+                        double finalTopVerticalFOV = GetAngularDistance(ArcMap.Document.FocusMap, TopVerticalFOV, AngularUnitType);
 
-                        string fcName = IntersectOutput(outputRasterLayer, ipDataset, workspace, rangeFanGeomList);
+                        // Output radius geometries
+                        List<IGeometry> maxRangeBufferGeomList = new List<IGeometry>();
+                        List<IGeometry> rangeFanGeomList = new List<IGeometry>();
 
-                        IFeatureClass finalFc = workspace.OpenFeatureClass(fcName);
-
-                        IFeatureLayer outputFeatureLayer = new FeatureLayerClass();
-                        outputFeatureLayer.FeatureClass = finalFc;
-
-                        //Add it to a map if the layer is valid.
-                        if (outputFeatureLayer != null)
+                        foreach (var observerPoint in observerPoints)
                         {
-                            // set the renderer
-                            IFeatureRenderer featRend = UniqueValueRenderer(workspace, finalFc);
-                            IGeoFeatureLayer geoLayer = (IGeoFeatureLayer)outputFeatureLayer;
-                            geoLayer.Renderer = featRend;
-                            geoLayer.Name = "RLOS_Visibility_" + RunCount.ToString();
+                            if ((observerPoint == null) || (observerPoint.Point == null))
+                                continue;
 
-                            // Set the layer transparency
-                            IDisplayFilterManager filterManager = (IDisplayFilterManager)outputFeatureLayer;
-                            ITransparencyDisplayFilter filter = new TransparencyDisplayFilter();
-                            filter.Transparency = 80;
-                            filterManager.DisplayFilter = filter;
+                            // Create 2 clipping geometries:
+                            // 1. maxRangeBufferGeomList - is used to clip the viz GP output because 2. doesn't work directly
+                            // 2. rangeFanGeomList - this is the range fan input by the user
+                            ITopologicalOperator topologicalOperator = observerPoint.Point as ITopologicalOperator;
+                            if (topologicalOperator == null)
+                                continue;
 
-                            ESRI.ArcGIS.Carto.IMap map = ArcMap.Document.FocusMap;
-                            map.AddLayer((ILayer)outputFeatureLayer);
+                            IGeometry geomBuffer = topologicalOperator.Buffer(muMaxDist);
 
-                            IEnvelope envelope = outputFeatureLayer.AreaOfInterest.Envelope;
-                            ZoomToExtent(envelope);
+                            maxRangeBufferGeomList.Add(geomBuffer);
+
+                            IGeometry geomRangeFan = ConstructRangeFan(observerPoint.Point, muMinDist, muMaxDist,
+                                finalLeftHorizontalFOV, finalRightHorizontalFOV, SelectedSurfaceSpatialRef);
+                            if (geomRangeFan != null)
+                                rangeFanGeomList.Add(geomRangeFan);
+
+                            double z1 = surface.GetElevation(observerPoint.Point) + finalObserverOffset;
+
+                            //create a new point feature
+                            IFeature ipFeature = pointFc.CreateFeature();
+
+                            // Set the field values for the feature
+                            SetFieldValues(finalObserverOffset, finalSurfaceOffset, muMinDist, muMaxDist, finalLeftHorizontalFOV,
+                                finalRightHorizontalFOV, finalBottomVerticalFOV, finalTopVerticalFOV, ipFeature);
+
+                            if (double.IsNaN(z1))
+                            {
+                                System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.RLOSPointsOutsideOfSurfaceExtent, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+                                return;
+                            }
+
+                            //Create shape 
+                            IPoint point = new PointClass() { Z = z1, X = observerPoint.Point.X, Y = observerPoint.Point.Y, ZAware = true };
+                            ipFeature.Shape = point;
+                            ipFeature.Store();
                         }
 
-                        RunCount += 1;
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine(ex.Message);
-                        System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+                        IFeatureClassDescriptor fd = new FeatureClassDescriptorClass();
+                        fd.Create(pointFc, null, "OBJECTID");
+
+                        StopEditOperation((IWorkspace)workspace);
+
+                        try
+                        {
+                            ILayer layer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
+                            string layerPath = GetLayerPath(layer);
+
+                            if (string.IsNullOrEmpty(layerPath))
+                            {
+                                // if layer path didn't resolve, issue error and stop
+                                System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgSurfaceLayerNotFound, VisibilityLibrary.Properties.Resources.AEInvalidInput);
+                                throw new Exception(VisibilityLibrary.Properties.Resources.MsgSurfaceLayerNotFound);
+                            }
+
+                            IFeatureLayer ipFeatureLayer = new FeatureLayerClass();
+                            ipFeatureLayer.FeatureClass = pointFc;
+
+                            IDataset ipDataset = (IDataset)pointFc;
+                            string outputFcName = ipDataset.BrowseName + "_output";
+                            string strPath = ipDataset.Workspace.PathName + System.IO.Path.DirectorySeparatorChar + ipDataset.BrowseName;
+                            string outPath = ipDataset.Workspace.PathName + System.IO.Path.DirectorySeparatorChar + outputFcName;
+
+                            IVariantArray parameters = new VarArrayClass();
+                            parameters.Add(layerPath);
+                            parameters.Add(strPath);
+                            parameters.Add(outPath);
+
+                            IGeoProcessor2 gp = new GeoProcessorClass();
+
+                            gp.AddOutputsToMap = false;
+
+                            // Add a mask to buffer the output to selected distance
+                            SetGPMask(workspace, maxRangeBufferGeomList, gp, "radiusMask");
+
+                            object oResult = gp.Execute("Visibility_sa", parameters, null);
+                            IGeoProcessorResult ipResult = (IGeoProcessorResult)oResult;
+
+                            ComReleaser.ReleaseCOMObject(gp);
+                            gp = null;
+                            GC.Collect();
+
+                            // Add the range fan geometries to the map
+                            foreach (IGeometry geom in rangeFanGeomList)
+                            {
+                                var color = new RgbColorClass() { Blue = 255 } as IColor;
+                                AddGraphicToMap(geom, color, true);
+                            }
+
+                            IRasterLayer outputRasterLayer = new RasterLayerClass();
+                            outputRasterLayer.CreateFromFilePath(outPath);
+
+                            string fcName = IntersectOutput(outputRasterLayer, ipDataset, workspace, rangeFanGeomList);
+
+                            IFeatureClass finalFc = workspace.OpenFeatureClass(fcName);
+
+                            IFeatureLayer outputFeatureLayer = new FeatureLayerClass();
+                            outputFeatureLayer.FeatureClass = finalFc;
+
+                            //Add it to a map if the layer is valid.
+                            if (outputFeatureLayer != null)
+                            {
+                                // set the renderer
+                                IFeatureRenderer featRend = UniqueValueRenderer(workspace, finalFc);
+                                IGeoFeatureLayer geoLayer = (IGeoFeatureLayer)outputFeatureLayer;
+                                geoLayer.Renderer = featRend;
+                                geoLayer.Name = "RLOS_Visibility_" + RunCount.ToString();
+
+                                // Set the layer transparency
+                                IDisplayFilterManager filterManager = (IDisplayFilterManager)outputFeatureLayer;
+                                ITransparencyDisplayFilter filter = new TransparencyDisplayFilter();
+                                filter.Transparency = 80;
+                                filterManager.DisplayFilter = filter;
+
+                                ESRI.ArcGIS.Carto.IMap map = ArcMap.Document.FocusMap;
+                                map.AddLayer((ILayer)outputFeatureLayer);
+
+                                IEnvelope envelope = outputFeatureLayer.AreaOfInterest.Envelope;
+                                ZoomToExtent(envelope);
+                            }
+
+                            RunCount += 1;
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine(ex.Message);
+                            System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+                        }
+
+                        DisplayOutOfExtentMsg(selectedLayer);
+                        //display point present out of extent
+                        var colorObserver = new RgbColorClass() { Red = 255 };
+                        var colorBorder = new RgbColorClass() { Red = 0, Blue = 0, Green = 0 };
+                        var observerOutOfExtent = new ObservableCollection<AddInPoint>(RLOS_ObserversOutOfExtent.Select(x => x.AddInPoint).Union(ObserverOutExtentPoints));
+                        foreach (var point in observerOutOfExtent)
+                        {
+                            AddGraphicToMap(point.Point, colorObserver, markerStyle: esriSimpleMarkerStyle.esriSMSX, size: 10, borderColor: colorBorder);
+                        }
                     }
                 }
+                else
+                {
+                    System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.OutOfExtentMsg, VisibilityLibrary.Properties.Resources.OutOfExtentHeader);
+                }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine(ex.Message);
                 System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
@@ -597,6 +620,9 @@ namespace ArcMapAddinVisibility.ViewModels
             finally
             {
                 IsRunning = false;
+                IsRLOSValidSelection = false;
+                ClearRLOSCollections();
+                ValidateRLOS_LayerSelection();
             }
         }
 
@@ -650,29 +676,29 @@ namespace ArcMapAddinVisibility.ViewModels
                 outlineSymbol.Style = esriSimpleLineStyle.esriSLSSolid;
 
                 if (ShowNonVisibleData == true)
-                {                  
+                {
                     fillSymbol.Color = new RgbColorClass() { Red = 255 } as IColor;
                     fillSymbol.Outline = outlineSymbol;
                     uvRenderer.AddValue("0", "", fillSymbol as ISymbol);
-                    uvRenderer.set_Label("0", "Non-Visible");    
+                    uvRenderer.set_Label("0", "Non-Visible");
                 }
-                    fillSymbol2.Color = new RgbColorClass() { Green = 255 } as IColor;
-                    fillSymbol2.Outline = outlineSymbol;
-                    uvRenderer.AddValue("1", "", fillSymbol2 as ISymbol);
-                    uvRenderer.set_Label("1", "Visible by 1 Observer");
+                fillSymbol2.Color = new RgbColorClass() { Green = 255 } as IColor;
+                fillSymbol2.Outline = outlineSymbol;
+                uvRenderer.AddValue("1", "", fillSymbol2 as ISymbol);
+                uvRenderer.set_Label("1", "Visible by 1 Observer");
 
-                    int field = ipTable.FindField("gridcode");
-                    uvRenderer.set_Field(0, "gridcode");
+                int field = ipTable.FindField("gridcode");
+                uvRenderer.set_Field(0, "gridcode");
 
-                    for (int i = 2; i < uniqueValues; i++)
-                    {
-                        ISimpleFillSymbol newFillSymbol = new SimpleFillSymbolClass();
-                        newFillSymbol.Color = colorRamp.get_Color(i);
-                        newFillSymbol.Outline = outlineSymbol;
-                        uvRenderer.AddValue(i.ToString(), "", newFillSymbol as ISymbol);
-                        string label = "Visible by " + i.ToString() + " Observers";
-                        uvRenderer.set_Label(i.ToString(), label);
-                    }
+                for (int i = 2; i < uniqueValues; i++)
+                {
+                    ISimpleFillSymbol newFillSymbol = new SimpleFillSymbolClass();
+                    newFillSymbol.Color = colorRamp.get_Color(i);
+                    newFillSymbol.Outline = outlineSymbol;
+                    uvRenderer.AddValue(i.ToString(), "", newFillSymbol as ISymbol);
+                    string label = "Visible by " + i.ToString() + " Observers";
+                    uvRenderer.set_Label(i.ToString(), label);
+                }
 
                 return featRenderer;
             }
@@ -716,7 +742,7 @@ namespace ArcMapAddinVisibility.ViewModels
                     throw (ex);
                 }
             }
-            
+
             return blnWasSuccessful;
         }
 
@@ -1119,7 +1145,7 @@ namespace ArcMapAddinVisibility.ViewModels
             if (ipSpatialReference is IGeographicCoordinateSystem)
             {
                 IAngularUnit ipAngularUnit = ((IGeographicCoordinateSystem)ipSpatialReference).CoordinateUnit;
-                String name= ipAngularUnit.Name;
+                String name = ipAngularUnit.Name;
                 dConversionFactor = ipAngularUnit.ConversionFactor;
             }
             else
@@ -1138,13 +1164,13 @@ namespace ArcMapAddinVisibility.ViewModels
             {
                 IAngularUnit ipAngularUnit = ((IGeographicCoordinateSystem)ipSpatialReference).CoordinateUnit;
                 name = ipAngularUnit.Name;
-                
+
             }
             else
             {
                 ILinearUnit ipLinearUnit = ((IProjectedCoordinateSystem)ipSpatialReference).CoordinateUnit;
                 name = ipLinearUnit.Name;
-                
+
             }
             return name;
         }
@@ -1152,9 +1178,9 @@ namespace ArcMapAddinVisibility.ViewModels
         private static DistanceTypes GetMTUnitFromEsriUnit(String esriUnit)
         {
             DistanceTypes outUnit = DistanceTypes.Meters; ;
-            switch(esriUnit)
+            switch (esriUnit)
             {
-                
+
                 case "Foot_US":
                 case "Foot":
                     outUnit = DistanceTypes.Feet;
@@ -1279,7 +1305,7 @@ namespace ArcMapAddinVisibility.ViewModels
             {
                 IImageServerLayer mlayer = layer as IImageServerLayer;
                 return mlayer.Name;
-            } 
+            }
             else if (layer is IRasterLayer)
             {
                 IRasterLayer rlayer = layer as IRasterLayer;
@@ -1292,6 +1318,50 @@ namespace ArcMapAddinVisibility.ViewModels
             }
 
             return null;
+        }
+
+        private void ReadSelectedLayerPoints()
+        {
+
+            var surface = GetSurfaceFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
+            double finalObserverOffset = GetOffsetInZUnits(ObserverOffset.Value, surface.ZFactor, OffsetUnitType);
+
+            var observerColor = new RgbColor() { Blue = 255 } as IColor;
+            ReadSelectedLyrPoints(RLOS_ObserversInExtent, RLOS_ObserversOutOfExtent, SelectedRLOS_ObserverLyrName, observerColor);
+        }
+
+
+        private void DisplayOutOfExtentMsg(string selectedLayer)
+        {
+            var observerIDCollection = RLOS_ObserversOutOfExtent.Select(x => x.ID).ToList<int>();
+            var observerString = string.Empty;
+            var targetString = string.Empty;
+            foreach (var item in observerIDCollection)
+            {
+                if (observerString == "")
+                    observerString = item.ToString();
+                else
+                    observerString = observerString + "," + item.ToString();
+            }
+            if (observerIDCollection.Any())
+            {
+                if (observerIDCollection.Count <= 10)
+                {
+                    var msgString = string.Empty;
+                    if (observerIDCollection.Any())
+                    {
+                        msgString = "Observers lying outside the extent of elevation surface are: " + observerString;
+                    }
+                    System.Windows.MessageBox.Show(msgString,
+                                                "Unable To Process For Few Locations");
+                }
+                else
+                {
+                    System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.LLOSPointsOutsideOfSurfaceExtent,
+                    VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+                }
+
+            }
         }
 
         #endregion

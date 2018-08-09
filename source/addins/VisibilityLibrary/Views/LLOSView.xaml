@@ -43,7 +43,17 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
+                <ProgressBar
+                    Name="pbStatus"
+                    Grid.ColumnSpan="3"
+                    Width="Auto"
+                    Margin="3,3,0,0"
+                    HorizontalAlignment="Stretch"
+                    IsIndeterminate="True"
+                    Visibility="{Binding DisplayProgressBarLLOS}" />
                 <TextBlock
                     Grid.ColumnSpan="3"
                     Margin="3,3,0,0"
@@ -75,8 +85,22 @@
                     Grid.ColumnSpan="3"
                     Margin="3,3,0,0"
                     Text="{x:Static prop:Resources.LabelObserverPoints}" />
-                <TextBox
+                <ComboBox
                     Grid.Row="3"
+                    Grid.ColumnSpan="3"
+                        Margin="3,3,0,0"
+                        ItemsSource="{Binding LLOS_ObserverLyrNames}"
+                        SelectedItem="{Binding SelectedLLOS_ObserverLyrName}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <TextBlock Text="{Binding}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <TextBox
+                    Grid.Row="4"
                     Grid.ColumnSpan="2"
                     Margin="3,3,0,0"
                     VerticalContentAlignment="Center"
@@ -91,7 +115,7 @@
                     </TextBox.InputBindings>
                 </TextBox>
                 <ToggleButton 
-                    Grid.Row="3"
+                    Grid.Row="4"
                     Grid.Column="2"
                     Margin="3,3,0,0"
                     HorizontalAlignment="Center"
@@ -118,7 +142,7 @@
                 </ToggleButton>
                 <ListBox
                     x:Name="listBoxObservers"
-                    Grid.Row="4"
+                    Grid.Row="5"
                     Grid.ColumnSpan="3"
                     Height="60"
                     Margin="3,3,0,0"
@@ -135,7 +159,15 @@
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                     <ListBox.ContextMenu>
-                        <ContextMenu DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Self}}">
+                        <ContextMenu DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Self}}">                           
+                            <MenuItem
+                                Command="{Binding DataContext.ImportCSVFileCommand}"
+                                CommandParameter="{x:Static prop:Resources.ToolModeObserver}"
+                                Header="{x:Static prop:Resources.LabelImport}"/>
+                            <MenuItem
+                                Command="{Binding DataContext.PasteCoordinatesCommand}"
+                                CommandParameter="{x:Static prop:Resources.ToolModeObserver}"
+                                Header="{x:Static prop:Resources.LabelPaste}"/>
                             <MenuItem
                                 Command="{Binding DataContext.DeletePointCommand}"
                                 CommandParameter="{Binding Path=SelectedItems}"
@@ -143,7 +175,7 @@
                             <MenuItem
                                 Command="{Binding DataContext.DeleteAllPointsCommand}"
                                 CommandParameter="{x:Static prop:Resources.ToolModeObserver}"
-                                Header="{x:Static prop:Resources.MenuLabelDeleteAll}" />
+                                Header="{x:Static prop:Resources.MenuLabelDeleteAll}" />                                                      
                         </ContextMenu>
                     </ListBox.ContextMenu>
                     <ListBox.InputBindings>
@@ -154,12 +186,26 @@
                     </ListBox.InputBindings>
                 </ListBox>
                 <TextBlock
-                    Grid.Row="5"
+                    Grid.Row="6"
                     Grid.ColumnSpan="3"
                     Margin="3,3,0,0"
                     Text="{x:Static prop:Resources.LabelTargetPoints}" />
+                <ComboBox
+                    Grid.Row="7"
+                    Grid.ColumnSpan="3"
+                        Margin="3,3,0,0"
+                        ItemsSource="{Binding LLOS_TargetLyrNames}"
+                        SelectedItem="{Binding SelectedLLOS_TargetLyrName}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <TextBlock Text="{Binding}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
                 <TextBox
-                    Grid.Row="6"
+                    Grid.Row="8"
                     Grid.ColumnSpan="2"
                     Margin="3,3,0,0"
                     VerticalContentAlignment="Center"
@@ -174,7 +220,7 @@
                     </TextBox.InputBindings>
                 </TextBox>
                 <ToggleButton
-                    Grid.Row="6"
+                    Grid.Row="8"
                     Grid.Column="2"
                     Margin="3,3,0,0"
                     HorizontalAlignment="Center"
@@ -201,7 +247,7 @@
                 </ToggleButton>
                 <ListBox
                     x:Name="listBoxTargets"
-                    Grid.Row="7"
+                    Grid.Row="9"
                     Grid.ColumnSpan="3"
                     Height="60"
                     Margin="3,3,0,0"
@@ -220,13 +266,21 @@
                     <ListBox.ContextMenu>
                         <ContextMenu DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Self}}">
                             <MenuItem
+                                Command="{Binding DataContext.ImportCSVFileCommand}"
+                                CommandParameter="{x:Static prop:Resources.ToolModeTarget}"
+                                Header="{x:Static prop:Resources.LabelImport}"/>
+                            <MenuItem
+                                Command="{Binding DataContext.PasteCoordinatesCommand}"
+                                CommandParameter="{x:Static prop:Resources.ToolModeTarget}"
+                                Header="{x:Static prop:Resources.LabelPaste}"/>
+                            <MenuItem
                                 Command="{Binding DataContext.DeletePointCommand}"
                                 CommandParameter="{Binding Path=SelectedItems}"
                                 Header="{x:Static prop:Resources.MenuLabelDelete}" />
                             <MenuItem
                                 Command="{Binding DataContext.DeleteAllPointsCommand}"
                                 CommandParameter="{x:Static prop:Resources.ToolModeTarget}"
-                                Header="{x:Static prop:Resources.MenuLabelDeleteAll}" />
+                                Header="{x:Static prop:Resources.MenuLabelDeleteAll}" />                            
                         </ContextMenu>
                     </ListBox.ContextMenu>
                     <ListBox.InputBindings>
@@ -235,9 +289,9 @@
                             Command="{Binding DeletePointCommand}"
                             CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}}, Path=SelectedItems}" />
                     </ListBox.InputBindings>
-                </ListBox>
+                </ListBox>              
                 <GroupBox
-                    Grid.Row="8"
+                    Grid.Row="10"
                     Grid.ColumnSpan="4"
                     Margin="0,3,0,0"
                     Header="{x:Static prop:Resources.LabelOffsets}">
@@ -266,12 +320,12 @@
                     </StackPanel>
                 </GroupBox>
                 <StackPanel
-                    Grid.Row="14"
+                    Grid.Row="16"
                     Grid.ColumnSpan="3"
                     HorizontalAlignment="Right"
-                    Orientation="Horizontal">
+                    Orientation="Horizontal">                     
                     <Button
-                        Grid.Row="14"
+                        Grid.Row="16"
                         Grid.Column="0"
                         Width="60"
                         Margin="3,20,0,0"
@@ -300,12 +354,20 @@
                                             <Setter Property="IsEnabled" Value="True" />
                                         </MultiDataTrigger.Setters>
                                     </MultiDataTrigger>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding IsLLOSValidSelection}" Value="True" />
+                                        </MultiDataTrigger.Conditions>
+                                        <MultiDataTrigger.Setters>
+                                            <Setter Property="IsEnabled" Value="True" />
+                                        </MultiDataTrigger.Setters>
+                                    </MultiDataTrigger>
                                 </Style.Triggers>
                             </Style>
                         </Button.Style>
                     </Button>
                     <Button
-                        Grid.Row="14"
+                        Grid.Row="16"
                         Grid.Column="1"
                         Width="60"
                         Margin="3,20,0,0"
@@ -328,12 +390,20 @@
                                             <Setter Property="IsEnabled" Value="True" />
                                         </MultiDataTrigger.Setters>
                                     </MultiDataTrigger>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding IsLLOSValidSelection}" Value="True" />
+                                        </MultiDataTrigger.Conditions>
+                                        <MultiDataTrigger.Setters>
+                                            <Setter Property="IsEnabled" Value="True" />
+                                        </MultiDataTrigger.Setters>
+                                    </MultiDataTrigger>
                                 </Style.Triggers>
                             </Style>
                         </Button.Style>
                     </Button>
                     <Button
-                        Grid.Row="14"
+                        Grid.Row="16"
                         Grid.Column="2"
                         Margin="3,20,0,0"
                         Command="{Binding ClearGraphicsCommand}"
