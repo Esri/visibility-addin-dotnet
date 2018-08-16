@@ -520,6 +520,15 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Show output in Classic Viewshed.
+        /// </summary>
+        public static string LabelShowClassicViewshed {
+            get {
+                return ResourceManager.GetString("LabelShowClassicViewshed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Submit.
         /// </summary>
         public static string LabelSubmit {
