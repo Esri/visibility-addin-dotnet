@@ -599,8 +599,8 @@ namespace ArcMapAddinVisibility.ViewModels
 
                         DisplayOutOfExtentMsg(selectedLayer);
                         //display point present out of extent
-                        var colorObserver = new RgbColorClass() { Red = 255 };
-                        var colorBorder = new RgbColorClass() { Red = 0, Blue = 0, Green = 0 };
+                        var colorObserver = new RgbColorClass() { Blue = 255 };
+                        var colorBorder = new RgbColorClass() { Red = 255, Blue = 255, Green = 255 };
                         var observerOutOfExtent = new ObservableCollection<AddInPoint>(RLOS_ObserversOutOfExtent.Select(x => x.AddInPoint).Union(ObserverOutExtentPoints));
                         foreach (var point in observerOutOfExtent)
                         {
