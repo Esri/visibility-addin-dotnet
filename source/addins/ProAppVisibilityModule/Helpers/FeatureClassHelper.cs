@@ -1091,7 +1091,7 @@ namespace ProAppVisibilityModule.Helpers
                 outOfExtentValues.Add(outOfExtentValue);
 
                 var outExtentSymbol = SymbolFactory.Instance.ConstructPointSymbol();
-                var symbol = SymbolFactory.Instance.ConstructMarker(CIMColor.CreateRGBColor(255, 0, 0), 12, SimpleMarkerStyle.X);
+                var symbol = SymbolFactory.Instance.ConstructMarker(CIMColor.CreateRGBColor(0, 0, 255), 12, SimpleMarkerStyle.X);
                 outExtentSymbol.SymbolLayers = new CIMSymbolLayer[1] { symbol };
 
                 var outOfExtent = new CIMUniqueValueClass()
@@ -1103,7 +1103,6 @@ namespace ProAppVisibilityModule.Helpers
                     Symbol = new CIMSymbolReference() { Symbol = outExtentSymbol }
                 };
                 classes.Add(outOfExtent);
-
 
                 CIMUniqueValueGroup groupOne = new CIMUniqueValueGroup();
                 groupOne.Heading = "Out Of Extent";
