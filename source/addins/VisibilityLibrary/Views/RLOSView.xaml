@@ -38,6 +38,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+		    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <ProgressBar
@@ -118,8 +119,7 @@
                     Grid.Row="4"
                     Grid.Column="2"
                     Margin="3,3,0,0"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
+                    Style="{StaticResource BorderedTButtonStyle}"
                     IsChecked="{Binding ObserverToolActive}"
                     Command="{Binding ActivateToolCommand}"
                     CommandParameter="{x:Static prop:Resources.ToolModeObserver}"
@@ -129,17 +129,6 @@
                         Height="16"
                         HorizontalAlignment="Right"
                         Source="/VisibilityLibrary;component/Images/Add_Point.png" />
-                    <ToggleButton.Style>
-                        <Style TargetType="ToggleButton">
-                            <Setter Property="Background" Value="Transparent"/>
-                            <Setter Property="IsEnabled" Value="True" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
-                                    <Setter Property="IsEnabled" Value="False" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ToggleButton.Style>
                 </ToggleButton>
                 <ListBox
                     x:Name="listBoxObservers"
@@ -207,8 +196,29 @@
                         </Style>
                     </CheckBox.Style>
                 </CheckBox>
-                <StackPanel
+                <CheckBox
                     Grid.Row="7"
+                    Grid.ColumnSpan="3"
+                    Margin="3,9,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Content="{x:Static prop:Resources.LabelShowClassicViewshed}"
+                    IsChecked="{Binding ShowClassicViewshed}"
+                    ToolTip="{x:Static prop:Resources.LabelShowClassicViewshed}">
+                    <CheckBox.Style>
+                        <Style TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
+                            <Setter Property="IsEnabled" Value="True" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                    <Setter Property="IsEnabled" Value="False" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </CheckBox.Style>
+                </CheckBox>
+
+                <StackPanel
+                    Grid.Row="8"
                     Grid.ColumnSpan="3"
                     HorizontalAlignment="Right"
                     Orientation="Horizontal">
@@ -303,7 +313,7 @@
                 </StackPanel>
                 
                 <Expander
-                    Grid.Row="8"
+                    Grid.Row="9"
                     Grid.ColumnSpan="3"
                     Margin="3,3,0,0"
                     HorizontalAlignment="Stretch"

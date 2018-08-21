@@ -57,6 +57,7 @@
                 <TextBlock
                     Grid.ColumnSpan="3"
                     Margin="3,3,0,0"
+                    Grid.Row="0"
                     Text="{x:Static prop:Resources.LabelInputSurface}" />
                 <Grid Grid.Row="1" Grid.ColumnSpan="3">
                     <Grid.ColumnDefinitions>
@@ -118,8 +119,7 @@
                     Grid.Row="4"
                     Grid.Column="2"
                     Margin="3,3,0,0"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
+                    Style="{StaticResource BorderedTButtonStyle}"
                     IsChecked="{Binding ObserverToolActive}"
                     Command="{Binding ActivateToolCommand}"
                     CommandParameter="{x:Static prop:Resources.ToolModeObserver}"
@@ -128,17 +128,6 @@
                         Width="16"
                         Height="16"
                         Source="/VisibilityLibrary;component/Images/Add_Point.png" />
-                    <ToggleButton.Style>
-                        <Style TargetType="ToggleButton">
-                            <Setter Property="Background" Value="Transparent"/>
-                            <Setter Property="IsEnabled" Value="True" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
-                                    <Setter Property="IsEnabled" Value="False" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ToggleButton.Style>
                 </ToggleButton>
                 <ListBox
                     x:Name="listBoxObservers"
@@ -223,8 +212,8 @@
                     Grid.Row="8"
                     Grid.Column="2"
                     Margin="3,3,0,0"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
+                    
+                    Style="{StaticResource BorderedTButtonStyle}"
                     Command="{Binding ActivateToolCommand}"
                     CommandParameter="{x:Static prop:Resources.ToolModeTarget}"
                     IsChecked="{Binding TargetToolActive}"
@@ -233,17 +222,6 @@
                         Width="16"
                         Height="16"
                         Source="/VisibilityLibrary;component/Images/Add_Point.png" />
-                    <ToggleButton.Style>
-                        <Style TargetType="ToggleButton">
-                            <Setter Property="Background" Value="Transparent"/>
-                            <Setter Property="IsEnabled" Value="True" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsRunning}" Value="True">
-                                    <Setter Property="IsEnabled" Value="False" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ToggleButton.Style>
                 </ToggleButton>
                 <ListBox
                     x:Name="listBoxTargets"
