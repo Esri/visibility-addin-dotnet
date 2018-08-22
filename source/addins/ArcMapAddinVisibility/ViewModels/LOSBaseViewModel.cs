@@ -1101,13 +1101,12 @@ namespace ArcMapAddinVisibility.ViewModels
                     {
                         var value = feature.get_Value(FLayer.FeatureClass.FindField("Shape"));
                         var point = (IPoint)value;
-                        var guid = AddGraphicToMap(point, color, true, esriSimpleMarkerStyle.esriSMSSquare);
                         var objectId = FLayer.FeatureClass.FindField("ObjectId");
                         var FID = FLayer.FeatureClass.FindField("FID");
                         var idIndex = objectId != -1 ? objectId : FID;
                         var id = Convert.ToInt32(feature.get_Value(idIndex));
                         var z1 = surface.GetElevation(point) + finalObserverOffset;
-                        var addInPoint = new AddInPoint() { Point = point, GUID = guid };
+                        var addInPoint = new AddInPoint() { Point = point, GUID = Guid.NewGuid().ToString() };
                         if (selectedFeaturesCollections == null || !selectedFeaturesCollections.Any() ||
                             (selectedFeaturesCollections.Any() && selectedFeaturesCollections.Where(x => x == id).Any()))
                         {
