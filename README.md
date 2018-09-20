@@ -30,7 +30,7 @@ These visibility component uses elevation data paired with observer and target i
 
 * Add-Ins for ArcGIS for Desktop
     * ArcMap 10.3.1+
-    * ArcGIS Pro 2.0+
+    * ArcGIS Pro 2.1+
     * 3D Analyst and Spatial Analyst extensions installed and licensed
 * Widget for Web Appbuilder for ArcGIS
     * Web Appbuilder for ArcGIS 2.2+
@@ -56,10 +56,10 @@ These visibility component uses elevation data paired with observer and target i
     * Visual Studio 2015
     * ArcGIS for Desktop 
         * ArcMap 10.3.1+
-        * ArcGIS Pro 2.0+
+        * ArcGIS Pro 2.1+
     * ArcGIS Desktop SDK for .NET 10.3.1+
         * [ArcGIS Desktop for .NET Requirements](https://desktop.arcgis.com/en/desktop/latest/get-started/system-requirements/arcobjects-sdk-system-requirements.htm)
-    * [ArcGIS Pro SDK](http://pro.arcgis.com/en/pro-app/sdk/) 2.0+
+    * [ArcGIS Pro SDK](http://pro.arcgis.com/en/pro-app/sdk/) 2.1+
 
 ## Instructions
 
@@ -82,7 +82,6 @@ Follow the links below to select the desired development/deployment environment.
 * [ArcGIS for Defense Downloads](http://appsforms.esri.com/products/download/#ArcGIS_for_Defense)
 * [ArcGIS Pro Help](http://pro.arcgis.com/en/pro-app/)
 * [ArcGIS Blog](http://blogs.esri.com/esri/arcgis/)
-* ![Twitter](https://g.twimg.com/twitter-bird-16x16.png)[@EsriDefense](http://twitter.com/EsriDefense)
 
 ## New to Github
 
@@ -96,28 +95,17 @@ Find a bug or want to request a new feature?  Please let us know by submitting a
 
 Anyone and everyone is welcome to contribute. Please see our [guidelines for contributing](https://github.com/esri/contributing).
 
-## Repository Points of Contact
-
-#### Repository Owner: [Kevin](https://github.com/kgonzago)
-
-* Merge Pull Requests
-* Creates Releases and Tags
-* Manages Milestones
-* Manages and Assigns Issues
-
-#### Secondary: [Patrick](https://github.com/pHill5136)
-
-* Backup when the Owner is away
+## Repository Points of Contact 
+Contact the [Military Tools team](mailto:defensesolutions@esri.com)
 
 ## Licensing
-
-Copyright 2016-2017 Esri
+Copyright 2018 Esri
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+You may obtain a copy of the License at:
 
-   http://www.apache.org/licenses/LICENSE-2.0
+   http://www.apache.org/licenses/LICENSE-2.0.
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -125,4 +113,4 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-A copy of the license is available in the repository's [license.txt](license.txt) file. 
+A copy of the license is available in the repository's [license.txt](./License.txt) file.

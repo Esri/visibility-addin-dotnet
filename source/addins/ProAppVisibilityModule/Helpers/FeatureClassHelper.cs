@@ -437,7 +437,7 @@ namespace ProAppVisibilityModule.Helpers
         /// <param name="featureLayer"></param>
         /// <param name="showNonVisData">flag to show non visible data as RED or transparent</param>
         /// <returns></returns>
-        public static async Task CreateUniqueValueRenderer(FeatureLayer featureLayer, bool showNonVisData, string outputLayerName)
+        public static async Task CreateUniqueValueRenderer(FeatureLayer featureLayer, bool showNonVisData, string outputLayerName, bool showClassicViewshed)
         {
             if (featureLayer == null)
                 return;
@@ -483,10 +483,19 @@ namespace ProAppVisibilityModule.Helpers
 
                 List<CIMUniqueValueClass> classes = new List<CIMUniqueValueClass>();
 
+                List<CIMUniqueValue> visibleValues = new List<CIMUniqueValue>();
                 int cnt = 1;
                 foreach (var gc in gridcodeUniqueList)
                 {
-                    colors.MoveNext();
+                    if (showClassicViewshed)
+                    {
+                        CIMUniqueValue visibleValue = new CIMUniqueValue();
+                        visibleValue.FieldValues = new string[] { gc.ToString() };
+                        visibleValues.Add(visibleValue);
+                    }
+                    else
+                    {
+                        colors.MoveNext();
 
                     List<CIMUniqueValue> visValues = new List<CIMUniqueValue>();
                     CIMUniqueValue visValue = new CIMUniqueValue();
@@ -505,10 +514,27 @@ namespace ProAppVisibilityModule.Helpers
                         Symbol = new CIMSymbolReference() { Symbol = visSymbol }
                     };
 
-                    classes.Add(visClass);
-                    cnt++;
+                        classes.Add(visClass);
+                        cnt++;
+                    }
                 }
 
+                if (showClassicViewshed)
+                {
+                    var visibleSymbol = SymbolFactory.Instance.ConstructPolygonSymbol(ColorFactory.Instance.GreenRGB);
+                    string visibleLabel = "Visible";
+                    var visibleClass = new CIMUniqueValueClass()
+                    {
+                        Values = visibleValues.ToArray(),
+                        Label = visibleLabel,
+                        Visible = true,
+                        Editable = true,
+                        Symbol = new CIMSymbolReference() { Symbol = visibleSymbol }
+                    };
+
+                    classes.Add(visibleClass);
+                }
+               
                 CIMUniqueValueGroup groupOne = new CIMUniqueValueGroup();
                 groupOne.Heading = "";
                 groupOne.Classes = classes.ToArray();
@@ -941,7 +967,7 @@ namespace ProAppVisibilityModule.Helpers
                 outOfExtentValues.Add(outOfExtentValue);
 
                 var outExtentSymbol = SymbolFactory.Instance.ConstructPointSymbol();
-                var symbol = SymbolFactory.Instance.ConstructMarker(CIMColor.CreateRGBColor(255, 0, 0), 12, SimpleMarkerStyle.X);
+                var symbol = SymbolFactory.Instance.ConstructMarker(CIMColor.CreateRGBColor(0, 0, 255), 12, SimpleMarkerStyle.X);
                 outExtentSymbol.SymbolLayers = new CIMSymbolLayer[1] { symbol };
 
                 var outOfExtent = new CIMUniqueValueClass()
@@ -961,14 +987,14 @@ namespace ProAppVisibilityModule.Helpers
                 uniqueValueRenderer.Groups = new CIMUniqueValueGroup[] { groupOne };
 
                 //Draw the rest with the default symbol
-                //uniqueValueRenderer.UseDefaultSymbol = true;
-                //uniqueValueRenderer.DefaultLabel = "All other values";
+                uniqueValueRenderer.UseDefaultSymbol = true;
+                uniqueValueRenderer.DefaultLabel = "All other values";
 
-                //var defaultColor = CIMColor.CreateRGBColor(215, 215, 215);
-                //uniqueValueRenderer.DefaultSymbol = new CIMSymbolReference()
-                //{
-                //    Symbol = SymbolFactory.Instance.ConstructPointSymbol(defaultColor)
-                //};
+                var defaultColor = CIMColor.CreateRGBColor(215, 215, 215);
+                uniqueValueRenderer.DefaultSymbol = new CIMSymbolReference()
+                {
+                    Symbol = SymbolFactory.Instance.ConstructPointSymbol(defaultColor)
+                };
 
                 //var renderer = featureLayer.CreateRenderer(uniqueValueRenderer);
                 featureLayer.SetRenderer(uniqueValueRenderer);
@@ -992,7 +1018,7 @@ namespace ProAppVisibilityModule.Helpers
                 noVisValue.FieldValues = new string[] { "0" };
                 noVisValues.Add(noVisValue);
 
-                var noVisSymbol = SymbolFactory.Instance.ConstructPointSymbol(CIMColor.CreateRGBColor(255, 0, 0), 12, SimpleMarkerStyle.Circle);
+                var noVisSymbol = SymbolFactory.Instance.ConstructPointSymbol(CIMColor.CreateRGBColor(255, 0, 0), 14, SimpleMarkerStyle.Circle);
 
                 var noVis = new CIMUniqueValueClass()
                 {
@@ -1012,7 +1038,7 @@ namespace ProAppVisibilityModule.Helpers
                 outOfExtentValues.Add(outOfExtentValue);
 
                 var outExtentSymbol = SymbolFactory.Instance.ConstructPointSymbol();
-                var symbol = SymbolFactory.Instance.ConstructMarker(CIMColor.CreateRGBColor(0, 0, 255), 12, SimpleMarkerStyle.X);
+                var symbol = SymbolFactory.Instance.ConstructMarker(CIMColor.CreateRGBColor(255, 0, 0), 12, SimpleMarkerStyle.X);
                 outExtentSymbol.SymbolLayers = new CIMSymbolLayer[1] { symbol };
 
                 var outOfExtent = new CIMUniqueValueClass()
@@ -1037,7 +1063,7 @@ namespace ProAppVisibilityModule.Helpers
 
                 uniqueValueRenderer.DefaultSymbol = new CIMSymbolReference()
                 {
-                    Symbol = SymbolFactory.Instance.ConstructPointSymbol(CIMColor.CreateRGBColor(0, 255, 0), 12, SimpleMarkerStyle.Circle)
+                    Symbol = SymbolFactory.Instance.ConstructPointSymbol(CIMColor.CreateRGBColor(0, 255, 0), 14, SimpleMarkerStyle.Circle)
                 };
 
                 //var renderer = featureLayer.CreateRenderer(uniqueValueRenderer);
@@ -1065,7 +1091,7 @@ namespace ProAppVisibilityModule.Helpers
                 outOfExtentValues.Add(outOfExtentValue);
 
                 var outExtentSymbol = SymbolFactory.Instance.ConstructPointSymbol();
-                var symbol = SymbolFactory.Instance.ConstructMarker(CIMColor.CreateRGBColor(255, 0, 0), 12, SimpleMarkerStyle.X);
+                var symbol = SymbolFactory.Instance.ConstructMarker(CIMColor.CreateRGBColor(0, 0, 255), 12, SimpleMarkerStyle.X);
                 outExtentSymbol.SymbolLayers = new CIMSymbolLayer[1] { symbol };
 
                 var outOfExtent = new CIMUniqueValueClass()
@@ -1077,7 +1103,6 @@ namespace ProAppVisibilityModule.Helpers
                     Symbol = new CIMSymbolReference() { Symbol = outExtentSymbol }
                 };
                 classes.Add(outOfExtent);
-
 
                 CIMUniqueValueGroup groupOne = new CIMUniqueValueGroup();
                 groupOne.Heading = "Out Of Extent";
@@ -1107,7 +1132,7 @@ namespace ProAppVisibilityModule.Helpers
                 //lc.SetExpression(string.Format("[{0}]", VisibilityLibrary.Properties.Resources.NumOfObserversFieldName));
                 string expression = @"Function FindLabel ( [NumOfObservers] )
                                     If (CInt([NumOfObservers])>0) Then
-                                        FindLabel = [NumOfObservers]
+                                        FindLabel = ""<FNT size='8'>"" + [NumOfObservers] + ""</FNT>""
                                     else
                                         FindLabel = """"
                                     End If

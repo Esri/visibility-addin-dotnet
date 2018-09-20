@@ -221,6 +221,8 @@ namespace ProAppVisibilityModule.ViewModels
         }
 
         public bool ShowNonVisibleData { get; set; }
+        public bool ShowClassicViewshed { get; set; }
+
         public int RunCount { get; set; }
 
         private Visibility _displayProgressBar = Visibility.Collapsed;
@@ -500,7 +502,7 @@ namespace ProAppVisibilityModule.ViewModels
                 var outOfExtent = new ObservableCollection<AddInPoint>(RLOS_ObserversOutOfExtent.Select(x => x.AddInPoint).Union(ObserverOutExtentPoints));
                 await FeatureClassHelper.CreatingFeatures(ObserversLayerName, outOfExtent, GetAsMapZUnits(surfaceSR, ObserverOffset.Value), VisibilityLibrary.Properties.Resources.IsOutOfExtentFieldName);
 
-                await FeatureClassHelper.CreateUniqueValueRenderer(GetLayerFromMapByName(RLOSConvertedPolygonsLayerName) as FeatureLayer, ShowNonVisibleData, RLOSConvertedPolygonsLayerName);
+                await FeatureClassHelper.CreateUniqueValueRenderer(GetLayerFromMapByName(RLOSConvertedPolygonsLayerName) as FeatureLayer, ShowNonVisibleData, RLOSConvertedPolygonsLayerName, ShowClassicViewshed);
 
                 var observersLayer = GetLayerFromMapByName(ObserversLayerName) as FeatureLayer;
 

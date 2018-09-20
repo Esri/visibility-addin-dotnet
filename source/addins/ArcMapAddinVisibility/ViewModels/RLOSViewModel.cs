@@ -154,6 +154,7 @@ namespace ArcMapAddinVisibility.ViewModels
         }
 
         public bool ShowNonVisibleData { get; set; }
+        public bool ShowClassicViewshed { get; set; }
         public int RunCount { get; set; }
 
         private Visibility _displayProgressBar;
@@ -598,8 +599,8 @@ namespace ArcMapAddinVisibility.ViewModels
 
                         DisplayOutOfExtentMsg(selectedLayer);
                         //display point present out of extent
-                        var colorObserver = new RgbColorClass() { Red = 255 };
-                        var colorBorder = new RgbColorClass() { Red = 0, Blue = 0, Green = 0 };
+                        var colorObserver = new RgbColorClass() { Blue = 255 };
+                        var colorBorder = new RgbColorClass() { Red = 255, Blue = 255, Green = 255 };
                         var observerOutOfExtent = new ObservableCollection<AddInPoint>(RLOS_ObserversOutOfExtent.Select(x => x.AddInPoint).Union(ObserverOutExtentPoints));
                         foreach (var point in observerOutOfExtent)
                         {
@@ -685,19 +686,34 @@ namespace ArcMapAddinVisibility.ViewModels
                 fillSymbol2.Color = new RgbColorClass() { Green = 255 } as IColor;
                 fillSymbol2.Outline = outlineSymbol;
                 uvRenderer.AddValue("1", "", fillSymbol2 as ISymbol);
-                uvRenderer.set_Label("1", "Visible by 1 Observer");
+               
+                if (ShowClassicViewshed)
+                {
+                    uvRenderer.set_Label("1", "Visible");
+                }
+                else
+                {
+                    uvRenderer.set_Label("1", "Visible by 1 Observer");
+                }
 
                 int field = ipTable.FindField("gridcode");
                 uvRenderer.set_Field(0, "gridcode");
 
                 for (int i = 2; i < uniqueValues; i++)
                 {
-                    ISimpleFillSymbol newFillSymbol = new SimpleFillSymbolClass();
-                    newFillSymbol.Color = colorRamp.get_Color(i);
-                    newFillSymbol.Outline = outlineSymbol;
-                    uvRenderer.AddValue(i.ToString(), "", newFillSymbol as ISymbol);
-                    string label = "Visible by " + i.ToString() + " Observers";
-                    uvRenderer.set_Label(i.ToString(), label);
+                    if (ShowClassicViewshed)
+                    {
+                        uvRenderer.AddReferenceValue(i.ToString(),"1");
+                    }
+                    else
+                    {
+                        ISimpleFillSymbol newFillSymbol = new SimpleFillSymbolClass();
+                        newFillSymbol.Color = colorRamp.get_Color(i);
+                        newFillSymbol.Outline = outlineSymbol;
+                        uvRenderer.AddValue(i.ToString(), "", newFillSymbol as ISymbol);
+                        string label = "Visible by " + i.ToString() + " Observers";
+                        uvRenderer.set_Label(i.ToString(), label);
+                    }
                 }
 
                 return featRenderer;
