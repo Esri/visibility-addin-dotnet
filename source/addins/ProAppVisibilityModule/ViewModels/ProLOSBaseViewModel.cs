@@ -667,6 +667,9 @@ namespace ProAppVisibilityModule.ViewModels
         /// <returns>bool</returns>
         internal async Task<bool> IsPointWithinExtent(MapPoint point, Envelope env)
         {
+            if ((point == null) || (env == null) || (env.SpatialReference == null))
+                return false;
+             
             var result = await QueuedTask.Run(() =>
                 {
                     Geometry projectedPoint = GeometryEngine.Instance.Project(point, env.SpatialReference);
