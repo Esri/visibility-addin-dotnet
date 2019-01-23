@@ -11,7 +11,6 @@ These visibility component uses elevation data paired with observer and target i
 * Specifying observer and target locations by entering inputs manually or by clicking on the map 
 * Use one or multiple observers and one or multiple targets to perform analysis 
 * Add-in for ArcGIS Pro and ArcMap 
-* Widget for Web Appbuilder for ArcGIS
 
 ## Sections
 
@@ -32,8 +31,6 @@ These visibility component uses elevation data paired with observer and target i
     * ArcMap 10.3.1+
     * ArcGIS Pro 2.1+
     * 3D Analyst and Spatial Analyst extensions installed and licensed
-* Widget for Web Appbuilder for ArcGIS
-    * Web Appbuilder for ArcGIS 2.2+
 
 ### Build Requirements 
 
@@ -68,10 +65,6 @@ Follow the links below to select the desired development/deployment environment.
 ### Add-ins for ArcMap and ArcGIS Pro 
 
 [Instructions for the Add-ins for ArcMap and ArcGIS Pro are here.](./source/addins)
-
-### Widget for Web Appbuilder for ArcGIS
-
-[Instructions for the Widget for Web Appbuilder for ArcGIS are here.](./source/widget/Visibility)
 
 ## Resources
 
