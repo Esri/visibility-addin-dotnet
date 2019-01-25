@@ -665,6 +665,9 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <returns></returns>
         internal bool IsPointWithinExtent(IPoint point, IEnvelope env)
         {
+            if ((point == null) || (env == null))
+                return false;
+
             var relationOp = env as IRelationalOperator;
 
             if (relationOp == null)
