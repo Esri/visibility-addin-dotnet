@@ -40,16 +40,16 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="ArcGIS.Core">
-      <HintPath>..\..\..\..\..\..\..\Program Files\ArcGIS\Pro\bin\ArcGIS.Core.dll</HintPath>
+      <HintPath>C:\Program Files\ArcGIS\Pro\bin\\ArcGIS.Core.dll</HintPath>
     </Reference>
     <Reference Include="ArcGIS.CoreHost">
-      <HintPath>..\..\..\..\..\..\..\Program Files\ArcGIS\Pro\bin\ArcGIS.CoreHost.dll</HintPath>
+      <HintPath>C:\Program Files\ArcGIS\Pro\bin\\ArcGIS.CoreHost.dll</HintPath>
     </Reference>
     <Reference Include="ArcGIS.Desktop.Framework">
-      <HintPath>..\..\..\..\..\..\..\Program Files\ArcGIS\Pro\bin\ArcGIS.Desktop.Framework.dll</HintPath>
+      <HintPath>C:\Program Files\ArcGIS\Pro\bin\\ArcGIS.Desktop.Framework.dll</HintPath>
     </Reference>
     <Reference Include="ArcGIS.Desktop.Mapping">
-      <HintPath>..\..\..\..\..\..\..\Program Files\ArcGIS\Pro\bin\Extensions\Mapping\ArcGIS.Desktop.Mapping.dll</HintPath>
+      <HintPath>C:\Program Files\ArcGIS\Pro\bin\\Extensions\Mapping\ArcGIS.Desktop.Mapping.dll</HintPath>
     </Reference>
     <Reference Include="System" />
   </ItemGroup>
