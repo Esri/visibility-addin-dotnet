@@ -1,5 +1,5 @@
 <ArcGIS defaultAssembly="Visibility.dll" defaultNamespace="ProAppVisibilityModule" xmlns="http://schemas.esri.com/DADF/Registry" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.esri.com/DADF/Registry file:///C:/Program%20Files/ArcGIS/Pro/bin/ArcGIS.Desktop.Framework.xsd">
-  <AddInInfo id="{cdeb79cb-8161-4f77-8771-9cf422c47f17}" version="4.0.0.0" desktopVersion="2.1">
+  <AddInInfo id="{cdeb79cb-8161-4f77-8771-9cf422c47f17}" version="4.0.0.0" desktopVersion="2.2">
     <Name>Visibility</Name>
     <Description>Conduct Linear Line of Sight and Radial Line of Sight analysis</Description>
     <Image>Images\AddinDesktop32.png</Image>
