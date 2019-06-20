@@ -1112,7 +1112,7 @@ namespace ProAppVisibilityModule.Helpers
 
                 //Draw the rest with the default symbol
                 uniqueValueRenderer.UseDefaultSymbol = true;
-                uniqueValueRenderer.DefaultLabel = "In side Extent";
+                uniqueValueRenderer.DefaultLabel = "Inside Extent";
 
                 uniqueValueRenderer.DefaultSymbol = new CIMSymbolReference()
                 {
