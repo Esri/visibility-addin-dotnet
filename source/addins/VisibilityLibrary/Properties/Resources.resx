@@ -433,7 +433,7 @@
     <value>No Data</value>
   </data>
   <data name="OutOfExtentMsg" xml:space="preserve">
-    <value>No data in side the surface extent to process.</value>
+    <value>No data inside the surface extent to process.</value>
   </data>
   <data name="LabelShowClassicViewshed" xml:space="preserve">
     <value>Show output in Classic Viewshed</value>
