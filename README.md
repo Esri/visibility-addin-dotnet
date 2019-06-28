@@ -2,7 +2,7 @@
 
 These visibility component uses elevation data paired with observer and target information to produce Linear Line of Sight (LLOS) and Radial Line of Sight (RLOS) information.
 
-![Image of Visibility Add-In](visibility.png) 
+![Image of Visibility Add-In](llos_screenshot.png) 
 
 ## Features
 
