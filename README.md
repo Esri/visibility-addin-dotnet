@@ -2,7 +2,7 @@
 
 These visibility component uses elevation data paired with observer and target information to produce Linear Line of Sight (LLOS) and Radial Line of Sight (RLOS) information.
 
-![Image of Visibility Add-In](visibility.png) 
+![Image of Visibility Add-In](llos_screenshot.png) 
 
 ## Features
 
@@ -28,8 +28,8 @@ These visibility component uses elevation data paired with observer and target i
 ### Run Requirements
 
 * Add-Ins for ArcGIS for Desktop
-    * ArcMap 10.3.1+
-    * ArcGIS Pro 2.1+
+    * ArcMap 10.4.1+
+    * ArcGIS Pro 2.2+
     * 3D Analyst and Spatial Analyst extensions installed and licensed
 
 ### Build Requirements 
@@ -51,12 +51,13 @@ These visibility component uses elevation data paired with observer and target i
 
 * Add-Ins for ArcGIS for Desktop
     * Visual Studio 2015
+        * Important Note: Visual Studio 2013 [may also be required if building on ArcGIS 10.4.1-10.5.1](https://support.esri.com/en/technical-article/000012659)
     * ArcGIS for Desktop 
-        * ArcMap 10.3.1+
-        * ArcGIS Pro 2.1+
-    * ArcGIS Desktop SDK for .NET 10.3.1+
+        * ArcMap 10.4.1+
+        * ArcGIS Pro 2.2+
+    * ArcGIS Desktop SDK for .NET 10.4.1+
         * [ArcGIS Desktop for .NET Requirements](https://desktop.arcgis.com/en/desktop/latest/get-started/system-requirements/arcobjects-sdk-system-requirements.htm)
-    * [ArcGIS Pro SDK](http://pro.arcgis.com/en/pro-app/sdk/) 2.1+
+    * [ArcGIS Pro SDK](http://pro.arcgis.com/en/pro-app/sdk/) 2.2+
 
 ## Instructions
 

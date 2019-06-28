@@ -1109,6 +1109,14 @@ namespace ArcMapAddinVisibility.ViewModels
                         var idIndex = objectId != -1 ? objectId : FID;
                         var id = Convert.ToInt32(feature.get_Value(idIndex));
                         var z1 = surface.GetElevation(point) + finalObserverOffset;
+
+                        if ((point.SpatialReference != null) && (ArcMap.Document.FocusMap != null) 
+                            && (ArcMap.Document.FocusMap.SpatialReference != null))
+                        {
+                            if (point.SpatialReference != ArcMap.Document.FocusMap.SpatialReference)
+                                point.Project(ArcMap.Document.FocusMap.SpatialReference);
+                        }
+
                         var addInPoint = new AddInPoint() { Point = point, GUID = Guid.NewGuid().ToString() };
                         if (selectedFeaturesCollections == null || !selectedFeaturesCollections.Any() ||
                             (selectedFeaturesCollections.Any() && selectedFeaturesCollections.Where(x => x == id).Any()))
