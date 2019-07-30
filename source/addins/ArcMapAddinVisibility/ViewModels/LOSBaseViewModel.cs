@@ -72,6 +72,8 @@ namespace ArcMapAddinVisibility.ViewModels
 
             Mediator.Register(Constants.MAP_TOC_UPDATED, OnMapTocUpdated);
             Mediator.Register(Constants.DISPLAY_COORDINATE_TYPE_CHANGED, OnDisplayCoordinateTypeChanged);
+            Mediator.Register(Constants.MAP_SPATIAL_REFERENCED_CHANGED, OnMapSpatialReferenceChanged);
+
 
             DeletePointCommand = new RelayCommand(OnDeletePointCommand);
             DeleteAllPointsCommand = new RelayCommand(OnDeleteAllPointsCommand);
@@ -485,6 +487,46 @@ namespace ArcMapAddinVisibility.ViewModels
             var map = ArcMap.Document.FocusMap;
 
             ResetSurfaceNames(map);
+        }
+
+        /// <summary>
+        /// Method called when the map Spatial Reference is changed
+        /// </summary>
+        /// <param name="obj">not used</param>
+        private void OnMapSpatialReferenceChanged(object obj)
+        {
+            if ((ArcMap.Document == null) || (ArcMap.Document.FocusMap == null) || 
+                    (GraphicsList == null) || (GraphicsList.Count == 0))
+                return;
+
+            var map = ArcMap.Document.FocusMap;
+            var av = (IActiveView)map;
+            var gc = (IGraphicsContainer)av;
+
+            // reproject the graphics in the GraphicsContained and GraphicsList
+            gc.Reset();
+            var element = gc.Next();
+            while (element != null)
+            {
+                var geom = element.Geometry;
+                geom.Project(ArcMap.Document.FocusMap.SpatialReference);
+                element.Geometry = geom;
+
+                element = gc.Next();
+            }
+
+            // remove from master graphics list
+            lock (GraphicsList)
+            {
+                foreach (var graphic in GraphicsList)
+                {
+                    var geom = graphic.Geometry;
+                    geom.Project(ArcMap.Document.FocusMap.SpatialReference);
+                    graphic.Geometry = geom;
+                }
+            }
+
+            av.PartialRefresh(esriViewDrawPhase.esriViewGraphics, null, null);
         }
 
         /// <summary>
