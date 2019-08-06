@@ -32,5 +32,6 @@ namespace VisibilityLibrary
         public const string MAP_POINT_TOOL_ACTIVATED = "MAP_POINT_TOOL_ACTIVATED";
         public const string MAP_POINT_TOOL_DEACTIVATED = "MAP_POINT_TOOL_DEACTIVATED";
         public const string MAP_TOOL_CHANGED = "MAP_TOOL_CHANGED";
+        public const string MAP_SPATIAL_REFERENCED_CHANGED = "MAP_SPATIAL_REFERENCED_CHANGED";
     }
 }
