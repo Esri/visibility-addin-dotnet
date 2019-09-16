@@ -278,6 +278,7 @@ namespace ProAppVisibilityModule.ViewModels
             SubmitCommand = new RelayCommand(OnSubmitCommand);
             ClearGraphicsCommand = new RelayCommand(OnClearCommand);
             CancelCommand = new RelayCommand(OnCancelCommand);
+            SetErrorTemplate(true);
         }
 
         #region overrides
@@ -313,6 +314,27 @@ namespace ProAppVisibilityModule.ViewModels
             try
             {
                 IsRunning = true;
+
+                if (string.IsNullOrEmpty(SelectedSurfaceName))
+                {
+                    MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgSurfaceLayerNotFound,
+                        VisibilityLibrary.Properties.Resources.CaptionError, MessageBoxButton.OK);
+                    return;
+                }
+
+
+                IsElevationSurfaceValid = ValidateElevationSurface(MapView.Active.Map, SelectedSurfaceName);
+                if (!await IsElevationSurfaceValid)
+                {
+                    ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.LOSDataFrameMatch, VisibilityLibrary.Properties.Resources.LOSSpatialReferenceCaption);
+                    SetErrorTemplate(false);
+                    return;
+                }
+                else
+                {
+                    SetErrorTemplate(true);
+                }
+
                 await ReadSelectedLayers();
 
                 if (!CanCreateElement || MapView.Active == null || MapView.Active.Map == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
@@ -521,12 +543,12 @@ namespace ProAppVisibilityModule.ViewModels
                 List<Layer> layerList = new List<Layer>();
                 var observersLayerFromMap = GetLayerFromMapByName(ObserversLayerName);
                 var RLOSConvertedPolygonsLayer = GetLayerFromMapByName(RLOSConvertedPolygonsLayerName);
-                
+
                 if (observersLayerFromMap != null)
                     layerList.Add(observersLayerFromMap);
                 if (RLOSConvertedPolygonsLayer != null)
                     layerList.Add(GetLayerFromMapByName(RLOSConvertedPolygonsLayerName));
-                
+
                 await FeatureClassHelper.MoveLayersToGroupLayer(layerList, FeatureDatasetName);
 
                 //string groupName = "RLOS Group";

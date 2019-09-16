@@ -29,6 +29,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
 using VisibilityLibrary;
 using VisibilityLibrary.Helpers;
 using VisibilityLibrary.ViewModels;
@@ -96,6 +97,8 @@ namespace ProAppVisibilityModule.ViewModels
 
             base.OnMapPointToolDeactivated(obj);
         }
+
+        public Task<bool> IsElevationSurfaceValid { get; set; }
 
         private bool observerToolActive = false;
         public bool ObserverToolActive
@@ -258,7 +261,7 @@ namespace ProAppVisibilityModule.ViewModels
                 ValidateRLOS_LayerSelection();
                 RaisePropertyChanged(() => SelectedRLOS_ObserverLyrName);
             }
-        }         
+        }
 
         public ObservableCollection<string> LLOS_ObserverLyrNames { get; set; }
         public ObservableCollection<string> LLOS_TargetLyrNames { get; set; }
@@ -280,7 +283,30 @@ namespace ProAppVisibilityModule.ViewModels
         public string SelectedSurfaceName { get; set; }
         public DistanceTypes OffsetUnitType { get; set; }
         public DistanceTypes DistanceUnitType { get; set; }
-        public AngularTypes AngularUnitType { get; set; }       
+        public AngularTypes AngularUnitType { get; set; }
+
+        private string selectedSurfaceTooltip;
+        public string SelectedSurfaceTooltip
+        {
+            get { return selectedSurfaceTooltip; }
+            set
+            {
+                selectedSurfaceTooltip = value;
+                RaisePropertyChanged(() => SelectedSurfaceTooltip);
+            }
+        }
+
+
+        private System.Windows.Media.Brush selectedBorderBrush;
+        public System.Windows.Media.Brush SelectedBorderBrush
+        {
+            get { return selectedBorderBrush; }
+            set
+            {
+                selectedBorderBrush = value;
+                RaisePropertyChanged(() => SelectedBorderBrush);
+            }
+        }
 
         #endregion
 
@@ -545,8 +571,24 @@ namespace ProAppVisibilityModule.ViewModels
             if (!IsActiveTab)
                 return;
 
+            //if (string.IsNullOrEmpty(SelectedSurfaceName))
+            //{
+            //    MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgSurfaceLayerNotFound,
+            //        VisibilityLibrary.Properties.Resources.CaptionError, MessageBoxButton.OK);
+            //    return;
+            //}
+
+            //IsElevationSurfaceValid = ValidateElevationSurface(MapView.Active.Map, SelectedSurfaceName);
+            //if (!await IsElevationSurfaceValid)
+            //{
+            //    MessageBox.Show(VisibilityLibrary.Properties.Resources.LOSDataFrameMatch, VisibilityLibrary.Properties.Resources.LOSSpatialReferenceCaption);
+            //    SelectedSurfaceTooltip = VisibilityLibrary.Properties.Resources.LOSDataFrameMatch;
+            //    SetErrorTemplate(false);
+            //    return;
+            //}
+
             var point = obj as MapPoint;
-           
+
             // ok, we have a point
             if (point != null && ToolMode == MapPointToolMode.Observer)
             {
@@ -556,7 +598,7 @@ namespace ProAppVisibilityModule.ViewModels
                     {
                         IsMapClick = false;
                         return;
-                    }             
+                    }
                 }
                 // in tool mode "Observer" we add observer points
                 // otherwise ignore
@@ -579,9 +621,9 @@ namespace ProAppVisibilityModule.ViewModels
                     });
                 IsMapClick = false;
             }
-           
+
         }
-         
+
         /// <summary>
         /// Method to update manual input boxes on mouse movement
         /// </summary>
@@ -669,10 +711,10 @@ namespace ProAppVisibilityModule.ViewModels
         {
             if ((point == null) || (env == null) || (env.SpatialReference == null))
                 return false;
-             
+
             var result = await QueuedTask.Run(() =>
                 {
-                    Geometry projectedPoint = GeometryEngine.Instance.Project(point, env.SpatialReference);
+                    ArcGIS.Core.Geometry.Geometry projectedPoint = GeometryEngine.Instance.Project(point, env.SpatialReference);
 
                     return GeometryEngine.Instance.Contains(env, projectedPoint);
                 });
@@ -990,6 +1032,12 @@ namespace ProAppVisibilityModule.ViewModels
         private async void OnMapPropertyChanged(MapPropertyChangedEventArgs obj)
         {
             await ResetSurfaceNames();
+
+            IsElevationSurfaceValid = ValidateElevationSurface(MapView.Active.Map, SelectedSurfaceName);
+            if (!await IsElevationSurfaceValid && !string.IsNullOrWhiteSpace(SelectedSurfaceName))
+                SetErrorTemplate(false);
+            else
+                SetErrorTemplate(true);
         }
 
         private async void OnMapMemberPropertyChanged(MapMemberPropertiesChangedEventArgs obj)
@@ -1109,6 +1157,17 @@ namespace ProAppVisibilityModule.ViewModels
             }
         }
 
+        internal async Task<bool> ValidateElevationSurface(Map map, string selectedSurfaceName)
+        {
+            if (string.IsNullOrWhiteSpace(selectedSurfaceName))
+                return false;
+            return await QueuedTask.Run(() =>
+            {
+                var surfaceSR = GetSpatialReferenceFromLayer(selectedSurfaceName);
+                return map.SpatialReference.Wkid == surfaceSR.Result.Wkid;
+            });
+        }
+
         internal void ClearLLOSCollections()
         {
             LLOS_TargetsInExtent.Clear();
@@ -1121,6 +1180,25 @@ namespace ProAppVisibilityModule.ViewModels
         {
             RLOS_ObserversInExtent.Clear();
             RLOS_ObserversOutOfExtent.Clear();
+        }
+
+        internal void SetErrorTemplate(bool isDefaultColor)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                if (isDefaultColor)
+                {
+                    var themeColor = Application.Current.Resources["Esri_BorderBrush"].ToString();
+                    Color color = (Color)ColorConverter.ConvertFromString(themeColor);
+                    SelectedBorderBrush = Brushes.Transparent;
+                    SelectedSurfaceTooltip = "Select Surface";
+                }
+                else
+                {
+                    SelectedBorderBrush = new SolidColorBrush(Colors.Red);
+                    SelectedSurfaceTooltip = VisibilityLibrary.Properties.Resources.LOSDataFrameMatchError;
+                }
+            });
         }
     }
 }
