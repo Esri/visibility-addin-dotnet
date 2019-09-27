@@ -273,6 +273,20 @@ namespace ArcMapAddinVisibility.ViewModels
             }
         }
 
+        private bool isInputValid;
+        public bool IsInputValid
+        {
+            get
+            {
+                return isInputValid;
+            }
+            set
+            {
+                isInputValid = value;
+                RaisePropertyChanged(() => IsInputValid);
+            }
+        }
+
         public string EnterManullyOption { get; set; }
         public ObservableCollection<AddInPointObject> LLOS_ObserversInExtent { get; set; }
         public ObservableCollection<AddInPointObject> LLOS_ObserversOutOfExtent { get; set; }
@@ -1315,11 +1329,13 @@ namespace ArcMapAddinVisibility.ViewModels
                 {
                     SelectedBorderBrush = new SolidColorBrush(Colors.Transparent);
                     SelectedSurfaceTooltip = "Select Surface";
+                    IsInputValid = true;
                 }
                 else
                 {
                     SelectedBorderBrush = new SolidColorBrush(Colors.Red);
                     SelectedSurfaceTooltip = VisibilityLibrary.Properties.Resources.LOSDataFrameMatchError;
+                    IsInputValid = false;
                 }
             });
         }

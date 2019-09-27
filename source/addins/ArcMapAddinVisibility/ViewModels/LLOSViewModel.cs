@@ -40,7 +40,6 @@ namespace ArcMapAddinVisibility.ViewModels
             // commands
             SubmitCommand = new RelayCommand(OnSubmitCommand);
             ClearGraphicsVisible = true;
-            SetErrorTemplate(true);
         }
 
         #region Properties

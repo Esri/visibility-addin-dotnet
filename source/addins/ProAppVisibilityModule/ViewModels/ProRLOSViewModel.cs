@@ -278,7 +278,6 @@ namespace ProAppVisibilityModule.ViewModels
             SubmitCommand = new RelayCommand(OnSubmitCommand);
             ClearGraphicsCommand = new RelayCommand(OnClearCommand);
             CancelCommand = new RelayCommand(OnCancelCommand);
-            SetErrorTemplate(true);
         }
 
         #region overrides

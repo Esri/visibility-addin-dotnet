@@ -79,10 +79,21 @@
                             </ComboBox.ItemTemplate>
                         </ComboBox>
                     </Border>
-                    <Button
+                    <Button 
+                    Grid.Column="1"
+                    Margin="3,3,0,0"
+                    Style="{StaticResource BorderedButtonStyle}"
+                    Command="{Binding EditPropertiesDialogCommand}"
+                    ToolTip="{x:Static prop:Resources.TooltipEditProperties}">
+                        <Image
+                        Width="16"
+                        Height="16"
+                        Source="/VisibilityLibrary;component/Images/GeoprocessingEnvironmentSettings16.png" />
+                    </Button>
+                    <!--<Button
                         Grid.Column="1"
                         Margin="3,3,0,0"
-                        Style="{StaticResource buttonProperties}" />
+                        Style="{StaticResource buttonProperties}" />-->
                 </Grid>
                 <TextBlock
                     Grid.Row="2"
@@ -366,6 +377,7 @@
                                             <Condition Binding="{Binding ElementName=tbObserverOffset, Path=(Validation.HasError)}" Value="False" />
                                             <Condition Binding="{Binding ElementName=tbTargetOffset, Path=(Validation.HasError)}" Value="False" />
                                             <Condition Binding="{Binding IsRunning}" Value="False" />
+                                            <Condition Binding="{Binding IsInputValid}" Value="True"/>
                                         </MultiDataTrigger.Conditions>
                                         <MultiDataTrigger.Setters>
                                             <Setter Property="IsEnabled" Value="True" />
@@ -374,11 +386,23 @@
                                     <MultiDataTrigger>
                                         <MultiDataTrigger.Conditions>
                                             <Condition Binding="{Binding IsLLOSValidSelection}" Value="True" />
+                                            <Condition Binding="{Binding IsInputValid}" Value="True"/>
                                         </MultiDataTrigger.Conditions>
                                         <MultiDataTrigger.Setters>
                                             <Setter Property="IsEnabled" Value="True" />
                                         </MultiDataTrigger.Setters>
                                     </MultiDataTrigger>
+                                    <!--<MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding IsInputValid}" Value="True"/>
+                                        </MultiDataTrigger.Conditions>
+                                        <MultiDataTrigger.Setters>
+                                            <Setter Property="IsEnabled" Value="True" />
+                                        </MultiDataTrigger.Setters>
+                                    </MultiDataTrigger>-->
+                                    <!--<DataTrigger Binding="{Binding IsInputValid}" Value="True">
+                                        <Setter Property="IsEnabled" Value="True" />
+                                    </DataTrigger>-->
                                 </Style.Triggers>
                             </Style>
                         </Button.Style>

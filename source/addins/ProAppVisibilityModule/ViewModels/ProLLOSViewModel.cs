@@ -47,7 +47,6 @@ namespace ProAppVisibilityModule.ViewModels
             TargetOutExtentPoints = new ObservableCollection<AddInPoint>();
             IsActiveTab = true;
             DisplayProgressBarLLOS = Visibility.Hidden;
-            SetErrorTemplate(true);
 
             // commands
             SubmitCommand = new RelayCommand(async (obj) =>
@@ -61,7 +60,6 @@ namespace ProAppVisibilityModule.ViewModels
                     Debug.Print(ex.Message);
                 }
             });
-
         }
 
         #region Properties

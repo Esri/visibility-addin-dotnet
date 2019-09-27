@@ -218,6 +218,20 @@ namespace ProAppVisibilityModule.ViewModels
             }
         }
 
+        private bool isInputValid;
+        public bool IsInputValid
+        {
+            get
+            {
+                return isInputValid;
+            }
+            set
+            {
+                isInputValid = value;
+                RaisePropertyChanged(() => IsInputValid);
+            }
+        }
+
         private string _selectedLLOS_TargetLyrName;
         public string SelectedLLOS_TargetLyrName
         {
@@ -852,12 +866,20 @@ namespace ProAppVisibilityModule.ViewModels
 
                 await ResetLayerNames();
                 RaisePropertyChanged(() => SelectedSurfaceName);
+                if (!string.IsNullOrWhiteSpace(SelectedSurfaceName))
+                {
+                    await QueuedTask.Run(async () =>
+                    {
+                        await ValidateElevationSurface(MapView.Active.Map, SelectedSurfaceName);
+                    });
+                }
             }
             catch (Exception ex)
             {
                 Debug.Print(ex.Message);
             }
         }
+
 
         private async Task ResetLayerNames()
         {
@@ -1164,7 +1186,9 @@ namespace ProAppVisibilityModule.ViewModels
             return await QueuedTask.Run(() =>
             {
                 var surfaceSR = GetSpatialReferenceFromLayer(selectedSurfaceName);
-                return map.SpatialReference.Wkid == surfaceSR.Result.Wkid;
+                bool result = map.SpatialReference.Wkid == surfaceSR.Result.Wkid;
+                SetErrorTemplate(result);
+                return result;
             });
         }
 
@@ -1188,15 +1212,15 @@ namespace ProAppVisibilityModule.ViewModels
             {
                 if (isDefaultColor)
                 {
-                    var themeColor = Application.Current.Resources["Esri_BorderBrush"].ToString();
-                    Color color = (Color)ColorConverter.ConvertFromString(themeColor);
                     SelectedBorderBrush = Brushes.Transparent;
                     SelectedSurfaceTooltip = "Select Surface";
+                    IsInputValid = true;
                 }
                 else
                 {
                     SelectedBorderBrush = new SolidColorBrush(Colors.Red);
                     SelectedSurfaceTooltip = VisibilityLibrary.Properties.Resources.LOSDataFrameMatchError;
+                    IsInputValid = false;
                 }
             });
         }

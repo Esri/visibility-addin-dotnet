@@ -62,9 +62,9 @@
     <Style x:Key="BorderedButtonStyle" TargetType="{x:Type Button}">
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
         <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="BorderBrush" Value="#9FCDE8"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource Esri_BorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Foreground" Value="#FFFFFF"/>
+        <Setter Property="Foreground" Value="{DynamicResource Esri_TextControlBrush}"/>
         <Setter Property="HorizontalContentAlignment" Value="Center"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Template">
@@ -83,20 +83,22 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsEnabled" Value="false">
-                            <Setter Property="Foreground" Value="#FFFFFF" />
+                            <Setter Property="Foreground" Value="{DynamicResource Esri_TextControlBrush}" />
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter Property="Background" Value="#E2F1FB" />
+                            <Setter Property="Background" Value="{DynamicResource Esri_BackgroundHoverBrush}" />
                             <Setter Property="BorderBrush" Value="#9FCDE8" />
-                            <Setter Property="Foreground" Value="#FFFFFF" />
+                            <Setter Property="BorderBrush" Value="{DynamicResource Esri_BorderHoverBrush}" />
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
                             <Setter Property="Background" Value="#90CDF2" />
+                            <Setter Property="Background" Value="{DynamicResource Esri_BackgroundPressedBrush}" />
                             <Setter Property="BorderBrush" Value="#007AC2"/>
-                            <Setter Property="Foreground" Value="#FFFFFF"/>
+                            <Setter Property="BorderBrush" Value="{DynamicResource Esri_BorderPressedBrush}"/>
                         </Trigger>
                         <Trigger Property="IsFocused" Value="true">
-                            <Setter TargetName="Chrome" Property="BorderBrush" Value="#007AC2" />
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource Esri_BackgroundPressedBrush}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -106,6 +108,8 @@
     <Style x:Key="buttonProperties" TargetType="Button" BasedOn="{StaticResource BorderedButtonStyle}">
         <Setter Property="Foreground" Value="{DynamicResource Esri_TextControlBrush}"/>
         <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource Esri_BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Opacity" Value="1.0"/>
         <Setter Property="Content">
             <Setter.Value>
