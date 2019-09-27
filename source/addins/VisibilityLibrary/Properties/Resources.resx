@@ -438,4 +438,7 @@
   <data name="LabelShowClassicViewshed" xml:space="preserve">
     <value>Show output in Classic Viewshed</value>
   </data>
+  <data name="LOSDataFrameMatchError" xml:space="preserve">
+    <value>Data frame and input Spatial references do not match</value>
+  </data>
 </root>

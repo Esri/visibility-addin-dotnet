@@ -23,11 +23,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Media;
 using System.Windows.Threading;
 using VisibilityLibrary;
 using VisibilityLibrary.Helpers;
@@ -69,11 +71,11 @@ namespace ArcMapAddinVisibility.ViewModels
             SelectedLLOS_ObserverLyrName = string.Empty;
             SelectedLLOS_TargetLyrName = string.Empty;
             SelectedRLOS_ObserverLyrName = string.Empty;
+            SetErrorTemplate(true);
 
             Mediator.Register(Constants.MAP_TOC_UPDATED, OnMapTocUpdated);
             Mediator.Register(Constants.DISPLAY_COORDINATE_TYPE_CHANGED, OnDisplayCoordinateTypeChanged);
             Mediator.Register(Constants.MAP_SPATIAL_REFERENCED_CHANGED, OnMapSpatialReferenceChanged);
-
 
             DeletePointCommand = new RelayCommand(OnDeletePointCommand);
             DeleteAllPointsCommand = new RelayCommand(OnDeleteAllPointsCommand);
@@ -217,10 +219,32 @@ namespace ArcMapAddinVisibility.ViewModels
             }
         }
 
+        private string selectedSurfaceTooltip;
+        public string SelectedSurfaceTooltip
+        {
+            get { return selectedSurfaceTooltip; }
+            set
+            {
+                selectedSurfaceTooltip = value;
+                RaisePropertyChanged(() => SelectedSurfaceTooltip);
+            }
+        }
+
+        private System.Windows.Media.Brush selectedBorderBrush;
+        public System.Windows.Media.Brush SelectedBorderBrush
+        {
+            get { return selectedBorderBrush; }
+            set
+            {
+                selectedBorderBrush = value;
+                RaisePropertyChanged(() => SelectedBorderBrush);
+            }
+        }
+
         public ObservableCollection<string> LLOS_ObserverLyrNames { get; set; }
         public ObservableCollection<string> LLOS_TargetLyrNames { get; set; }
         public ObservableCollection<string> RLOS_ObserverLyrNames { get; set; }
-        
+
         private bool _isLLOSValidSelection { get; set; }
         public bool IsLLOSValidSelection
         {
@@ -234,7 +258,7 @@ namespace ArcMapAddinVisibility.ViewModels
                 RaisePropertyChanged(() => IsLLOSValidSelection);
             }
         }
-        
+
         private bool _isRLOSValidSelection { get; set; }
         public bool IsRLOSValidSelection
         {
@@ -248,7 +272,21 @@ namespace ArcMapAddinVisibility.ViewModels
                 RaisePropertyChanged(() => IsRLOSValidSelection);
             }
         }
-        
+
+        private bool isInputValid;
+        public bool IsInputValid
+        {
+            get
+            {
+                return isInputValid;
+            }
+            set
+            {
+                isInputValid = value;
+                RaisePropertyChanged(() => IsInputValid);
+            }
+        }
+
         public string EnterManullyOption { get; set; }
         public ObservableCollection<AddInPointObject> LLOS_ObserversInExtent { get; set; }
         public ObservableCollection<AddInPointObject> LLOS_ObserversOutOfExtent { get; set; }
@@ -487,6 +525,9 @@ namespace ArcMapAddinVisibility.ViewModels
             var map = ArcMap.Document.FocusMap;
 
             ResetSurfaceNames(map);
+
+
+            this.ValidateSelectedSurface();
         }
 
         /// <summary>
@@ -495,7 +536,8 @@ namespace ArcMapAddinVisibility.ViewModels
         /// <param name="obj">not used</param>
         private void OnMapSpatialReferenceChanged(object obj)
         {
-            if ((ArcMap.Document == null) || (ArcMap.Document.FocusMap == null) || 
+            this.ValidateSelectedSurface();
+            if ((ArcMap.Document == null) || (ArcMap.Document.FocusMap == null) ||
                     (GraphicsList == null) || (GraphicsList.Count == 0))
                 return;
 
@@ -527,6 +569,29 @@ namespace ArcMapAddinVisibility.ViewModels
             }
 
             av.PartialRefresh(esriViewDrawPhase.esriViewGraphics, null, null);
+        }
+
+
+        private void ValidateSelectedSurface()
+        {
+            if (!string.IsNullOrEmpty(SelectedSurfaceName))
+            {
+                ILayer surfaceLayer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
+
+                var geoDataset = surfaceLayer as IGeoDataset;
+                if (geoDataset != null)
+                {
+                    SelectedSurfaceSpatialRef = geoDataset.SpatialReference;
+                    if (ArcMap.Document.FocusMap.SpatialReference.FactoryCode != geoDataset.SpatialReference.FactoryCode)
+                    {
+                        SetErrorTemplate(false);
+                    }
+                    else
+                    {
+                        SetErrorTemplate(true);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -564,6 +629,59 @@ namespace ArcMapAddinVisibility.ViewModels
             base.OnMapPointToolDeactivated(obj);
         }
 
+        internal bool ValidateElevationSurface()
+        {
+            if (string.IsNullOrEmpty(SelectedSurfaceName))
+            {
+                MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgSurfaceLayerNotFound,
+                    VisibilityLibrary.Properties.Resources.CaptionError, MessageBoxButton.OK);
+                return false;
+            }
+
+            ILayer surfaceLayer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
+
+            // Issue warning if layer is ImageServerLayer
+            if (surfaceLayer is IImageServerLayer)
+            {
+                MessageBoxResult mbr = MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgLayerIsImageService,
+                    VisibilityLibrary.Properties.Resources.CaptionLayerIsImageService, MessageBoxButton.YesNo);
+
+                if (mbr == MessageBoxResult.No)
+                {
+                    System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+                    return false;
+                }
+            }
+
+            // Determine if selected surface is projected or geographic
+            var geoDataset = surfaceLayer as IGeoDataset;
+            if (geoDataset == null)
+            {
+                System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.CaptionError);
+                return false;
+            }
+
+            SelectedSurfaceSpatialRef = geoDataset.SpatialReference;
+
+            if (SelectedSurfaceSpatialRef is IGeographicCoordinateSystem)
+            {
+                MessageBox.Show(VisibilityLibrary.Properties.Resources.LLOSUserPrompt, VisibilityLibrary.Properties.Resources.LLOSUserPromptCaption);
+                return false;
+            }
+
+            if (ArcMap.Document.FocusMap.SpatialReference.FactoryCode != geoDataset.SpatialReference.FactoryCode)
+            {
+                MessageBox.Show(VisibilityLibrary.Properties.Resources.LOSDataFrameMatch, VisibilityLibrary.Properties.Resources.LOSSpatialReferenceCaption);
+                SetErrorTemplate(false);
+                return false;
+            }
+            else
+            {
+                SetErrorTemplate(true);
+            }
+            return true;
+        }
+
         /// <summary>
         /// Override this event to collect observer points based on tool mode
         /// </summary>
@@ -573,7 +691,7 @@ namespace ArcMapAddinVisibility.ViewModels
             if (!IsActiveTab)
                 return;
 
-            var point = obj as IPoint;             
+            var point = obj as IPoint;
 
             // ok, we have a point
             if (ToolMode == MapPointToolMode.Observer)
@@ -1027,7 +1145,7 @@ namespace ArcMapAddinVisibility.ViewModels
             var list = ObserverAddInPoints.ToList();
             var inExtentList = ObserverInExtentPoints.ToList();
             var outExtentList = ObserverOutExtentPoints.ToList();
-            
+
             ObserverAddInPoints.Clear();
             ObserverInExtentPoints.Clear();
             ObserverOutExtentPoints.Clear();
@@ -1152,7 +1270,7 @@ namespace ArcMapAddinVisibility.ViewModels
                         var id = Convert.ToInt32(feature.get_Value(idIndex));
                         var z1 = surface.GetElevation(point) + finalObserverOffset;
 
-                        if ((point.SpatialReference != null) && (ArcMap.Document.FocusMap != null) 
+                        if ((point.SpatialReference != null) && (ArcMap.Document.FocusMap != null)
                             && (ArcMap.Document.FocusMap.SpatialReference != null))
                         {
                             if (point.SpatialReference != ArcMap.Document.FocusMap.SpatialReference)
@@ -1172,13 +1290,13 @@ namespace ArcMapAddinVisibility.ViewModels
                 }
                 layer = layers.Next();
             }
-         }
+        }
 
         private static List<int> GetSelectedFeaturesCollections(ILayer layer)
         {
             var selectedFeatureCollections = new List<int>();
             var selectedFeature = ((IFeatureSelection)layer).SelectionSet;
-            var enumFeature = ((IEnumIDs)(((ISelectionSet)(selectedFeature)).IDs));
+            var enumFeature = selectedFeature.IDs;
             enumFeature.Reset();
             int selfeature = enumFeature.Next();
             while (selfeature != -1)
@@ -1201,6 +1319,25 @@ namespace ArcMapAddinVisibility.ViewModels
         {
             RLOS_ObserversInExtent.Clear();
             RLOS_ObserversOutOfExtent.Clear();
+        }
+
+        internal void SetErrorTemplate(bool isDefaultColor)
+        {
+            Dispatcher.CurrentDispatcher.Invoke(() =>
+            {
+                if (isDefaultColor)
+                {
+                    SelectedBorderBrush = new SolidColorBrush(Colors.Transparent);
+                    SelectedSurfaceTooltip = "Select Surface";
+                    IsInputValid = true;
+                }
+                else
+                {
+                    SelectedBorderBrush = new SolidColorBrush(Colors.Red);
+                    SelectedSurfaceTooltip = VisibilityLibrary.Properties.Resources.LOSDataFrameMatchError;
+                    IsInputValid = false;
+                }
+            });
         }
     }
 }

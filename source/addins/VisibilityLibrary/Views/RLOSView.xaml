@@ -38,7 +38,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
-		    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <ProgressBar
@@ -61,24 +61,39 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <ComboBox
-                        x:Name="cmbInputSurface"
-                        Height="Auto"
-                        Margin="3,3,0,0"
-                        ItemsSource="{Binding SurfaceLayerNames}"
-                        SelectedItem="{Binding SelectedSurfaceName}">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel>
-                                    <TextBlock Text="{Binding}" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
-                    <Button
+                    <Border Margin="3,3,0,0" BorderThickness="1" BorderBrush="{Binding SelectedBorderBrush}">
+                        <ComboBox
+                            x:Name="cmbInputSurface"
+                            Height="Auto"
+                            Margin="0"
+                            ItemsSource="{Binding SurfaceLayerNames}"
+                            SelectedItem="{Binding SelectedSurfaceName}"
+                            ToolTip="{Binding SelectedSurfaceTooltip}"
+                            BorderBrush="{Binding SelectedBorderBrush}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </Border>
+                    <!--<Button
                         Grid.Column="1"
                         Margin="3,3,0,0"
-                        Style="{StaticResource buttonProperties}" />
+                        Style="{StaticResource buttonProperties}" />-->
+                    <Button 
+                    Grid.Column="1"
+                    Margin="3,3,0,0"
+                    Style="{StaticResource BorderedButtonStyle}"
+                    Command="{Binding EditPropertiesDialogCommand}"
+                    ToolTip="{x:Static prop:Resources.TooltipEditProperties}">
+                        <Image
+                        Width="16"
+                        Height="16"
+                        Source="/VisibilityLibrary;component/Images/GeoprocessingEnvironmentSettings16.png" />
+                    </Button>
                 </Grid>
                 <TextBlock
                     Grid.Row="2"
@@ -276,6 +291,7 @@
                                             <Condition Binding="{Binding ElementName=tbVFOVFrom, Path=(Validation.HasError)}" Value="False" />
                                             <Condition Binding="{Binding ElementName=tbVFOVTo, Path=(Validation.HasError)}" Value="False" />
                                             <Condition Binding="{Binding IsRunning}" Value="False" />
+                                            <Condition Binding="{Binding IsInputValid}" Value="True"/>
                                         </MultiDataTrigger.Conditions>
                                         <MultiDataTrigger.Setters>
                                             <Setter Property="IsEnabled" Value="True" />
@@ -311,7 +327,7 @@
                         </Button.Style>
                     </Button>
                 </StackPanel>
-                
+
                 <Expander
                     Grid.Row="9"
                     Grid.ColumnSpan="3"

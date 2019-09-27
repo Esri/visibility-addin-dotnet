@@ -682,6 +682,15 @@ namespace VisibilityLibrary.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Data frame and input Spatial references do not match.
+        /// </summary>
+        public static string LOSDataFrameMatchError {
+            get {
+                return ResourceManager.GetString("LOSDataFrameMatchError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Verify that the Spatial Analyst extension is available and authorized for use..
         /// </summary>
         public static string LOSSpatialAnalystLicenseInvalid {

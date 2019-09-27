@@ -269,6 +269,8 @@ namespace ArcMapAddinVisibility.ViewModels
             }
         }
 
+        public bool IsValidSurface { get; set; }
+
         /// <summary>
         /// Property used to test if there is enough info to create a line map element
         /// </summary>
