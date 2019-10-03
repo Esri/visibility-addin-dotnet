@@ -350,63 +350,75 @@ namespace ArcMapAddinVisibility.ViewModels
             {
                 IsRunning = true;
                 var selectedLayer = SelectedRLOS_ObserverLyrName;
-                ReadSelectedLayerPoints();
                 if (!CanCreateElement || ArcMap.Document == null || ArcMap.Document.FocusMap == null
                     || string.IsNullOrWhiteSpace(SelectedSurfaceName))
                     return;
+
+                var surface = GetSurfaceFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
+                if (surface == null)
+                {
+                    System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgSurfaceLayerNotFound, VisibilityLibrary.Properties.Resources.CaptionError);
+                    return;
+                }
+
+                IsValidSurface = ValidateElevationSurface();
+                if (!IsValidSurface)
+                {
+                    return;
+                }
+
+                bool spatialAnalystAvailable = IsSpatialAnalystAvailable();
+                if (!spatialAnalystAvailable)
+                {
+                    System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.LOSSpatialAnalystLicenseInvalid, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+                    return;
+                }
+
+                ILayer surfaceLayer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
+                // Issue warning if layer is ImageServerLayer
+                if (surfaceLayer is IImageServerLayer)
+                {
+                    MessageBoxResult mbr = MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgLayerIsImageService,
+                        VisibilityLibrary.Properties.Resources.CaptionLayerIsImageService, MessageBoxButton.YesNo);
+
+                    if (mbr == MessageBoxResult.No)
+                    {
+                        System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+                        return;
+                    }
+                }
+
+                // Determine if selected surface is projected or geographic
+                var geoDataset = surfaceLayer as IGeoDataset;
+                if (geoDataset == null)
+                {
+                    System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.CaptionError);
+                    return;
+                }
+
+                SelectedSurfaceSpatialRef = geoDataset.SpatialReference;
+
+                if (SelectedSurfaceSpatialRef is IGeographicCoordinateSystem)
+                {
+                    MessageBox.Show(VisibilityLibrary.Properties.Resources.RLOSUserPrompt, VisibilityLibrary.Properties.Resources.RLOSUserPromptCaption);
+                    return;
+                }
+
+                if (ArcMap.Document.FocusMap.SpatialReference.FactoryCode != geoDataset.SpatialReference.FactoryCode)
+                {
+                    MessageBox.Show(VisibilityLibrary.Properties.Resources.LOSDataFrameMatch, VisibilityLibrary.Properties.Resources.LOSSpatialReferenceCaption);
+                    SetErrorTemplate(false);
+                    return;
+                }
+                SetErrorTemplate(true);
+
+                ReadSelectedLayerPoints();
+
                 if (RLOS_ObserversInExtent.Any() || ObserverAddInPoints.Any())
                 {
 
                     var observerPoints = RLOS_ObserversInExtent.Select(x => x.AddInPoint).Union(ObserverInExtentPoints);
-                    var surface = GetSurfaceFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
-                    if (surface == null)
-                    {
-                        System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.CaptionError);
-                        return;
-                    }
-
-                    bool spatialAnalystAvailable = IsSpatialAnalystAvailable();
-                    if (!spatialAnalystAvailable)
-                    {
-                        System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.LOSSpatialAnalystLicenseInvalid, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
-                        return;
-                    }
-
-                    ILayer surfaceLayer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
-                    // Issue warning if layer is ImageServerLayer
-                    if (surfaceLayer is IImageServerLayer)
-                    {
-                        MessageBoxResult mbr = MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgLayerIsImageService,
-                            VisibilityLibrary.Properties.Resources.CaptionLayerIsImageService, MessageBoxButton.YesNo);
-
-                        if (mbr == MessageBoxResult.No)
-                        {
-                            System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
-                            return;
-                        }
-                    }
-
-                    // Determine if selected surface is projected or geographic
-                    var geoDataset = surfaceLayer as IGeoDataset;
-                    if (geoDataset == null)
-                    {
-                        System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.CaptionError);
-                        return;
-                    }
-
-                    SelectedSurfaceSpatialRef = geoDataset.SpatialReference;
-
-                    if (SelectedSurfaceSpatialRef is IGeographicCoordinateSystem)
-                    {
-                        MessageBox.Show(VisibilityLibrary.Properties.Resources.RLOSUserPrompt, VisibilityLibrary.Properties.Resources.RLOSUserPromptCaption);
-                        return;
-                    }
-
-                    if (ArcMap.Document.FocusMap.SpatialReference.FactoryCode != geoDataset.SpatialReference.FactoryCode)
-                    {
-                        MessageBox.Show(VisibilityLibrary.Properties.Resources.LOSDataFrameMatch, VisibilityLibrary.Properties.Resources.LOSSpatialReferenceCaption);
-                        return;
-                    }
+                    
 
                     using (ComReleaser oComReleaser = new ComReleaser())
                     {

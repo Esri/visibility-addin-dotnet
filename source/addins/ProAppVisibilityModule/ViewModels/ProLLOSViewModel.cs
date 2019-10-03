@@ -47,6 +47,7 @@ namespace ProAppVisibilityModule.ViewModels
             TargetOutExtentPoints = new ObservableCollection<AddInPoint>();
             IsActiveTab = true;
             DisplayProgressBarLLOS = Visibility.Hidden;
+
             // commands
             SubmitCommand = new RelayCommand(async (obj) =>
             {
@@ -59,7 +60,6 @@ namespace ProAppVisibilityModule.ViewModels
                     Debug.Print(ex.Message);
                 }
             });
-
         }
 
         #region Properties
@@ -302,7 +302,7 @@ namespace ProAppVisibilityModule.ViewModels
             }
 
             ValidateLLOS_LayerSelection();
-            
+
         }
 
         /// <summary>
@@ -358,9 +358,14 @@ namespace ProAppVisibilityModule.ViewModels
 
                 await ReadSelectedLayers();
 
-                if (!CanCreateElement || MapView.Active == null || MapView.Active.Map == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
-                    return;
+                if (string.IsNullOrWhiteSpace(SelectedSurfaceName))
+                {
+                    ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgSurfaceLayerNotFound,
+                            VisibilityLibrary.Properties.Resources.CaptionError);
+                }
 
+                if (!CanCreateElement || MapView.Active == null || MapView.Active.Map == null)
+                    return;
 
                 if ((LLOS_ObserversInExtent.Any() || ObserverAddInPoints.Any())
                     && LLOS_TargetsInExtent.Any() || TargetAddInPoints.Any())
@@ -425,6 +430,26 @@ namespace ProAppVisibilityModule.ViewModels
                     return false;
                 }
 
+                if (string.IsNullOrEmpty(SelectedSurfaceName))
+                {
+                    MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgSurfaceLayerNotFound,
+                        VisibilityLibrary.Properties.Resources.CaptionError, MessageBoxButton.OK);
+                    return true;
+                }
+
+                //Validate Dataframe Spatial reference with surface spatial reference
+                IsElevationSurfaceValid = ValidateElevationSurface(MapView.Active.Map, SelectedSurfaceName);
+                if (!await IsElevationSurfaceValid)
+                {
+                    ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.LOSDataFrameMatch, VisibilityLibrary.Properties.Resources.LOSSpatialReferenceCaption);
+                    SetErrorTemplate(false);
+                    return true;
+                }
+                else
+                {
+                    SetErrorTemplate(true);
+                }
+
                 var observerPoints = new ObservableCollection<AddInPoint>(LLOS_ObserversInExtent.Select(x => x.AddInPoint).Union(ObserverInExtentPoints));
                 var targetPoints = new ObservableCollection<AddInPoint>(LLOS_TargetsInExtent.Select(x => x.AddInPoint).Union(TargetInExtentPoints));
                 // Warn if Image Service layer
@@ -441,12 +466,7 @@ namespace ProAppVisibilityModule.ViewModels
                     }
                 }
 
-                //Validate Dataframe Spatial reference with surface spatial reference
-                if (MapView.Active.Map.SpatialReference.Wkid != surfaceSR.Wkid)
-                {
-                    MessageBox.Show(VisibilityLibrary.Properties.Resources.LOSDataFrameMatch, VisibilityLibrary.Properties.Resources.LOSSpatialReferenceCaption);
-                    return false;
-                }
+
 
                 await ArcGIS.Desktop.Framework.Threading.Tasks.QueuedTask.Run(() =>
                 {

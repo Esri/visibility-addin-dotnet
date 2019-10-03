@@ -39,9 +39,7 @@ namespace ArcMapAddinVisibility.ViewModels
             DisplayProgressBarLLOS = Visibility.Hidden;
             // commands
             SubmitCommand = new RelayCommand(OnSubmitCommand);
-
             ClearGraphicsVisible = true;
-
         }
 
         #region Properties
@@ -213,9 +211,63 @@ namespace ArcMapAddinVisibility.ViewModels
                 IsRunning = true;
                 IPolyline longestLine = new PolylineClass();
 
-                ReadSelectedLayerPoints();
+
+
+                ILayer surfaceLayer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
+                if (surfaceLayer == null)
+                {
+                    System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgSurfaceLayerNotFound, VisibilityLibrary.Properties.Resources.CaptionError);
+                    return;
+                }
+
+                IsValidSurface = ValidateElevationSurface();
+                if (!IsValidSurface)
+                {
+                    return;
+                }
+
+                // Issue warning if layer is ImageServerLayer
+                if (surfaceLayer is IImageServerLayer)
+                {
+                    MessageBoxResult mbr = MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgLayerIsImageService,
+                        VisibilityLibrary.Properties.Resources.CaptionLayerIsImageService, MessageBoxButton.YesNo);
+
+                    if (mbr == MessageBoxResult.No)
+                    {
+                        System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
+                        return;
+                    }
+                }
+
+                // Determine if selected surface is projected or geographic
+                var geoDataset = surfaceLayer as IGeoDataset;
+                if (geoDataset == null)
+                {
+                    System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.CaptionError);
+                    return;
+                }
+
+                SelectedSurfaceSpatialRef = geoDataset.SpatialReference;
+
+                if (SelectedSurfaceSpatialRef is IGeographicCoordinateSystem)
+                {
+                    MessageBox.Show(VisibilityLibrary.Properties.Resources.LLOSUserPrompt, VisibilityLibrary.Properties.Resources.LLOSUserPromptCaption);
+                    return;
+                }
+
+                if (ArcMap.Document.FocusMap.SpatialReference.FactoryCode != geoDataset.SpatialReference.FactoryCode)
+                {
+                    MessageBox.Show(VisibilityLibrary.Properties.Resources.LOSDataFrameMatch, VisibilityLibrary.Properties.Resources.LOSSpatialReferenceCaption);
+                    SetErrorTemplate(false);
+                    return;
+                }
+
                 if (!CanCreateElement || ArcMap.Document == null || ArcMap.Document.FocusMap == null || string.IsNullOrWhiteSpace(SelectedSurfaceName))
                     return;
+
+                SetErrorTemplate(true);
+                ReadSelectedLayerPoints();
+
 
                 if ((LLOS_ObserversInExtent.Any() || ObserverAddInPoints.Any())
                    && LLOS_TargetsInExtent.Any() || TargetAddInPoints.Any())
@@ -228,42 +280,7 @@ namespace ArcMapAddinVisibility.ViewModels
                     if (surface == null)
                         return;
 
-                    ILayer surfaceLayer = GetLayerFromMapByName(ArcMap.Document.FocusMap, SelectedSurfaceName);
 
-                    // Issue warning if layer is ImageServerLayer
-                    if (surfaceLayer is IImageServerLayer)
-                    {
-                        MessageBoxResult mbr = MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgLayerIsImageService,
-                            VisibilityLibrary.Properties.Resources.CaptionLayerIsImageService, MessageBoxButton.YesNo);
-
-                        if (mbr == MessageBoxResult.No)
-                        {
-                            System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.MsgCalcCancelled);
-                            return;
-                        }
-                    }
-
-                    // Determine if selected surface is projected or geographic
-                    var geoDataset = surfaceLayer as IGeoDataset;
-                    if (geoDataset == null)
-                    {
-                        System.Windows.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgTryAgain, VisibilityLibrary.Properties.Resources.CaptionError);
-                        return;
-                    }
-
-                    SelectedSurfaceSpatialRef = geoDataset.SpatialReference;
-
-                    if (SelectedSurfaceSpatialRef is IGeographicCoordinateSystem)
-                    {
-                        MessageBox.Show(VisibilityLibrary.Properties.Resources.LLOSUserPrompt, VisibilityLibrary.Properties.Resources.LLOSUserPromptCaption);
-                        return;
-                    }
-
-                    if (ArcMap.Document.FocusMap.SpatialReference.FactoryCode != geoDataset.SpatialReference.FactoryCode)
-                    {
-                        MessageBox.Show(VisibilityLibrary.Properties.Resources.LOSDataFrameMatch, VisibilityLibrary.Properties.Resources.LOSSpatialReferenceCaption);
-                        return;
-                    }
 
                     SelectedSurfaceSpatialRef = geoDataset.SpatialReference;
 

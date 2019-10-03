@@ -83,7 +83,7 @@ namespace ArcMapAddinVisibility.ViewModels
         private string lastActiveToolName;
 
         // lists to store GUIDs of graphics, temp feedback and map graphics
-        private static List<AMGraphic> GraphicsList = new List<AMGraphic>();
+        protected static List<AMGraphic> GraphicsList = new List<AMGraphic>();
 
         /// <summary>
         /// Property used to determine if there are non temp graphics
@@ -269,6 +269,8 @@ namespace ArcMapAddinVisibility.ViewModels
             }
         }
 
+        public bool IsValidSurface { get; set; }
+
         /// <summary>
         /// Property used to test if there is enough info to create a line map element
         /// </summary>
@@ -374,6 +376,7 @@ namespace ArcMapAddinVisibility.ViewModels
 
             av.PartialRefresh(esriViewDrawPhase.esriViewGraphics, null, null);
         }
+
         /// <summary>
         /// Method used to remove graphics from the graphics container
         /// Elements are tagged with a GUID on the IElementProperties.Name property

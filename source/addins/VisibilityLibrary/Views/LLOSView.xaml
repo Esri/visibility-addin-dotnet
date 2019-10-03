@@ -64,22 +64,36 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <ComboBox
-                        Margin="3,3,0,0"
-                        ItemsSource="{Binding SurfaceLayerNames}"
-                        SelectedItem="{Binding SelectedSurfaceName}">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel>
-                                    <TextBlock Text="{Binding}" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
-                    <Button
+                    <Border Margin="3,3,0,0" BorderThickness="1" BorderBrush="{Binding SelectedBorderBrush}">
+                        <ComboBox
+                           Margin="0"
+                           ItemsSource="{Binding SurfaceLayerNames}"
+                           SelectedItem="{Binding SelectedSurfaceName}"
+                           ToolTip="{Binding SelectedSurfaceTooltip}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </Border>
+                    <Button 
+                    Grid.Column="1"
+                    Margin="3,3,0,0"
+                    Style="{StaticResource BorderedButtonStyle}"
+                    Command="{Binding EditPropertiesDialogCommand}"
+                    ToolTip="{x:Static prop:Resources.TooltipEditProperties}">
+                        <Image
+                        Width="16"
+                        Height="16"
+                        Source="/VisibilityLibrary;component/Images/GeoprocessingEnvironmentSettings16.png" />
+                    </Button>
+                    <!--<Button
                         Grid.Column="1"
                         Margin="3,3,0,0"
-                        Style="{StaticResource buttonProperties}" />
+                        Style="{StaticResource buttonProperties}" />-->
                 </Grid>
                 <TextBlock
                     Grid.Row="2"
@@ -148,7 +162,7 @@
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                     <ListBox.ContextMenu>
-                        <ContextMenu DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Self}}">                           
+                        <ContextMenu DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Self}}">
                             <MenuItem
                                 Command="{Binding DataContext.ImportCSVFileCommand}"
                                 CommandParameter="{x:Static prop:Resources.ToolModeObserver}"
@@ -164,7 +178,7 @@
                             <MenuItem
                                 Command="{Binding DataContext.DeleteAllPointsCommand}"
                                 CommandParameter="{x:Static prop:Resources.ToolModeObserver}"
-                                Header="{x:Static prop:Resources.MenuLabelDeleteAll}" />                                                      
+                                Header="{x:Static prop:Resources.MenuLabelDeleteAll}" />
                         </ContextMenu>
                     </ListBox.ContextMenu>
                     <ListBox.InputBindings>
@@ -258,7 +272,7 @@
                             <MenuItem
                                 Command="{Binding DataContext.DeleteAllPointsCommand}"
                                 CommandParameter="{x:Static prop:Resources.ToolModeTarget}"
-                                Header="{x:Static prop:Resources.MenuLabelDeleteAll}" />                            
+                                Header="{x:Static prop:Resources.MenuLabelDeleteAll}" />
                         </ContextMenu>
                     </ListBox.ContextMenu>
                     <ListBox.InputBindings>
@@ -267,7 +281,7 @@
                             Command="{Binding DeletePointCommand}"
                             CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}}, Path=SelectedItems}" />
                     </ListBox.InputBindings>
-                </ListBox>              
+                </ListBox>
                 <GroupBox
                     Grid.Row="10"
                     Grid.ColumnSpan="4"
@@ -301,7 +315,7 @@
                     Grid.Row="16"
                     Grid.ColumnSpan="3"
                     HorizontalAlignment="Right"
-                    Orientation="Horizontal">                     
+                    Orientation="Horizontal">
                     <Button
                         Grid.Row="16"
                         Grid.Column="0"
@@ -363,6 +377,7 @@
                                             <Condition Binding="{Binding ElementName=tbObserverOffset, Path=(Validation.HasError)}" Value="False" />
                                             <Condition Binding="{Binding ElementName=tbTargetOffset, Path=(Validation.HasError)}" Value="False" />
                                             <Condition Binding="{Binding IsRunning}" Value="False" />
+                                            <Condition Binding="{Binding IsInputValid}" Value="True"/>
                                         </MultiDataTrigger.Conditions>
                                         <MultiDataTrigger.Setters>
                                             <Setter Property="IsEnabled" Value="True" />
@@ -371,6 +386,7 @@
                                     <MultiDataTrigger>
                                         <MultiDataTrigger.Conditions>
                                             <Condition Binding="{Binding IsLLOSValidSelection}" Value="True" />
+                                            <Condition Binding="{Binding IsInputValid}" Value="True"/>
                                         </MultiDataTrigger.Conditions>
                                         <MultiDataTrigger.Setters>
                                             <Setter Property="IsEnabled" Value="True" />
@@ -389,7 +405,7 @@
                         ToolTip="{x:Static prop:Resources.LabelClearGraphics}"
                         Visibility="{Binding Path=ClearGraphicsVisible, Converter={StaticResource BoolToVis}}" >
                         <Button.Style>
-                            <Style TargetType="Button" BasedOn="{StaticResource TransparentButtonStyle}">                                
+                            <Style TargetType="Button" BasedOn="{StaticResource TransparentButtonStyle}">
                                 <Setter Property="IsEnabled" Value="False" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding HasMapGraphics}" Value="True">

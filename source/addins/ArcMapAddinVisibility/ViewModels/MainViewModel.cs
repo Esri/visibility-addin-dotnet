@@ -70,6 +70,7 @@ namespace ArcMapAddinVisibility.ViewModels
             viewEvents.FocusMapChanged += viewEvents_FocusMapChanged;
             viewEvents.ItemAdded += viewEvents_ItemAdded;
             viewEvents.ItemDeleted += viewEvents_ItemDeleted;
+            viewEvents.SpatialReferenceChanged += viewEvents_SpatialReferenceChanged;
 
             NotifyMapTOCUpdated();
         }
@@ -89,11 +90,20 @@ namespace ArcMapAddinVisibility.ViewModels
             NotifyMapTOCUpdated();
         }
 
+        void viewEvents_SpatialReferenceChanged()
+        {
+            NotifySpatialReferenceChanged();
+        }
+
         private void NotifyMapTOCUpdated()
         {
             Mediator.NotifyColleagues(Constants.MAP_TOC_UPDATED, null);
         }
 
+        private void NotifySpatialReferenceChanged()
+        {
+            Mediator.NotifyColleagues(Constants.MAP_SPATIAL_REFERENCED_CHANGED, null);
+        }
         #region Properties
 
         object selectedTab = null;
