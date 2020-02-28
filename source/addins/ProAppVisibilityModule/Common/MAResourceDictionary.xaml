@@ -1,10 +1,12 @@
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="clr-namespace:ProAppVisibilityModule"
-    xmlns:prop="clr-namespace:VisibilityLibrary.Properties"
-    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    xmlns:prop="clr-namespace:ProAppVisibilityModule.Properties"
+    xmlns:enum="clr-namespace:ProAppVisibilityModule.Common.Enums"
+    xmlns:local="clr-namespace:ProAppVisibilityModule.Common.ValueConverters">
     <local:EnumToFriendlyNameConverter x:Key="enumItemsConverter" />
+
     <ControlTemplate x:Key="errorTemplate">
         <Grid ClipToBounds="False">
             <Image
@@ -13,7 +15,7 @@
                 Margin="0,0,3,0"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Center"
-                Source="/VisibilityLibrary;component/Images/GenericErrorStop16.png"
+                Source="../Images/GenericErrorStop16.png"
                 ToolTip="{Binding [0].ErrorContent}" />
             <Border
                 Margin="-1"
@@ -28,7 +30,7 @@
         MethodName="GetValues"
         ObjectType="{x:Type sys:Enum}">
         <ObjectDataProvider.MethodParameters>
-            <x:TypeExtension TypeName="local:DistanceTypes" />
+            <x:TypeExtension TypeName="enum:DistanceTypes" />
         </ObjectDataProvider.MethodParameters>
     </ObjectDataProvider>
     <ObjectDataProvider
@@ -36,7 +38,7 @@
         MethodName="GetValues"
         ObjectType="{x:Type sys:Enum}">
         <ObjectDataProvider.MethodParameters>
-            <x:TypeExtension TypeName="local:AngularTypes" />
+            <x:TypeExtension TypeName="enum:AngularTypes" />
         </ObjectDataProvider.MethodParameters>
     </ObjectDataProvider>
     <!--  store here your styles  -->
@@ -116,7 +118,7 @@
                 <Image
                     Width="16"
                     Height="16"
-                    Source="/VisibilityLibrary;component/Images/GeoprocessingEnvironmentSettings16.png" />
+                    Source="/ProAppVisibilityModule;component/Images/GeoprocessingEnvironmentSettings16.png" />
             </Setter.Value>
         </Setter>
         <Setter Property="Command" Value="{Binding EditPropertiesDialogCommand}" />

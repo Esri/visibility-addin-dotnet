@@ -27,12 +27,10 @@ using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
+using ProAppVisibilityModule.Common.ViewModels;
 using ProAppVisibilityModule.Helpers;
 using ProAppVisibilityModule.Models;
-
-// Visibility
-using VisibilityLibrary.Helpers;
-using VisibilityLibrary.ViewModels;
+using ProAppVisibilityModule.Properties;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -44,19 +42,24 @@ namespace ProAppVisibilityModule.ViewModels
         public ProTabBaseViewModel()
         {
             //commands
-            ClearGraphicsCommand = new VisibilityLibrary.Helpers.RelayCommand(OnClearGraphics);
-            ActivateToolCommand = new VisibilityLibrary.Helpers.RelayCommand(OnActivateToolCommand);
-            EnterKeyCommand = new VisibilityLibrary.Helpers.RelayCommand(OnEnterKeyCommand);
-            CancelCommand = new VisibilityLibrary.Helpers.RelayCommand(OnCancelCommand);
+            ClearGraphicsCommand = new Helpers.RelayCommand(OnClearGraphics);
+            ActivateToolCommand = new Helpers.RelayCommand(OnActivateToolCommand);
+            EnterKeyCommand = new Helpers.RelayCommand(OnEnterKeyCommand);
+            CancelCommand = new Helpers.RelayCommand(OnCancelCommand);
+
+            //MouseMapPoint = new Helpers.RelayCommand(OnMouseMoveEvent);
+            //TabItemSelected = new Helpers.RelayCommand(OnTabItemSelected);
+            //MapPointToolActivated = new Helpers.RelayCommand(OnMapPointToolActivated);
+            //MapPointToolActivated = new Helpers.RelayCommand(OnMapPointToolDeactivated);
 
             // Mediator
-            Mediator.Register(VisibilityLibrary.Constants.NEW_MAP_POINT, OnMapClickEvent);
-            Mediator.Register(VisibilityLibrary.Constants.NEW_MAP_POINT, OnNewMapPointEvent);           
-            Mediator.Register(VisibilityLibrary.Constants.MOUSE_MOVE_POINT, OnMouseMoveEvent);
-            Mediator.Register(VisibilityLibrary.Constants.TAB_ITEM_SELECTED, OnTabItemSelected);
+            Mediator.Register(Helpers.Constants.NEW_MAP_POINT, OnMapClickEvent);
+            Mediator.Register(Helpers.Constants.NEW_MAP_POINT, OnNewMapPointEvent);
+            Mediator.Register(Helpers.Constants.MOUSE_MOVE_POINT, OnMouseMoveEvent);
+            Mediator.Register(Helpers.Constants.TAB_ITEM_SELECTED, OnTabItemSelected);
 
-            Mediator.Register(VisibilityLibrary.Constants.MAP_POINT_TOOL_ACTIVATED, OnMapPointToolActivated);
-            Mediator.Register(VisibilityLibrary.Constants.MAP_POINT_TOOL_DEACTIVATED, OnMapPointToolDeactivated);
+            Mediator.Register(Helpers.Constants.MAP_POINT_TOOL_ACTIVATED, OnMapPointToolActivated);
+            Mediator.Register(Helpers.Constants.MAP_POINT_TOOL_DEACTIVATED, OnMapPointToolDeactivated);
 
             // Pro Events
             ArcGIS.Desktop.Framework.Events.ActiveToolChangedEvent.Subscribe(OnActiveToolChanged);
@@ -248,7 +251,7 @@ namespace ProAppVisibilityModule.ViewModels
                 {
                     // invalid coordinate, reset and throw exception
                     Point1 = null;
-                    throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEInvalidCoordinate);
+                    throw new ArgumentException(Resources.AEInvalidCoordinate);
                 }
             }
         }
@@ -302,7 +305,7 @@ namespace ProAppVisibilityModule.ViewModels
                 {
                     // invalid coordinate, reset and throw exception
                     Point2 = null;
-                    throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEInvalidCoordinate);
+                    throw new ArgumentException(Resources.AEInvalidCoordinate);
                 }
             }
         }
@@ -344,10 +347,10 @@ namespace ProAppVisibilityModule.ViewModels
 
         #region Commands
 
-        public VisibilityLibrary.Helpers.RelayCommand ClearGraphicsCommand { get; set; }
-        public VisibilityLibrary.Helpers.RelayCommand EnterKeyCommand { get; set; }
-        public VisibilityLibrary.Helpers.RelayCommand CancelCommand { get; set; }
-        public VisibilityLibrary.Helpers.RelayCommand ActivateToolCommand { get; set; }
+        public Helpers.RelayCommand ClearGraphicsCommand { get; set; }
+        public Helpers.RelayCommand EnterKeyCommand { get; set; }
+        public Helpers.RelayCommand CancelCommand { get; set; }
+        public Helpers.RelayCommand ActivateToolCommand { get; set; }
         public bool IsMapClick { get; set; }
 
         /// <summary>
@@ -442,7 +445,7 @@ namespace ProAppVisibilityModule.ViewModels
         {
             IsMapClick = true;
         }
- 
+
         #endregion
 
         #region Internal Methods
@@ -488,9 +491,9 @@ namespace ProAppVisibilityModule.ViewModels
                 if (item.Disposable != null)
                     item.Disposable.Dispose();
                 Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        ProGraphicsList.Remove(item);
-                    });
+                {
+                    ProGraphicsList.Remove(item);
+                });
             }
 
             RaisePropertyChanged(() => HasMapGraphics);
@@ -586,9 +589,9 @@ namespace ProAppVisibilityModule.ViewModels
                         var Lat = Double.Parse(matchMercator.Groups["latitude"].Value);
                         var Lon = Double.Parse(matchMercator.Groups["longitude"].Value);
                         point = QueuedTask.Run(() =>
-                            {
-                                return MapPointBuilder.CreateMapPoint(Lon, Lat, MapView.Active.Map.SpatialReference);
-                            }).Result;
+                        {
+                            return MapPointBuilder.CreateMapPoint(Lon, Lat, MapView.Active.Map.SpatialReference);
+                        }).Result;
                         return point;
                     }
                     catch (Exception ex)

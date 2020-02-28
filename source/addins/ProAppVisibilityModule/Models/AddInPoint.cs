@@ -13,14 +13,13 @@
 // limitations under the License.
 
 using ArcGIS.Core.Geometry;
-using VisibilityLibrary.Helpers;
 using ProAppVisibilityModule.Helpers;
 using CoordinateConversionLibrary.Models;
 using CoordinateConversionLibrary.Helpers;
 
 namespace ProAppVisibilityModule.Models
 {
-    public class AddInPoint : VisibilityLibrary.Helpers.NotificationObject
+    public class AddInPoint : Helpers.NotificationObject
     {
         public AddInPoint()
         {

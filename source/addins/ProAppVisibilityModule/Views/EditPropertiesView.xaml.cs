@@ -17,11 +17,11 @@ using System.Windows;
 namespace ProAppVisibilityModule.Views
 {
     /// <summary>
-    /// Interaction logic for ProEditPropertiesView.xaml
+    /// Interaction logic for EditPropertiesView.xaml
     /// </summary>
-    public partial class ProEditPropertiesView : ArcGIS.Desktop.Framework.Controls.ProWindow
+    public partial class EditPropertiesView : Window
     {
-        public ProEditPropertiesView()
+        public EditPropertiesView()
         {
             InitializeComponent();
         }

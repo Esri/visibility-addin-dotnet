@@ -30,10 +30,11 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
-using VisibilityLibrary;
-using VisibilityLibrary.Helpers;
-using VisibilityLibrary.ViewModels;
-using VisibilityLibrary.Views;
+using ProAppVisibilityModule.Helpers;
+using ProAppVisibilityModule.Common.Enums;
+using ProAppVisibilityModule.Views;
+using ProAppVisibilityModule.Properties;
+using ProAppVisibilityModule.Common.ViewModels;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -46,7 +47,7 @@ namespace ProAppVisibilityModule.ViewModels
             OffsetUnitType = DistanceTypes.Meters;
             DistanceUnitType = DistanceTypes.Meters;
             AngularUnitType = AngularTypes.DEGREES;
-            EnterManullyOption = VisibilityLibrary.Properties.Resources.EnterManuallyOption;
+            EnterManullyOption = Resources.EnterManuallyOption;
 
             ObserverAddInPoints = new ObservableCollection<AddInPoint>();
             ObserverInExtentPoints = new ObservableCollection<AddInPoint>();
@@ -65,7 +66,7 @@ namespace ProAppVisibilityModule.ViewModels
             SurfaceLayerNames = new ObservableCollection<string>();
             SelectedSurfaceName = string.Empty;
 
-            Mediator.Register(VisibilityLibrary.Constants.DISPLAY_COORDINATE_TYPE_CHANGED, OnDisplayCoordinateTypeChanged);
+            Mediator.Register(Helpers.Constants.DISPLAY_COORDINATE_TYPE_CHANGED, OnDisplayCoordinateTypeChanged);
 
             DeletePointCommand = new RelayCommand(OnDeletePointCommand);
             DeleteAllPointsCommand = new RelayCommand(OnDeleteAllPointsCommand);
@@ -143,7 +144,7 @@ namespace ProAppVisibilityModule.ViewModels
                 RaisePropertyChanged(() => ObserverOffset);
 
                 if (!observerOffset.HasValue)
-                    throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEInvalidInput);
+                    throw new ArgumentException(Resources.AEInvalidInput);
             }
         }
 
@@ -157,7 +158,7 @@ namespace ProAppVisibilityModule.ViewModels
                 RaisePropertyChanged(() => TargetOffset);
 
                 if (!targetOffset.HasValue)
-                    throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEInvalidInput);
+                    throw new ArgumentException(Resources.AEInvalidInput);
             }
         }
 
@@ -395,8 +396,8 @@ namespace ProAppVisibilityModule.ViewModels
                     }
                     else
                     {
-                        ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgNoDataFound,
-                                                                      VisibilityLibrary.Properties.Resources.CaptionError);
+                        ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(Resources.MsgNoDataFound,
+                                                                      Resources.CaptionError);
                         return;
                     }
                 }
@@ -429,13 +430,13 @@ namespace ProAppVisibilityModule.ViewModels
                             MapPoint point = (ccType != CoordinateConversionLibrary.Models.CoordinateType.Unknown) ? GetMapPointFromString(outFormattedString) : null;
                             if (point != null)
                             {
-                                if (mode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
+                                if (mode == Resources.ToolModeObserver)
                                 {
                                     ToolMode = MapPointToolMode.Observer;
                                     Point1 = point;
                                     OnNewMapPointEvent(Point1);
                                 }
-                                else if (mode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
+                                else if (mode == Resources.ToolModeTarget)
                                 {
                                     ToolMode = MapPointToolMode.Target;
                                     Point2 = point;
@@ -475,13 +476,13 @@ namespace ProAppVisibilityModule.ViewModels
                 MapPoint point = (ccType != CoordinateConversionLibrary.Models.CoordinateType.Unknown) ? GetMapPointFromString(outFormattedString) : null;
                 if (point != null)
                 {
-                    if (mode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
+                    if (mode == Resources.ToolModeObserver)
                     {
                         ToolMode = MapPointToolMode.Observer;
                         Point1 = point;
                         OnNewMapPointEvent(Point1);
                     }
-                    else if (mode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
+                    else if (mode == Resources.ToolModeTarget)
                     {
                         ToolMode = MapPointToolMode.Target;
                         Point2 = point;
@@ -526,7 +527,7 @@ namespace ProAppVisibilityModule.ViewModels
         {
             var keyCommandMode = obj as string;
 
-            if (keyCommandMode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
+            if (keyCommandMode == Resources.ToolModeObserver)
             {
                 if (!(await IsValidPoint(Point1, true)))
                     return;
@@ -534,7 +535,7 @@ namespace ProAppVisibilityModule.ViewModels
                 ToolMode = MapPointToolMode.Observer;
                 OnNewMapPointEvent(Point1);
             }
-            else if (keyCommandMode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
+            else if (keyCommandMode == Resources.ToolModeTarget)
             {
                 if (!(await IsValidPoint(Point2, true)))
                     return;
@@ -563,10 +564,10 @@ namespace ProAppVisibilityModule.ViewModels
             if (string.IsNullOrWhiteSpace(mode))
                 return;
 
-            if ((mode == VisibilityLibrary.Properties.Resources.ToolModeObserver) &&
+            if ((mode == Resources.ToolModeObserver) &&
                 (lastToolMode != MapPointToolMode.Observer))
                 ToolMode = MapPointToolMode.Observer;
-            else if ((mode == VisibilityLibrary.Properties.Resources.ToolModeTarget) &&
+            else if ((mode == Resources.ToolModeTarget) &&
                 (lastToolMode != MapPointToolMode.Target))
                 ToolMode = MapPointToolMode.Target;
             else
@@ -587,16 +588,16 @@ namespace ProAppVisibilityModule.ViewModels
 
             //if (string.IsNullOrEmpty(SelectedSurfaceName))
             //{
-            //    MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgSurfaceLayerNotFound,
-            //        VisibilityLibrary.Properties.Resources.CaptionError, MessageBoxButton.OK);
+            //    MessageBox.Show(Resources.MsgSurfaceLayerNotFound,
+            //        Resources.CaptionError, MessageBoxButton.OK);
             //    return;
             //}
 
             //IsElevationSurfaceValid = ValidateElevationSurface(MapView.Active.Map, SelectedSurfaceName);
             //if (!await IsElevationSurfaceValid)
             //{
-            //    MessageBox.Show(VisibilityLibrary.Properties.Resources.LOSDataFrameMatch, VisibilityLibrary.Properties.Resources.LOSSpatialReferenceCaption);
-            //    SelectedSurfaceTooltip = VisibilityLibrary.Properties.Resources.LOSDataFrameMatch;
+            //    MessageBox.Show(Resources.LOSDataFrameMatch, Resources.LOSSpatialReferenceCaption);
+            //    SelectedSurfaceTooltip = Resources.LOSDataFrameMatch;
             //    SetErrorTemplate(false);
             //    return;
             //}
@@ -621,18 +622,18 @@ namespace ProAppVisibilityModule.ViewModels
                 var addInPoint = new AddInPoint() { Point = point, GUID = guid };
                 bool isValid = await IsValidPoint(point, false);
                 Application.Current.Dispatcher.Invoke(() =>
+                {
+                    if (!isValid)
                     {
-                        if (!isValid)
-                        {
-                            ObserverOutExtentPoints.Insert(0, addInPoint);
-                        }
-                        else
-                        {
-                            ObserverInExtentPoints.Insert(0, addInPoint);
-                        }
+                        ObserverOutExtentPoints.Insert(0, addInPoint);
+                    }
+                    else
+                    {
+                        ObserverInExtentPoints.Insert(0, addInPoint);
+                    }
 
-                        ObserverAddInPoints.Insert(0, addInPoint);
-                    });
+                    ObserverAddInPoints.Insert(0, addInPoint);
+                });
                 IsMapClick = false;
             }
 
@@ -697,7 +698,7 @@ namespace ProAppVisibilityModule.ViewModels
                 validPoint = await IsPointWithinExtent(point, env);
 
                 if (validPoint == false && showPopup)
-                    ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgOutOfAOI, VisibilityLibrary.Properties.Resources.CaptionError);
+                    ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(Resources.MsgOutOfAOI, Resources.CaptionError);
             }
 
             return validPoint;
@@ -727,11 +728,11 @@ namespace ProAppVisibilityModule.ViewModels
                 return false;
 
             var result = await QueuedTask.Run(() =>
-                {
-                    ArcGIS.Core.Geometry.Geometry projectedPoint = GeometryEngine.Instance.Project(point, env.SpatialReference);
+            {
+                ArcGIS.Core.Geometry.Geometry projectedPoint = GeometryEngine.Instance.Project(point, env.SpatialReference);
 
-                    return GeometryEngine.Instance.Contains(env, projectedPoint);
-                });
+                return GeometryEngine.Instance.Contains(env, projectedPoint);
+            });
 
             return result;
         }
@@ -757,20 +758,20 @@ namespace ProAppVisibilityModule.ViewModels
             var layerList = MapView.Active.Map.GetLayersAsFlattenedList();
 
             var elevationSurfaceList = await QueuedTask.Run(() =>
+            {
+                var list = new List<Layer>();
+                foreach (var layer in layerList)
                 {
-                    var list = new List<Layer>();
-                    foreach (var layer in layerList)
+                    var def = layer.GetDefinition();
+                    if (def != null && def.LayerType == ArcGIS.Core.CIM.MapLayerType.Operational &&
+                        (def is CIMRasterLayer || def is CIMTinLayer || def is CIMLASDatasetLayer || def is CIMMosaicLayer))
                     {
-                        var def = layer.GetDefinition();
-                        if (def != null && def.LayerType == ArcGIS.Core.CIM.MapLayerType.Operational &&
-                            (def is CIMRasterLayer || def is CIMTinLayer || def is CIMLASDatasetLayer || def is CIMMosaicLayer))
-                        {
-                            list.Add(layer);
-                        }
+                        list.Add(layer);
                     }
+                }
 
-                    return list;
-                });
+                return list;
+            });
 
             var sortedList = elevationSurfaceList.Select(l => l.Name).ToList();
             sortedList.Sort();
@@ -817,13 +818,13 @@ namespace ProAppVisibilityModule.ViewModels
                 // reset surface names OC
                 await ResetSurfaceNames();
                 Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        // reset observer points
-                        ObserverAddInPoints.Clear();
-                        ObserverInExtentPoints.Clear();
-                        ObserverOutExtentPoints.Clear();
-                        ClearTempGraphics();
-                    });
+                {
+                    // reset observer points
+                    ObserverAddInPoints.Clear();
+                    ObserverInExtentPoints.Clear();
+                    ObserverOutExtentPoints.Clear();
+                    ClearTempGraphics();
+                });
             }
             catch (Exception ex)
             {
@@ -848,9 +849,9 @@ namespace ProAppVisibilityModule.ViewModels
                 var tempName = SelectedSurfaceName;
 
                 Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        SurfaceLayerNames.Clear();
-                    });
+                {
+                    SurfaceLayerNames.Clear();
+                });
 
                 Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -942,17 +943,17 @@ namespace ProAppVisibilityModule.ViewModels
         private Task<List<string>> GetLayerNamesFromMap()
         {
             return QueuedTask.Run(() =>
+            {
+                var layer = new List<string>();
+                try
                 {
-                    var layer = new List<string>();
-                    try
-                    {
-                        layer = MapView.Active.Map.GetLayersAsFlattenedList().OfType<FeatureLayer>()
-                                         .Where(l => l.ShapeType == esriGeometryType.esriGeometryPoint)
-                                         .Select(x => x.ToString()).ToList();
-                    }
-                    catch (Exception) { }
-                    return layer;
-                });
+                    layer = MapView.Active.Map.GetLayersAsFlattenedList().OfType<FeatureLayer>()
+                                     .Where(l => l.ShapeType == esriGeometryType.esriGeometryPoint)
+                                     .Select(x => x.ToString()).ToList();
+                }
+                catch (Exception) { }
+                return layer;
+            });
         }
 
         /// <summary>
@@ -1219,7 +1220,7 @@ namespace ProAppVisibilityModule.ViewModels
                 else
                 {
                     SelectedBorderBrush = new SolidColorBrush(Colors.Red);
-                    SelectedSurfaceTooltip = VisibilityLibrary.Properties.Resources.LOSDataFrameMatchError;
+                    SelectedSurfaceTooltip = Resources.LOSDataFrameMatchError;
                     IsInputValid = false;
                 }
             });

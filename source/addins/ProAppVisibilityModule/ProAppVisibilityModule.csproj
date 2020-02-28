@@ -102,24 +102,48 @@
     <AddInContent Include="DarkImages\AddInDesktop32.png" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common\Attributes\LocalizableDescriptionAttribute.cs" />
+    <Compile Include="Common\Enums\Enums.cs" />
+    <Compile Include="Common\ValueConverters\EnumToFriendlyNameConverter.cs" />
+    <Compile Include="Helpers\Constants.cs" />
     <Compile Include="Helpers\FeatureClassHelper.cs" />
     <Compile Include="Helpers\GeometryHelper.cs" />
     <Compile Include="Helpers\MapPointHelper.cs" />
+    <Compile Include="Helpers\Mediator.cs" />
+    <Compile Include="Helpers\NotificationObject.cs" />
+    <Compile Include="Helpers\RelayCommand.cs" />
+    <Compile Include="Helpers\Wpf.cs" />
     <Compile Include="Models\AddInPoint.cs" />
     <Compile Include="Models\AddInPointObject.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Models\ProGraphic.cs" />
+    <Compile Include="Models\VisibilityConfig.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="ViewModels\EditPropertiesViewModel.cs" />
     <Compile Include="ViewModels\ProLLOSViewModel.cs" />
     <Compile Include="ViewModels\ProLOSBaseViewModel.cs" />
     <Compile Include="ViewModels\ProRLOSViewModel.cs" />
     <Compile Include="ViewModels\ProTabBaseViewModel.cs" />
+    <Compile Include="Views\EditPropertiesView.xaml.cs">
+      <DependentUpon>EditPropertiesView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LLOSView.xaml.cs">
+      <DependentUpon>LLOSView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\ProEditPropertiesView.xaml.cs">
       <DependentUpon>ProEditPropertiesView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ProSelectCoordinateFieldsView.xaml.cs">
       <DependentUpon>ProSelectCoordinateFieldsView.xaml</DependentUpon>
       <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Views\RLOSView.xaml.cs">
+      <DependentUpon>RLOSView.xaml</DependentUpon>
     </Compile>
     <Compile Include="VisibilityMapTool.cs" />
     <Compile Include="PropertiesButton.cs" />
@@ -131,6 +155,18 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Common\MAResourceDictionary.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\EditPropertiesView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LLOSView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\ProEditPropertiesView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -138,6 +174,10 @@
     <Page Include="Views\ProSelectCoordinateFieldsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\RLOSView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="VisibilityDockpane.xaml">
       <SubType>Designer</SubType>
@@ -157,10 +197,6 @@
       <Project>{67ffdfae-f8ec-45aa-a3f9-6109bcf5bbf4}</Project>
       <Name>CoordinateConversionLibrary</Name>
     </ProjectReference>
-    <ProjectReference Include="..\VisibilityLibrary\VisibilityLibrary.csproj">
-      <Project>{d743cd02-174d-44cb-ae88-93c01d21f89e}</Project>
-      <Name>VisibilityLibrary</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <AddInContent Include="Images\VisibilityButton16.png" />
@@ -171,6 +207,22 @@
     <AddInContent Include="Images\visibility-32.png" />
     <AddInContent Include="DarkImages\visibility-16.png" />
     <AddInContent Include="DarkImages\visibility-32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Add_Point.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\GenericErrorStop16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\GeoprocessingEnvironmentSettings16.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <UsingTask AssemblyFile="C:\Program Files\ArcGIS\Pro\bin\proapp-sdk-MSBuild.dll" TaskName="proapp_sdk_MSBuild.PackageAddIn" />

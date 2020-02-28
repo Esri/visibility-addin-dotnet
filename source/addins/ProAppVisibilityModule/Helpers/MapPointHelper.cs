@@ -14,8 +14,8 @@
 
 using System;
 using ArcGIS.Core.Geometry;
-using VisibilityLibrary.Models;
-using VisibilityLibrary;
+using ProAppVisibilityModule.Models;
+using ProAppVisibilityModule.Common.Enums;
 
 namespace ProAppVisibilityModule.Helpers
 {
@@ -43,35 +43,35 @@ namespace ProAppVisibilityModule.Helpers
             {
                 switch (VisibilityConfig.AddInConfig.DisplayCoordinateType)
                 {
-                    case CoordinateTypes.DD:
+                    case (CoordinateConversionLibrary.CoordinateTypes)CoordinateTypes.DD:
                         tgparam = new ToGeoCoordinateParameter(GeoCoordinateType.DD);
                         tgparam.NumDigits = 6;
                         result = mp.ToGeoCoordinateString(tgparam);
                         break;
-                    case CoordinateTypes.DDM:
+                    case (CoordinateConversionLibrary.CoordinateTypes)CoordinateTypes.DDM:
                         tgparam = new ToGeoCoordinateParameter(GeoCoordinateType.DDM);
                         tgparam.NumDigits = 4;
                         result = mp.ToGeoCoordinateString(tgparam);
                         break;
-                    case CoordinateTypes.DMS:
+                    case (CoordinateConversionLibrary.CoordinateTypes)CoordinateTypes.DMS:
                         tgparam = new ToGeoCoordinateParameter(GeoCoordinateType.DMS);
                         tgparam.NumDigits = 2;
                         result = mp.ToGeoCoordinateString(tgparam);
                         break;
-                    //case CoordinateTypes.GARS:
+                    //case (CoordinateConversionLibrary.CoordinateTypes)CoordinateTypes.GARS:
                     //    tgparam = new ToGeoCoordinateParameter(GeoCoordinateType.GARS);
                     //    result = mp.ToGeoCoordinateString(tgparam);
                     //    break;
-                    case CoordinateTypes.MGRS:
+                    case (CoordinateConversionLibrary.CoordinateTypes)CoordinateTypes.MGRS:
                         tgparam = new ToGeoCoordinateParameter(GeoCoordinateType.MGRS);
                         result = mp.ToGeoCoordinateString(tgparam);
                         break;
-                    case CoordinateTypes.USNG:
+                    case (CoordinateConversionLibrary.CoordinateTypes)CoordinateTypes.USNG:
                         tgparam = new ToGeoCoordinateParameter(GeoCoordinateType.USNG);
                         tgparam.NumDigits = 5;
                         result = mp.ToGeoCoordinateString(tgparam);
                         break;
-                    case CoordinateTypes.UTM:
+                    case (CoordinateConversionLibrary.CoordinateTypes)CoordinateTypes.UTM:
                         tgparam = new ToGeoCoordinateParameter(GeoCoordinateType.UTM);
                         tgparam.GeoCoordMode = ToGeoCoordinateMode.UtmNorthSouth;
                         result = mp.ToGeoCoordinateString(tgparam);

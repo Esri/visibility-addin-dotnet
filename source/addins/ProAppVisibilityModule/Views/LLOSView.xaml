@@ -1,0 +1,422 @@
+﻿<UserControl
+    x:Class="ProAppVisibilityModule.Views.VisibilityLLOSView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:ProAppVisibilityModule.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:prop="clr-namespace:ProAppVisibilityModule.Properties"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    d:DesignHeight="600"
+    d:DesignWidth="300"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Common/MAResourceDictionary.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid>
+        <ScrollViewer Padding="0,0,3,0" VerticalScrollBarVisibility="Auto">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <ProgressBar
+                    Name="pbStatus"
+                    Grid.ColumnSpan="3"
+                    Width="Auto"
+                    Margin="3,3,0,0"
+                    HorizontalAlignment="Stretch"
+                    IsIndeterminate="True"
+                    Visibility="{Binding DisplayProgressBarLLOS}" />
+                <TextBlock
+                    Grid.ColumnSpan="3"
+                    Margin="3,3,0,0"
+                    Grid.Row="0"
+                    Text="{x:Static prop:Resources.LabelInputSurface}" />
+                <Grid Grid.Row="1" Grid.ColumnSpan="3">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Border Margin="3,3,0,0" BorderThickness="1" BorderBrush="{Binding SelectedBorderBrush}">
+                        <ComboBox
+                           Margin="0"
+                           ItemsSource="{Binding SurfaceLayerNames}"
+                           SelectedItem="{Binding SelectedSurfaceName}"
+                           ToolTip="{Binding SelectedSurfaceTooltip}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </Border>
+                    <Button 
+                    Grid.Column="1"
+                    Margin="3,3,0,0"
+                    Style="{StaticResource BorderedButtonStyle}"
+                    Command="{Binding EditPropertiesDialogCommand}"
+                    ToolTip="{x:Static prop:Resources.TooltipEditProperties}">
+                        <Image
+                        Width="16"
+                        Height="16"
+                        Source="../Images/GeoprocessingEnvironmentSettings16.png" />
+                    </Button>
+                    <!--<Button
+                        Grid.Column="1"
+                        Margin="3,3,0,0"
+                        Style="{StaticResource buttonProperties}" />-->
+                </Grid>
+                <TextBlock
+                    Grid.Row="2"
+                    Grid.ColumnSpan="3"
+                    Margin="3,3,0,0"
+                    Text="{x:Static prop:Resources.LabelObserverPoints}" />
+                <ComboBox
+                    Grid.Row="3"
+                    Grid.ColumnSpan="3"
+                        Margin="3,3,0,0"
+                        ItemsSource="{Binding LLOS_ObserverLyrNames}"
+                        SelectedItem="{Binding SelectedLLOS_ObserverLyrName}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <TextBlock Text="{Binding}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <TextBox
+                    Grid.Row="4"
+                    Grid.ColumnSpan="2"
+                    Margin="3,3,0,0"
+                    VerticalContentAlignment="Center"
+                    Style="{StaticResource textboxStyle}"
+                    Text="{Binding Path=Point1Formatted, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
+                    Validation.ErrorTemplate="{StaticResource errorTemplate}">
+                    <TextBox.InputBindings>
+                        <KeyBinding
+                            Key="Enter"
+                            Command="{Binding EnterKeyCommand}"
+                            CommandParameter="{x:Static prop:Resources.ToolModeObserver}" />
+                    </TextBox.InputBindings>
+                </TextBox>
+                <ToggleButton 
+                    Grid.Row="4"
+                    Grid.Column="2"
+                    Margin="3,3,0,0"
+                    Style="{StaticResource BorderedTButtonStyle}"
+                    IsChecked="{Binding ObserverToolActive}"
+                    Command="{Binding ActivateToolCommand}"
+                    CommandParameter="{x:Static prop:Resources.ToolModeObserver}"
+                    ToolTip="{x:Static prop:Resources.TooltipObserverMapPointTool}">
+                    <Image
+                        Width="16"
+                        Height="16"
+                        Source="../Images/Add_Point.png" />
+                </ToggleButton>
+                <ListBox
+                    x:Name="listBoxObservers"
+                    Grid.Row="5"
+                    Grid.ColumnSpan="3"
+                    Height="60"
+                    Margin="3,3,0,0"
+                    ItemsSource="{Binding ObserverAddInPoints}"
+                    PreviewMouseRightButtonDown="listBoxObservers_PreviewMouseRightButtonDown"
+                    ScrollViewer.VerticalScrollBarVisibility="Visible"
+                    SelectionMode="Multiple"
+                    Style="{StaticResource listboxStyle}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Text}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                    <ListBox.ContextMenu>
+                        <ContextMenu DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Self}}">
+                            <MenuItem
+                                Command="{Binding DataContext.ImportCSVFileCommand}"
+                                CommandParameter="{x:Static prop:Resources.ToolModeObserver}"
+                                Header="{x:Static prop:Resources.LabelImport}"/>
+                            <MenuItem
+                                Command="{Binding DataContext.PasteCoordinatesCommand}"
+                                CommandParameter="{x:Static prop:Resources.ToolModeObserver}"
+                                Header="{x:Static prop:Resources.LabelPaste}"/>
+                            <MenuItem
+                                Command="{Binding DataContext.DeletePointCommand}"
+                                CommandParameter="{Binding Path=SelectedItems}"
+                                Header="{x:Static prop:Resources.MenuLabelDelete}" />
+                            <MenuItem
+                                Command="{Binding DataContext.DeleteAllPointsCommand}"
+                                CommandParameter="{x:Static prop:Resources.ToolModeObserver}"
+                                Header="{x:Static prop:Resources.MenuLabelDeleteAll}" />
+                        </ContextMenu>
+                    </ListBox.ContextMenu>
+                    <ListBox.InputBindings>
+                        <KeyBinding
+                            Key="Delete"
+                            Command="{Binding DeletePointCommand}"
+                            CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}}, Path=SelectedItems}" />
+                    </ListBox.InputBindings>
+                </ListBox>
+                <TextBlock
+                    Grid.Row="6"
+                    Grid.ColumnSpan="3"
+                    Margin="3,3,0,0"
+                    Text="{x:Static prop:Resources.LabelTargetPoints}" />
+                <ComboBox
+                    Grid.Row="7"
+                    Grid.ColumnSpan="3"
+                        Margin="3,3,0,0"
+                        ItemsSource="{Binding LLOS_TargetLyrNames}"
+                        SelectedItem="{Binding SelectedLLOS_TargetLyrName}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <TextBlock Text="{Binding}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <TextBox
+                    Grid.Row="8"
+                    Grid.ColumnSpan="2"
+                    Margin="3,3,0,0"
+                    VerticalContentAlignment="Center"
+                    Style="{StaticResource textboxStyle}"
+                    Text="{Binding Path=Point2Formatted, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
+                    Validation.ErrorTemplate="{StaticResource errorTemplate}">
+                    <TextBox.InputBindings>
+                        <KeyBinding
+                            Key="Enter"
+                            Command="{Binding EnterKeyCommand}"
+                            CommandParameter="{x:Static prop:Resources.ToolModeTarget}" />
+                    </TextBox.InputBindings>
+                </TextBox>
+                <ToggleButton
+                    Grid.Row="8"
+                    Grid.Column="2"
+                    Margin="3,3,0,0"
+                    
+                    Style="{StaticResource BorderedTButtonStyle}"
+                    Command="{Binding ActivateToolCommand}"
+                    CommandParameter="{x:Static prop:Resources.ToolModeTarget}"
+                    IsChecked="{Binding TargetToolActive}"
+                    ToolTip="{x:Static prop:Resources.TooltipTargetMapPointTool}">
+                    <Image
+                        Width="16"
+                        Height="16"
+                        Source="../Images/Add_Point.png" />
+                </ToggleButton>
+                <ListBox
+                    x:Name="listBoxTargets"
+                    Grid.Row="9"
+                    Grid.ColumnSpan="3"
+                    Height="60"
+                    Margin="3,3,0,0"
+                    ItemsSource="{Binding TargetAddInPoints}"
+                    PreviewMouseRightButtonDown="listBoxTargets_PreviewMouseRightButtonDown"
+                    ScrollViewer.VerticalScrollBarVisibility="Visible"
+                    SelectionMode="Multiple"
+                    Style="{StaticResource listboxStyle}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Text}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                    <ListBox.ContextMenu>
+                        <ContextMenu DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Self}}">
+                            <MenuItem
+                                Command="{Binding DataContext.ImportCSVFileCommand}"
+                                CommandParameter="{x:Static prop:Resources.ToolModeTarget}"
+                                Header="{x:Static prop:Resources.LabelImport}"/>
+                            <MenuItem
+                                Command="{Binding DataContext.PasteCoordinatesCommand}"
+                                CommandParameter="{x:Static prop:Resources.ToolModeTarget}"
+                                Header="{x:Static prop:Resources.LabelPaste}"/>
+                            <MenuItem
+                                Command="{Binding DataContext.DeletePointCommand}"
+                                CommandParameter="{Binding Path=SelectedItems}"
+                                Header="{x:Static prop:Resources.MenuLabelDelete}" />
+                            <MenuItem
+                                Command="{Binding DataContext.DeleteAllPointsCommand}"
+                                CommandParameter="{x:Static prop:Resources.ToolModeTarget}"
+                                Header="{x:Static prop:Resources.MenuLabelDeleteAll}" />
+                        </ContextMenu>
+                    </ListBox.ContextMenu>
+                    <ListBox.InputBindings>
+                        <KeyBinding
+                            Key="Delete"
+                            Command="{Binding DeletePointCommand}"
+                            CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}}, Path=SelectedItems}" />
+                    </ListBox.InputBindings>
+                </ListBox>
+                <GroupBox
+                    Grid.Row="10"
+                    Grid.ColumnSpan="4"
+                    Margin="0,3,0,0"
+                    Header="{x:Static prop:Resources.LabelOffsets}">
+                    <StackPanel>
+                        <TextBlock Margin="3,3,0,0" Text="{x:Static prop:Resources.LabelObserverOffset}" />
+                        <TextBox
+                            x:Name="tbObserverOffset"
+                            Margin="3,3,0,0"
+                            Style="{StaticResource textboxStyle}"
+                            Text="{Binding ObserverOffset, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
+                            Validation.ErrorTemplate="{StaticResource errorTemplate}" />
+                        <TextBlock Margin="3,3,0,0" Text="{x:Static prop:Resources.LabelTargetOffset}" />
+                        <TextBox
+                            x:Name="tbTargetOffset"
+                            Margin="3,3,0,0"
+                            Style="{StaticResource textboxStyle}"
+                            Text="{Binding TargetOffset, UpdateSourceTrigger=PropertyChanged, ValidatesOnExceptions=True}"
+                            Validation.ErrorTemplate="{StaticResource errorTemplate}" />
+                        <ComboBox
+                            x:Name="cmbOffsetUnitType"
+                            Height="Auto"
+                            Margin="3,3,0,0"
+                            ItemsSource="{Binding Source={StaticResource lineDistanceData}}"
+                            SelectedItem="{Binding Path=OffsetUnitType, Mode=TwoWay}">
+                        </ComboBox>
+                    </StackPanel>
+                </GroupBox>
+                <StackPanel
+                    Grid.Row="16"
+                    Grid.ColumnSpan="3"
+                    HorizontalAlignment="Right"
+                    Orientation="Horizontal">
+                    <Button
+                        Grid.Row="16"
+                        Grid.Column="0"
+                        Width="60"
+                        Margin="3,20,0,0"
+                        Command="{Binding CancelCommand}"
+                        Content="{x:Static prop:Resources.LabelCancel}"
+                        ToolTip="{x:Static prop:Resources.LabelCancel}">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource TransparentButtonStyle}">
+                                <Setter Property="IsEnabled" Value="False" />
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding ElementName=listBoxObservers, Path=HasItems}" Value="True" />
+                                            <Condition Binding="{Binding IsRunning}" Value="False" />
+                                        </MultiDataTrigger.Conditions>
+                                        <MultiDataTrigger.Setters>
+                                            <Setter Property="IsEnabled" Value="True" />
+                                        </MultiDataTrigger.Setters>
+                                    </MultiDataTrigger>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding ElementName=listBoxTargets, Path=HasItems}" Value="True" />
+                                            <Condition Binding="{Binding IsRunning}" Value="False" />
+                                        </MultiDataTrigger.Conditions>
+                                        <MultiDataTrigger.Setters>
+                                            <Setter Property="IsEnabled" Value="True" />
+                                        </MultiDataTrigger.Setters>
+                                    </MultiDataTrigger>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding IsLLOSValidSelection}" Value="True" />
+                                        </MultiDataTrigger.Conditions>
+                                        <MultiDataTrigger.Setters>
+                                            <Setter Property="IsEnabled" Value="True" />
+                                        </MultiDataTrigger.Setters>
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    <Button
+                        Grid.Row="16"
+                        Grid.Column="1"
+                        Width="60"
+                        Margin="3,20,0,0"
+                        Command="{Binding SubmitCommand}"
+                        Content="{x:Static prop:Resources.LabelOK}"
+                        ToolTip="{x:Static prop:Resources.LabelOK}">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource TransparentButtonStyle}">
+                                <Setter Property="IsEnabled" Value="False" />
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding ElementName=listBoxObservers, Path=HasItems}" Value="True" />
+                                            <Condition Binding="{Binding ElementName=listBoxTargets, Path=HasItems}" Value="True" />
+                                            <Condition Binding="{Binding ElementName=tbObserverOffset, Path=(Validation.HasError)}" Value="False" />
+                                            <Condition Binding="{Binding ElementName=tbTargetOffset, Path=(Validation.HasError)}" Value="False" />
+                                            <Condition Binding="{Binding IsRunning}" Value="False" />
+                                            <Condition Binding="{Binding IsInputValid}" Value="True"/>
+                                        </MultiDataTrigger.Conditions>
+                                        <MultiDataTrigger.Setters>
+                                            <Setter Property="IsEnabled" Value="True" />
+                                        </MultiDataTrigger.Setters>
+                                    </MultiDataTrigger>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding IsLLOSValidSelection}" Value="True" />
+                                            <Condition Binding="{Binding IsInputValid}" Value="True"/>
+                                        </MultiDataTrigger.Conditions>
+                                        <MultiDataTrigger.Setters>
+                                            <Setter Property="IsEnabled" Value="True" />
+                                        </MultiDataTrigger.Setters>
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                    <Button
+                        Grid.Row="16"
+                        Grid.Column="2"
+                        Margin="3,20,0,0"
+                        Command="{Binding ClearGraphicsCommand}"
+                        Content="{x:Static prop:Resources.LabelClearGraphics}"
+                        ToolTip="{x:Static prop:Resources.LabelClearGraphics}"
+                        Visibility="{Binding Path=ClearGraphicsVisible, Converter={StaticResource BoolToVis}}" >
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource TransparentButtonStyle}">
+                                <Setter Property="IsEnabled" Value="False" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasMapGraphics}" Value="True">
+                                        <Setter Property="IsEnabled" Value="True" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
