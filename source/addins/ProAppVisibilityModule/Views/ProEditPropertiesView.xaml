@@ -4,11 +4,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:controls="clr-namespace:ArcGIS.Desktop.Framework.Controls;assembly=ArcGIS.Desktop.Framework"
-    xmlns:extensions="clr-namespace:ArcGIS.Desktop.Extensions;assembly=ArcGIS.Desktop.Extensions"
-    xmlns:enum="clr-namespace:ProAppVisibilityModule.Common.Enums"
+    xmlns:extensions="clr-namespace:ArcGIS.Desktop.Extensions;assembly=ArcGIS.Desktop.Extensions"     
     xmlns:helpers="clr-namespace:ProAppVisibilityModule.Helpers" 
     xmlns:prop="clr-namespace:ProAppVisibilityModule.Properties" 
-    xmlns:local="clr-namespace:ProAppVisibilityModule.Views"
+    xmlns:local="clr-namespace:ProAppVisibilityModule.Common.Enums"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     Title="{x:Static prop:Resources.TitleEditProperties}"
@@ -22,14 +21,14 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <extensions:DesignOnlyResourceDictionary Source="pack://application:,,,/ArcGIS.Desktop.Framework;component\Themes\Default.xaml"/>
-                <ResourceDictionary Source="../Common/MAResourceDictionary.xaml" />
+                <ResourceDictionary Source="/Visibility;component/Common/MAResourceDictionary.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <ObjectDataProvider
                 x:Key="coordinateTypes"
                 MethodName="GetValues"
                 ObjectType="{x:Type sys:Enum}">
                 <ObjectDataProvider.MethodParameters>
-                    <x:TypeExtension TypeName="enum:CoordinateTypes" />
+                    <x:TypeExtension TypeName="local:CoordinateTypes" />
                 </ObjectDataProvider.MethodParameters>
             </ObjectDataProvider>
         </ResourceDictionary>

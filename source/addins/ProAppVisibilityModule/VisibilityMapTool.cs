@@ -16,12 +16,17 @@ using System;
 using System.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
+using ProAppVisibilityModule.Helpers;
 using ArcGIS.Core.Geometry;
 
 namespace ProAppVisibilityModule
 {
     internal class VisibilityMapTool : MapTool
     {
+        private const string MAP_POINT_TOOL_ACTIVATED = "MAP_POINT_TOOL_ACTIVATED";
+        private const string MAP_POINT_TOOL_DEACTIVATED = "MAP_POINT_TOOL_DEACTIVATED";
+        private const string NEW_MAP_POINT = "NEW_MAP_POINT";
+        private const string MOUSE_MOVE_POINT = "MOUSE_MOVE_POINT";
         public VisibilityMapTool()
         {
             IsSketchTool = true;
@@ -37,15 +42,13 @@ namespace ProAppVisibilityModule
 
         protected override Task OnToolActivateAsync(bool active)
         {
-            //Mediator.NotifyColleagues(Helpers.Constants.MAP_POINT_TOOL_ACTIVATED, active);
-            ToolActiveDeactive(active, Helpers.Constants.MAP_POINT_TOOL_ACTIVATED);
+            ToolActiveDeactive(active, MAP_POINT_TOOL_ACTIVATED);
             return base.OnToolActivateAsync(active);
         }
 
         protected override Task OnToolDeactivateAsync(bool hasMapViewChanged)
         {
-            //Mediator.NotifyColleagues(Helpers.Constants.MAP_POINT_TOOL_DEACTIVATED, hasMapViewChanged);
-            ToolActiveDeactive(hasMapViewChanged, Helpers.Constants.MAP_POINT_TOOL_DEACTIVATED);
+            ToolActiveDeactive(hasMapViewChanged, MAP_POINT_TOOL_DEACTIVATED);
             return base.OnToolDeactivateAsync(hasMapViewChanged);
         }
 
@@ -54,9 +57,7 @@ namespace ProAppVisibilityModule
             try
             {
                 var mp = geometry as MapPoint;
-                //Mediator.NotifyColleagues(Helpers.Constants.NEW_MAP_POINT, mp);
-                VisibilitySketchMouseEvents(mp, Helpers.Constants.NEW_MAP_POINT);
-
+                VisibilitySketchMouseEvents(mp, NEW_MAP_POINT);
             }
             catch (Exception ex)
             {
@@ -78,10 +79,9 @@ namespace ProAppVisibilityModule
                 QueuedTask.Run(() =>
                 {
                     var mp = MapView.Active.ClientToMap(e.ClientPoint);
-                    //Mediator.NotifyColleagues(Helpers.Constants.MOUSE_MOVE_POINT, mp);
                     System.Windows.Application.Current.Dispatcher.Invoke(() =>
                     {
-                        VisibilitySketchMouseEvents(mp, Helpers.Constants.MOUSE_MOVE_POINT);
+                        VisibilitySketchMouseEvents(mp, MOUSE_MOVE_POINT);
                     });
                 });
             }
@@ -95,82 +95,80 @@ namespace ProAppVisibilityModule
 
         private void VisibilitySketchMouseEvents(MapPoint mp, string mouseevent)
         {
-            VisibilityDockpaneViewModel vsVm = VisibilityModule.VisibuiltyVm;
-            if (vsVm != null)
+            VisibilityDockpaneViewModel vsDKVM = VisibilityModule.VisibiltyVM;
+            if (vsDKVM != null)
             {
-                System.Windows.Controls.TabItem tabItem = vsVm.SelectedTab as System.Windows.Controls.TabItem;
+                System.Windows.Controls.TabItem tabItem = vsDKVM.SelectedTab as System.Windows.Controls.TabItem;
                 if (tabItem != null)
                 {
                     if (tabItem.Header.Equals(Properties.Resources.LabelTabLLOS))
                     {
-                        Views.VisibilityLLOSView vsLlos = (tabItem.Content as System.Windows.Controls.UserControl).Content as Views.VisibilityLLOSView;
-                        ViewModels.ProLLOSViewModel llosVm = vsLlos.DataContext as ViewModels.ProLLOSViewModel;
-                        llosVm.IsActiveTab = true;
-                        if (mouseevent.Equals(Helpers.Constants.NEW_MAP_POINT))
+                        Views.VisibilityLLOSView vsLLOS = (tabItem.Content as System.Windows.Controls.UserControl).Content as Views.VisibilityLLOSView;
+                        ViewModels.ProLLOSViewModel llosVM = vsLLOS.DataContext as ViewModels.ProLLOSViewModel;
+                        if (mouseevent.Equals(NEW_MAP_POINT))
                         {
-                            llosVm.NewMapPoint.Execute(mp);
+                            llosVM.OnMapClickEvent(mp);
+                            llosVM.NewMapPoint.Execute(mp);
                         }
-                        else if (mouseevent.Equals(Helpers.Constants.MOUSE_MOVE_POINT))
+                        else if (mouseevent.Equals(MOUSE_MOVE_POINT))
                         {
-                            llosVm.MouseMovePoint.Execute(mp);
+                            llosVM.MouseMovePoint.Execute(mp);
                         }
                     }
                     else if (tabItem.Header.Equals(Properties.Resources.LabelTabRLOS))
                     {
-                        Views.VisibilityRLOSView vsRlos = (tabItem.Content as System.Windows.Controls.UserControl).Content as Views.VisibilityRLOSView;
-                        ViewModels.ProRLOSViewModel rlosVm = vsRlos.DataContext as ViewModels.ProRLOSViewModel;
-                        rlosVm.IsActiveTab = true;
-                        if (mouseevent.Equals(Helpers.Constants.NEW_MAP_POINT))
+                        Views.VisibilityRLOSView vsRLOS = (tabItem.Content as System.Windows.Controls.UserControl).Content as Views.VisibilityRLOSView;
+                        ViewModels.ProRLOSViewModel rlosVM = vsRLOS.DataContext as ViewModels.ProRLOSViewModel;
+                        if (mouseevent.Equals(NEW_MAP_POINT))
                         {
-                            rlosVm.NewMapPoint.Execute(mp);
+                            rlosVM.OnMapClickEvent(mp);
+                            rlosVM.NewMapPoint.Execute(mp);
                         }
-                        else if (mouseevent.Equals(Helpers.Constants.MOUSE_MOVE_POINT))
+                        else if (mouseevent.Equals(MOUSE_MOVE_POINT))
                         {
-                            rlosVm.MouseMovePoint.Execute(mp);
+                            rlosVM.MouseMovePoint.Execute(mp);
                         }
                     }
                 }
             }
         }
-        
+
+
         private void ToolActiveDeactive(bool activeOrDeactive, string mouseevent)
         {
-            VisibilityDockpaneViewModel vsVm = VisibilityModule.VisibuiltyVm;
-            if (vsVm != null)
+            VisibilityDockpaneViewModel vsVM = VisibilityModule.VisibiltyVM;
+            if (vsVM != null)
             {
-                System.Windows.Controls.TabItem tabItem = vsVm.SelectedTab as System.Windows.Controls.TabItem;
-                if (tabItem != null)
+                Views.VisibilityLLOSView vsLLOS = vsVM.LLOSView;
+                if(vsLLOS != null)
                 {
-                    if (tabItem.Header.Equals(Properties.Resources.LabelTabLLOS))
+                    ViewModels.ProLLOSViewModel llosVM = vsLLOS.DataContext as ViewModels.ProLLOSViewModel;
+                    if (mouseevent.Equals(MAP_POINT_TOOL_ACTIVATED))
                     {
-                        Views.VisibilityLLOSView vsLlos = (tabItem.Content as System.Windows.Controls.UserControl).Content as Views.VisibilityLLOSView;
-                        ViewModels.ProLLOSViewModel llosVm = vsLlos.DataContext as ViewModels.ProLLOSViewModel;
-                        llosVm.IsActiveTab = true;
-                        if (mouseevent.Equals(Helpers.Constants.MAP_POINT_TOOL_ACTIVATED))
-                        {
-                            llosVm.MapPointToolActivated.Execute(activeOrDeactive);
-                        }
-                        else if (mouseevent.Equals(Helpers.Constants.MAP_POINT_TOOL_DEACTIVATED))
-                        {
-                            llosVm.MapPointToolDeActivated.Execute(activeOrDeactive);
-                        }
+                        llosVM.MapPointToolActivated.Execute(activeOrDeactive);
                     }
-                    else if (tabItem.Header.Equals(Properties.Resources.LabelTabRLOS))
+                    else if (mouseevent.Equals(MAP_POINT_TOOL_DEACTIVATED))
                     {
-                        Views.VisibilityRLOSView vsRlos = (tabItem.Content as System.Windows.Controls.UserControl).Content as Views.VisibilityRLOSView;
-                        ViewModels.ProRLOSViewModel rlosVm = vsRlos.DataContext as ViewModels.ProRLOSViewModel;
-                        rlosVm.IsActiveTab = true;
-                        if (mouseevent.Equals(Helpers.Constants.MAP_POINT_TOOL_ACTIVATED))
-                        {
-                            rlosVm.MapPointToolActivated.Execute(activeOrDeactive);
-                        }
-                        else if (mouseevent.Equals(Helpers.Constants.MAP_POINT_TOOL_DEACTIVATED))
-                        {
-                            rlosVm.MapPointToolDeActivated.Execute(activeOrDeactive);
-                        }
+                        llosVM.MapPointToolDeActivated.Execute(activeOrDeactive);
+                    }
+                }
+                
+
+                Views.VisibilityRLOSView vsRLOS = vsVM.RLOSView;
+                if(vsRLOS != null)
+                {
+                    ViewModels.ProRLOSViewModel rlosVM = vsRLOS.DataContext as ViewModels.ProRLOSViewModel;
+                    if (mouseevent.Equals(MAP_POINT_TOOL_ACTIVATED))
+                    {
+                        rlosVM.MapPointToolActivated.Execute(activeOrDeactive);
+                    }
+                    else if (mouseevent.Equals(MAP_POINT_TOOL_DEACTIVATED))
+                    {
+                        rlosVM.MapPointToolDeActivated.Execute(activeOrDeactive);
                     }
                 }
             }
         }
+
     }
 }

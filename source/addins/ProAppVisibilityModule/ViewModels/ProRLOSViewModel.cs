@@ -21,8 +21,8 @@ using System.Collections.Generic;
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Core;
+using ProAppVisibilityModule.Common.Enums;
 using ProAppVisibilityModule.Helpers;
-using ProAppVisibilityModule.Properties;
 using ArcGIS.Desktop.Core.Geoprocessing;
 using ArcGIS.Core.Data;
 using ArcGIS.Desktop.Editing;
@@ -30,8 +30,6 @@ using ArcGIS.Desktop.Framework.Threading.Tasks;
 using System.Text.RegularExpressions;
 using System.Collections.ObjectModel;
 using ProAppVisibilityModule.Models;
-using ProAppVisibilityModule.Common.Enums;
-
 using ArcGIS.Core.CIM;
 
 namespace ProAppVisibilityModule.ViewModels
@@ -41,70 +39,70 @@ namespace ProAppVisibilityModule.ViewModels
         #region Properties
 
         private int executionCounter = 0;
-        private string _ObserversLayerName = Resources.RLOSObserversLayerName;
+        private string _ObserversLayerName = ProAppVisibilityModule.Properties.Resources.RLOSObserversLayerName;
         public string ObserversLayerName
         {
             get
             {
                 if (executionCounter > 0)
                 {
-                    _ObserversLayerName = string.Format("{0}_{1}", Resources.RLOSObserversLayerName, executionCounter);
+                    _ObserversLayerName = string.Format("{0}_{1}", ProAppVisibilityModule.Properties.Resources.RLOSObserversLayerName, executionCounter);
                 }
                 return _ObserversLayerName;
             }
             set { }
         }
 
-        private string _FeatureDatasetName = Resources.RLOSFeatureDatasetName;
+        private string _FeatureDatasetName = ProAppVisibilityModule.Properties.Resources.RLOSFeatureDatasetName;
         public string FeatureDatasetName
         {
             get
             {
                 if (executionCounter > 0)
                 {
-                    _FeatureDatasetName = string.Format("{0}_{1}", Resources.RLOSFeatureDatasetName, executionCounter);
+                    _FeatureDatasetName = string.Format("{0}_{1}", ProAppVisibilityModule.Properties.Resources.RLOSFeatureDatasetName, executionCounter);
                 }
                 return _FeatureDatasetName;
             }
             set { }
         }
 
-        private string _RLOSConvertedPolygonsLayerName = Resources.RLOSConvertedPolygonsLayerName;
+        private string _RLOSConvertedPolygonsLayerName = ProAppVisibilityModule.Properties.Resources.RLOSConvertedPolygonsLayerName;
         public string RLOSConvertedPolygonsLayerName
         {
             get
             {
                 if (executionCounter > 0)
                 {
-                    _RLOSConvertedPolygonsLayerName = string.Format("{0}_{1}", Resources.RLOSConvertedPolygonsLayerName, executionCounter);
+                    _RLOSConvertedPolygonsLayerName = string.Format("{0}_{1}", ProAppVisibilityModule.Properties.Resources.RLOSConvertedPolygonsLayerName, executionCounter);
                 }
                 return _RLOSConvertedPolygonsLayerName;
             }
             set { }
         }
 
-        private string _RLOSOutputLayerName = Resources.RLOSOutputLayerName;
+        private string _RLOSOutputLayerName = ProAppVisibilityModule.Properties.Resources.RLOSOutputLayerName;
         public string RLOSOutputLayerName
         {
             get
             {
                 if (executionCounter > 0)
                 {
-                    _RLOSOutputLayerName = string.Format("{0}_{1}", Resources.RLOSOutputLayerName, executionCounter);
+                    _RLOSOutputLayerName = string.Format("{0}_{1}", ProAppVisibilityModule.Properties.Resources.RLOSOutputLayerName, executionCounter);
                 }
                 return _RLOSOutputLayerName;
             }
             set { }
         }
 
-        private string _RLOSMaskLayerName = Resources.RLOSMaskLayerName;
+        private string _RLOSMaskLayerName = ProAppVisibilityModule.Properties.Resources.RLOSMaskLayerName;
         public string RLOSMaskLayerName
         {
             get
             {
                 if (executionCounter > 0)
                 {
-                    _RLOSMaskLayerName = string.Format("{0}_{1}", Resources.RLOSMaskLayerName, executionCounter);
+                    _RLOSMaskLayerName = string.Format("{0}_{1}", ProAppVisibilityModule.Properties.Resources.RLOSMaskLayerName, executionCounter);
                 }
                 return _RLOSMaskLayerName;
             }
@@ -118,7 +116,7 @@ namespace ProAppVisibilityModule.ViewModels
             set
             {
                 if (value < 0.0)
-                    throw new ArgumentException(Resources.AEMustBePositive);
+                    throw new ArgumentException(ProAppVisibilityModule.Properties.Resources.AEMustBePositive);
 
                 _SurfaceOffset = value;
                 RaisePropertyChanged(() => SurfaceOffset);
@@ -132,10 +130,10 @@ namespace ProAppVisibilityModule.ViewModels
             set
             {
                 if (value < 0.0)
-                    throw new ArgumentException(Resources.AEMustBePositive);
+                    throw new ArgumentException(ProAppVisibilityModule.Properties.Resources.AEMustBePositive);
 
                 if (value > MaxDistance)
-                    throw new ArgumentException(Resources.AENumMustBeLess);
+                    throw new ArgumentException(ProAppVisibilityModule.Properties.Resources.AENumMustBeLess);
 
                 _MinDistance = value;
                 RaisePropertyChanged(() => MinDistance);
@@ -149,10 +147,10 @@ namespace ProAppVisibilityModule.ViewModels
             set
             {
                 if (value < 0.0)
-                    throw new ArgumentException(Resources.AEMustBePositive);
+                    throw new ArgumentException(ProAppVisibilityModule.Properties.Resources.AEMustBePositive);
 
                 if (value < MinDistance)
-                    throw new ArgumentException(Resources.AENumMustBeGreater);
+                    throw new ArgumentException(ProAppVisibilityModule.Properties.Resources.AENumMustBeGreater);
 
                 _MaxDistance = value;
                 RaisePropertyChanged(() => MaxDistance);
@@ -168,7 +166,7 @@ namespace ProAppVisibilityModule.ViewModels
                 var checkAngleInDegrees = GetAngularDistanceFromTo(AngularUnitType, AngularTypes.DEGREES, value);
 
                 if (checkAngleInDegrees < 0.0 || checkAngleInDegrees > 360.0)
-                    throw new ArgumentException(string.Format(Resources.AENumRange, 0, GetAngularDistanceFromTo(AngularTypes.DEGREES, AngularUnitType, 360.0)));
+                    throw new ArgumentException(string.Format(ProAppVisibilityModule.Properties.Resources.AENumRange, 0, GetAngularDistanceFromTo(AngularTypes.DEGREES, AngularUnitType, 360.0)));
 
                 _LeftHorizontalFOV = value;
                 RaisePropertyChanged(() => LeftHorizontalFOV);
@@ -183,7 +181,7 @@ namespace ProAppVisibilityModule.ViewModels
                 var checkAngleInDegrees = GetAngularDistanceFromTo(AngularUnitType, AngularTypes.DEGREES, value);
 
                 if (checkAngleInDegrees < 0.0 || checkAngleInDegrees > 360.0)
-                    throw new ArgumentException(string.Format(Resources.AENumRange, 0, GetAngularDistanceFromTo(AngularTypes.DEGREES, AngularUnitType, 360.0)));
+                    throw new ArgumentException(string.Format(ProAppVisibilityModule.Properties.Resources.AENumRange, 0, GetAngularDistanceFromTo(AngularTypes.DEGREES, AngularUnitType, 360.0)));
 
                 _RightHorizontalFOV = value;
                 RaisePropertyChanged(() => RightHorizontalFOV);
@@ -198,7 +196,7 @@ namespace ProAppVisibilityModule.ViewModels
                 var checkAngleInDegrees = GetAngularDistanceFromTo(AngularUnitType, AngularTypes.DEGREES, value);
 
                 if (checkAngleInDegrees < -90.0 || checkAngleInDegrees > 0.0)
-                    throw new ArgumentException(string.Format(Resources.AENumRange, GetAngularDistanceFromTo(AngularTypes.DEGREES, AngularUnitType, -90.0), 0.0));
+                    throw new ArgumentException(string.Format(ProAppVisibilityModule.Properties.Resources.AENumRange, GetAngularDistanceFromTo(AngularTypes.DEGREES, AngularUnitType, -90.0), 0.0));
 
                 _BottomVerticalFOV = value;
                 RaisePropertyChanged(() => BottomVerticalFOV);
@@ -214,7 +212,7 @@ namespace ProAppVisibilityModule.ViewModels
                 var checkAngleInDegrees = GetAngularDistanceFromTo(AngularUnitType, AngularTypes.DEGREES, value);
 
                 if (checkAngleInDegrees < -0.0 || checkAngleInDegrees > 90.0)
-                    throw new ArgumentException(string.Format(Resources.AENumRange, 0.0, GetAngularDistanceFromTo(AngularTypes.DEGREES, AngularUnitType, 90.0)));
+                    throw new ArgumentException(string.Format(ProAppVisibilityModule.Properties.Resources.AENumRange, 0.0, GetAngularDistanceFromTo(AngularTypes.DEGREES, AngularUnitType, 90.0)));
 
                 _TopVerticalFOV = value;
                 RaisePropertyChanged(() => TopVerticalFOV);
@@ -317,8 +315,8 @@ namespace ProAppVisibilityModule.ViewModels
 
                 if (string.IsNullOrEmpty(SelectedSurfaceName))
                 {
-                    MessageBox.Show(Resources.MsgSurfaceLayerNotFound,
-                        Resources.CaptionError, MessageBoxButton.OK);
+                    MessageBox.Show(ProAppVisibilityModule.Properties.Resources.MsgSurfaceLayerNotFound,
+                        ProAppVisibilityModule.Properties.Resources.CaptionError, MessageBoxButton.OK);
                     return;
                 }
 
@@ -326,7 +324,7 @@ namespace ProAppVisibilityModule.ViewModels
                 IsElevationSurfaceValid = ValidateElevationSurface(MapView.Active.Map, SelectedSurfaceName);
                 if (!await IsElevationSurfaceValid)
                 {
-                    ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(Resources.LOSDataFrameMatch, Resources.LOSSpatialReferenceCaption);
+                    ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(ProAppVisibilityModule.Properties.Resources.LOSDataFrameMatch, ProAppVisibilityModule.Properties.Resources.LOSSpatialReferenceCaption);
                     SetErrorTemplate(false);
                     return;
                 }
@@ -345,12 +343,12 @@ namespace ProAppVisibilityModule.ViewModels
                     bool success = await ExecuteVisibilityRLOS();
 
                     if (!success)
-                        MessageBox.Show("RLOS computations did not complete correctly.\nPlease check your parameters and try again.",
-                            Resources.CaptionError);
+                        MessageBox.Show(Properties.Resources.RLOSViewError,
+                            ProAppVisibilityModule.Properties.Resources.CaptionError);
                 }
                 else
                 {
-                    ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(Resources.OutOfExtentMsg, Resources.OutOfExtentHeader);
+                    ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(ProAppVisibilityModule.Properties.Resources.OutOfExtentMsg, ProAppVisibilityModule.Properties.Resources.OutOfExtentHeader);
                 }
 
                 DeactivateTool(VisibilityMapTool.ToolId);
@@ -361,8 +359,8 @@ namespace ProAppVisibilityModule.ViewModels
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine(ex.Message);
-                ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(Resources.ExceptionSomethingWentWrong,
-                                                                Resources.CaptionError);
+                ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(ProAppVisibilityModule.Properties.Resources.ExceptionSomethingWentWrong,
+                                                                ProAppVisibilityModule.Properties.Resources.CaptionError);
             }
             finally
             {
@@ -391,7 +389,7 @@ namespace ProAppVisibilityModule.ViewModels
                 var surfaceSR = await GetSpatialReferenceFromLayer(SelectedSurfaceName);
                 if (surfaceSR == null || !surfaceSR.IsProjected)
                 {
-                    MessageBox.Show(Resources.RLOSUserPrompt, Resources.RLOSUserPromptCaption);
+                    MessageBox.Show(ProAppVisibilityModule.Properties.Resources.RLOSUserPrompt, ProAppVisibilityModule.Properties.Resources.RLOSUserPromptCaption);
                     return false;
                 }
 
@@ -400,12 +398,12 @@ namespace ProAppVisibilityModule.ViewModels
                 Layer surfaceLayer = GetLayerFromMapByName(SelectedSurfaceName);
                 if (surfaceLayer is ImageServiceLayer)
                 {
-                    MessageBoxResult mbr = MessageBox.Show(Resources.MsgLayerIsImageService,
-                        Resources.CaptionLayerIsImageService, MessageBoxButton.YesNo);
+                    MessageBoxResult mbr = MessageBox.Show(ProAppVisibilityModule.Properties.Resources.MsgLayerIsImageService,
+                        ProAppVisibilityModule.Properties.Resources.CaptionLayerIsImageService, MessageBoxButton.YesNo);
 
                     if (mbr == MessageBoxResult.No)
                     {
-                        System.Windows.MessageBox.Show(Resources.MsgTryAgain, Resources.MsgCalcCancelled);
+                        System.Windows.MessageBox.Show(ProAppVisibilityModule.Properties.Resources.MsgTryAgain, ProAppVisibilityModule.Properties.Resources.MsgCalcCancelled);
                         return false;
                     }
                 }
@@ -413,7 +411,7 @@ namespace ProAppVisibilityModule.ViewModels
                 //Validate Dataframe Spatial reference with surface spatial reference
                 if (MapView.Active.Map.SpatialReference.Wkid != surfaceSR.Wkid)
                 {
-                    MessageBox.Show(Resources.LOSDataFrameMatch, Resources.LOSSpatialReferenceCaption);
+                    MessageBox.Show(ProAppVisibilityModule.Properties.Resources.LOSDataFrameMatch, ProAppVisibilityModule.Properties.Resources.LOSSpatialReferenceCaption);
                     return false;
                 }
 
@@ -423,7 +421,7 @@ namespace ProAppVisibilityModule.ViewModels
                     {
                         executionCounter = 0;
                         int featureDataSetSuffix = 0;
-                        var enterpriseDefinitionNames = geodatabase.GetDefinitions<FeatureDatasetDefinition>().Where(i => i.GetName().StartsWith(Resources.RLOSFeatureDatasetName)).Select(i => i.GetName()).ToList();
+                        var enterpriseDefinitionNames = geodatabase.GetDefinitions<FeatureDatasetDefinition>().Where(i => i.GetName().StartsWith(ProAppVisibilityModule.Properties.Resources.RLOSFeatureDatasetName)).Select(i => i.GetName()).ToList();
                         foreach (var defName in enterpriseDefinitionNames)
                         {
                             int n;
@@ -433,10 +431,10 @@ namespace ProAppVisibilityModule.ViewModels
                         }
                         featureDataSetSuffix = enterpriseDefinitionNames.Count > 0 ? featureDataSetSuffix + 1 : 0;
 
-                        var observerLyrSuffix = GetLayerSuffix(Resources.LLOSObserversLayerName, geodatabase);
-                        var convertedPolygonLyrSuffix = GetLayerSuffix(Resources.RLOSConvertedPolygonsLayerName, geodatabase);
-                        var outputLyrSuffix = GetLayerSuffix(Resources.RLOSOutputLayerName, geodatabase);
-                        var maskLyrSuffix = GetLayerSuffix(Resources.RLOSMaskLayerName, geodatabase);
+                        var observerLyrSuffix = GetLayerSuffix(ProAppVisibilityModule.Properties.Resources.LLOSObserversLayerName, geodatabase);
+                        var convertedPolygonLyrSuffix = GetLayerSuffix(ProAppVisibilityModule.Properties.Resources.RLOSConvertedPolygonsLayerName, geodatabase);
+                        var outputLyrSuffix = GetLayerSuffix(ProAppVisibilityModule.Properties.Resources.RLOSOutputLayerName, geodatabase);
+                        var maskLyrSuffix = GetLayerSuffix(ProAppVisibilityModule.Properties.Resources.RLOSMaskLayerName, geodatabase);
 
                         executionCounter = new List<int> { featureDataSetSuffix, observerLyrSuffix, convertedPolygonLyrSuffix, outputLyrSuffix, maskLyrSuffix }.Max();
                     }
@@ -453,9 +451,9 @@ namespace ProAppVisibilityModule.ViewModels
 
                 // add fields for observer offset
 
-                await FeatureClassHelper.AddFieldToLayer(ObserversLayerName, Resources.OffsetFieldName, "DOUBLE");
-                await FeatureClassHelper.AddFieldToLayer(ObserversLayerName, Resources.OffsetWithZFieldName, "DOUBLE");
-                await FeatureClassHelper.AddFieldToLayer(ObserversLayerName, Resources.IsOutOfExtentFieldName, "SHORT");
+                await FeatureClassHelper.AddFieldToLayer(ObserversLayerName, ProAppVisibilityModule.Properties.Resources.OffsetFieldName, "DOUBLE");
+                await FeatureClassHelper.AddFieldToLayer(ObserversLayerName, ProAppVisibilityModule.Properties.Resources.OffsetWithZFieldName, "DOUBLE");
+                await FeatureClassHelper.AddFieldToLayer(ObserversLayerName, ProAppVisibilityModule.Properties.Resources.IsOutOfExtentFieldName, "SHORT");
 
                 // add observer points to feature layer
                 await FeatureClassHelper.CreatingFeatures(ObserversLayerName, observerPoints, GetAsMapZUnits(surfaceSR, ObserverOffset.Value));
@@ -464,7 +462,7 @@ namespace ProAppVisibilityModule.ViewModels
                 if (ObserverInExtentPoints.Any() || RLOS_ObserversInExtent.Any())
                 {
                     // update with surface information
-                    success = await FeatureClassHelper.AddSurfaceInformation(ObserversLayerName, SelectedSurfaceName, Resources.ZFieldName);
+                    success = await FeatureClassHelper.AddSurfaceInformation(ObserversLayerName, SelectedSurfaceName, ProAppVisibilityModule.Properties.Resources.ZFieldName);
                     if (!success)
                         return false;
 
@@ -479,7 +477,7 @@ namespace ProAppVisibilityModule.ViewModels
                     var verticalUpperAngleInDegrees = GetAngularDistanceFromTo(AngularUnitType, AngularTypes.DEGREES, TopVerticalFOV);
                     var verticalLowerAngleInDegrees = GetAngularDistanceFromTo(AngularUnitType, AngularTypes.DEGREES, BottomVerticalFOV);
 
-                    await FeatureClassHelper.UpdateShapeWithZ(ObserversLayerName, Resources.ZFieldName, observerOffsetInMapZUnits);
+                    await FeatureClassHelper.UpdateShapeWithZ(ObserversLayerName, ProAppVisibilityModule.Properties.Resources.ZFieldName, observerOffsetInMapZUnits);
 
                     await CreateMask(RLOSMaskLayerName, minDistanceInMapUnits, maxDistanceInMapUnits, horizontalStartAngleInDegrees,
                         horizontalEndAngleInDegrees, surfaceSR, observerPoints);
@@ -522,7 +520,7 @@ namespace ProAppVisibilityModule.ViewModels
 
                 // add observer points present out of extent to feature layer
                 var outOfExtent = new ObservableCollection<AddInPoint>(RLOS_ObserversOutOfExtent.Select(x => x.AddInPoint).Union(ObserverOutExtentPoints));
-                await FeatureClassHelper.CreatingFeatures(ObserversLayerName, outOfExtent, GetAsMapZUnits(surfaceSR, ObserverOffset.Value), Resources.IsOutOfExtentFieldName);
+                await FeatureClassHelper.CreatingFeatures(ObserversLayerName, outOfExtent, GetAsMapZUnits(surfaceSR, ObserverOffset.Value), ProAppVisibilityModule.Properties.Resources.IsOutOfExtentFieldName);
 
                 await FeatureClassHelper.CreateUniqueValueRenderer(GetLayerFromMapByName(RLOSConvertedPolygonsLayerName) as FeatureLayer, ShowNonVisibleData, RLOSConvertedPolygonsLayerName, ShowClassicViewshed);
 
@@ -617,15 +615,16 @@ namespace ProAppVisibilityModule.ViewModels
                         var msgString = string.Empty;
                         if (observerIDCollection.Any())
                         {
-                            msgString = "Observers lying outside the extent of elevation surface are: " + observerString;
+                            
+                            msgString = Properties.Resources.LLOSViewObs + observerString;
                         }
                         ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(msgString,
-                                                    "Unable To Process For Few Locations");
+                                                    Properties.Resources.LLOSViewObsCaption);
                     }
                     else
                     {
-                        ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(Resources.LLOSPointsOutsideOfSurfaceExtent,
-                        Resources.MsgCalcCancelled);
+                        ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(ProAppVisibilityModule.Properties.Resources.LLOSPointsOutsideOfSurfaceExtent,
+                        ProAppVisibilityModule.Properties.Resources.MsgCalcCancelled);
                     }
 
                 }

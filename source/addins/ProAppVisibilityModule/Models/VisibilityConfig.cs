@@ -18,7 +18,7 @@ using System.Xml.Serialization;
 using System.Xml;
 using ProAppVisibilityModule.Helpers;
 using System.IO;
-using CoordinateConversionLibrary;
+using ProAppVisibilityModule.Common.Enums;
 
 namespace ProAppVisibilityModule.Models
 {
@@ -38,7 +38,6 @@ namespace ProAppVisibilityModule.Models
             {
                 displayCoordinateType = value;
                 RaisePropertyChanged(() => DisplayCoordinateType);
-                //Helpers.Mediator.NotifyColleagues(Helpers.Constants.DISPLAY_COORDINATE_TYPE_CHANGED, null);
                 DisplayCoordinateTypeChange();
             }
         }
@@ -111,23 +110,23 @@ namespace ProAppVisibilityModule.Models
 
         private void DisplayCoordinateTypeChange()
         {
-            VisibilityDockpaneViewModel vsDkVm = VisibilityModule.VisibuiltyVm;
-            if (vsDkVm != null)
+            VisibilityDockpaneViewModel vsDKVM = VisibilityModule.VisibiltyVM;
+            if (vsDKVM != null)
             {
-                System.Windows.Controls.TabItem tabItem = vsDkVm.SelectedTab as System.Windows.Controls.TabItem;
+                System.Windows.Controls.TabItem tabItem = vsDKVM.SelectedTab as System.Windows.Controls.TabItem;
                 if (tabItem != null)
                 {
                     if (tabItem.Header.Equals(Properties.Resources.LabelTabLLOS))
                     {
-                        Views.VisibilityLLOSView vsLlos = (tabItem.Content as System.Windows.Controls.UserControl).Content as Views.VisibilityLLOSView;
-                        ViewModels.ProLLOSViewModel llosVm = vsLlos.DataContext as ViewModels.ProLLOSViewModel;
-                        llosVm.DisplayCoordinateTypeChanged.Execute(null);
+                        Views.VisibilityLLOSView vsLLOS = (tabItem.Content as System.Windows.Controls.UserControl).Content as Views.VisibilityLLOSView;
+                        ViewModels.ProLLOSViewModel llosVM = vsLLOS.DataContext as ViewModels.ProLLOSViewModel;
+                        llosVM.DisplayCoordinateTypeChanged.Execute(null);
                     }
                     else if (tabItem.Header.Equals(Properties.Resources.LabelTabRLOS))
                     {
-                        Views.VisibilityRLOSView vsRlos = (tabItem.Content as System.Windows.Controls.UserControl).Content as Views.VisibilityRLOSView;
-                        ViewModels.ProRLOSViewModel rlosVm = vsRlos.DataContext as ViewModels.ProRLOSViewModel;
-                        rlosVm.DisplayCoordinateTypeChanged.Execute(null);
+                        Views.VisibilityRLOSView vsRLOS = (tabItem.Content as System.Windows.Controls.UserControl).Content as Views.VisibilityRLOSView;
+                        ViewModels.ProRLOSViewModel rlosVM = vsRLOS.DataContext as ViewModels.ProRLOSViewModel;
+                        rlosVM.DisplayCoordinateTypeChanged.Execute(null);
                     }
                 }
             }

@@ -27,40 +27,35 @@ using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
-using ProAppVisibilityModule.Common.ViewModels;
 using ProAppVisibilityModule.Helpers;
 using ProAppVisibilityModule.Models;
-using ProAppVisibilityModule.Properties;
+
+// Visibility
 
 namespace ProAppVisibilityModule.ViewModels
 {
     /// <summary>
     /// Base class for all the common properties, commands and events for tab items
     /// </summary>
-    public class ProTabBaseViewModel : BaseViewModel
+    public class ProTabBaseViewModel : NotificationObject
     {
         public ProTabBaseViewModel()
         {
             //commands
-            ClearGraphicsCommand = new Helpers.RelayCommand(OnClearGraphics);
-            ActivateToolCommand = new Helpers.RelayCommand(OnActivateToolCommand);
-            EnterKeyCommand = new Helpers.RelayCommand(OnEnterKeyCommand);
-            CancelCommand = new Helpers.RelayCommand(OnCancelCommand);
+            ClearGraphicsCommand = new ProAppVisibilityModule.Helpers.RelayCommand(OnClearGraphics);
+            ActivateToolCommand = new ProAppVisibilityModule.Helpers.RelayCommand(OnActivateToolCommand);
+            EnterKeyCommand = new ProAppVisibilityModule.Helpers.RelayCommand(OnEnterKeyCommand);
+            CancelCommand = new ProAppVisibilityModule.Helpers.RelayCommand(OnCancelCommand);
 
-            //MouseMapPoint = new Helpers.RelayCommand(OnMouseMoveEvent);
-            //TabItemSelected = new Helpers.RelayCommand(OnTabItemSelected);
-            //MapPointToolActivated = new Helpers.RelayCommand(OnMapPointToolActivated);
-            //MapPointToolActivated = new Helpers.RelayCommand(OnMapPointToolDeactivated);
+            NewMapPoint = new ProAppVisibilityModule.Helpers.RelayCommand(OnMapClickEvent);
+            NewMapPoint = new ProAppVisibilityModule.Helpers.RelayCommand(OnNewMapPointEvent);
+            MouseMovePoint = new ProAppVisibilityModule.Helpers.RelayCommand(OnMouseMoveEvent);
+            TabItemSelected = new ProAppVisibilityModule.Helpers.RelayCommand(OnTabItemSelected);
 
-            // Mediator
-            Mediator.Register(Helpers.Constants.NEW_MAP_POINT, OnMapClickEvent);
-            Mediator.Register(Helpers.Constants.NEW_MAP_POINT, OnNewMapPointEvent);
-            Mediator.Register(Helpers.Constants.MOUSE_MOVE_POINT, OnMouseMoveEvent);
-            Mediator.Register(Helpers.Constants.TAB_ITEM_SELECTED, OnTabItemSelected);
-
-            Mediator.Register(Helpers.Constants.MAP_POINT_TOOL_ACTIVATED, OnMapPointToolActivated);
-            Mediator.Register(Helpers.Constants.MAP_POINT_TOOL_DEACTIVATED, OnMapPointToolDeactivated);
-
+            MapPointToolActivated = new ProAppVisibilityModule.Helpers.RelayCommand(OnMapPointToolActivated);
+            MapPointToolDeActivated = new ProAppVisibilityModule.Helpers.RelayCommand(OnMapPointToolDeactivated);
+            
+          
             // Pro Events
             ArcGIS.Desktop.Framework.Events.ActiveToolChangedEvent.Subscribe(OnActiveToolChanged);
 
@@ -218,7 +213,7 @@ namespace ProAppVisibilityModule.ViewModels
                     {
                         // only format if the Point1 data was generated from a mouse click
                         string outFormattedString = string.Empty;
-                        CoordinateConversionLibrary.Models.CoordinateType ccType = CoordinateConversionLibrary.Helpers.ConversionUtils.GetCoordinateString(MapPointHelper.GetMapPointAsDisplayString(Point1), out outFormattedString);
+                        ProAppCoordConversionModule.Models.CoordinateType ccType = ProAppCoordConversionModule.Helpers.ConversionUtils.GetCoordinateString(MapPointHelper.GetMapPointAsDisplayString(Point1), out outFormattedString);
                         return outFormattedString;
                     }
                     return string.Empty;
@@ -240,8 +235,8 @@ namespace ProAppVisibilityModule.ViewModels
                 }
                 // try to convert string to a MapPoint
                 string outFormattedString = string.Empty;
-                CoordinateConversionLibrary.Models.CoordinateType ccType = CoordinateConversionLibrary.Helpers.ConversionUtils.GetCoordinateString(value, out outFormattedString);
-                MapPoint point = (ccType != CoordinateConversionLibrary.Models.CoordinateType.Unknown) ? GetMapPointFromString(outFormattedString) : null;
+                ProAppCoordConversionModule.Models.CoordinateType ccType = ProAppCoordConversionModule.Helpers.ConversionUtils.GetCoordinateString(value, out outFormattedString);
+                MapPoint point = (ccType != ProAppCoordConversionModule.Models.CoordinateType.Unknown) ? GetMapPointFromString(outFormattedString) : null;
                 if (point != null)
                 {
                     point1Formatted = value;
@@ -251,7 +246,7 @@ namespace ProAppVisibilityModule.ViewModels
                 {
                     // invalid coordinate, reset and throw exception
                     Point1 = null;
-                    throw new ArgumentException(Resources.AEInvalidCoordinate);
+                    throw new ArgumentException(ProAppVisibilityModule.Properties.Resources.AEInvalidCoordinate);
                 }
             }
         }
@@ -273,7 +268,7 @@ namespace ProAppVisibilityModule.ViewModels
                     {
                         // only format if the Point2 data was generated from a mouse click
                         string outFormattedString = string.Empty;
-                        CoordinateConversionLibrary.Models.CoordinateType ccType = CoordinateConversionLibrary.Helpers.ConversionUtils.GetCoordinateString(MapPointHelper.GetMapPointAsDisplayString(Point2), out outFormattedString);
+                        ProAppCoordConversionModule.Models.CoordinateType ccType = ProAppCoordConversionModule.Helpers.ConversionUtils.GetCoordinateString(MapPointHelper.GetMapPointAsDisplayString(Point2), out outFormattedString);
                         return outFormattedString;
                     }
                     return string.Empty;
@@ -294,8 +289,8 @@ namespace ProAppVisibilityModule.ViewModels
                 }
                 // try to convert string to a MapPoint
                 string outFormattedString = string.Empty;
-                CoordinateConversionLibrary.Models.CoordinateType ccType = CoordinateConversionLibrary.Helpers.ConversionUtils.GetCoordinateString(value, out outFormattedString);
-                MapPoint point = (ccType != CoordinateConversionLibrary.Models.CoordinateType.Unknown) ? GetMapPointFromString(outFormattedString) : null;
+                ProAppCoordConversionModule.Models.CoordinateType ccType = ProAppCoordConversionModule.Helpers.ConversionUtils.GetCoordinateString(value, out outFormattedString);
+                MapPoint point = (ccType != ProAppCoordConversionModule.Models.CoordinateType.Unknown) ? GetMapPointFromString(outFormattedString) : null;
                 if (point != null)
                 {
                     point2Formatted = value;
@@ -305,7 +300,7 @@ namespace ProAppVisibilityModule.ViewModels
                 {
                     // invalid coordinate, reset and throw exception
                     Point2 = null;
-                    throw new ArgumentException(Resources.AEInvalidCoordinate);
+                    throw new ArgumentException(ProAppVisibilityModule.Properties.Resources.AEInvalidCoordinate);
                 }
             }
         }
@@ -347,10 +342,17 @@ namespace ProAppVisibilityModule.ViewModels
 
         #region Commands
 
-        public Helpers.RelayCommand ClearGraphicsCommand { get; set; }
-        public Helpers.RelayCommand EnterKeyCommand { get; set; }
-        public Helpers.RelayCommand CancelCommand { get; set; }
-        public Helpers.RelayCommand ActivateToolCommand { get; set; }
+        public ProAppVisibilityModule.Helpers.RelayCommand ClearGraphicsCommand { get; set; }
+        public ProAppVisibilityModule.Helpers.RelayCommand EnterKeyCommand { get; set; }
+        public ProAppVisibilityModule.Helpers.RelayCommand CancelCommand { get; set; }
+        public ProAppVisibilityModule.Helpers.RelayCommand ActivateToolCommand { get; set; }
+
+        public ProAppVisibilityModule.Helpers.RelayCommand NewMapPoint { get; set; }
+        public ProAppVisibilityModule.Helpers.RelayCommand MouseMovePoint { get; set; }
+        public ProAppVisibilityModule.Helpers.RelayCommand TabItemSelected { get; set; }
+        public ProAppVisibilityModule.Helpers.RelayCommand MapPointToolActivated { get; set; }
+        public ProAppVisibilityModule.Helpers.RelayCommand MapPointToolDeActivated { get; set; }
+
         public bool IsMapClick { get; set; }
 
         /// <summary>
@@ -445,7 +447,7 @@ namespace ProAppVisibilityModule.ViewModels
         {
             IsMapClick = true;
         }
-
+ 
         #endregion
 
         #region Internal Methods
@@ -491,9 +493,9 @@ namespace ProAppVisibilityModule.ViewModels
                 if (item.Disposable != null)
                     item.Disposable.Dispose();
                 Application.Current.Dispatcher.Invoke(() =>
-                {
-                    ProGraphicsList.Remove(item);
-                });
+                    {
+                        ProGraphicsList.Remove(item);
+                    });
             }
 
             RaisePropertyChanged(() => HasMapGraphics);
@@ -589,9 +591,9 @@ namespace ProAppVisibilityModule.ViewModels
                         var Lat = Double.Parse(matchMercator.Groups["latitude"].Value);
                         var Lon = Double.Parse(matchMercator.Groups["longitude"].Value);
                         point = QueuedTask.Run(() =>
-                        {
-                            return MapPointBuilder.CreateMapPoint(Lon, Lat, MapView.Active.Map.SpatialReference);
-                        }).Result;
+                            {
+                                return MapPointBuilder.CreateMapPoint(Lon, Lat, MapView.Active.Map.SpatialReference);
+                            }).Result;
                         return point;
                     }
                     catch (Exception ex)

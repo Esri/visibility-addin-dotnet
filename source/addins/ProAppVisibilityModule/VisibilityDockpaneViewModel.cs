@@ -19,7 +19,6 @@ using ProAppVisibilityModule.Helpers;
 using ProAppVisibilityModule.Views;
 using ProAppVisibilityModule.Models;
 using ProAppVisibilityModule.ViewModels;
-using ProAppVisibilityModule.Properties;
 using System.Threading.Tasks;
 
 namespace ProAppVisibilityModule
@@ -57,20 +56,25 @@ namespace ProAppVisibilityModule
                 if ((tabItem != null) && ((tabItem.Content as UserControl) != null) &&
                      ((tabItem.Content as UserControl).Content != null))
                 {
-                    //Mediator.NotifyColleagues(Constants.TAB_ITEM_SELECTED, ((tabItem.Content as UserControl).Content as UserControl).DataContext);
-                    if (tabItem.Header.Equals(Properties.Resources.LabelTabLLOS))
+                    VisibilityDockpaneViewModel vsVM = VisibilityModule.VisibiltyVM;
+                    if (vsVM != null)
                     {
-                        ProLLOSViewModel losVm = ((tabItem.Content as UserControl).Content as UserControl).DataContext as ProLLOSViewModel;
-                        losVm.IsActiveTab = true;
-                        losVm.TabItemSelected.Execute(((tabItem.Content as UserControl).Content as UserControl).DataContext);
-                    }
-                    else
-                    {
-                        ProRLOSViewModel tabVm = ((tabItem.Content as UserControl).Content as UserControl).DataContext as ProRLOSViewModel;
-                        tabVm.IsActiveTab = true;
-                        tabVm.TabItemSelected.Execute(((tabItem.Content as UserControl).Content as UserControl).DataContext);
+                        Views.VisibilityLLOSView vsLLOS = vsVM.LLOSView;
+                        if (vsLLOS != null)
+                        {
+                            ViewModels.ProLLOSViewModel llosVM = vsLLOS.DataContext as ViewModels.ProLLOSViewModel;
+                            llosVM.TabItemSelected.Execute(llosVM);
+                        }
+
+                        Views.VisibilityRLOSView vsRLOS = vsVM.RLOSView;
+                        if (vsRLOS != null)
+                        {
+                            ViewModels.ProRLOSViewModel rlosVM = vsRLOS.DataContext as ViewModels.ProRLOSViewModel;
+                            rlosVM.TabItemSelected.Execute(rlosVM);
+                        }
                     }
                 }
+                    
             }
         }
 
@@ -98,11 +102,11 @@ namespace ProAppVisibilityModule
             if (isVisible)
             {
                 if (((ProLLOSViewModel)LLOSView.DataContext).ToolMode == ProLOSBaseViewModel.MapPointToolMode.Observer)
-                    ((ProLLOSViewModel)LLOSView.DataContext).OnActivateToolCommand(Resources.ToolModeObserver);
+                    ((ProLLOSViewModel)LLOSView.DataContext).OnActivateToolCommand(ProAppVisibilityModule.Properties.Resources.ToolModeObserver);
                 else if (((ProLLOSViewModel)LLOSView.DataContext).ToolMode == ProLOSBaseViewModel.MapPointToolMode.Target)
-                    ((ProLLOSViewModel)LLOSView.DataContext).OnActivateToolCommand(Resources.ToolModeTarget);
+                    ((ProLLOSViewModel)LLOSView.DataContext).OnActivateToolCommand(ProAppVisibilityModule.Properties.Resources.ToolModeTarget);
                 else if (((ProRLOSViewModel)RLOSView.DataContext).ToolMode == ProLOSBaseViewModel.MapPointToolMode.Observer)
-                    ((ProRLOSViewModel)RLOSView.DataContext).OnActivateToolCommand(Resources.ToolModeObserver);
+                    ((ProRLOSViewModel)RLOSView.DataContext).OnActivateToolCommand(ProAppVisibilityModule.Properties.Resources.ToolModeObserver);
             }
             
             base.OnShow(isVisible);

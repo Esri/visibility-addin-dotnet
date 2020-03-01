@@ -421,6 +421,24 @@ namespace ProAppVisibilityModule.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to X Field (Longitude).
+        /// </summary>
+        public static string LabelField1 {
+            get {
+                return ResourceManager.GetString("LabelField1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Y Field (Latitude).
+        /// </summary>
+        public static string LabelField2 {
+            get {
+                return ResourceManager.GetString("LabelField2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Field of View.
         /// </summary>
         public static string LabelFieldOfView {
@@ -673,6 +691,51 @@ namespace ProAppVisibilityModule.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to LLOS computations did not complete correctly.\nPlease check your parameters and try again..
+        /// </summary>
+        public static string LLOSViewError {
+            get {
+                return ResourceManager.GetString("LLOSViewError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Observers lying outside the extent of elevation surface are: .
+        /// </summary>
+        public static string LLOSViewObs {
+            get {
+                return ResourceManager.GetString("LLOSViewObs", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Targets lying outside the extent of elevation surface are: .
+        /// </summary>
+        public static string LLOSViewObs1 {
+            get {
+                return ResourceManager.GetString("LLOSViewObs1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable To Process For Few Locations.
+        /// </summary>
+        public static string LLOSViewObsCaption {
+            get {
+                return ResourceManager.GetString("LLOSViewObsCaption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select Surface.
+        /// </summary>
+        public static string LOSBaseViewError {
+            get {
+                return ResourceManager.GetString("LOSBaseViewError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Spatial Reference of Data Frame and surface must match. Please change the Spatial Reference of the Data Frame and try again..
         /// </summary>
         public static string LOSDataFrameMatch {
@@ -898,6 +961,15 @@ namespace ProAppVisibilityModule.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to RLOS computations did not complete correctly.\nPlease check your parameters and try again..
+        /// </summary>
+        public static string RLOSViewError {
+            get {
+                return ResourceManager.GetString("RLOSViewError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to TarIsVis.
         /// </summary>
         public static string TarIsVisFieldName {
@@ -912,6 +984,15 @@ namespace ProAppVisibilityModule.Properties {
         public static string TitleEditProperties {
             get {
                 return ResourceManager.GetString("TitleEditProperties", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select Fields.
+        /// </summary>
+        public static string TitleSelectCoordinateFields {
+            get {
+                return ResourceManager.GetString("TitleSelectCoordinateFields", resourceCulture);
             }
         }
         
@@ -1011,6 +1092,24 @@ namespace ProAppVisibilityModule.Properties {
         public static string TooltipTopFOVValidRange {
             get {
                 return ResourceManager.GetString("TooltipTopFOVValidRange", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use two fields.
+        /// </summary>
+        public static string UseTwoFields {
+            get {
+                return ResourceManager.GetString("UseTwoFields", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Converter cannot convert back..
+        /// </summary>
+        public static string ValueConverterError {
+            get {
+                return ResourceManager.GetString("ValueConverterError", resourceCulture);
             }
         }
         

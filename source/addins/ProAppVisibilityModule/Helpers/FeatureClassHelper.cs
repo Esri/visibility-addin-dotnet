@@ -22,7 +22,6 @@ using ArcGIS.Desktop.Framework.Dialogs;
 using ArcGIS.Desktop.Framework.Threading.Tasks;
 using ArcGIS.Desktop.Mapping;
 using ProAppVisibilityModule.Models;
-using ProAppVisibilityModule.Properties;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -601,7 +600,7 @@ namespace ProAppVisibilityModule.Helpers
                                     using (var rowBuffer = enterpriseFeatureClass.CreateRowBuffer())
                                     {
                                         // Either the field index or the field name can be used in the indexer.
-                                        rowBuffer[Resources.OffsetFieldName] = offsetInZUnits;
+                                        rowBuffer[ProAppVisibilityModule.Properties.Resources.OffsetFieldName] = offsetInZUnits;
                                         var point = MapPointBuilder.CreateMapPoint(item.Point.X, item.Point.Y, 0.0, item.Point.SpatialReference);
                                         rowBuffer[shapeFieldName] = point;
 
@@ -678,7 +677,7 @@ namespace ProAppVisibilityModule.Helpers
                                             context.Invalidate(feature);
                                             var mp = (MapPoint)feature[shapeFieldName];
                                             var z = (Double)feature[zFieldIndex] + offsetInMapZUnits;
-                                            feature[Resources.OffsetWithZFieldName] = z;
+                                            feature[ProAppVisibilityModule.Properties.Resources.OffsetWithZFieldName] = z;
                                             feature.SetShape(MapPointBuilder.CreateMapPoint(mp.X, mp.Y, z, mp.SpatialReference));
                                             
                                             feature.Store();
@@ -756,10 +755,11 @@ namespace ProAppVisibilityModule.Helpers
                     using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(layerName))
                     {
                         var filter = new QueryFilter();
-                        // if (sourceOIDs.Count > 0)
-                        filter.WhereClause = string.Format("OID IN ({0})", string.Join(",", sourceOIDs));
-                        // else
-                        //     filter.WhereClause = "";
+
+                        if (sourceOIDs.Count > 0)
+                            filter.WhereClause = string.Format("OID IN ({0})", string.Join(",", sourceOIDs));
+                        else
+                            filter.WhereClause = "";
 
                         var cursor = enterpriseFeatureClass.Search(filter, true);
 
@@ -805,7 +805,7 @@ namespace ProAppVisibilityModule.Helpers
                         using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(observersLayerName))
                         using (FeatureClassDefinition fcDefinition = enterpriseFeatureClass.GetDefinition())
                         {
-                            int tarIsVisFieldIndex = fcDefinition.FindField(Resources.TarIsVisFieldName);
+                            int tarIsVisFieldIndex = fcDefinition.FindField(ProAppVisibilityModule.Properties.Resources.TarIsVisFieldName);
                             int oidFieldIndex = fcDefinition.FindField(fcDefinition.GetObjectIDField());
 
                             EditOperation editOperation = new EditOperation();
@@ -850,7 +850,7 @@ namespace ProAppVisibilityModule.Helpers
                         using (FeatureClass enterpriseFeatureClass = geodatabase.OpenDataset<FeatureClass>(targetsLayerName))
                         using (FeatureClassDefinition fcDefinition = enterpriseFeatureClass.GetDefinition())
                         {
-                            int numOfObserversFieldIndex = fcDefinition.FindField(Resources.NumOfObserversFieldName);
+                            int numOfObserversFieldIndex = fcDefinition.FindField(ProAppVisibilityModule.Properties.Resources.NumOfObserversFieldName);
                             int oidFieldIndex = fcDefinition.FindField(fcDefinition.GetObjectIDField());
 
                             EditOperation editOperation = new EditOperation();
@@ -912,7 +912,7 @@ namespace ProAppVisibilityModule.Helpers
                 CIMUniqueValueRenderer uniqueValueRenderer = new CIMUniqueValueRenderer();
 
                 // set the value field
-                uniqueValueRenderer.Fields = new string[] { Resources.TarIsVisFieldName };
+                uniqueValueRenderer.Fields = new string[] { ProAppVisibilityModule.Properties.Resources.TarIsVisFieldName };
 
                 List<CIMUniqueValueClass> classes = new List<CIMUniqueValueClass>();
 
@@ -1010,7 +1010,7 @@ namespace ProAppVisibilityModule.Helpers
                 CIMUniqueValueRenderer uniqueValueRenderer = new CIMUniqueValueRenderer();
 
                 // set the value field
-                uniqueValueRenderer.Fields = new string[] { Resources.NumOfObserversFieldName };
+                uniqueValueRenderer.Fields = new string[] { ProAppVisibilityModule.Properties.Resources.NumOfObserversFieldName };
 
                 List<CIMUniqueValueClass> classes = new List<CIMUniqueValueClass>();
 
@@ -1082,7 +1082,7 @@ namespace ProAppVisibilityModule.Helpers
                 CIMUniqueValueRenderer uniqueValueRenderer = new CIMUniqueValueRenderer();
 
                 // set the value field
-                uniqueValueRenderer.Fields = new string[] { Resources.IsOutOfExtentFieldName };
+                uniqueValueRenderer.Fields = new string[] { ProAppVisibilityModule.Properties.Resources.IsOutOfExtentFieldName };
 
                 List<CIMUniqueValueClass> classes = new List<CIMUniqueValueClass>();
                 // out of extent
@@ -1130,7 +1130,7 @@ namespace ProAppVisibilityModule.Helpers
             await QueuedTask.Run(() =>
             {
                 var lc = featureLayer.LabelClasses[0];
-                //lc.SetExpression(string.Format("[{0}]", Resources.NumOfObserversFieldName));
+                //lc.SetExpression(string.Format("[{0}]", ProAppVisibilityModule.Properties.Resources.NumOfObserversFieldName));
                 string expression = @"Function FindLabel ( [NumOfObservers] )
                                     If (CInt([NumOfObservers])>0) Then
                                         FindLabel = ""<FNT size='8'>"" + [NumOfObservers] + ""</FNT>""
@@ -1224,7 +1224,7 @@ namespace ProAppVisibilityModule.Helpers
                 CIMUniqueValueRenderer uniqueValueRenderer = new CIMUniqueValueRenderer();
 
                 // set the value field
-                uniqueValueRenderer.Fields = new string[] { Resources.TarIsVisFieldName };
+                uniqueValueRenderer.Fields = new string[] { ProAppVisibilityModule.Properties.Resources.TarIsVisFieldName };
 
                 List<CIMUniqueValueClass> classes = new List<CIMUniqueValueClass>();
 
@@ -1385,7 +1385,7 @@ namespace ProAppVisibilityModule.Helpers
             }
 
             ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(sb.ToString(),
-                    Resources.CaptionError);
+                    ProAppVisibilityModule.Properties.Resources.CaptionError);
 
             return false;
         }

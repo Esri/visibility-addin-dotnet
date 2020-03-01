@@ -17,7 +17,7 @@ using System.Windows.Data;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.Serialization;
-using ProAppVisibilityModule.Common;
+using ProAppCoordConversionModule.Common.Attributes;
 
 namespace ProAppVisibilityModule.Common.ValueConverters
 {
@@ -65,7 +65,7 @@ namespace ProAppVisibilityModule.Common.ValueConverters
         /// </summary>
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            throw new Exception("Cant convert back");
+            throw new Exception(Properties.Resources.ValueConverterError);
         }
         #endregion
     }

@@ -3,9 +3,10 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="clr-namespace:ProAppVisibilityModule.Common"
+     xmlns:local="clr-namespace:ProAppVisibilityModule.Common.ValueConverters"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:prop="clr-namespace:ProAppVisibilityModule.Properties"
+    xmlns:extensions="clr-namespace:ArcGIS.Desktop.Extensions;assembly=ArcGIS.Desktop.Extensions"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     d:DesignHeight="595"
     d:DesignWidth="300"
@@ -13,10 +14,10 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="../Common/MAResourceDictionary.xaml" />
+                <extensions:DesignOnlyResourceDictionary Source="pack://application:,,,/ArcGIS.Desktop.Framework;component\Themes\Default.xaml"/>
+                <ResourceDictionary Source="/Visibility;component/Common/MAResourceDictionary.xaml" />
             </ResourceDictionary.MergedDictionaries>
-
-            <BooleanToVisibilityConverter x:Key="BoolToVis" />
+            <local:BooleanToVisibilityConverter x:Key="BoolToVis" />
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
@@ -68,8 +69,7 @@
                             Margin="0"
                             ItemsSource="{Binding SurfaceLayerNames}"
                             SelectedItem="{Binding SelectedSurfaceName}"
-                            ToolTip="{Binding SelectedSurfaceTooltip}"
-                            BorderBrush="{Binding SelectedBorderBrush}">
+                            ToolTip="{Binding SelectedSurfaceTooltip}">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel>
@@ -92,7 +92,7 @@
                         <Image
                         Width="16"
                         Height="16"
-                        Source="../Images/GeoprocessingEnvironmentSettings16.png" />
+                        Source="/Visibility;component/Images/GeoprocessingEnvironmentSettings16.png" />
                     </Button>
                 </Grid>
                 <TextBlock
@@ -143,7 +143,7 @@
                         Width="16"
                         Height="16"
                         HorizontalAlignment="Right"
-                        Source="../Images/Add_Point.png" />
+                        Source="/Visibility;component/Images/Add_Point.png" />
                 </ToggleButton>
                 <ListBox
                     x:Name="listBoxObservers"
@@ -244,7 +244,7 @@
                         Content="{x:Static prop:Resources.LabelCancel}"
                         ToolTip="{x:Static prop:Resources.LabelCancel}">
                         <Button.Style>
-                            <Style TargetType="Button" BasedOn="{StaticResource TransparentButtonStyle}">
+                            <Style TargetType="Button" BasedOn="{StaticResource Esri_Button}">
                                 <Setter Property="IsEnabled" Value="False" />
                                 <Style.Triggers>
                                     <MultiDataTrigger>
@@ -276,7 +276,7 @@
                         Content="{x:Static prop:Resources.LabelOK}"
                         ToolTip="{x:Static prop:Resources.LabelOK}">
                         <Button.Style>
-                            <Style TargetType="Button" BasedOn="{StaticResource TransparentButtonStyle}">
+                            <Style TargetType="Button" BasedOn="{StaticResource Esri_Button}">
                                 <Setter Property="IsEnabled" Value="False" />
                                 <Style.Triggers>
                                     <MultiDataTrigger>
@@ -316,7 +316,7 @@
                         ToolTip="{x:Static prop:Resources.LabelClearGraphics}"
                         Visibility="{Binding Path=ClearGraphicsVisible, Converter={StaticResource BoolToVis}}" >
                         <Button.Style>
-                            <Style TargetType="Button" BasedOn="{StaticResource TransparentButtonStyle}">
+                            <Style TargetType="Button" BasedOn="{StaticResource Esri_Button}">
                                 <Setter Property="IsEnabled" Value="False" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding HasMapGraphics}" Value="True">

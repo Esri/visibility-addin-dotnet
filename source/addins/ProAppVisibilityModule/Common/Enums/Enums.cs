@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ProAppVisibilityModule.Common.Attributes;
 using ProAppVisibilityModule.Properties;
 
 namespace ProAppVisibilityModule.Common.Enums

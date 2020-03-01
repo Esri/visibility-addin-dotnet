@@ -18,7 +18,7 @@ using System.Reflection;
 using System.Globalization;
 using System.ComponentModel;
 
-namespace ProAppVisibilityModule.Common
+namespace ProAppVisibilityModule.Common.Attributes
 {
     /// <summary>
     /// Attribute for localization.

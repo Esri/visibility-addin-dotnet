@@ -13,10 +13,10 @@
 // limitations under the License.
 
 using ProAppVisibilityModule.Helpers;
-using ProAppVisibilityModule.Models;
 using ProAppVisibilityModule.Common.Enums;
+using ProAppVisibilityModule.Models;
 
-namespace ProAppVisibilityModule.Common.ViewModels
+namespace ProAppVisibilityModule.ViewModels
 {
     public class EditPropertiesViewModel : NotificationObject
     {
@@ -31,7 +31,7 @@ namespace ProAppVisibilityModule.Common.ViewModels
         public CoordinateTypes SelectedCoordinateType { get; set; }
 
         private bool? dialogResult = null;
-        public bool? DialogResult
+        public bool? DialogResult 
         {
             get { return dialogResult; }
             set
@@ -56,4 +56,3 @@ namespace ProAppVisibilityModule.Common.ViewModels
         }
     }
 }
-

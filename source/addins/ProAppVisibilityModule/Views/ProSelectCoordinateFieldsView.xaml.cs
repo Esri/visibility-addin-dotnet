@@ -1,6 +1,6 @@
 using ArcGIS.Desktop.Framework.Controls;
 
-namespace CoordinateConversionLibrary.Views
+namespace ProAppVisibilityModule.Views
 {
     /// <summary>
     /// Interaction logic for ProSelectCoordinateFieldsView.xaml
