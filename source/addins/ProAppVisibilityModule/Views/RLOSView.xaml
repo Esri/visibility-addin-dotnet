@@ -235,7 +235,7 @@
                 <StackPanel
                     Grid.Row="8"
                     Grid.ColumnSpan="3"
-                    HorizontalAlignment="Right"
+                    HorizontalAlignment="Center"
                     Orientation="Horizontal">
                     <Button
                         Width="60"
@@ -309,7 +309,7 @@
                             </Style>
                         </Button.Style>
                     </Button>
-                    <Button
+                    <!--<Button
                         Margin="3,20,0,0"
                         Command="{Binding ClearGraphicsCommand}"
                         Content="{x:Static prop:Resources.LabelClearGraphics}"
@@ -325,7 +325,7 @@
                                 </Style.Triggers>
                             </Style>
                         </Button.Style>
-                    </Button>
+                    </Button>-->
                 </StackPanel>
 
                 <Expander

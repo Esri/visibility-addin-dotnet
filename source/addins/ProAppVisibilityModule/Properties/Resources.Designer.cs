@@ -367,6 +367,24 @@ namespace ProAppVisibilityModule.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to csv files.
+        /// </summary>
+        public static string FileDialogFiltercsv {
+            get {
+                return ResourceManager.GetString("FileDialogFiltercsv", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Open File.
+        /// </summary>
+        public static string FileDialogTitle {
+            get {
+                return ResourceManager.GetString("FileDialogTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to gridcode.
         /// </summary>
         public static string GridCodeFieldName {

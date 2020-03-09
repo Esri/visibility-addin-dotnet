@@ -474,4 +474,10 @@
   <data name="ValueConverterError" xml:space="preserve">
     <value>Converter cannot convert back.</value>
   </data>
+  <data name="FileDialogFiltercsv" xml:space="preserve">
+    <value>csv files</value>
+  </data>
+  <data name="FileDialogTitle" xml:space="preserve">
+    <value>Open File</value>
+  </data>
 </root>

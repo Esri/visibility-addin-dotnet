@@ -33,6 +33,8 @@ using System.Windows.Media;
 using ProAppVisibilityModule.Common.Enums;
 using ProAppVisibilityModule.Helpers;
 using ProAppVisibilityModule.Views;
+using ArcGIS.Desktop.Core;
+using ArcGIS.Desktop.Catalog;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -369,18 +371,29 @@ namespace ProAppVisibilityModule.ViewModels
         {
             var mode = obj as string;
             ProAppCoordConversionModule.Models.CoordinateConversionLibraryConfig.AddInConfig.DisplayAmbiguousCoordsDlg = false;
-            var fileDialog = new Microsoft.Win32.OpenFileDialog();
-            fileDialog.CheckFileExists = true;
-            fileDialog.CheckPathExists = true;
-            fileDialog.Filter = "csv files|*.csv";
 
+            BrowseProjectFilter bf = new BrowseProjectFilter("esri_browseDialogFilters_textFiles_csv");
+            bf.Name = Properties.Resources.FileDialogFiltercsv;
+        
+            OpenItemDialog fileDialog = new OpenItemDialog
+            {
+                Title = Properties.Resources.FileDialogTitle,
+                MultiSelect = false,
+                BrowseFilter = bf,
+            };
+         
+            string filePath = string.Empty;
+            var result = fileDialog.ShowDialog();
+            
             // attemp to import
             var fieldVM = new ProAppCoordConversionModule.ViewModels.SelectCoordinateFieldsViewModel();
-            var result = fileDialog.ShowDialog();
+            
             if (result.HasValue && result.Value == true)
             {
+                Item selectedItem = fileDialog.Items.First();
+                filePath = selectedItem.Path;
                 var dlg = new ProAppCoordConversionModule.Views.ProSelectCoordinateFieldsView();
-                using (Stream s = new FileStream(fileDialog.FileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                using (Stream s = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
                     var headers = ProAppCoordConversionModule.Helpers.ImportCSV.GetHeaders(s);
                     if (headers != null)
@@ -401,7 +414,7 @@ namespace ProAppVisibilityModule.ViewModels
                 }
                 if (dlg.ShowDialog() == true)
                 {
-                    using (Stream s = new FileStream(fileDialog.FileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                    using (Stream s = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                     {
                         var lists = ProAppCoordConversionModule.Helpers.ImportCSV.Import<ProAppCoordConversionModule.ViewModels.ImportCoordinatesList>(s, fieldVM.SelectedFields.ToArray());
 

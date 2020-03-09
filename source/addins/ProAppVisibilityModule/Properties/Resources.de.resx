@@ -474,4 +474,10 @@
   <data name="ZFieldName" xml:space="preserve">
     <value>Z de</value>
   </data>
+  <data name="FileDialogFiltercsv" xml:space="preserve">
+    <value>csv files de</value>
+  </data>
+  <data name="FileDialogTitle" xml:space="preserve">
+    <value>Open File de</value>
+  </data>
 </root>

@@ -314,7 +314,7 @@
                 <StackPanel
                     Grid.Row="16"
                     Grid.ColumnSpan="3"
-                    HorizontalAlignment="Right"
+                    HorizontalAlignment="Center"
                     Orientation="Horizontal">
                     <Button
                         Grid.Row="16"
@@ -396,7 +396,7 @@
                             </Style>
                         </Button.Style>
                     </Button>
-                    <Button
+                    <!--<Button
                         Grid.Row="16"
                         Grid.Column="2"
                         Margin="3,20,0,0"
@@ -414,7 +414,7 @@
                                 </Style.Triggers>
                             </Style>
                         </Button.Style>
-                    </Button>
+                    </Button>-->
                 </StackPanel>
             </Grid>
         </ScrollViewer>
