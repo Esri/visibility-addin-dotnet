@@ -14,8 +14,8 @@
 
 using System;
 using ArcGIS.Core.Geometry;
-using VisibilityLibrary.Models;
-using VisibilityLibrary;
+using ProAppVisibilityModule.Models;
+using ProAppVisibilityModule.Common.Enums;
 
 namespace ProAppVisibilityModule.Helpers
 {

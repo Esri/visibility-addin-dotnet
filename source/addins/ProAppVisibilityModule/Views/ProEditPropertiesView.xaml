@@ -1,13 +1,13 @@
 ﻿<controls:ProWindow
-    x:Class="VisibilityLibrary.Views.ProEditPropertiesView"
+    x:Class="ProAppVisibilityModule.Views.ProEditPropertiesView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:controls="clr-namespace:ArcGIS.Desktop.Framework.Controls;assembly=ArcGIS.Desktop.Framework"
     xmlns:extensions="clr-namespace:ArcGIS.Desktop.Extensions;assembly=ArcGIS.Desktop.Extensions"     
-    xmlns:helpers="clr-namespace:VisibilityLibrary.Helpers;assembly=VisibilityLibrary" 
-    xmlns:prop="clr-namespace:VisibilityLibrary.Properties;assembly=VisibilityLibrary" 
-    xmlns:local="clr-namespace:VisibilityLibrary;assembly=VisibilityLibrary"
+    xmlns:helpers="clr-namespace:ProAppVisibilityModule.Helpers" 
+    xmlns:prop="clr-namespace:ProAppVisibilityModule.Properties" 
+    xmlns:local="clr-namespace:ProAppVisibilityModule.Common.Enums"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     Title="{x:Static prop:Resources.TitleEditProperties}"
@@ -21,7 +21,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <extensions:DesignOnlyResourceDictionary Source="pack://application:,,,/ArcGIS.Desktop.Framework;component\Themes\Default.xaml"/>
-                <ResourceDictionary Source="/VisibilityLibrary;component/MAResourceDictionary.xaml" />
+                <ResourceDictionary Source="/Visibility;component/Common/MAResourceDictionary.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <ObjectDataProvider
                 x:Key="coordinateTypes"

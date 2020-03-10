@@ -30,10 +30,11 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
-using VisibilityLibrary;
-using VisibilityLibrary.Helpers;
-using VisibilityLibrary.ViewModels;
-using VisibilityLibrary.Views;
+using ProAppVisibilityModule.Common.Enums;
+using ProAppVisibilityModule.Helpers;
+using ProAppVisibilityModule.Views;
+using ArcGIS.Desktop.Core;
+using ArcGIS.Desktop.Catalog;
 
 namespace ProAppVisibilityModule.ViewModels
 {
@@ -46,7 +47,7 @@ namespace ProAppVisibilityModule.ViewModels
             OffsetUnitType = DistanceTypes.Meters;
             DistanceUnitType = DistanceTypes.Meters;
             AngularUnitType = AngularTypes.DEGREES;
-            EnterManullyOption = VisibilityLibrary.Properties.Resources.EnterManuallyOption;
+            EnterManullyOption = ProAppVisibilityModule.Properties.Resources.EnterManuallyOption;
 
             ObserverAddInPoints = new ObservableCollection<AddInPoint>();
             ObserverInExtentPoints = new ObservableCollection<AddInPoint>();
@@ -65,13 +66,12 @@ namespace ProAppVisibilityModule.ViewModels
             SurfaceLayerNames = new ObservableCollection<string>();
             SelectedSurfaceName = string.Empty;
 
-            Mediator.Register(VisibilityLibrary.Constants.DISPLAY_COORDINATE_TYPE_CHANGED, OnDisplayCoordinateTypeChanged);
-
             DeletePointCommand = new RelayCommand(OnDeletePointCommand);
             DeleteAllPointsCommand = new RelayCommand(OnDeleteAllPointsCommand);
             EditPropertiesDialogCommand = new RelayCommand(OnEditPropertiesDialogCommand);
             ImportCSVFileCommand = new RelayCommand(OnImportCSVFileCommand);
             PasteCoordinatesCommand = new RelayCommand(OnPasteCommand);
+            DisplayCoordinateTypeChanged = new RelayCommand(OnDisplayCoordinateTypeChanged);
 
             // subscribe to some mapping events
             ActiveMapViewChangedEvent.Subscribe(OnActiveMapViewChanged);
@@ -143,7 +143,7 @@ namespace ProAppVisibilityModule.ViewModels
                 RaisePropertyChanged(() => ObserverOffset);
 
                 if (!observerOffset.HasValue)
-                    throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEInvalidInput);
+                    throw new ArgumentException(ProAppVisibilityModule.Properties.Resources.AEInvalidInput);
             }
         }
 
@@ -157,7 +157,7 @@ namespace ProAppVisibilityModule.ViewModels
                 RaisePropertyChanged(() => TargetOffset);
 
                 if (!targetOffset.HasValue)
-                    throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEInvalidInput);
+                    throw new ArgumentException(ProAppVisibilityModule.Properties.Resources.AEInvalidInput);
             }
         }
 
@@ -331,6 +331,7 @@ namespace ProAppVisibilityModule.ViewModels
         public RelayCommand EditPropertiesDialogCommand { get; set; }
         public RelayCommand ImportCSVFileCommand { get; set; }
         public RelayCommand PasteCoordinatesCommand { get; set; }
+        public RelayCommand DisplayCoordinateTypeChanged { get; set; }
 
         /// <summary>
         /// Command method to delete points
@@ -369,21 +370,32 @@ namespace ProAppVisibilityModule.ViewModels
         public virtual void OnImportCSVFileCommand(object obj)
         {
             var mode = obj as string;
-            CoordinateConversionLibrary.Models.CoordinateConversionLibraryConfig.AddInConfig.DisplayAmbiguousCoordsDlg = false;
-            var fileDialog = new Microsoft.Win32.OpenFileDialog();
-            fileDialog.CheckFileExists = true;
-            fileDialog.CheckPathExists = true;
-            fileDialog.Filter = "csv files|*.csv";
+            ProAppCoordConversionModule.Models.CoordinateConversionLibraryConfig.AddInConfig.DisplayAmbiguousCoordsDlg = false;
 
-            // attemp to import
-            var fieldVM = new CoordinateConversionLibrary.ViewModels.SelectCoordinateFieldsViewModel();
+            BrowseProjectFilter bf = new BrowseProjectFilter("esri_browseDialogFilters_textFiles_csv");
+            bf.Name = Properties.Resources.FileDialogFiltercsv;
+        
+            OpenItemDialog fileDialog = new OpenItemDialog
+            {
+                Title = Properties.Resources.FileDialogTitle,
+                MultiSelect = false,
+                BrowseFilter = bf,
+            };
+         
+            string filePath = string.Empty;
             var result = fileDialog.ShowDialog();
+            
+            // attemp to import
+            var fieldVM = new ProAppCoordConversionModule.ViewModels.SelectCoordinateFieldsViewModel();
+            
             if (result.HasValue && result.Value == true)
             {
-                var dlg = new CoordinateConversionLibrary.Views.ProSelectCoordinateFieldsView();
-                using (Stream s = new FileStream(fileDialog.FileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                Item selectedItem = fileDialog.Items.First();
+                filePath = selectedItem.Path;
+                var dlg = new ProAppCoordConversionModule.Views.ProSelectCoordinateFieldsView();
+                using (Stream s = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
-                    var headers = CoordinateConversionLibrary.Helpers.ImportCSV.GetHeaders(s);
+                    var headers = ProAppCoordConversionModule.Helpers.ImportCSV.GetHeaders(s);
                     if (headers != null)
                     {
                         foreach (var header in headers)
@@ -395,16 +407,16 @@ namespace ProAppVisibilityModule.ViewModels
                     }
                     else
                     {
-                        ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgNoDataFound,
-                                                                      VisibilityLibrary.Properties.Resources.CaptionError);
+                        ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(ProAppVisibilityModule.Properties.Resources.MsgNoDataFound,
+                                                                      ProAppVisibilityModule.Properties.Resources.CaptionError);
                         return;
                     }
                 }
                 if (dlg.ShowDialog() == true)
                 {
-                    using (Stream s = new FileStream(fileDialog.FileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                    using (Stream s = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                     {
-                        var lists = CoordinateConversionLibrary.Helpers.ImportCSV.Import<CoordinateConversionLibrary.ViewModels.ImportCoordinatesList>(s, fieldVM.SelectedFields.ToArray());
+                        var lists = ProAppCoordConversionModule.Helpers.ImportCSV.Import<ProAppCoordConversionModule.ViewModels.ImportCoordinatesList>(s, fieldVM.SelectedFields.ToArray());
 
                         foreach (var item in lists)
                         {
@@ -416,26 +428,26 @@ namespace ProAppVisibilityModule.ViewModels
                                 sb.Append(string.Format(" {0}", item.lon.Trim()));
 
                             string coordinate = sb.ToString();
-                            CoordinateConversionLibrary.Models.CoordinateType ccType = CoordinateConversionLibrary.Helpers.ConversionUtils.GetCoordinateString(coordinate, out outFormattedString);
-                            if (ccType == CoordinateConversionLibrary.Models.CoordinateType.Unknown)
+                            ProAppCoordConversionModule.Models.CoordinateType ccType = ProAppCoordConversionModule.Helpers.ConversionUtils.GetCoordinateString(coordinate, out outFormattedString);
+                            if (ccType == ProAppCoordConversionModule.Models.CoordinateType.Unknown)
                             {
                                 Regex regexMercator = new Regex(@"^(?<latitude>\-?\d+\.?\d*)[+,;:\s]*(?<longitude>\-?\d+\.?\d*)");
                                 var matchMercator = regexMercator.Match(coordinate);
                                 if (matchMercator.Success && matchMercator.Length == coordinate.Length)
                                 {
-                                    ccType = CoordinateConversionLibrary.Models.CoordinateType.DD;
+                                    ccType = ProAppCoordConversionModule.Models.CoordinateType.DD;
                                 }
                             }
-                            MapPoint point = (ccType != CoordinateConversionLibrary.Models.CoordinateType.Unknown) ? GetMapPointFromString(outFormattedString) : null;
+                            MapPoint point = (ccType != ProAppCoordConversionModule.Models.CoordinateType.Unknown) ? GetMapPointFromString(outFormattedString) : null;
                             if (point != null)
                             {
-                                if (mode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
+                                if (mode == ProAppVisibilityModule.Properties.Resources.ToolModeObserver)
                                 {
                                     ToolMode = MapPointToolMode.Observer;
                                     Point1 = point;
                                     OnNewMapPointEvent(Point1);
                                 }
-                                else if (mode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
+                                else if (mode == ProAppVisibilityModule.Properties.Resources.ToolModeTarget)
                                 {
                                     ToolMode = MapPointToolMode.Target;
                                     Point2 = point;
@@ -462,26 +474,26 @@ namespace ProAppVisibilityModule.ViewModels
             {
                 string outFormattedString = string.Empty;
                 string coordinate = item.Trim().ToString();
-                CoordinateConversionLibrary.Models.CoordinateType ccType = CoordinateConversionLibrary.Helpers.ConversionUtils.GetCoordinateString(coordinate, out outFormattedString);
-                if (ccType == CoordinateConversionLibrary.Models.CoordinateType.Unknown)
+                ProAppCoordConversionModule.Models.CoordinateType ccType = ProAppCoordConversionModule.Helpers.ConversionUtils.GetCoordinateString(coordinate, out outFormattedString);
+                if (ccType == ProAppCoordConversionModule.Models.CoordinateType.Unknown)
                 {
                     Regex regexMercator = new Regex(@"^(?<latitude>\-?\d+\.?\d*)[+,;:\s]*(?<longitude>\-?\d+\.?\d*)");
                     var matchMercator = regexMercator.Match(coordinate);
                     if (matchMercator.Success && matchMercator.Length == coordinate.Length)
                     {
-                        ccType = CoordinateConversionLibrary.Models.CoordinateType.DD;
+                        ccType = ProAppCoordConversionModule.Models.CoordinateType.DD;
                     }
                 }
-                MapPoint point = (ccType != CoordinateConversionLibrary.Models.CoordinateType.Unknown) ? GetMapPointFromString(outFormattedString) : null;
+                MapPoint point = (ccType != ProAppCoordConversionModule.Models.CoordinateType.Unknown) ? GetMapPointFromString(outFormattedString) : null;
                 if (point != null)
                 {
-                    if (mode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
+                    if (mode == ProAppVisibilityModule.Properties.Resources.ToolModeObserver)
                     {
                         ToolMode = MapPointToolMode.Observer;
                         Point1 = point;
                         OnNewMapPointEvent(Point1);
                     }
-                    else if (mode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
+                    else if (mode == ProAppVisibilityModule.Properties.Resources.ToolModeTarget)
                     {
                         ToolMode = MapPointToolMode.Target;
                         Point2 = point;
@@ -526,7 +538,7 @@ namespace ProAppVisibilityModule.ViewModels
         {
             var keyCommandMode = obj as string;
 
-            if (keyCommandMode == VisibilityLibrary.Properties.Resources.ToolModeObserver)
+            if (keyCommandMode == ProAppVisibilityModule.Properties.Resources.ToolModeObserver)
             {
                 if (!(await IsValidPoint(Point1, true)))
                     return;
@@ -534,7 +546,7 @@ namespace ProAppVisibilityModule.ViewModels
                 ToolMode = MapPointToolMode.Observer;
                 OnNewMapPointEvent(Point1);
             }
-            else if (keyCommandMode == VisibilityLibrary.Properties.Resources.ToolModeTarget)
+            else if (keyCommandMode == ProAppVisibilityModule.Properties.Resources.ToolModeTarget)
             {
                 if (!(await IsValidPoint(Point2, true)))
                     return;
@@ -563,10 +575,10 @@ namespace ProAppVisibilityModule.ViewModels
             if (string.IsNullOrWhiteSpace(mode))
                 return;
 
-            if ((mode == VisibilityLibrary.Properties.Resources.ToolModeObserver) &&
+            if ((mode == ProAppVisibilityModule.Properties.Resources.ToolModeObserver) &&
                 (lastToolMode != MapPointToolMode.Observer))
                 ToolMode = MapPointToolMode.Observer;
-            else if ((mode == VisibilityLibrary.Properties.Resources.ToolModeTarget) &&
+            else if ((mode == ProAppVisibilityModule.Properties.Resources.ToolModeTarget) &&
                 (lastToolMode != MapPointToolMode.Target))
                 ToolMode = MapPointToolMode.Target;
             else
@@ -587,16 +599,16 @@ namespace ProAppVisibilityModule.ViewModels
 
             //if (string.IsNullOrEmpty(SelectedSurfaceName))
             //{
-            //    MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgSurfaceLayerNotFound,
-            //        VisibilityLibrary.Properties.Resources.CaptionError, MessageBoxButton.OK);
+            //    MessageBox.Show(ProAppVisibilityModule.Properties.Resources.MsgSurfaceLayerNotFound,
+            //        ProAppVisibilityModule.Properties.Resources.CaptionError, MessageBoxButton.OK);
             //    return;
             //}
 
             //IsElevationSurfaceValid = ValidateElevationSurface(MapView.Active.Map, SelectedSurfaceName);
             //if (!await IsElevationSurfaceValid)
             //{
-            //    MessageBox.Show(VisibilityLibrary.Properties.Resources.LOSDataFrameMatch, VisibilityLibrary.Properties.Resources.LOSSpatialReferenceCaption);
-            //    SelectedSurfaceTooltip = VisibilityLibrary.Properties.Resources.LOSDataFrameMatch;
+            //    MessageBox.Show(ProAppVisibilityModule.Properties.Resources.LOSDataFrameMatch, ProAppVisibilityModule.Properties.Resources.LOSSpatialReferenceCaption);
+            //    SelectedSurfaceTooltip = ProAppVisibilityModule.Properties.Resources.LOSDataFrameMatch;
             //    SetErrorTemplate(false);
             //    return;
             //}
@@ -697,7 +709,7 @@ namespace ProAppVisibilityModule.ViewModels
                 validPoint = await IsPointWithinExtent(point, env);
 
                 if (validPoint == false && showPopup)
-                    ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(VisibilityLibrary.Properties.Resources.MsgOutOfAOI, VisibilityLibrary.Properties.Resources.CaptionError);
+                    ArcGIS.Desktop.Framework.Dialogs.MessageBox.Show(ProAppVisibilityModule.Properties.Resources.MsgOutOfAOI, ProAppVisibilityModule.Properties.Resources.CaptionError);
             }
 
             return validPoint;
@@ -1213,13 +1225,13 @@ namespace ProAppVisibilityModule.ViewModels
                 if (isDefaultColor)
                 {
                     SelectedBorderBrush = Brushes.Transparent;
-                    SelectedSurfaceTooltip = "Select Surface";
+                    SelectedSurfaceTooltip = Properties.Resources.LOSBaseViewError;
                     IsInputValid = true;
                 }
                 else
                 {
                     SelectedBorderBrush = new SolidColorBrush(Colors.Red);
-                    SelectedSurfaceTooltip = VisibilityLibrary.Properties.Resources.LOSDataFrameMatchError;
+                    SelectedSurfaceTooltip = ProAppVisibilityModule.Properties.Resources.LOSDataFrameMatchError;
                     IsInputValid = false;
                 }
             });

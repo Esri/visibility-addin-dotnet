@@ -1,0 +1,483 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AEInvalidCoordinate" xml:space="preserve">
+    <value>Invalid coordinate de</value>
+  </data>
+  <data name="AEInvalidInput" xml:space="preserve">
+    <value>Invalid input de</value>
+  </data>
+  <data name="AEMustBePositive" xml:space="preserve">
+    <value>The number must be positive de</value>
+  </data>
+  <data name="AENumMustBeGreater" xml:space="preserve">
+    <value>The number must be greater than min de</value>
+  </data>
+  <data name="AENumMustBeLess" xml:space="preserve">
+    <value>The number must be less than max de</value>
+  </data>
+  <data name="AENumRange" xml:space="preserve">
+    <value>The number must be between {0} and {1} de</value>
+  </data>
+  <data name="ButtonCancel" xml:space="preserve">
+    <value>Cancel de</value>
+  </data>
+  <data name="ButtonOK" xml:space="preserve">
+    <value>OK de</value>
+  </data>
+  <data name="CaptionError" xml:space="preserve">
+    <value>Error de</value>
+  </data>
+  <data name="CaptionLayerIsImageService" xml:space="preserve">
+    <value>Image Service Layer Warning de</value>
+  </data>
+  <data name="EnterManuallyOption" xml:space="preserve">
+    <value>Enter Manually de</value>
+  </data>
+  <data name="EnumCTDD" xml:space="preserve">
+    <value>DD de</value>
+  </data>
+  <data name="EnumCTDDM" xml:space="preserve">
+    <value>DDM de</value>
+  </data>
+  <data name="EnumCTDMS" xml:space="preserve">
+    <value>DMS de</value>
+  </data>
+  <data name="EnumCTGARS" xml:space="preserve">
+    <value>GARS de</value>
+  </data>
+  <data name="EnumCTMGRS" xml:space="preserve">
+    <value>MGRS de</value>
+  </data>
+  <data name="EnumCTNone" xml:space="preserve">
+    <value>Default Map Unit de</value>
+  </data>
+  <data name="EnumCTUSNG" xml:space="preserve">
+    <value>USNG de</value>
+  </data>
+  <data name="EnumCTUTM" xml:space="preserve">
+    <value>UTM de</value>
+  </data>
+  <data name="EnumDegrees" xml:space="preserve">
+    <value>Degrees de</value>
+  </data>
+  <data name="EnumFeet" xml:space="preserve">
+    <value>Feet de</value>
+  </data>
+  <data name="EnumGeodesic" xml:space="preserve">
+    <value>Geodesic de</value>
+  </data>
+  <data name="EnumGrads" xml:space="preserve">
+    <value>Grads de</value>
+  </data>
+  <data name="EnumGreatElliptic" xml:space="preserve">
+    <value>Great Elliptic de</value>
+  </data>
+  <data name="EnumKilometers" xml:space="preserve">
+    <value>Kilometers de</value>
+  </data>
+  <data name="EnumLoxodrome" xml:space="preserve">
+    <value>Loxodrome de</value>
+  </data>
+  <data name="EnumMeters" xml:space="preserve">
+    <value>Meters de</value>
+  </data>
+  <data name="EnumMiles" xml:space="preserve">
+    <value>Miles de</value>
+  </data>
+  <data name="EnumMils" xml:space="preserve">
+    <value>Mils de</value>
+  </data>
+  <data name="EnumNauticalMile" xml:space="preserve">
+    <value>Nautical Mile de</value>
+  </data>
+  <data name="EnumSurveyFoot" xml:space="preserve">
+    <value>US Survey Foot de</value>
+  </data>
+  <data name="EnumYards" xml:space="preserve">
+    <value>Yards de</value>
+  </data>
+  <data name="ExceptionFieldIndexNotFound" xml:space="preserve">
+    <value>Field index not found de</value>
+  </data>
+  <data name="ExceptionSomethingWentWrong" xml:space="preserve">
+    <value>Something went wrong. de</value>
+  </data>
+  <data name="GridCodeFieldName" xml:space="preserve">
+    <value>gridcode de</value>
+  </data>
+  <data name="IsOutOfExtentFieldName" xml:space="preserve">
+    <value>IsOutOfExtent de</value>
+  </data>
+  <data name="LabelCancel" xml:space="preserve">
+    <value>Cancel de</value>
+  </data>
+  <data name="LabelClearGraphics" xml:space="preserve">
+    <value>Clear Graphics de</value>
+  </data>
+  <data name="LabelDisplayCoordinate" xml:space="preserve">
+    <value>Display Coordinate de</value>
+  </data>
+  <data name="LabelDistance" xml:space="preserve">
+    <value>Distance de</value>
+  </data>
+  <data name="LabelField1" xml:space="preserve">
+    <value>X Field (Longitude) de</value>
+  </data>
+  <data name="LabelField2" xml:space="preserve">
+    <value>Y Field (Latitude) de</value>
+  </data>
+  <data name="LabelFieldOfView" xml:space="preserve">
+    <value>Field of View de</value>
+  </data>
+  <data name="LabelHorizontalFOV" xml:space="preserve">
+    <value>Horizontal de</value>
+  </data>
+  <data name="LabelImport" xml:space="preserve">
+    <value>Import de</value>
+  </data>
+  <data name="LabelInputSurface" xml:space="preserve">
+    <value>Input Surface de</value>
+  </data>
+  <data name="LabelNonVisible" xml:space="preserve">
+    <value>Symbolize Non-Visible Data in Output de</value>
+  </data>
+  <data name="LabelObserverOffset" xml:space="preserve">
+    <value>Observer de</value>
+  </data>
+  <data name="LabelObserverOptions" xml:space="preserve">
+    <value>Observer Options de</value>
+  </data>
+  <data name="LabelObserverPoints" xml:space="preserve">
+    <value>Observer Points de</value>
+  </data>
+  <data name="LabelOffsets" xml:space="preserve">
+    <value>Height Above Surface de</value>
+  </data>
+  <data name="LabelOK" xml:space="preserve">
+    <value>OK de</value>
+  </data>
+  <data name="LabelPaste" xml:space="preserve">
+    <value>Paste de</value>
+  </data>
+  <data name="LabelShowClassicViewshed" xml:space="preserve">
+    <value>Show output in Classic Viewshed de</value>
+  </data>
+  <data name="LabelSubmit" xml:space="preserve">
+    <value>Submit de</value>
+  </data>
+  <data name="LabelSurfaceOffset" xml:space="preserve">
+    <value>Surface de</value>
+  </data>
+  <data name="LabelTabLLOS" xml:space="preserve">
+    <value>LLOS de</value>
+  </data>
+  <data name="LabelTabRLOS" xml:space="preserve">
+    <value>RLOS de</value>
+  </data>
+  <data name="LabelTargetOffset" xml:space="preserve">
+    <value>Target de</value>
+  </data>
+  <data name="LabelTargetPoints" xml:space="preserve">
+    <value>Target Points de</value>
+  </data>
+  <data name="LabelTo" xml:space="preserve">
+    <value>to de</value>
+  </data>
+  <data name="LabelVerticalFOV" xml:space="preserve">
+    <value>Vertical de</value>
+  </data>
+  <data name="LLOSFeatureDatasetName" xml:space="preserve">
+    <value>LLOS de</value>
+  </data>
+  <data name="LLOSObserversLayerName" xml:space="preserve">
+    <value>LLOS_Observers de</value>
+  </data>
+  <data name="LLOSOutputLayerName" xml:space="preserve">
+    <value>LLOS_Output de</value>
+  </data>
+  <data name="LLOSPointsOutsideOfSurfaceExtent" xml:space="preserve">
+    <value>Please verify that all Observer and Target Points are within the extents of the selected Surface de</value>
+  </data>
+  <data name="LLOSSightLinesLayerName" xml:space="preserve">
+    <value>LLOS_Sight_Lines de</value>
+  </data>
+  <data name="LLOSTargetsLayerName" xml:space="preserve">
+    <value>LLOS_Targets de</value>
+  </data>
+  <data name="LLOSUserPrompt" xml:space="preserve">
+    <value>The selected surface has not been projected.  Please project your data and try again. de</value>
+  </data>
+  <data name="LLOSUserPromptCaption" xml:space="preserve">
+    <value>Surface Projection de</value>
+  </data>
+  <data name="LLOSViewError" xml:space="preserve">
+    <value>LLOS computations did not complete correctly.\nPlease check your parameters and try again. de</value>
+  </data>
+  <data name="LLOSViewObs" xml:space="preserve">
+    <value>Observers lying outside the extent of elevation surface are:  de</value>
+  </data>
+  <data name="LLOSViewObs1" xml:space="preserve">
+    <value>Targets lying outside the extent of elevation surface are:  de</value>
+  </data>
+  <data name="LLOSViewObsCaption" xml:space="preserve">
+    <value>Unable To Process For Few Locations de</value>
+  </data>
+  <data name="LOSBaseViewError" xml:space="preserve">
+    <value>Select Surface de</value>
+  </data>
+  <data name="LOSDataFrameMatch" xml:space="preserve">
+    <value>Spatial Reference of Data Frame and surface must match. Please change the Spatial Reference of the Data Frame and try again. de</value>
+  </data>
+  <data name="LOSDataFrameMatchError" xml:space="preserve">
+    <value>Data frame and input Spatial references do not match de</value>
+  </data>
+  <data name="LOSSpatialAnalystLicenseInvalid" xml:space="preserve">
+    <value>Verify that the Spatial Analyst extension is available and authorized for use. de</value>
+  </data>
+  <data name="LOSSpatialReferenceCaption" xml:space="preserve">
+    <value>Spatial Reference de</value>
+  </data>
+  <data name="MenuLabelDelete" xml:space="preserve">
+    <value>Delete de</value>
+  </data>
+  <data name="MenuLabelDeleteAll" xml:space="preserve">
+    <value>Delete All de</value>
+  </data>
+  <data name="MsgCalcCancelled" xml:space="preserve">
+    <value>Calculation cancelled de</value>
+  </data>
+  <data name="MsgLayerIsImageService" xml:space="preserve">
+    <value>The selected input surface layer is an Image Service and may take a long time to process. Do you wish to continue? de</value>
+  </data>
+  <data name="MsgNoDataFound" xml:space="preserve">
+    <value>No data found de</value>
+  </data>
+  <data name="MsgOutOfAOI" xml:space="preserve">
+    <value>Point does not fall within the input extent. de</value>
+  </data>
+  <data name="MsgSurfaceLayerNotFound" xml:space="preserve">
+    <value>The surface layer was not found. Please try again. de</value>
+  </data>
+  <data name="MsgTryAgain" xml:space="preserve">
+    <value>Results not calculated.  Check input parameters and try again. de</value>
+  </data>
+  <data name="NumOfObserversFieldName" xml:space="preserve">
+    <value>NumOfObservers de</value>
+  </data>
+  <data name="OffsetFieldName" xml:space="preserve">
+    <value>offset de</value>
+  </data>
+  <data name="OffsetWithZFieldName" xml:space="preserve">
+    <value>offsetWithZ de</value>
+  </data>
+  <data name="OutOfExtentHeader" xml:space="preserve">
+    <value>No Data de</value>
+  </data>
+  <data name="OutOfExtentMsg" xml:space="preserve">
+    <value>No data inside the surface extent to process. de</value>
+  </data>
+  <data name="RLOSConvertedPolygonsLayerName" xml:space="preserve">
+    <value>RLOS_Visibility de</value>
+  </data>
+  <data name="RLOSFeatureDatasetName" xml:space="preserve">
+    <value>RLOS de</value>
+  </data>
+  <data name="RLOSMaskLayerName" xml:space="preserve">
+    <value>RLOS_Mask de</value>
+  </data>
+  <data name="RLOSObserversLayerName" xml:space="preserve">
+    <value>RLOS_Observers de</value>
+  </data>
+  <data name="RLOSOutputLayerName" xml:space="preserve">
+    <value>RLOS_Output de</value>
+  </data>
+  <data name="RLOSPointsOutsideOfSurfaceExtent" xml:space="preserve">
+    <value>Please verify that all Observer Points are within the extents of the selected Surface de</value>
+  </data>
+  <data name="RLOSUserPrompt" xml:space="preserve">
+    <value>The selected surface has not been projected.  Please project your data and try again. de</value>
+  </data>
+  <data name="RLOSUserPromptCaption" xml:space="preserve">
+    <value>Surface Projection de</value>
+  </data>
+  <data name="RLOSViewError" xml:space="preserve">
+    <value>RLOS computations did not complete correctly.\nPlease check your parameters and try again. de</value>
+  </data>
+  <data name="TarIsVisFieldName" xml:space="preserve">
+    <value>TarIsVis de</value>
+  </data>
+  <data name="TitleEditProperties" xml:space="preserve">
+    <value>Edit Properties de</value>
+  </data>
+  <data name="TitleSelectCoordinateFields" xml:space="preserve">
+    <value>Select Fields de</value>
+  </data>
+  <data name="ToolModeObserver" xml:space="preserve">
+    <value>observer de</value>
+  </data>
+  <data name="ToolModeTarget" xml:space="preserve">
+    <value>target de</value>
+  </data>
+  <data name="TooltipBottomFOVValidRange" xml:space="preserve">
+    <value>Valid vertical angle de</value>
+  </data>
+  <data name="TooltipEditProperties" xml:space="preserve">
+    <value>Edit Properties de</value>
+  </data>
+  <data name="TooltipHFOVValidRange" xml:space="preserve">
+    <value>Valid horizontal angle de</value>
+  </data>
+  <data name="TooltipLLOSTab" xml:space="preserve">
+    <value>Linear Line of Sight de</value>
+  </data>
+  <data name="TooltipMapPointTool" xml:space="preserve">
+    <value>Observer Map Point Tool de</value>
+  </data>
+  <data name="TooltipObserverMapPointTool" xml:space="preserve">
+    <value>Observer Map Point Tool de</value>
+  </data>
+  <data name="TooltipRLOSTab" xml:space="preserve">
+    <value>Radial Line of Sight de</value>
+  </data>
+  <data name="TooltipTargetMapPointTool" xml:space="preserve">
+    <value>Target Map Point Tool de</value>
+  </data>
+  <data name="TooltipTopFOVValidRange" xml:space="preserve">
+    <value>Valid vertical angle de</value>
+  </data>
+  <data name="UseTwoFields" xml:space="preserve">
+    <value>Use two fields de</value>
+  </data>
+  <data name="ValueConverterError" xml:space="preserve">
+    <value>Converter cannot convert back. de</value>
+  </data>
+  <data name="VisCodeFieldName" xml:space="preserve">
+    <value>VisCode de</value>
+  </data>
+  <data name="ZFieldName" xml:space="preserve">
+    <value>Z de</value>
+  </data>
+  <data name="FileDialogFiltercsv" xml:space="preserve">
+    <value>csv files de</value>
+  </data>
+  <data name="FileDialogTitle" xml:space="preserve">
+    <value>Open File de</value>
+  </data>
+</root>

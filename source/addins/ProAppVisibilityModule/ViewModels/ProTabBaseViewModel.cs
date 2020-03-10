@@ -31,33 +31,31 @@ using ProAppVisibilityModule.Helpers;
 using ProAppVisibilityModule.Models;
 
 // Visibility
-using VisibilityLibrary.Helpers;
-using VisibilityLibrary.ViewModels;
 
 namespace ProAppVisibilityModule.ViewModels
 {
     /// <summary>
     /// Base class for all the common properties, commands and events for tab items
     /// </summary>
-    public class ProTabBaseViewModel : BaseViewModel
+    public class ProTabBaseViewModel : NotificationObject
     {
         public ProTabBaseViewModel()
         {
             //commands
-            ClearGraphicsCommand = new VisibilityLibrary.Helpers.RelayCommand(OnClearGraphics);
-            ActivateToolCommand = new VisibilityLibrary.Helpers.RelayCommand(OnActivateToolCommand);
-            EnterKeyCommand = new VisibilityLibrary.Helpers.RelayCommand(OnEnterKeyCommand);
-            CancelCommand = new VisibilityLibrary.Helpers.RelayCommand(OnCancelCommand);
+            ClearGraphicsCommand = new ProAppVisibilityModule.Helpers.RelayCommand(OnClearGraphics);
+            ActivateToolCommand = new ProAppVisibilityModule.Helpers.RelayCommand(OnActivateToolCommand);
+            EnterKeyCommand = new ProAppVisibilityModule.Helpers.RelayCommand(OnEnterKeyCommand);
+            CancelCommand = new ProAppVisibilityModule.Helpers.RelayCommand(OnCancelCommand);
 
-            // Mediator
-            Mediator.Register(VisibilityLibrary.Constants.NEW_MAP_POINT, OnMapClickEvent);
-            Mediator.Register(VisibilityLibrary.Constants.NEW_MAP_POINT, OnNewMapPointEvent);           
-            Mediator.Register(VisibilityLibrary.Constants.MOUSE_MOVE_POINT, OnMouseMoveEvent);
-            Mediator.Register(VisibilityLibrary.Constants.TAB_ITEM_SELECTED, OnTabItemSelected);
+            NewMapPoint = new ProAppVisibilityModule.Helpers.RelayCommand(OnMapClickEvent);
+            NewMapPoint = new ProAppVisibilityModule.Helpers.RelayCommand(OnNewMapPointEvent);
+            MouseMovePoint = new ProAppVisibilityModule.Helpers.RelayCommand(OnMouseMoveEvent);
+            TabItemSelected = new ProAppVisibilityModule.Helpers.RelayCommand(OnTabItemSelected);
 
-            Mediator.Register(VisibilityLibrary.Constants.MAP_POINT_TOOL_ACTIVATED, OnMapPointToolActivated);
-            Mediator.Register(VisibilityLibrary.Constants.MAP_POINT_TOOL_DEACTIVATED, OnMapPointToolDeactivated);
-
+            MapPointToolActivated = new ProAppVisibilityModule.Helpers.RelayCommand(OnMapPointToolActivated);
+            MapPointToolDeActivated = new ProAppVisibilityModule.Helpers.RelayCommand(OnMapPointToolDeactivated);
+            
+          
             // Pro Events
             ArcGIS.Desktop.Framework.Events.ActiveToolChangedEvent.Subscribe(OnActiveToolChanged);
 
@@ -215,7 +213,7 @@ namespace ProAppVisibilityModule.ViewModels
                     {
                         // only format if the Point1 data was generated from a mouse click
                         string outFormattedString = string.Empty;
-                        CoordinateConversionLibrary.Models.CoordinateType ccType = CoordinateConversionLibrary.Helpers.ConversionUtils.GetCoordinateString(MapPointHelper.GetMapPointAsDisplayString(Point1), out outFormattedString);
+                        ProAppCoordConversionModule.Models.CoordinateType ccType = ProAppCoordConversionModule.Helpers.ConversionUtils.GetCoordinateString(MapPointHelper.GetMapPointAsDisplayString(Point1), out outFormattedString);
                         return outFormattedString;
                     }
                     return string.Empty;
@@ -237,8 +235,8 @@ namespace ProAppVisibilityModule.ViewModels
                 }
                 // try to convert string to a MapPoint
                 string outFormattedString = string.Empty;
-                CoordinateConversionLibrary.Models.CoordinateType ccType = CoordinateConversionLibrary.Helpers.ConversionUtils.GetCoordinateString(value, out outFormattedString);
-                MapPoint point = (ccType != CoordinateConversionLibrary.Models.CoordinateType.Unknown) ? GetMapPointFromString(outFormattedString) : null;
+                ProAppCoordConversionModule.Models.CoordinateType ccType = ProAppCoordConversionModule.Helpers.ConversionUtils.GetCoordinateString(value, out outFormattedString);
+                MapPoint point = (ccType != ProAppCoordConversionModule.Models.CoordinateType.Unknown) ? GetMapPointFromString(outFormattedString) : null;
                 if (point != null)
                 {
                     point1Formatted = value;
@@ -248,7 +246,7 @@ namespace ProAppVisibilityModule.ViewModels
                 {
                     // invalid coordinate, reset and throw exception
                     Point1 = null;
-                    throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEInvalidCoordinate);
+                    throw new ArgumentException(ProAppVisibilityModule.Properties.Resources.AEInvalidCoordinate);
                 }
             }
         }
@@ -270,7 +268,7 @@ namespace ProAppVisibilityModule.ViewModels
                     {
                         // only format if the Point2 data was generated from a mouse click
                         string outFormattedString = string.Empty;
-                        CoordinateConversionLibrary.Models.CoordinateType ccType = CoordinateConversionLibrary.Helpers.ConversionUtils.GetCoordinateString(MapPointHelper.GetMapPointAsDisplayString(Point2), out outFormattedString);
+                        ProAppCoordConversionModule.Models.CoordinateType ccType = ProAppCoordConversionModule.Helpers.ConversionUtils.GetCoordinateString(MapPointHelper.GetMapPointAsDisplayString(Point2), out outFormattedString);
                         return outFormattedString;
                     }
                     return string.Empty;
@@ -291,8 +289,8 @@ namespace ProAppVisibilityModule.ViewModels
                 }
                 // try to convert string to a MapPoint
                 string outFormattedString = string.Empty;
-                CoordinateConversionLibrary.Models.CoordinateType ccType = CoordinateConversionLibrary.Helpers.ConversionUtils.GetCoordinateString(value, out outFormattedString);
-                MapPoint point = (ccType != CoordinateConversionLibrary.Models.CoordinateType.Unknown) ? GetMapPointFromString(outFormattedString) : null;
+                ProAppCoordConversionModule.Models.CoordinateType ccType = ProAppCoordConversionModule.Helpers.ConversionUtils.GetCoordinateString(value, out outFormattedString);
+                MapPoint point = (ccType != ProAppCoordConversionModule.Models.CoordinateType.Unknown) ? GetMapPointFromString(outFormattedString) : null;
                 if (point != null)
                 {
                     point2Formatted = value;
@@ -302,7 +300,7 @@ namespace ProAppVisibilityModule.ViewModels
                 {
                     // invalid coordinate, reset and throw exception
                     Point2 = null;
-                    throw new ArgumentException(VisibilityLibrary.Properties.Resources.AEInvalidCoordinate);
+                    throw new ArgumentException(ProAppVisibilityModule.Properties.Resources.AEInvalidCoordinate);
                 }
             }
         }
@@ -344,10 +342,17 @@ namespace ProAppVisibilityModule.ViewModels
 
         #region Commands
 
-        public VisibilityLibrary.Helpers.RelayCommand ClearGraphicsCommand { get; set; }
-        public VisibilityLibrary.Helpers.RelayCommand EnterKeyCommand { get; set; }
-        public VisibilityLibrary.Helpers.RelayCommand CancelCommand { get; set; }
-        public VisibilityLibrary.Helpers.RelayCommand ActivateToolCommand { get; set; }
+        public ProAppVisibilityModule.Helpers.RelayCommand ClearGraphicsCommand { get; set; }
+        public ProAppVisibilityModule.Helpers.RelayCommand EnterKeyCommand { get; set; }
+        public ProAppVisibilityModule.Helpers.RelayCommand CancelCommand { get; set; }
+        public ProAppVisibilityModule.Helpers.RelayCommand ActivateToolCommand { get; set; }
+
+        public ProAppVisibilityModule.Helpers.RelayCommand NewMapPoint { get; set; }
+        public ProAppVisibilityModule.Helpers.RelayCommand MouseMovePoint { get; set; }
+        public ProAppVisibilityModule.Helpers.RelayCommand TabItemSelected { get; set; }
+        public ProAppVisibilityModule.Helpers.RelayCommand MapPointToolActivated { get; set; }
+        public ProAppVisibilityModule.Helpers.RelayCommand MapPointToolDeActivated { get; set; }
+
         public bool IsMapClick { get; set; }
 
         /// <summary>

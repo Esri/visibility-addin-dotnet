@@ -15,9 +15,9 @@
 using System.Windows.Controls;
 using ArcGIS.Desktop.Framework;
 using ArcGIS.Desktop.Framework.Contracts;
-using VisibilityLibrary.Helpers;
-using VisibilityLibrary.Views;
-using VisibilityLibrary.Models;
+using ProAppVisibilityModule.Helpers;
+using ProAppVisibilityModule.Views;
+using ProAppVisibilityModule.Models;
 using ProAppVisibilityModule.ViewModels;
 using System.Threading.Tasks;
 
@@ -55,7 +55,26 @@ namespace ProAppVisibilityModule
 
                 if ((tabItem != null) && ((tabItem.Content as UserControl) != null) &&
                      ((tabItem.Content as UserControl).Content != null))
-                    Mediator.NotifyColleagues(VisibilityLibrary.Constants.TAB_ITEM_SELECTED, ((tabItem.Content as UserControl).Content as UserControl).DataContext);
+                {
+                    VisibilityDockpaneViewModel vsVM = VisibilityModule.VisibiltyVM;
+                    if (vsVM != null)
+                    {
+                        Views.VisibilityLLOSView vsLLOS = vsVM.LLOSView;
+                        if (vsLLOS != null)
+                        {
+                            ViewModels.ProLLOSViewModel llosVM = vsLLOS.DataContext as ViewModels.ProLLOSViewModel;
+                            llosVM.TabItemSelected.Execute(llosVM);
+                        }
+
+                        Views.VisibilityRLOSView vsRLOS = vsVM.RLOSView;
+                        if (vsRLOS != null)
+                        {
+                            ViewModels.ProRLOSViewModel rlosVM = vsRLOS.DataContext as ViewModels.ProRLOSViewModel;
+                            rlosVM.TabItemSelected.Execute(rlosVM);
+                        }
+                    }
+                }
+                    
             }
         }
 
@@ -83,11 +102,11 @@ namespace ProAppVisibilityModule
             if (isVisible)
             {
                 if (((ProLLOSViewModel)LLOSView.DataContext).ToolMode == ProLOSBaseViewModel.MapPointToolMode.Observer)
-                    ((ProLLOSViewModel)LLOSView.DataContext).OnActivateToolCommand(VisibilityLibrary.Properties.Resources.ToolModeObserver);
+                    ((ProLLOSViewModel)LLOSView.DataContext).OnActivateToolCommand(ProAppVisibilityModule.Properties.Resources.ToolModeObserver);
                 else if (((ProLLOSViewModel)LLOSView.DataContext).ToolMode == ProLOSBaseViewModel.MapPointToolMode.Target)
-                    ((ProLLOSViewModel)LLOSView.DataContext).OnActivateToolCommand(VisibilityLibrary.Properties.Resources.ToolModeTarget);
+                    ((ProLLOSViewModel)LLOSView.DataContext).OnActivateToolCommand(ProAppVisibilityModule.Properties.Resources.ToolModeTarget);
                 else if (((ProRLOSViewModel)RLOSView.DataContext).ToolMode == ProLOSBaseViewModel.MapPointToolMode.Observer)
-                    ((ProRLOSViewModel)RLOSView.DataContext).OnActivateToolCommand(VisibilityLibrary.Properties.Resources.ToolModeObserver);
+                    ((ProRLOSViewModel)RLOSView.DataContext).OnActivateToolCommand(ProAppVisibilityModule.Properties.Resources.ToolModeObserver);
             }
             
             base.OnShow(isVisible);

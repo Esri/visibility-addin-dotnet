@@ -14,7 +14,7 @@
 
 using System.Windows;
 
-namespace VisibilityLibrary.Views
+namespace ProAppVisibilityModule.Views
 {
     /// <summary>
     /// Interaction logic for ProEditPropertiesView.xaml

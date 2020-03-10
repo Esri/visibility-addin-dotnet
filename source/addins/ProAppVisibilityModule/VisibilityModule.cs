@@ -21,6 +21,8 @@ namespace ProAppVisibilityModule
     {
         private static VisibilityModule _this = null;
 
+        private const string _dockPaneID = "ProAppVisibilityModule_VisibilityDockpane";
+
         /// <summary>
         /// Retrieve the singleton instance to this module here
         /// </summary>
@@ -44,6 +46,20 @@ namespace ProAppVisibilityModule
         }
 
         #endregion Overrides
+
+        private static VisibilityDockpaneViewModel _dockPane;
+        internal static VisibilityDockpaneViewModel VisibiltyVM
+        {
+            get
+            {
+                if (_dockPane == null)
+                {
+                    _dockPane = FrameworkApplication.DockPaneManager.Find(_dockPaneID) as VisibilityDockpaneViewModel;
+                }
+
+                return _dockPane;
+            }
+        }
 
     }
 }

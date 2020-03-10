@@ -13,14 +13,12 @@
 // limitations under the License.
 
 using ArcGIS.Core.Geometry;
-using VisibilityLibrary.Helpers;
-using ProAppVisibilityModule.Helpers;
-using CoordinateConversionLibrary.Models;
-using CoordinateConversionLibrary.Helpers;
+using ProAppCoordConversionModule.Models;
+using ProAppCoordConversionModule.Helpers;
 
 namespace ProAppVisibilityModule.Models
 {
-    public class AddInPoint : VisibilityLibrary.Helpers.NotificationObject
+    public class AddInPoint : ProAppVisibilityModule.Helpers.NotificationObject
     {
         public AddInPoint()
         {
@@ -47,7 +45,7 @@ namespace ProAppVisibilityModule.Models
             get
             {                
                 string outFormattedString = string.Empty;
-                CoordinateType ccType = ConversionUtils.GetCoordinateString(MapPointHelper.GetMapPointAsDisplayString(Point), out outFormattedString);
+                CoordinateType ccType = ConversionUtils.GetCoordinateString(ProAppVisibilityModule.Helpers.MapPointHelper.GetMapPointAsDisplayString(Point), out outFormattedString);
                 return outFormattedString;
             }
         }
